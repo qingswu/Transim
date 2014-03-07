@@ -1,0 +1,41 @@
+﻿Build started 12/11/2013 9:03:38 PM.
+     1>Project "C:\TRANSIMS\Transims60\TransimsNet\TransimsNet.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I..\include /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Connections.cpp Control.cpp Execute.cpp Lane_Ranges.cpp Lane_Use.cpp Link_Access.cpp Operators.cpp Pocket_Lanes.cpp Read_Approach.cpp Read_Boundary.cpp Read_Link_Use.cpp Traffic_Controls.cpp TransimsNet.cpp
+         TransimsNet.cpp
+         Traffic_Controls.cpp
+         Read_Link_Use.cpp
+         Read_Boundary.cpp
+         Read_Approach.cpp
+         Pocket_Lanes.cpp
+         Operators.cpp
+         Link_Access.cpp
+         Lane_Use.cpp
+         Lane_Ranges.cpp
+         Execute.cpp
+         Control.cpp
+         Connections.cpp
+         Generating Code...
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\TRANSIMS\Transims60\Debug\TransimsNet.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\TRANSIMS\Transims60\Debug\TransimsNet.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\TRANSIMS\Transims60\Debug\TransimsNet.lib" /MACHINE:X86 /SAFESEH Debug\Connections.obj
+         Debug\Control.obj
+         Debug\Execute.obj
+         Debug\Lane_Ranges.obj
+         Debug\Lane_Use.obj
+         Debug\Link_Access.obj
+         Debug\Operators.obj
+         Debug\Pocket_Lanes.obj
+         Debug\Read_Approach.obj
+         Debug\Read_Boundary.obj
+         Debug\Read_Link_Use.obj
+         Debug\Traffic_Controls.obj
+         Debug\TransimsNet.obj
+         C:\TRANSIMS\Transims60\Debug\SysLib.lib
+         C:\TRANSIMS\Transims60\Debug\File_Data_Service.lib
+     1>Connections.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/SAFESEH' specification
+         TransimsNet.vcxproj -> C:\TRANSIMS\Transims60\Debug\TransimsNet.exe
+     1>Done Building Project "C:\TRANSIMS\Transims60\TransimsNet\TransimsNet.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:36.62

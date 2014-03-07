@@ -1,0 +1,53 @@
+﻿Build started 3/7/2014 8:05:02 AM.
+     1>Project "C:\Software\Transims60\RiderSum\RiderSum.vcxproj" on node 4 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\CL.exe /c /I..\Include /Zi /nologo /W4 /WX /MP /O2 /Oi /D WIN32 /D NDEBUG /D _CONSOLE /D THREADS /Gm- /EHsc /MT /GS /Gy /Qpar /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\BinThreads\\" /Fd"x64\BinThreads\vc110.pdb" /Gd /TP /errorReport:prompt Control.cpp Execute.cpp Group_Rider_Report.cpp Line_Group_Report.cpp Line_Rider_Report.cpp Line_Sum_Report.cpp Link_Selection.cpp RiderSum.cpp Run_Selection.cpp Setup_Riders.cpp Stop_Group_Report.cpp Stop_Route_Report.cpp Stop_Run_Report.cpp Stop_Sum_Report.cpp Sum_Riders.cpp Write_Group_Rider.cpp Write_Line_Rider.cpp Write_Stop_Details.cpp Write_Stop_Profile.cpp Write_Stop_Route.cpp
+         Control.cpp
+         Execute.cpp
+         Group_Rider_Report.cpp
+         Line_Group_Report.cpp
+         Line_Rider_Report.cpp
+         Line_Sum_Report.cpp
+         Link_Selection.cpp
+         RiderSum.cpp
+         Run_Selection.cpp
+         Setup_Riders.cpp
+         Stop_Group_Report.cpp
+         Stop_Route_Report.cpp
+         Stop_Run_Report.cpp
+         Stop_Sum_Report.cpp
+         Sum_Riders.cpp
+         Write_Group_Rider.cpp
+         Write_Line_Rider.cpp
+         Write_Stop_Details.cpp
+         Write_Stop_Profile.cpp
+         Write_Stop_Route.cpp
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Software\Transims60\x64\BinThreads\RiderSum.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"C:\Software\Transims60\x64\BinThreads\RiderSum.pdb" /SUBSYSTEM:CONSOLE,"5.02" /OPT:REF /OPT:ICF /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Software\Transims60\x64\BinThreads\RiderSum.lib" /MACHINE:X64 x64\BinThreads\Control.obj
+         x64\BinThreads\Execute.obj
+         x64\BinThreads\Group_Rider_Report.obj
+         x64\BinThreads\Line_Group_Report.obj
+         x64\BinThreads\Line_Rider_Report.obj
+         x64\BinThreads\Line_Sum_Report.obj
+         x64\BinThreads\Link_Selection.obj
+         x64\BinThreads\RiderSum.obj
+         x64\BinThreads\Run_Selection.obj
+         x64\BinThreads\Setup_Riders.obj
+         x64\BinThreads\Stop_Group_Report.obj
+         x64\BinThreads\Stop_Route_Report.obj
+         x64\BinThreads\Stop_Run_Report.obj
+         x64\BinThreads\Stop_Sum_Report.obj
+         x64\BinThreads\Sum_Riders.obj
+         x64\BinThreads\Write_Group_Rider.obj
+         x64\BinThreads\Write_Line_Rider.obj
+         x64\BinThreads\Write_Stop_Details.obj
+         x64\BinThreads\Write_Stop_Profile.obj
+         x64\BinThreads\Write_Stop_Route.obj
+         C:\Software\Transims60\SysLib\x64\BinThreads\SysLib.lib
+         C:\Software\Transims60\File_Data_Service\x64\BinThreads\File_Data_Service.lib
+         RiderSum.vcxproj -> C:\Software\Transims60\x64\BinThreads\RiderSum.exe
+     1>Done Building Project "C:\Software\Transims60\RiderSum\RiderSum.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:01:24.41

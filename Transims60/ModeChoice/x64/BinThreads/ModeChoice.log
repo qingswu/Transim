@@ -1,0 +1,49 @@
+﻿Build started 3/7/2014 8:04:01 AM.
+     1>Project "C:\Software\Transims60\ModeChoice\ModeChoice.vcxproj" on node 3 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\CL.exe /c /I..\Include /Zi /nologo /W4 /WX /MP /O2 /Oi /D WIN32 /D NDEBUG /D _CONSOLE /D THREADS /Gm- /EHsc /MT /GS /Gy- /Qpar /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\BinThreads\\" /Fd"x64\BinThreads\vc110.pdb" /Gd /TP /errorReport:prompt Access_Summary.cpp Adjust_Constants.cpp Choice_Process.cpp Compile_Script.cpp Control.cpp Execute.cpp ModeChoice.cpp Mode_Summary.cpp Read_Constants.cpp Read_Targets.cpp Read_Zone.cpp Segment_Map.cpp Value_Summary.cpp Write_Market.cpp Write_Mode_Seg.cpp Write_Summary.cpp Write_Zones.cpp
+         Access_Summary.cpp
+         Adjust_Constants.cpp
+         Choice_Process.cpp
+         Compile_Script.cpp
+         Control.cpp
+         Execute.cpp
+         ModeChoice.cpp
+         Mode_Summary.cpp
+         Read_Constants.cpp
+         Read_Targets.cpp
+         Read_Zone.cpp
+         Segment_Map.cpp
+         Value_Summary.cpp
+         Write_Market.cpp
+         Write_Mode_Seg.cpp
+         Write_Summary.cpp
+         Write_Zones.cpp
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Software\Transims60\x64\BinThreads\ModeChoice.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"C:\Software\Transims60\x64\BinThreads\ModeChoice.pdb" /SUBSYSTEM:CONSOLE,"5.02" /OPT:REF /OPT:ICF /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Software\Transims60\x64\BinThreads\ModeChoice.lib" /MACHINE:X64 x64\BinThreads\Access_Summary.obj
+         x64\BinThreads\Adjust_Constants.obj
+         x64\BinThreads\Choice_Process.obj
+         x64\BinThreads\Compile_Script.obj
+         x64\BinThreads\Control.obj
+         x64\BinThreads\Execute.obj
+         x64\BinThreads\ModeChoice.obj
+         x64\BinThreads\Mode_Summary.obj
+         x64\BinThreads\Read_Constants.obj
+         x64\BinThreads\Read_Targets.obj
+         x64\BinThreads\Read_Zone.obj
+         x64\BinThreads\Segment_Map.obj
+         x64\BinThreads\Value_Summary.obj
+         x64\BinThreads\Write_Market.obj
+         x64\BinThreads\Write_Mode_Seg.obj
+         x64\BinThreads\Write_Summary.obj
+         x64\BinThreads\Write_Zones.obj
+         C:\Software\Transims60\SysLib\x64\BinThreads\SysLib.lib
+         C:\Software\Transims60\File_Data_Service\x64\BinThreads\File_Data_Service.lib
+         C:\Software\Transims60\TcadLib\x64\BinThreads\TcadLib.lib
+         C:\Software\Transims60\TppLib\x64\BinThreads\TppLib.lib
+         ModeChoice.vcxproj -> C:\Software\Transims60\x64\BinThreads\ModeChoice.exe
+     1>Done Building Project "C:\Software\Transims60\ModeChoice\ModeChoice.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:01:26.56

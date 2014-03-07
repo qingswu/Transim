@@ -1,0 +1,37 @@
+﻿Build started 3/7/2014 8:04:12 AM.
+     1>Project "C:\Software\Transims60\ArcRider\ArcRider.vcxproj" on node 5 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\CL.exe /c /I..\Include /Zi /nologo /W4 /WX /MP /O2 /Oi /D WIN32 /D NDEBUG /D _CONSOLE /D THREADS /Gm- /EHsc /MT /GS /Gy- /Qpar /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\BinThreads\\" /Fd"x64\BinThreads\vc110.pdb" /Gd /TP /errorReport:prompt ArcRider.cpp Control.cpp Execute.cpp Get_Stop_Data.cpp Setup_Riders.cpp Sum_Riders.cpp Write_Capacity.cpp Write_Group.cpp Write_Riders.cpp Write_Route.cpp Write_Stops.cpp Write_Sum.cpp
+         ArcRider.cpp
+         Control.cpp
+         Execute.cpp
+         Get_Stop_Data.cpp
+         Setup_Riders.cpp
+         Sum_Riders.cpp
+         Write_Capacity.cpp
+         Write_Group.cpp
+         Write_Riders.cpp
+         Write_Route.cpp
+         Write_Stops.cpp
+         Write_Sum.cpp
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Software\Transims60\x64\BinThreads\ArcRider.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"C:\Software\Transims60\x64\BinThreads\ArcRider.pdb" /SUBSYSTEM:CONSOLE,"5.02" /OPT:REF /OPT:ICF /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Software\Transims60\x64\BinThreads\ArcRider.lib" /MACHINE:X64 x64\BinThreads\ArcRider.obj
+         x64\BinThreads\Control.obj
+         x64\BinThreads\Execute.obj
+         x64\BinThreads\Get_Stop_Data.obj
+         x64\BinThreads\Setup_Riders.obj
+         x64\BinThreads\Sum_Riders.obj
+         x64\BinThreads\Write_Capacity.obj
+         x64\BinThreads\Write_Group.obj
+         x64\BinThreads\Write_Riders.obj
+         x64\BinThreads\Write_Route.obj
+         x64\BinThreads\Write_Stops.obj
+         x64\BinThreads\Write_Sum.obj
+         C:\Software\Transims60\SysLib\x64\BinThreads\SysLib.lib
+         C:\Software\Transims60\File_Data_Service\x64\BinThreads\File_Data_Service.lib
+         ArcRider.vcxproj -> C:\Software\Transims60\x64\BinThreads\ArcRider.exe
+     1>Done Building Project "C:\Software\Transims60\ArcRider\ArcRider.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:49.42

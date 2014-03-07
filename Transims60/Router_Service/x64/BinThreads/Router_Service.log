@@ -1,0 +1,81 @@
+﻿Build started 3/7/2014 7:54:30 AM.
+     1>Project "C:\Software\Transims60\Router_Service\Router_Service.vcxproj" on node 3 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\CL.exe /c /I..\Include /Zi /nologo /W4 /WX /MP /O2 /D WIN32 /D NDEBUG /D _LIB /D _MSC_EXTENSIONS /D THREADS /Gm- /EHsc /MT /GS /Qpar /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\BinThreads\\" /Fd"x64\BinThreads\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Path_Builder\Array_Processing.cpp Path_Builder\Best_Destination.cpp Path_Builder\Best_Lane_Use.cpp Path_Builder\Build_Path.cpp Path_Builder\Drive_Path.cpp Path_Builder\Drive_Plan.cpp Path_Builder\Drive_Transit.cpp Path_Builder\Location_Access.cpp Path_Builder\Magic_Move.cpp Path_Builder\Node_Path.cpp Path_Builder\Node_Plan.cpp Path_Builder\Parking_Access.cpp Path_Builder\Parking_Update.cpp Path_Builder\Path_Builder.cpp Path_Builder\Plan_Build.cpp Path_Builder\Plan_Flow.cpp Path_Builder\Plan_ReRoute.cpp Path_Builder\Plan_Update.cpp Path_Builder\Save_Skims.cpp Path_Builder\Skim_Build.cpp Path_Builder\Stop_Alight.cpp Path_Builder\Stop_Board.cpp Path_Builder\Trace_Path.cpp Path_Builder\Transit_Access.cpp Path_Builder\Transit_Parking.cpp Path_Builder\Transit_Path.cpp Path_Builder\Transit_Plan.cpp Path_Builder\Walk_Access.cpp Service\Control.cpp Service\Execute.cpp Service\Get_Household_Data.cpp Service\Plan_Processor.cpp Service\Router_Service.cpp Service\Set_Parameters.cpp Service\Skim_Processor.cpp
+         Array_Processing.cpp
+         Best_Destination.cpp
+         Best_Lane_Use.cpp
+         Build_Path.cpp
+         Drive_Path.cpp
+         Drive_Plan.cpp
+         Drive_Transit.cpp
+         Location_Access.cpp
+         Magic_Move.cpp
+         Node_Path.cpp
+         Node_Plan.cpp
+         Parking_Access.cpp
+         Parking_Update.cpp
+         Path_Builder.cpp
+         Plan_Build.cpp
+         Plan_Flow.cpp
+         Plan_ReRoute.cpp
+         Plan_Update.cpp
+         Save_Skims.cpp
+         Skim_Build.cpp
+         Stop_Alight.cpp
+         Stop_Board.cpp
+         Trace_Path.cpp
+         Transit_Access.cpp
+         Transit_Parking.cpp
+         Transit_Path.cpp
+         Transit_Plan.cpp
+         Walk_Access.cpp
+         Control.cpp
+         Execute.cpp
+         Get_Household_Data.cpp
+         Plan_Processor.cpp
+         Router_Service.cpp
+         Set_Parameters.cpp
+         Skim_Processor.cpp
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\Lib.exe /OUT:"C:\Software\Transims60\Router_Service\x64\BinThreads\Router_Service.lib" /NOLOGO /MACHINE:X64 x64\BinThreads\Array_Processing.obj
+         x64\BinThreads\Best_Destination.obj
+         x64\BinThreads\Best_Lane_Use.obj
+         x64\BinThreads\Build_Path.obj
+         x64\BinThreads\Drive_Path.obj
+         x64\BinThreads\Drive_Plan.obj
+         x64\BinThreads\Drive_Transit.obj
+         x64\BinThreads\Location_Access.obj
+         x64\BinThreads\Magic_Move.obj
+         x64\BinThreads\Node_Path.obj
+         x64\BinThreads\Node_Plan.obj
+         x64\BinThreads\Parking_Access.obj
+         x64\BinThreads\Parking_Update.obj
+         x64\BinThreads\Path_Builder.obj
+         x64\BinThreads\Plan_Build.obj
+         x64\BinThreads\Plan_Flow.obj
+         x64\BinThreads\Plan_ReRoute.obj
+         x64\BinThreads\Plan_Update.obj
+         x64\BinThreads\Save_Skims.obj
+         x64\BinThreads\Skim_Build.obj
+         x64\BinThreads\Stop_Alight.obj
+         x64\BinThreads\Stop_Board.obj
+         x64\BinThreads\Trace_Path.obj
+         x64\BinThreads\Transit_Access.obj
+         x64\BinThreads\Transit_Parking.obj
+         x64\BinThreads\Transit_Path.obj
+         x64\BinThreads\Transit_Plan.obj
+         x64\BinThreads\Walk_Access.obj
+         x64\BinThreads\Control.obj
+         x64\BinThreads\Execute.obj
+         x64\BinThreads\Get_Household_Data.obj
+         x64\BinThreads\Plan_Processor.obj
+         x64\BinThreads\Router_Service.obj
+         x64\BinThreads\Set_Parameters.obj
+         x64\BinThreads\Skim_Processor.obj
+         Router_Service.vcxproj -> C:\Software\Transims60\Router_Service\x64\BinThreads\Router_Service.lib
+     1>Done Building Project "C:\Software\Transims60\Router_Service\Router_Service.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:02:41.44

@@ -1,0 +1,47 @@
+﻿Build started 3/7/2014 7:57:32 AM.
+     1>Project "C:\Software\Transims60\TripPrep\TripPrep.vcxproj" on node 3 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\CL.exe /c /I..\Include /Zi /nologo /W4 /WX /MP /O2 /D WIN32 /D NDEBUG /D _CONSOLE /D _MSC_EXTENSIONS /D THREADS /Gm- /EHsc /MT /GS /Qpar /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\BinThreads\\" /Fd"x64\BinThreads\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Check_Trips.cpp Combine_Trips.cpp Control.cpp Execute.cpp MPI_Processing.cpp MPI_Setup.cpp Read_Trips.cpp Sort_Tours.cpp Temp_Time_Write.cpp Temp_Trip_Write.cpp Time_Combine.cpp Time_Write.cpp Trip_Combine.cpp Trip_Processing.cpp Trip_Write.cpp TripPrep.cpp Write_Temp.cpp
+         Check_Trips.cpp
+         Combine_Trips.cpp
+         Control.cpp
+         Execute.cpp
+         MPI_Processing.cpp
+         MPI_Setup.cpp
+         Read_Trips.cpp
+         Sort_Tours.cpp
+         Temp_Time_Write.cpp
+         Temp_Trip_Write.cpp
+         Time_Combine.cpp
+         Time_Write.cpp
+         Trip_Combine.cpp
+         Trip_Processing.cpp
+         Trip_Write.cpp
+         TripPrep.cpp
+         Write_Temp.cpp
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Software\Transims60\x64\BinThreads\TripPrep.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"C:\Software\Transims60\x64\BinThreads\TripPrep.pdb" /SUBSYSTEM:CONSOLE,"5.02" /OPT:REF /OPT:ICF /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Software\Transims60\x64\BinThreads\TripPrep.lib" /MACHINE:X64 x64\BinThreads\Check_Trips.obj
+         x64\BinThreads\Combine_Trips.obj
+         x64\BinThreads\Control.obj
+         x64\BinThreads\Execute.obj
+         x64\BinThreads\MPI_Processing.obj
+         x64\BinThreads\MPI_Setup.obj
+         x64\BinThreads\Read_Trips.obj
+         x64\BinThreads\Sort_Tours.obj
+         x64\BinThreads\Temp_Time_Write.obj
+         x64\BinThreads\Temp_Trip_Write.obj
+         x64\BinThreads\Time_Combine.obj
+         x64\BinThreads\Time_Write.obj
+         x64\BinThreads\Trip_Combine.obj
+         x64\BinThreads\Trip_Processing.obj
+         x64\BinThreads\Trip_Write.obj
+         x64\BinThreads\TripPrep.obj
+         x64\BinThreads\Write_Temp.obj
+         C:\Software\Transims60\SysLib\x64\BinThreads\SysLib.lib
+         C:\Software\Transims60\File_Data_Service\x64\BinThreads\File_Data_Service.lib
+         TripPrep.vcxproj -> C:\Software\Transims60\x64\BinThreads\TripPrep.exe
+     1>Done Building Project "C:\Software\Transims60\TripPrep\TripPrep.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:01:13.10

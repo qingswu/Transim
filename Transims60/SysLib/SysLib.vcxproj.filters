@@ -1,0 +1,396 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Dbfile">
+      <UniqueIdentifier>{e610f76a-f5df-4939-94f7-3b163a2a12ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dbfile\Header Files">
+      <UniqueIdentifier>{a64287be-0e26-4675-954a-35364bffb222}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dbfile\Source Files">
+      <UniqueIdentifier>{c70bae1d-8840-4bf2-ace6-2f74940ee0f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Program">
+      <UniqueIdentifier>{ce76db7b-0aca-4227-aef4-e177075a19ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Program\Header Files">
+      <UniqueIdentifier>{386a1e6b-98ee-4818-b8b6-5e1987d71874}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Program\Source Files">
+      <UniqueIdentifier>{0687a62c-6bfe-46ca-aa49-5d47c553f10c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Projection">
+      <UniqueIdentifier>{1680db69-73e0-4a47-8063-7634b99bd88b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Projection\Header Files">
+      <UniqueIdentifier>{2dce3f21-bb45-410d-99f9-85bc30202db7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Projection\Source Files">
+      <UniqueIdentifier>{dcb670ee-63f0-4c18-a80b-13af623a93b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Service">
+      <UniqueIdentifier>{e8093382-3a6e-4b7e-abb5-82c823e2e6ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Service\Header Files">
+      <UniqueIdentifier>{49a6d07c-e0dc-4728-bff3-2a63b34bf9ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Service\Source Files">
+      <UniqueIdentifier>{55f7281e-f418-437d-98d4-cfbb716a1916}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{5be778b8-7f5b-43e4-819a-6f5af1392c68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility\Header Files">
+      <UniqueIdentifier>{2a14ffd7-f2f2-47f4-993f-0dc20398ddfb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility\Source Files">
+      <UniqueIdentifier>{4a796343-dd86-4ef6-845c-a4d2a0898bb5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Include\Arcview_File.hpp">
+      <Filter>Dbfile\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Db_Array.hpp">
+      <Filter>Dbfile\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Db_Base.hpp">
+      <Filter>Dbfile\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Db_Field.hpp">
+      <Filter>Dbfile\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Db_File.hpp">
+      <Filter>Dbfile\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Db_Header.hpp">
+      <Filter>Dbfile\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Db_Matrix.hpp">
+      <Filter>Dbfile\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Db_Record.hpp">
+      <Filter>Dbfile\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Db_Status.hpp">
+      <Filter>Dbfile\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\User_Program.hpp">
+      <Filter>Program\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Projection.hpp">
+      <Filter>Projection\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Projection_Data.hpp">
+      <Filter>Projection\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Projection_Service.hpp">
+      <Filter>Projection\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Control_Service.hpp">
+      <Filter>Service\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Execution_Service.hpp">
+      <Filter>Service\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Message_Service.hpp">
+      <Filter>Service\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Report_Service.hpp">
+      <Filter>Service\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Static_Service.hpp">
+      <Filter>Service\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\APIDefs.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Barrier.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Best_List.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Buffer.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Compass.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Data_Buffer.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Data_Pack.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Data_Queue.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Data_Range.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Difference_Data.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Dtime.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Equation.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Equiv_Data.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Ordered_Queue.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Ordered_Work.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Random.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Range_Data.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Record_Queue.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Shape_Tools.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Smooth_Data.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Streams.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\String.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\System_Defines.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Time_Periods.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Trip_Gap_Data.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Trip_Sum_Data.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\TypeDefs.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Work_Queue.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Work_Step.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Threads.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Bounded_Queue.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\IPF_Data.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\TDF_Matrix.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Bin_Heap.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Functions.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Dbfile\Arcview_File.cpp">
+      <Filter>Dbfile\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Dbfile\Db_Array.cpp">
+      <Filter>Dbfile\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Dbfile\Db_Base.cpp">
+      <Filter>Dbfile\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Dbfile\Db_Field.cpp">
+      <Filter>Dbfile\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Dbfile\Db_File.cpp">
+      <Filter>Dbfile\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Dbfile\Db_Header.cpp">
+      <Filter>Dbfile\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Dbfile\Db_Matrix.cpp">
+      <Filter>Dbfile\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Dbfile\Db_Record.cpp">
+      <Filter>Dbfile\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Dbfile\Db_Status.cpp">
+      <Filter>Dbfile\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\Assign.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\Compile.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\Convert.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\Date_Time.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\Execute.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\Function.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\Get_Token.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\Initial_Declare.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\Initial_Table.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\Input_Output.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\Math.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\Print_Commands.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\Process_Command.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\Process_Token.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\Program_Code.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\Read_Value.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\Relation.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\Table.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\User_Program.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Projection\Projection.cpp">
+      <Filter>Projection\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Projection\Projection_Data.cpp">
+      <Filter>Projection\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Projection\Projection_Service.cpp">
+      <Filter>Projection\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\Control_Service.cpp">
+      <Filter>Service\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\Execution_Service.cpp">
+      <Filter>Service\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\Message_Service.cpp">
+      <Filter>Service\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\Report_Service.cpp">
+      <Filter>Service\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\Static_Service.cpp">
+      <Filter>Service\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Barrier.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Best_List.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Buffer.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Compass.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Data_Buffer.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Data_Range.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Difference_Data.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Dtime.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Equation.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Equiv_Data.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Random.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Range_Data.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Record_Queue.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Shape_Tools.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Smooth_Data.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Streams.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\String.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Time_Periods.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Trip_Gap_Data.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Trip_Sum_Data.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Work_Queue.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\IPF_Data.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\Initial_Map.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Program\Map.cpp">
+      <Filter>Program\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\Functions.cpp">
+      <Filter>Utility\Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

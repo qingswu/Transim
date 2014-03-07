@@ -1,0 +1,51 @@
+﻿Build started 3/7/2014 7:56:26 AM.
+     1>Project "C:\Software\Transims60\NewFormat\NewFormat.vcxproj" on node 4 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\CL.exe /c /I..\Include /Zi /nologo /W4 /WX /MP /O2 /D WIN32 /D NDEBUG /D _CONSOLE /D THREADS /Gm- /EHsc /MT /GS /Qpar /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\BinThreads\\" /Fd"x64\BinThreads\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Check_Phasing_Plans.cpp Control.cpp Create_Performance.cpp Execute.cpp Get_Location_Data.cpp Get_Router_Nodes_Data.cpp Get_Skim_Data.cpp Get_Trip_Data.cpp Get_Zone_Data.cpp Make_Route_Nodes.cpp NewFormat.cpp Plan_Processing.cpp Read_Activity.cpp Read_Persons.cpp Read_Routes.cpp Read_Snapshots.cpp Read_Tolls.cpp Read_Vehicles.cpp Travel_Plans.cpp
+         Check_Phasing_Plans.cpp
+         Control.cpp
+         Create_Performance.cpp
+         Execute.cpp
+         Get_Location_Data.cpp
+         Get_Router_Nodes_Data.cpp
+         Get_Skim_Data.cpp
+         Get_Trip_Data.cpp
+         Get_Zone_Data.cpp
+         Make_Route_Nodes.cpp
+         NewFormat.cpp
+         Plan_Processing.cpp
+         Read_Activity.cpp
+         Read_Persons.cpp
+         Read_Routes.cpp
+         Read_Snapshots.cpp
+         Read_Tolls.cpp
+         Read_Vehicles.cpp
+         Travel_Plans.cpp
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Software\Transims60\x64\BinThreads\NewFormat.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"C:\Software\Transims60\x64\BinThreads\NewFormat.pdb" /SUBSYSTEM:CONSOLE,"5.02" /OPT:REF /OPT:ICF /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Software\Transims60\x64\BinThreads\NewFormat.lib" /MACHINE:X64 x64\BinThreads\Check_Phasing_Plans.obj
+         x64\BinThreads\Control.obj
+         x64\BinThreads\Create_Performance.obj
+         x64\BinThreads\Execute.obj
+         x64\BinThreads\Get_Location_Data.obj
+         x64\BinThreads\Get_Router_Nodes_Data.obj
+         x64\BinThreads\Get_Skim_Data.obj
+         x64\BinThreads\Get_Trip_Data.obj
+         x64\BinThreads\Get_Zone_Data.obj
+         x64\BinThreads\Make_Route_Nodes.obj
+         x64\BinThreads\NewFormat.obj
+         x64\BinThreads\Plan_Processing.obj
+         x64\BinThreads\Read_Activity.obj
+         x64\BinThreads\Read_Persons.obj
+         x64\BinThreads\Read_Routes.obj
+         x64\BinThreads\Read_Snapshots.obj
+         x64\BinThreads\Read_Tolls.obj
+         x64\BinThreads\Read_Vehicles.obj
+         x64\BinThreads\Travel_Plans.obj
+         C:\Software\Transims60\SysLib\x64\BinThreads\SysLib.lib
+         C:\Software\Transims60\File_Data_Service\x64\BinThreads\File_Data_Service.lib
+         NewFormat.vcxproj -> C:\Software\Transims60\x64\BinThreads\NewFormat.exe
+     1>Done Building Project "C:\Software\Transims60\NewFormat\NewFormat.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:01:19.16
