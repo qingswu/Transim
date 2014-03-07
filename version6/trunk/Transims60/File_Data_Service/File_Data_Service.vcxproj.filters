@@ -1,0 +1,801 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Data">
+      <UniqueIdentifier>{e39e057b-0ada-4437-a0a7-5d7e249ba70b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Data\Header Files">
+      <UniqueIdentifier>{292c491d-e659-41dc-98fb-e4c84a1dd4fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Data\Source Files">
+      <UniqueIdentifier>{b89b23af-dbd9-474f-a462-1b259709f5cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Files">
+      <UniqueIdentifier>{a09d7285-0b93-444e-ae89-40f944b81324}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Files\Header Files">
+      <UniqueIdentifier>{3a2bc367-0a07-427a-90f2-8f4d18005bbe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Files\Source Files">
+      <UniqueIdentifier>{b5c1a8bb-8bb7-4c51-bb85-8981084230d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Read">
+      <UniqueIdentifier>{2e393187-27a3-4a0f-9a7f-fe0e0319980a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Write">
+      <UniqueIdentifier>{699ec562-89e7-44a9-85f7-a7bbf0301baa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Service">
+      <UniqueIdentifier>{71c85677-3bdb-4edd-907c-a36b9ef482d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Service\Header Files">
+      <UniqueIdentifier>{6b16a571-f26c-4b54-9557-677e594ae321}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Service\Source Files">
+      <UniqueIdentifier>{3ff8592e-a395-4aaf-b7d2-e30052dabcf3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Service\Data_Service.cpp">
+      <Filter>Service\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\Draw_Service.cpp">
+      <Filter>Service\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\File_Service.cpp">
+      <Filter>Service\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\Flow_Time_Service.cpp">
+      <Filter>Service\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\Select_Service.cpp">
+      <Filter>Service\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Access_Links.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Connections.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Detectors.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Drivers.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Events.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Fares.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Households.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Lane_Uses.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Lines.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Link_Delays.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Links.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Locations.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Nodes.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Parking_Lots.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Performance.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Phasing_Plans.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Plans.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Pockets.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Problems.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Ridership.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Route_Nodes.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Schedules.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Selections.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Shapes.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Signals.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Signs.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Skims.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Stops.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Timing_Plans.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Travelers.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Trips.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Turn_Pens.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Veh_Types.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Zones.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Access_Links.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Connections.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Detectors.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Drivers.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Events.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Fares.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Households.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Lane_Uses.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Lines.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Link_Delays.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Links.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Locations.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Nodes.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Parking_Lots.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Performance.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Phasing_Plans.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Plans.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Pockets.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Problems.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Ridership.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Route_Nodes.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Schedules.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Selections.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Shapes.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Signals.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Signs.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Skims.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Stops.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Timing_Plans.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Travelers.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Trips.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Turn_Pens.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Veh_Types.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Zones.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Access_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Activity_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Connect_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Detector_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Diurnal_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Driver_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Event_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Factor_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Fare_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Household_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Lane_Use_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Line_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Link_Data_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Link_Delay_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Link_Dir_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Link_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Location_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Matrix_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Node_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Occupancy_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Old_Plan_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Parking_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Performance_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Person_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Phasing_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Plan_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Pocket_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Problem_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Ridership_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Route_Nodes_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Schedule_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Selection_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Shape_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Sign_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Signal_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Skim_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Snapshot_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Stop_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Subzone_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Time_Sum_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Timing_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Toll_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Travel_Time_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Traveler_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Trip_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Turn_Pen_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Turn_Vol_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Veh_Type_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Zone_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Attribute_Data.cpp">
+      <Filter>Data\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Event_Data.cpp">
+      <Filter>Data\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Flow_Time_Data.cpp">
+      <Filter>Data\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Line_Data.cpp">
+      <Filter>Data\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Performance_Data.cpp">
+      <Filter>Data\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Selection_Data.cpp">
+      <Filter>Data\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Skim_Data.cpp">
+      <Filter>Data\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Time_Index.cpp">
+      <Filter>Data\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Tour_Sort.cpp">
+      <Filter>Data\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Transfer_Data.cpp">
+      <Filter>Data\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Traveler_Data.cpp">
+      <Filter>Data\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Trip_Index.cpp">
+      <Filter>Data\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Zone_Location.cpp">
+      <Filter>Data\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\Data_Shapes.cpp">
+      <Filter>Service\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Vehicle_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Approach_Link_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Link_Use_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Include\Data_Service.hpp">
+      <Filter>Service\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Draw_Service.hpp">
+      <Filter>Service\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\File_Service.hpp">
+      <Filter>Service\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Flow_Time_Service.hpp">
+      <Filter>Service\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Select_Service.hpp">
+      <Filter>Service\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Access_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Activity_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Connect_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Detector_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Driver_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Event_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Factor_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Fare_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Household_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Lane_Use_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Line_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Link_Data_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Link_Delay_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Link_Dir_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Link_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Location_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Matrix_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Node_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Occupancy_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Old_Plan_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Parking_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Performance_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Person_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Phasing_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Plan_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Pocket_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Problem_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Ridership_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Route_Nodes_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Schedule_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Selection_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Shape_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Sign_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Signal_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Skim_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Snapshot_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Stop_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Subzone_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Time_Sum_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Timing_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Traveler_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Trip_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Turn_Pen_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Turn_Vol_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Veh_Type_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Zone_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Toll_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Access_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Attribute_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Connect_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Detector_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Dir_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Event_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Factor_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Fare_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Flow_Time_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Household_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Lane_Use_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Line_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Link_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Link_Delay_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Link_Dir_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\List_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Location_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Matrix_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Node_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Notes_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Parking_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Partition_Files.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Performance_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Phasing_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Plan_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Pocket_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Problem_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Ridership_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Route_Nodes_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Schedule_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Selection_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Shape_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Sign_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Signal_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Skim_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Stop_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Subzone_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Time_Index.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Time_Sum_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Timing_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Traveler_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Trip_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Trip_Index.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Turn_Pen_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Turn_Vol_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Veh_Type_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Zone_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Zone_Location.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Zone_ODT_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\ZoneData.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Driver_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Diurnal_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Diurnal_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Transfer_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Vehicle_Index.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Lane_Map_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Vehicle_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Approach_Link_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Link_Use_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Link_Use_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Approach_Link_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Travel_Time_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
