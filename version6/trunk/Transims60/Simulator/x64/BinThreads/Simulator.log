@@ -1,0 +1,28 @@
+﻿Build started 3/7/2014 8:03:40 AM.
+     1>Project "C:\Software\Transims60\Simulator\Simulator.vcxproj" on node 5 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\CL.exe /c /I..\Include /Zi /nologo /W4 /WX /MP /O2 /D WIN32 /D NDEBUG /D _CONSOLE /D THREADS /Gm- /EHsc /MT /GS /Qpar /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\BinThreads\\" /Fd"x64\BinThreads\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Control.cpp Execute.cpp MPI_Close.cpp MPI_Distribute.cpp MPI_Setup.cpp MPI_Transfer.cpp Simulator.cpp
+         Control.cpp
+         Execute.cpp
+         MPI_Close.cpp
+         MPI_Distribute.cpp
+         MPI_Setup.cpp
+         MPI_Transfer.cpp
+         Simulator.cpp
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Software\Transims60\x64\BinThreads\Simulator.exe" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"C:\Software\Transims60\x64\BinThreads\Simulator.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Software\Transims60\x64\BinThreads\Simulator.lib" /MACHINE:X64 x64\BinThreads\Control.obj
+         x64\BinThreads\Execute.obj
+         x64\BinThreads\MPI_Close.obj
+         x64\BinThreads\MPI_Distribute.obj
+         x64\BinThreads\MPI_Setup.obj
+         x64\BinThreads\MPI_Transfer.obj
+         x64\BinThreads\Simulator.obj
+         C:\Software\Transims60\SysLib\x64\BinThreads\SysLib.lib
+         C:\Software\Transims60\File_Data_Service\x64\BinThreads\File_Data_Service.lib
+         C:\Software\Transims60\Simulator_Service\x64\BinThreads\Simulator_Service.lib
+         Simulator.vcxproj -> C:\Software\Transims60\x64\BinThreads\Simulator.exe
+     1>Done Building Project "C:\Software\Transims60\Simulator\Simulator.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:31.29

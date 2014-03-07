@@ -1,0 +1,33 @@
+﻿Build started 3/7/2014 7:58:46 AM.
+     1>Project "C:\Software\Transims60\IntControl\IntControl.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\CL.exe /c /I..\Include /Zi /nologo /W4 /WX /MP /O2 /D WIN32 /D NDEBUG /D _CONSOLE /D THREADS /Gm- /EHsc /MT /GS /Gy- /Qpar /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\BinThreads\\" /Fd"x64\BinThreads\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Control.cpp Create_Signals.cpp Execute.cpp IntControl.cpp Node_Links.cpp Read_Deletes.cpp Read_Sign.cpp Read_Signal.cpp Read_Turn.cpp Update_Signals.cpp
+         Control.cpp
+         Create_Signals.cpp
+         Execute.cpp
+         IntControl.cpp
+         Node_Links.cpp
+         Read_Deletes.cpp
+         Read_Sign.cpp
+         Read_Signal.cpp
+         Read_Turn.cpp
+         Update_Signals.cpp
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Software\Transims60\x64\BinThreads\IntControl.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"C:\Software\Transims60\x64\BinThreads\IntControl.pdb" /SUBSYSTEM:CONSOLE,"5.02" /OPT:REF /OPT:ICF /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Software\Transims60\x64\BinThreads\IntControl.lib" /MACHINE:X64 x64\BinThreads\Control.obj
+         x64\BinThreads\Create_Signals.obj
+         x64\BinThreads\Execute.obj
+         x64\BinThreads\IntControl.obj
+         x64\BinThreads\Node_Links.obj
+         x64\BinThreads\Read_Deletes.obj
+         x64\BinThreads\Read_Sign.obj
+         x64\BinThreads\Read_Signal.obj
+         x64\BinThreads\Read_Turn.obj
+         x64\BinThreads\Update_Signals.obj
+         C:\Software\Transims60\SysLib\x64\BinThreads\SysLib.lib
+         C:\Software\Transims60\File_Data_Service\x64\BinThreads\File_Data_Service.lib
+         IntControl.vcxproj -> C:\Software\Transims60\x64\BinThreads\IntControl.exe
+     1>Done Building Project "C:\Software\Transims60\IntControl\IntControl.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:46.06
