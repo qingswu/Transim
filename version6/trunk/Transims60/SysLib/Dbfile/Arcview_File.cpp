@@ -71,6 +71,23 @@ bool Arcview_Base::Arc_Open (string filename)
 	}
 	if (filename.empty ()) return (false);
 
+	//---- open the dbase file ----
+
+	if (filename.size () > 4 && filename [filename.size () - 4] == '.') {
+		filename.erase (filename.size () - 3, 3);
+	} else {
+		filename += ".";
+	}
+	filename += "dbf";
+	
+	messages = exe->Send_Messages ();
+	exe->Send_Messages (false);
+
+	status = file->Db_Header::Open (filename);
+
+	exe->Send_Messages (messages);
+	if (!status) return (status);
+
 	shape_file.File_Type (file->File_Type ());
 	shape_file.File_Access (file->File_Access ());
 
@@ -78,11 +95,21 @@ bool Arcview_Base::Arc_Open (string filename)
 	index_file.File_Access (file->File_Access ());
 
 	//---- open the shape file ----
+	
+	filename.erase (filename.size () - 3, 3);
+	filename += "shp";
 
 	if (!shape_file.Open (filename)) {
 		return (file->Status (NOT_OPEN));
 	}
-	messages = exe->Send_Messages ();
+	if (file->First_Open () && messages) {
+		String text, result;
+		text = file->File_Type ();
+
+		text.Split_Last (result);
+
+		exe->Print (1, text) << " Format = " << Data_Format (file->Dbase_Format (), file->Model_Format ());
+	}
 	exe->Send_Messages (false);
 
 	if (file->File_Access () == CREATE) {
@@ -218,13 +245,6 @@ bool Arcview_Base::Arc_Open (string filename)
 
 	index_file.First_Offset (sizeof (index_header));
 	index_file.Record_Size (sizeof (Arc_Record));
-
-	//---- open the dbase file ----
-
-	filename.erase (filename.size () - 3, 3);
-	filename += "dbf";
-
-	status = file->Db_Header::Open (filename);
 
 	exe->Send_Messages (messages);
 

@@ -36,7 +36,7 @@ protected:
 		MAXIMUM_NUMBER_OF_ITERATIONS, LINK_CONVERGENCE_CRITERIA, TRIP_CONVERGENCE_CRITERIA, 
 		TRANSIT_CAPACITY_CRITERIA, INITIAL_WEIGHTING_FACTOR, ITERATION_WEIGHTING_INCREMENT, 
 		MAXIMUM_WEIGHTING_FACTOR, MINIMIZE_VEHICLE_HOURS, SAVE_AFTER_EACH_ITERATION,
-		NEW_LINK_CONVERGENCE_FILE, NEW_TRIP_CONVERGENCE_FILE,
+		STORE_TRIPS_IN_MEMORY, NEW_LINK_CONVERGENCE_FILE, NEW_TRIP_CONVERGENCE_FILE,
 		LINK_PERSON_FILE, LINK_PERSON_FORMAT, LINK_VEHICLE_FILE, LINK_VEHICLE_FORMAT,
 		NEW_LINK_PERSON_FILE, NEW_LINK_PERSON_FORMAT, NEW_LINK_VEHICLE_FILE, NEW_LINK_VEHICLE_FORMAT,
 	};
@@ -48,7 +48,7 @@ private:
 	enum Router_Reports { TRAVELER_SCRIPT = 1, TRAVELER_STACK, LINK_GAP, TRIP_GAP, ITERATION_PROBLEMS };
 
 	Dtime reroute_time;
-	bool trip_flag, plan_flag, new_plan_flag, problem_flag, min_vht_flag;
+	bool trip_flag, plan_flag, new_plan_flag, problem_flag, min_vht_flag, trip_memory_flag;
 	bool trip_set_flag, plan_set_flag, problem_set_flag, old_plan_flag, save_flag;
 	bool new_delay_flag, flow_flag, turn_flag, reroute_flag, warn_flag, rider_flag;
 	bool link_gap_flag, trip_gap_flag, trip_gap_map_flag, iteration_flag, first_iteration;
@@ -140,6 +140,8 @@ private:
 	Partition_Files <Plan_File> plan_set;
 	Partition_Files <Plan_File> new_plan_set;
 	Partition_Files <Problem_File> problem_set;
+
+	Partition_Data <Trip_Array> trip_arrays;
 	
 	//---- gap report data ----
 

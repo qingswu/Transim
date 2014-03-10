@@ -12,23 +12,6 @@ void Data_Service::Write_Links (void)
 {
 	Link_File *file = (Link_File *) System_File_Handle (NEW_LINK);
 
-	if (file->Dbase_Format () == ARCVIEW) {
-		if (!System_Data_Flag (NODE)) {
-			Error ("Node File is required for Arcview Processing");
-		}
-		Arc_Link_File *arc_file = new Arc_Link_File (CREATE);
-
-		arc_file->Filename (file->Filename ());
-		arc_file->File_Type (file->File_Type ());
-		arc_file->Shape_Type (VECTOR);
-		arc_file->First_Open (false);
-		arc_file->Model_Format (file->Model_Format ());
-
-		file->Close ();
-		arc_file->Open ();
-		file = arc_file;
-	}
-
 	int count = 0;
 	Int_Map_Itr itr;
 
@@ -81,17 +64,10 @@ int Data_Service::Put_Link_Data (Link_File &file, Link_Data &data)
 			file.Cap_AB (dir_ptr->Capacity ());
 
 			if (file.Dbase_Format () == ARCVIEW) {
-				Arc_Link_File *arc_file = (Arc_Link_File *) &file;
-
-				Link_Shape (&data, 0, *arc_file);
-
-				if (!arc_file->Write_Record ()) {
-					Error (String ("Writing %s") % arc_file->File_Type ());
-				}
-			} else {
-				if (!file.Write ()) {
-					Error (String ("Writing %s") % file.File_Type ());
-				}
+				Link_Shape (&data, 0, *((Arc_Link_File *) &file));
+			}
+			if (!file.Write_Record ()) {
+				Error (String ("Writing %s") % file.File_Type ());
 			}
 			count++;
 		}
@@ -108,17 +84,10 @@ int Data_Service::Put_Link_Data (Link_File &file, Link_Data &data)
 			file.Cap_AB (dir_ptr->Capacity ());
 
 			if (file.Dbase_Format () == ARCVIEW) {
-				Arc_Link_File *arc_file = (Arc_Link_File *) &file;
-
-				Link_Shape (&data, 1, *arc_file);
-
-				if (!arc_file->Write_Record ()) {
-					Error (String ("Writing %s") % arc_file->File_Type ());
-				}
-			} else {
-				if (!file.Write ()) {
-					Error (String ("Writing %s") % file.File_Type ());
-				}
+				Link_Shape (&data, 1, *((Arc_Link_File *) &file));
+			}
+			if (!file.Write_Record ()) {
+				Error (String ("Writing %s") % file.File_Type ());
 			}
 			count++;
 		}
@@ -207,6 +176,9 @@ int Data_Service::Put_Link_Data (Link_File &file, Link_Data &data)
 		file.Speed_BA (0);
 		file.Fspd_BA (0);
 		file.Cap_BA (0);
+	}
+	if (file.Dbase_Format () == ARCVIEW) {
+		Link_Shape (&data, 0, *((Arc_Link_File *) &file));
 	}
 	if (!file.Write_Record ()) {
 		Error (String ("Writing %s") % file.File_Type ());

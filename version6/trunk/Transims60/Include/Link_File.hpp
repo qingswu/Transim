@@ -102,8 +102,11 @@ private:
 class SYSLIB_API Arc_Link_File : public Link_File, public Arcview_Base
 {
 public:
-	Arc_Link_File (Access_Type access = READ);
-	Arc_Link_File (string filename, Access_Type access = READ);
+	Arc_Link_File (Access_Type access, string format);
+	Arc_Link_File (string filename, Access_Type access, string format);
+	Arc_Link_File (Access_Type access = READ, Format_Type format = ARCVIEW);
+	Arc_Link_File (string filename, Access_Type access = READ, Format_Type format = ARCVIEW);
+
 	~Arc_Link_File ()                           { Arc_Close (); }
 
 	virtual bool Open (string filename = "")	{ return (Arc_Open (filename)); }

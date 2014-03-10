@@ -67,6 +67,10 @@ void Router::Set_Partitions (void)
 	}
 	if (trip_set_flag) {
 		trip_set.Initialize (trip_file, num_file_sets);
+
+		if (trip_memory_flag) {
+			trip_arrays.Initialize (num_file_sets);
+		}
 	}
 	if (plan_set_flag && plan_flag) {
 		plan_set.Initialize (plan_file, num_file_sets);

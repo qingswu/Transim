@@ -11,7 +11,7 @@
 Router::Router (void) : Router_Service (), Select_Service ()
 {
 	Program ("Router");
-	Version (21);
+	Version (22);
 	Title ("Network Path Building");
 
 	System_File_Type required_files [] = {
@@ -47,6 +47,7 @@ Router::Router (void) : Router_Service (), Select_Service ()
 		{ MAXIMUM_WEIGHTING_FACTOR, "MAXIMUM_WEIGHTING_FACTOR", LEVEL0, OPT_KEY, FLOAT_KEY, "20.0", "0.0, >= 2.0", NO_HELP },
 		{ MINIMIZE_VEHICLE_HOURS, "MINIMIZE_VEHICLE_HOURS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ SAVE_AFTER_EACH_ITERATION, "SAVE_AFTER_EACH_ITERATION", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
+		{ STORE_TRIPS_IN_MEMORY, "STORE_TRIPS_IN_MEMORY", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ NEW_LINK_CONVERGENCE_FILE, "NEW_LINK_CONVERGENCE_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
 		{ NEW_TRIP_CONVERGENCE_FILE, "NEW_TRIP_CONVERGENCE_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
 		{ LINK_PERSON_FILE, "LINK_PERSON_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
@@ -89,7 +90,7 @@ Router::Router (void) : Router_Service (), Select_Service ()
 	System_Data_Reserve (TRIP, 0);
 
 	reroute_time = 0;
-	plan_set_flag = problem_set_flag = false;
+	plan_set_flag = problem_set_flag = trip_memory_flag = false;
 	old_plan_flag = update_flag = warn_flag = false;
 	select_flag = new_delay_flag = flow_flag = turn_flag = reroute_flag = min_vht_flag = rider_flag = false;
 	

@@ -13,7 +13,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 	int p, p0, num, num_car, max_hhold, hhold, person, mode;
 	int last_hhold, last_person, partition;
 
-	bool keep_flag, old_flag, duration_flag, last_skip, gap_flag, gap_ptr_flag;
+	bool keep_flag, old_flag, duration_flag, last_skip, gap_flag, gap_ptr_flag, read_flag, first;
 
 	Trip_File *file;
 	Plan_File *plan_file = 0;
@@ -25,7 +25,9 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 	Gap_Map_Data gap_map_data;
 	Trip_Gap_Map_Stat map_stat;
 	Trip_Gap_Map *trip_gap_map_ptr;
-
+	Trip_Array *trip_ptr;
+	Trip_Itr trip_itr;
+	
 	Set_Parameters (param);
 
 	num_car = 0;
@@ -51,14 +53,24 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 	plan_ptr_array = new Plan_Ptr_Array ();
 	plan_ptr = new Plan_Data ();
 
+	read_flag = !trip_memory_flag || first_iteration;
+
 	if (trip_set_flag) {
 		file = trip_set [part];
 		p0 = part;
 		num = part + 1;
+
+		if (!read_flag) {
+			trip_ptr = trip_arrays [part];
+		}
 	} else {
 		file = trip_file;
 		p0 = 0;
 		num = num_file_sets;
+
+		if (!read_flag) {
+			trip_ptr = &trip_array;
+		}
 	}
 
 	if (plan_flag) {
@@ -117,7 +129,18 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 	}
 	last_hhold = last_person = 0;
 
-	while (file->Read_Trip (*plan_ptr)) {
+	for (first=true; ; first=false) {
+		if (read_flag) {
+			if (!file->Read_Trip (*plan_ptr)) break;
+		} else {
+			if (first) {
+				trip_itr = trip_ptr->begin ();
+			} else {
+				trip_itr++;
+			}
+			if (trip_itr == trip_ptr->end ()) break;
+			*plan_ptr = *trip_itr;
+		}
 		if (Master ()) {
 			if (thread_flag) {
 				Show_Dot ();

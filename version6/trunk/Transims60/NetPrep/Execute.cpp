@@ -45,20 +45,14 @@ void NetPrep::Execute (void)
 		Input_Links ();
 	}
 
-	//---- read the input route file ----
-
-	if (input_route_flag) {
-		Input_Routes ();
-	}
-
-	if (length_flag) {
-		Print (2, "Number of Length Ratio Updates = ") << num_ratio;
-	}
-
 	//---- correct link shapes ----
 
 	if (correct_flag) {
 		Correct_Shapes ();
+	}
+
+	if (length_flag) {
+		Print (2, "Number of Length Ratio Updates = ") << num_ratio;
 	}
 
 	//---- split loops ----
@@ -143,6 +137,12 @@ void NetPrep::Execute (void)
 		//---- update the link bearings ----
 
 		Bearing_Update ();
+	}
+
+	//---- read the input route file ----
+
+	if (input_route_flag) {
+		Input_Routes ();
 	}
 
 	//---- write the network files ----
