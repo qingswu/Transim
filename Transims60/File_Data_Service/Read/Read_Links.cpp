@@ -15,12 +15,21 @@
 void Data_Service::Read_Links (void)
 {
 	int num, anode, bnode, index;
+	bool shape_flag;
+	Arc_Link_File *arc_file = 0;
+
 	Link_File *file = (Link_File *) System_File_Handle (LINK);
 	
 	Int_Map_Stat map_stat;
 	Int2_Map_Stat ab_stat;
 	Link_Data link_rec;
 	Dir_Data ab_rec, ba_rec;
+
+	shape_flag = (!System_File_Flag (SHAPE) && file->Dbase_Format () == ARCVIEW); 
+
+	if (shape_flag) {
+		arc_file = (Arc_Link_File *) file;
+	}
 
 	//---- store the link data ----
 
@@ -31,7 +40,7 @@ void Data_Service::Read_Links (void)
 
 	anode = bnode = 0;
 
-	while (file->Read ()) {
+	while (file->Read_Record ()) {
 		Show_Progress ();
 
 		link_rec.Clear ();
@@ -49,6 +58,40 @@ void Data_Service::Read_Links (void)
 				Warning ("Duplicate Link Number = ") << link_rec.Link ();
 				continue;
 			} else {
+
+				//---- save the link shape ----
+
+				if (shape_flag) {
+					int i, npts;
+					Shape_Data shape_rec;
+					Points_Itr pt_itr;
+					XYZ xyz;
+
+					shape_rec.Link (link_rec.Link ());
+
+					npts = arc_file->Num_Points () - 1;
+
+					for (i=0, pt_itr = arc_file->begin (); i < npts; pt_itr++, i++) {
+						if (i > 0) {
+							xyz.x = Round (pt_itr->x);
+							xyz.y = Round (pt_itr->y);
+							xyz.z = Round (pt_itr->z);
+
+							shape_rec.push_back (xyz);
+						}
+					}
+					if (shape_rec.size () > 0) {
+						index = (int) shape_array.size ();
+						map_stat = shape_map.insert (Int_Map_Data (shape_rec.Link (), index));
+
+						if (!map_stat.second) {
+							Warning ("Duplicate Shape Link = ") << shape_rec.Link ();
+						} else {
+							shape_array.push_back (shape_rec);
+							link_rec.Shape (index);
+						}
+					}
+				}
 				link_array.push_back (link_rec);
 			}
 
@@ -113,6 +156,10 @@ void Data_Service::Read_Links (void)
 	num = (int) dir_array.size ();
 
 	if (num) Print (1, "Number of Directional Links = ") << num;
+
+	if (shape_flag && shape_map.size () > 0) {
+		System_File_True (SHAPE);
+	}
 	return;
 
 num_error:

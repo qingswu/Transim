@@ -189,6 +189,10 @@ void Router::Program_Control (void)
 
 		save_flag = Get_Control_Flag (SAVE_AFTER_EACH_ITERATION);
 
+		//---- store trips in memory ----
+
+		trip_memory_flag = Get_Control_Flag (STORE_TRIPS_IN_MEMORY);
+
 		//---- new link convergence file ----
 
 		key = Get_Control_String (NEW_LINK_CONVERGENCE_FILE);

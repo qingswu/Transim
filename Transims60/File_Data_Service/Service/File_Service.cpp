@@ -397,7 +397,17 @@ void File_Service::Program_Control (void)
 				break;
 			case LINK:
 			case NEW_LINK:
-				file->file = new Link_File (key, file->access, format);
+				{
+					Format_Type model_format, file_format;
+					Data_Format (format, file_format, model_format);
+
+					if (file_format == ARCVIEW) {
+						file->file = new Arc_Link_File (key, file->access, format);
+						((Arc_Link_File *) file->file)->Shape_Type (VECTOR);
+					} else {
+						file->file = new Link_File (key, file->access, format);
+					}
+				}
 				break;
 			case POCKET:
 			case NEW_POCKET:

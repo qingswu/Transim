@@ -328,7 +328,7 @@ void NetPrep::Input_Links (void)
 
 				//---- smooth the shape points ----
 
-				if (min_length > 0) {
+				if (max_angle > 0 || min_length > 0) {
 					Smooth_Shape (points, max_angle, min_length);
 				}
 
@@ -360,7 +360,7 @@ void NetPrep::Input_Links (void)
 						if (i < num && shape_flag) {
 							xyz.x = Round (x2);
 							xyz.y = Round (y2);
-							xyz.z = Round (x2);
+							xyz.z = Round (z2);
 
 							shape_rec.push_back (xyz);
 						}

@@ -208,20 +208,33 @@ bool Link_File::Set_Field_Numbers (void)
 }
 
 //-----------------------------------------------------------
-//	Arc_Link_File constructors - access only
+//	Arc_Link_File constructors
 //-----------------------------------------------------------
 
-Arc_Link_File::Arc_Link_File (Access_Type access) : Link_File (access, ARCVIEW), Arcview_Base ()
+Arc_Link_File::Arc_Link_File (Access_Type access, string format) : 
+	Link_File (access, format), Arcview_Base ()
 {
 	Arc_Setup (this);
 }
 
-//-----------------------------------------------------------
-//	Arc_Link_File constructors - with filename
-//-----------------------------------------------------------
-
-Arc_Link_File::Arc_Link_File (string filename, Access_Type access) : Link_File (access, ARCVIEW), Arcview_Base ()
+Arc_Link_File::Arc_Link_File (string filename, Access_Type access, string format) : 
+	Link_File (access, format), Arcview_Base ()
 {
 	Arc_Setup (this);
+
+	Arc_Open (filename);
+}
+
+Arc_Link_File::Arc_Link_File (Access_Type access, Format_Type format) : 
+	Link_File (access, format), Arcview_Base ()
+{
+	Arc_Setup (this);
+}
+
+Arc_Link_File::Arc_Link_File (string filename, Access_Type access, Format_Type format) : 
+	Link_File (access, format), Arcview_Base ()
+{
+	Arc_Setup (this);
+
 	Arc_Open (filename);
 }

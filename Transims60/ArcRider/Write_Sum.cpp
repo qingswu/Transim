@@ -17,6 +17,8 @@ void ArcRider::Write_Sum (void)
 	double side, side_offset, length;
 	bool offset_flag, first, flag_ab, flag_ba;
 
+	Integers stop_flag;
+
 	Link_Data *link_ptr;
 	Dir_Data *dir_ptr;
 	Line_Data *line_ptr;
@@ -70,6 +72,7 @@ void ArcRider::Write_Sum (void)
 		arcview_sum.parts.clear ();
 
 		riders = board = alight = max_load = runs = stops = routes = 0;
+		stop_flag.assign (stop_array.size (), 0);
 
 		//---- set the overlap count ----
 
@@ -154,6 +157,10 @@ void ArcRider::Write_Sum (void)
 					if (run_flag [run] == 1) {
 						runs++;
 						run_flag [run] = 2;
+					}
+					if (stop_flag [stop_itr->Stop ()] == 0) {
+						stops++;
+						stop_flag [stop_itr->Stop ()] = 1;
 					}
 				}
 			}

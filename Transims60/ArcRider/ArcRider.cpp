@@ -11,7 +11,7 @@
 ArcRider::ArcRider (void) : Data_Service (), Select_Service (), Draw_Service ()
 {
 	Program ("ArcRider");
-	Version (7);
+	Version (8);
 	Title ("Ridership File Display Utility");
 
 	System_File_Type required_files [] = {

@@ -81,6 +81,16 @@ bool Router::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 				}
 			}
 		}
+
+		//---- save the trip in memory ----
+
+		if (trip_memory_flag && first_iteration) {
+			if (trip_set_flag) {
+				trip_arrays [plan_ptr->Partition ()]->push_back (*plan_ptr);
+			} else {
+				trip_array.push_back (*plan_ptr);
+			}
+		}
 		delete plan_ptr;
 	}
 	delete array_ptr;
