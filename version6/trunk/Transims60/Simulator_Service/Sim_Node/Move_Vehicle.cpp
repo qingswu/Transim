@@ -140,6 +140,8 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 				ptr->Remove (l, c);
 				sim_travel_ptr->sim_plan_ptr->Next_Leg ();
 				sim_travel_ptr->Next_Event (sim->time_step);
+
+stats.num_veh_end++;
 				break;
 			}
 		}

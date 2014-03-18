@@ -182,9 +182,9 @@ private:
 	} x;
 };
 typedef Vector <Sim_Plan_Data>    Sim_Plan_Array;
+typedef Sim_Plan_Array::iterator  Sim_Plan_Itr;
+typedef Sim_Plan_Data *           Sim_Plan_Ptr;
 
 typedef Deque <Sim_Plan_Data>     Sim_Plan_Queue;
-typedef Sim_Plan_Queue::iterator  Sim_Plan_Itr;
-typedef Sim_Plan_Data *           Sim_Plan_Ptr;
 
 #endif

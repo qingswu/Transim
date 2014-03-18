@@ -687,7 +687,12 @@ void TransitNet::Build_Routes (void)
 
 				if (offset < 0 || !offset_flag) {
 					line_stop_itr = line_ptr->begin ();
-					offset = (int) ((headway - line_stop_itr->Time ()) * random.Probability () + 0.5);
+					if (line_stop_itr != line_ptr->end ()) {
+						offset = (int) ((headway - line_stop_itr->Time ()) * random.Probability () + 0.5);
+					} else {
+						Warning (String ("Route %d-%s does not have stops") % route_itr->Route () % route_itr->Name ());
+						offset = 0;
+					}
 				}
 				ttime = low + offset;
 				last_time = last_time - 1.5 * headway;

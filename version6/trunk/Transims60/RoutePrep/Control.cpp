@@ -10,14 +10,13 @@
 
 void RoutePrep::Program_Control (void)
 {
-	String key;
+	String key, in_format, out_format;
 	int i, j, num;
 
 	Integer_List list;
 	Int_Itr itr;
 	String_List str_list;
 	Str_Itr str_itr;
-	Format_Type format;
 
 	in_route_flag = (Highest_Control_Group (INPUT_ROUTE_FILE, 0) > 0);
 	out_route_flag = (Highest_Control_Group (NEW_ROUTE_FILE, 0) > 0);
@@ -477,7 +476,8 @@ void RoutePrep::Program_Control (void)
 
 		if (num != 0) {
 
-			format = Format_Code (Get_Control_String (INPUT_ROUTE_FORMAT));
+			in_format = Get_Control_String (INPUT_ROUTE_FORMAT, 1);
+			out_format = Get_Control_String (NEW_ROUTE_FORMAT, 1);
 
 			//---- read the input route files ----
 
@@ -501,7 +501,7 @@ void RoutePrep::Program_Control (void)
 				if (Check_Control_Key (INPUT_ROUTE_FORMAT, i)) {
 					group_rec.in_file->Dbase_Format (Get_Control_String (INPUT_ROUTE_FORMAT, i));
 				} else {
-					group_rec.in_file->Dbase_Format (format);
+					group_rec.in_file->Dbase_Format (in_format);
 				}
 				group_rec.in_file->Open (Project_Filename (key));	
 
@@ -533,7 +533,7 @@ void RoutePrep::Program_Control (void)
 					if (Check_Control_Key (NEW_ROUTE_FORMAT, i)) {
 						group_rec.out_file->Dbase_Format (Get_Control_String (NEW_ROUTE_FORMAT, i));
 					} else {
-						group_rec.out_file->Dbase_Format (format);
+						group_rec.out_file->Dbase_Format (out_format);
 					}
 					group_rec.out_file->Create (Project_Filename (key));
 				}

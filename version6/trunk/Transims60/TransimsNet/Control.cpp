@@ -187,7 +187,7 @@ void TransimsNet::Program_Control (void)
 				case 4:		//---- pocket length ----
 					text = *str_itr;
 					units = Parse_Units (text);
-					if (units == NO_UNITS) units = METERS;
+					if (units == NO_UNITS) units = (Metric_Flag ()) ? METERS : FEET;
 					length = Round (Internal_Units (text.Double (), units));
 					break;
 				case 5:		//---- number of lanes ----
@@ -324,7 +324,7 @@ void TransimsNet::Program_Control (void)
 				case 4:		//---- intersection setback ----
 					text = *str_itr;
 					units = Parse_Units (text);
-					if (units == NO_UNITS) units = METERS;
+					if (units == NO_UNITS) units = (Metric_Flag ()) ? METERS : FEET;
 					length = Round (Internal_Units (text.Double (), units));
 					break;
 				case 5:		//---- signal group ----
@@ -336,7 +336,7 @@ void TransimsNet::Program_Control (void)
 			}
 		}
 		if (low1 > high1 || low2 > high2 || low3 > high3) goto traffic_error;
-		if (length < 0 || length > Round (Internal_Units (30, METERS))) goto traffic_error;
+		if (length < 0 || length > Round (Internal_Units (100, FEET))) goto traffic_error;
 		if (number < 0) goto traffic_error;
 
 		//---- print the codes ----
@@ -402,7 +402,7 @@ void TransimsNet::Program_Control (void)
 		text = key;
 		text.Parse (parts, COMMA_DELIMITERS);
 		type = loc_setback;
-		length = Round (Internal_Units (100, METERS));
+		length = Round (Internal_Units (300, FEET));
 		number = 3;
 		low1 = high1 = low2 = 0;
 		high2 = 10;
@@ -425,13 +425,13 @@ void TransimsNet::Program_Control (void)
 				case 2:		//---- location setback ----
 					text = *str_itr;
 					units = Parse_Units (text);
-					if (units == NO_UNITS) units = METERS;
+					if (units == NO_UNITS) units = (Metric_Flag ()) ? METERS : FEET;
 					type = Round (Internal_Units (text.Double (), units));
 					break;
 				case 3:		//---- minimum split length ----
 					text = *str_itr;
 					units = Parse_Units (text);
-					if (units == NO_UNITS) units = METERS;
+					if (units == NO_UNITS) units = (Metric_Flag ()) ? METERS : FEET;
 					length = Round (Internal_Units (text.Double (), units));
 					break;
 				case 4:		//---- maximum number of points ----
@@ -446,17 +446,17 @@ void TransimsNet::Program_Control (void)
 		//---- check the values ---
 
 		if (low1 > high1 || low2 > high2) goto access_error;
-		if (type < 1 || type > Round (Internal_Units (100, METERS))) {
-			Write (1, "Setback ") << UnRound (type) << " is Out of Range (1.." << Internal_Units (100, METERS) << ")";
+		if (type < 1 || type > Round (Internal_Units (300, FEET))) {
+			Write (1, "Setback ") << UnRound (type) << " is Out of Range (1.." << Internal_Units (300, FEET) << ")";
 			goto access_error;
 		}
 		if (low1 <= WALKWAY && WALKWAY <= high1) {
-			low3 = 10;
+			low3 = 30;
 		} else {
-			low3 = 40;
+			low3 = 125;
 		}
-		if (length < Round (Internal_Units (low3, METERS)) || length > Round (Internal_Units (4000, METERS))) {
-			Write (1, "Split Length ") << UnRound (length) << " is Out of Range (" << Internal_Units (40, METERS) << ".." << Internal_Units (4000, METERS) << ")";
+		if (length < Round (Internal_Units (low3, FEET)) || length > Round (Internal_Units (12000, FEET))) {
+			Write (1, "Split Length ") << UnRound (length) << " is Out of Range (" << Internal_Units (low3, FEET) << ".." << Internal_Units (12000, FEET) << ")";
 			goto access_error;
 		}
 		if (number < 1 || number > 20) goto access_error;

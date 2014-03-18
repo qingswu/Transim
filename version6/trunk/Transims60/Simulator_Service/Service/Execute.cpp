@@ -48,6 +48,7 @@ Write (1, "Microscopic Processing is Not Implemented");
 
 	//---- initialize the simulator processing steps ----
 
+	sim_update_step.Initialize ();
 	sim_plan_step.Initialize ();
 	sim_travel_step.Initialize ();
 	sim_node_step.Initialize ();

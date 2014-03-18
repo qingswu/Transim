@@ -29,7 +29,6 @@ void Simulator_Service::Global_Data (void)
 	Lane_Map_Itr lane_itr;
 
 	Veh_Type_Itr type_itr;
-	Veh_Type_Data type_rec;
 	Link_Itr link_itr;
 	Node_Data *node_ptr;
 	Location_Itr loc_itr;
@@ -39,6 +38,7 @@ void Simulator_Service::Global_Data (void)
 	Sim_Connection sim_con_rec;
 	Sim_Signal_Data sim_signal_rec;
 	Int2_Key mpi_key;
+
 
 	//---- set the vehicle cell size ----
 
@@ -163,9 +163,6 @@ void Simulator_Service::Global_Data (void)
 
 			//capacity = MAX (Round ((length + param.half_cell) / param.cell_size), 1);
 
-			//sim_dir_ptr->Lane_Cells (capacity);
-			//sim_dir_ptr->Pocket_Cells (0);
-
 			//---- initialize the lane data and capacity ----
 
 			//if (sim_dir_ptr->Method () == MACROSCOPIC) {
@@ -173,16 +170,6 @@ void Simulator_Service::Global_Data (void)
 			//	sim_dir_ptr->assign (lanes, sim_lane_data);
 			//} else if (sim_dir_ptr->Method () == MESOSCOPIC) {
 			//	sim_dir_ptr->assign (sim_dir_ptr->Lanes (), sim_lane_data);
-			//}
-
-			//for (sim_lane_itr = sim_dir_ptr->begin (); sim_lane_itr != sim_dir_ptr->end (); sim_lane_itr++) {
-			//	sim_lane_itr->Use_Type (LIMIT);
-			//	sim_lane_itr->Use (link_itr->Use ());
-			//	sim_lane_itr->Min_Veh_Type (-1);
-			//	sim_lane_itr->Max_Veh_Type (0);
-			//	sim_lane_itr->Min_Traveler (0);
-			//	sim_lane_itr->Max_Traveler (0);
-			//	sim_lane_itr->First_Use (-1);
 			//}
 
 			//---- apply method specific processing ----
@@ -197,12 +184,6 @@ void Simulator_Service::Global_Data (void)
 				//sim_lane_ptr->High_Lane (max_lane);
 
 			} else if (sim_dir_ptr->Method () == MESOSCOPIC) {
-				//for (i=min_lane; i <= max_lane; i++) {
-				//	sim_lane_ptr = sim_dir_ptr->Lane (i);
-				//	sim_lane_ptr->Capacity (capacity);
-				//	sim_lane_ptr->Low_Lane (i);
-				//	sim_lane_ptr->High_Lane (i);
-				//}
 
 				//---- initialize the connection array ----
 
@@ -238,10 +219,9 @@ void Simulator_Service::Global_Data (void)
 			//---- initialize the pocket lanes and access restrictions ----
 
 			offset = sim_dir_ptr->Out_Offset ();
-			max_lane = dir_ptr->Lanes () - dir_ptr->Right ();
-			sim_dir_ptr->Lanes (dir_ptr->Lanes () + dir_ptr->Left () + dir_ptr->Right ());
+			max_lane = sim_dir_ptr->Lanes () - dir_ptr->Right ();
 
-			for (i=0; i < dir_ptr->Lanes (); i++) {
+			for (i=0; i < sim_dir_ptr->Lanes (); i++) {
 				if (i < dir_ptr->Left () || i >= max_lane) {
 					for (j=0; j <= sim_dir_ptr->Max_Cell (); j++) {
 						sim_dir_ptr->Set (i, j, -1);
@@ -281,45 +261,6 @@ void Simulator_Service::Global_Data (void)
 						sim_dir_ptr->Set (lane, i, 0);
 					}
 				}
-
-				//if (sim_dir_ptr->Method () == MACROSCOPIC) {
-				//	capacity = Round (pocket_ptr->Lanes () * (k - j + 1) * factor / param.cell_size);
-				//	sim_lane_ptr = sim_dir_ptr->Lane (0);
-				//	
-				//	sim_dir_ptr->Add_Pocket (capacity);
-				//	sim_lane_ptr->Add_Capacity (capacity);
-
-				//} else if (sim_dir_ptr->Method () == MESOSCOPIC) {
-				//	capacity = Round ((k - j + 1) / param.cell_size);
-
-				//	if (pocket_ptr->Type () == LEFT_TURN || pocket_ptr->Type () == LEFT_MERGE) {
-				//		lanes = dir_ptr->Left () - pocket_ptr->Lanes ();
-				//	} else {
-				//		lanes = dir_ptr->Left () + dir_ptr->Lanes ();
-				//	}
-				//	for (n=0; n < pocket_ptr->Lanes (); n++, lanes++) {
-				//		sim_lane_ptr = sim_dir_ptr->Lane (lanes);
-				//		sim_lane_ptr->Add_Capacity (capacity);
-				//		sim_lane_ptr->Low_Lane (n);
-				//		sim_lane_ptr->High_Lane (n);
-
-				//		if (pocket_ptr->Type () == LEFT_TURN || pocket_ptr->Type () == RIGHT_TURN) {
-				//			sim_lane_ptr->Start_Turn (j);
-				//		} else {
-				//			sim_lane_ptr->End_Merge (k);
-				//		}
-				//	}
-				//}
-			}
-
-			//---- initialize the lane use restrictions ----
-
-			if (dir_ptr->First_Lane_Use () >= 0) {
-				Set_Lane_Use (sim_dir_ptr, dir_ptr, link_itr->Use ());
-			}
-
-			if (dir_ptr->First_Turn () >= 0) {
-				Set_Turn_Flag (sim_dir_ptr, dir_ptr);
 			}
 
 			//---- initialize the traffic controls ----
@@ -410,10 +351,6 @@ void Simulator_Service::Global_Data (void)
 	if (param.transit_flag) {
 		Transit_Plans ();
 	}
-
-	//---- initialize the traffic controls ----
-
-	Traffic_Controls (true);
 
 	//---- identify conflict links ----
 

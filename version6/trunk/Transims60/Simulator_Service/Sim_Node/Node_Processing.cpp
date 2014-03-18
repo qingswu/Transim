@@ -43,7 +43,6 @@ bool Sim_Node_Process::Node_Processing (int node)
 			if (sim_veh_ptr->link != index) {
 				step.Problem (PATH_PROBLEM);
 				step.Status (3);
-sim->Write (1, " link error index=") << index << " vs " << sim_veh_ptr->link << " vehicle=" << sim_travel_ptr->Vehicle () << " traveler=" << *cell_itr << " time=" << sim->time_step;
 				Output_Step (step);
 				continue;
 			}

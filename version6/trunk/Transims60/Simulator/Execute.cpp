@@ -51,9 +51,7 @@ void Simulator::Execute (void)
 	for (; time_step <= param.end_time_step; time_step += param.step_size) {
 		io_flag = ((time_step % one_second) == 0);
 		Step_Flag (time_step);
-//Write (1, " step=") << time_step;
-//debug = (time_step == 8210);
-//if (debug) Write (1, "step=") << time_step;
+
 		//---- processing for each second ----
 
 		if (io_flag) {
@@ -61,6 +59,8 @@ void Simulator::Execute (void)
 			//---- read plans and write output ----
 
 			start = clock ();
+
+			sim_update_step.Start_Processing ();
 
 			if (read_status) {
 				read_status = sim_plan_step.Read_Plans ();
@@ -111,6 +111,7 @@ void Simulator::Execute (void)
 
 	//Stop_Simulator ();
 
+	sim_update_step.Stop_Processing ();
 	sim_plan_step.Stop_Processing ();
 	sim_travel_step.Stop_Processing ();
 	sim_node_step.Stop_Processing ();

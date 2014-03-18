@@ -467,4 +467,10 @@ enum Loc_Method_Type {
 enum Signal_Split_Type {
 	LANE_SPLITS, CAPACITY_SPLITS, VOLUME_SPLITS, UPDATE_SPLITS 
 };
+
+//---- Simulator Update Types ----
+
+enum Sim_Update_Type {
+	SIM_CONTROL_UPDATE, SIM_NETWORK_UPDATE, SIM_TRANSIT_UPDATE 
+};
 #endif

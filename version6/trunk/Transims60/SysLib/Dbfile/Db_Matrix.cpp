@@ -484,15 +484,15 @@ bool Db_Matrix::Get_Shared_Fields (Db_Matrix *file)
 int Db_Matrix::Add_Org (int org)
 {
 	if (org <= 0)  return (-1);
+
+	Int_Map_Itr itr = org_map.find (org);
+	if (itr != org_map.end ()) {
+		return (itr->second);
+	}
 	if (!data_flag || (int) org_map.size () < num_org) {
 		return (org_map.insert (Int_Map_Data (org, (int) org_map.size ())).first->second);
 	} else {
-		Int_Map_Itr itr = org_map.find (org);
-		if (itr == org_map.end ()) {
-			return (-1);		
-		} else {
-			return (itr->second);
-		}
+		return (-1);	
 	}
 }
 
@@ -503,15 +503,15 @@ int Db_Matrix::Add_Org (int org)
 int Db_Matrix::Add_Des (int des)
 {
 	if (des <= 0)  return (-1);
+
+	Int_Map_Itr itr = des_map.find (des);
+	if (itr != des_map.end ()) {
+		return (itr->second);
+	}
 	if (!data_flag || (int) des_map.size () < num_des) {
 		return (des_map.insert (Int_Map_Data (des, (int) des_map.size ())).first->second);
 	} else {
-		Int_Map_Itr itr = des_map.find (des);
-		if (itr == des_map.end ()) {
-			return (-1);		
-		} else {
-			return (itr->second);
-		}
+		return (-1);
 	}
 }
 

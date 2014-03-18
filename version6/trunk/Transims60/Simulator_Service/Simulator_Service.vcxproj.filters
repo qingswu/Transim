@@ -46,6 +46,15 @@
     <Filter Include="Sim_Plan\Header Files">
       <UniqueIdentifier>{ff1cff27-b594-4ae2-abd8-ea3c76ad2145}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sim_Update">
+      <UniqueIdentifier>{a8c32566-7bec-4ae0-a79d-6560fcf8ba3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sim_Update\Header files">
+      <UniqueIdentifier>{d7a6f701-8523-4deb-90a1-bee53a1a0e2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sim_Update\Source_Files">
+      <UniqueIdentifier>{32d581c5-c550-4f34-a749-26202d90f2d9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\Sim_Node_Process.hpp">
@@ -131,6 +140,24 @@
     </ClInclude>
     <ClInclude Include="..\Include\Sim_Output_Data.hpp">
       <Filter>Sim_Output\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Sim_Control_Update.hpp">
+      <Filter>Sim_Update\Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Sim_Network_Update.hpp">
+      <Filter>Sim_Update\Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Sim_Transit_Update.hpp">
+      <Filter>Sim_Update\Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Sim_Update_Step.hpp">
+      <Filter>Sim_Update\Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Sim_Update_Data.hpp">
+      <Filter>Sim_Update\Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Sim_Signal_Data.hpp">
+      <Filter>Service\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -230,15 +257,6 @@
     <ClCompile Include="Sim_Plan\Sim_Plan_Step.cpp">
       <Filter>Sim_Plan\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Service\Set_Turn_Flag.cpp">
-      <Filter>Service\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Service\Set_Lane_Use.cpp">
-      <Filter>Service\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Service\Traffic_Controls.cpp">
-      <Filter>Service\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Sim_Node\Check_Behind.cpp">
       <Filter>Sim_Node\Source Files</Filter>
     </ClCompile>
@@ -259,6 +277,30 @@
     </ClCompile>
     <ClCompile Include="Sim_Output\Sim_Output_Data.cpp">
       <Filter>Sim_Output\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sim_Update\Signal_Timing.cpp">
+      <Filter>Sim_Update\Source_Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sim_Update\Sim_Control_Update.cpp">
+      <Filter>Sim_Update\Source_Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sim_Update\Sim_Network_Update.cpp">
+      <Filter>Sim_Update\Source_Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sim_Update\Sim_Transit_Update.cpp">
+      <Filter>Sim_Update\Source_Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sim_Update\Sim_Update_Data.cpp">
+      <Filter>Sim_Update\Source_Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sim_Update\Sim_Update_Step.cpp">
+      <Filter>Sim_Update\Source_Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sim_Update\Traffic_Control.cpp">
+      <Filter>Sim_Update\Source_Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sim_Update\Check_Detector.cpp">
+      <Filter>Sim_Update\Source_Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -82,6 +82,10 @@ public:
 
 	virtual bool Create_Fields (void);
 
+	virtual Format_Type Dbase_Format (void)           { return (Db_Base::Dbase_Format ()); }
+	virtual void  Dbase_Format (Format_Type type)     { return (Db_Base::Dbase_Format (type)); }
+	virtual void  Dbase_Format (string text);
+
 protected:
 
 	virtual bool Set_Field_Numbers (void);

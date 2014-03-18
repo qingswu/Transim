@@ -24,6 +24,7 @@
 #include "Sim_Veh_Data.hpp"
 #include "Travel_Step.hpp"
 
+#include "Sim_Update_Step.hpp"
 #include "Sim_Plan_Step.hpp"
 #include "Sim_Travel_Step.hpp"
 #include "Sim_Node_Step.hpp"
@@ -39,6 +40,10 @@
 #include "Event_Output.hpp"
 #include "Traveler_Output.hpp"
 
+#include "Sim_Control_Update.hpp"
+#include "Sim_Network_Update.hpp"
+#include "Sim_Transit_Update.hpp"
+
 //---------------------------------------------------------
 //	Simulator_Service - simulation service class definition
 //---------------------------------------------------------
@@ -46,6 +51,8 @@
 //class SYSLIB_API Simulator_Service : public Router_Service, public Select_Service
 class SYSLIB_API Simulator_Service : public Data_Service, public Select_Service
 {
+	friend class Sim_Update_Step;
+	friend class Sim_Update_Data;
 	friend class Sim_Plan_Step;
 	friend class Sim_Plan_Process;
 	friend class Sim_Travel_Step;
@@ -65,6 +72,10 @@ class SYSLIB_API Simulator_Service : public Data_Service, public Select_Service
 	friend class Occupancy_Output;
 	friend class Event_Output;
 	friend class Traveler_Output;
+
+	friend class Sim_Control_Update;
+	friend class Sim_Network_Update;
+	friend class Sim_Transit_Update;
 
 public:
 
@@ -90,10 +101,6 @@ protected:
 	virtual void Execute (void);
 
 	void Global_Data (void);
-	void Set_Lane_Use (Sim_Dir_Data *sim_dir_ptr, Dir_Data *dir_ptr, int use = ANY_USE_CODE);
-	void Set_Turn_Flag (Sim_Dir_Data *sim_dir_ptr, Dir_Data *dir_ptr);
-	void Traffic_Controls (bool inialize);
-	//void Check_Output (Travel_Step &step);
 
 	virtual bool Get_Node_Data (Node_File &file, Node_Data &data);
 
@@ -133,8 +140,7 @@ protected:
 	Sim_Statistics & Get_Statistics (void);
 	Sim_Parameters param;
 
-	Dtime time_step, one_second, use_update_time, turn_update_time;
-	Dtime signal_update_time, timing_update_time, run_update_time;
+	Dtime time_step, one_second;
 
 	Data_Range no_range, macro_range, meso_range, micro_range;
 
@@ -152,24 +158,16 @@ protected:
 
 	Int_Map subarea_map;
 
+	Sim_Update_Step sim_update_step;
 	Sim_Plan_Step sim_plan_step;
 	Sim_Travel_Step sim_travel_step;
 	Sim_Node_Step sim_node_step;
 	Sim_Output_Step sim_output_step;
 
-	//Barrier node_barrier, output_barrier;
 	Barrier node_barrier;
 	Integers node_list, node_link, link_list;
 
 	Problem_Output problem_output;
-	//Snapshot_Output snapshot_output;
-	//Link_Delay_Output link_delay_output;
-	//Performance_Output performance_output;
-	//Turn_Vol_Output turn_vol_output;
-	//Ridership_Output ridership_output;
-	//Occupancy_Output occupancy_output;
-	//Event_Output event_output;
-	//Traveler_Output traveler_output;
 
 	Int2s_Array transfers;
 	Work_Step work_step;

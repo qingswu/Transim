@@ -316,6 +316,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\Ridership_Output.hpp" />
+    <ClInclude Include="..\Include\Sim_Control_Update.hpp" />
+    <ClInclude Include="..\Include\Sim_Network_Update.hpp" />
     <ClInclude Include="..\Include\Sim_Node_Process.hpp" />
     <ClInclude Include="..\Include\Sim_Node_Step.hpp" />
     <ClInclude Include="..\Include\Event_Output.hpp" />
@@ -325,6 +327,10 @@
     <ClInclude Include="..\Include\Problem_Output.hpp" />
     <ClInclude Include="..\Include\Sim_Output_Data.hpp" />
     <ClInclude Include="..\Include\Sim_Output_Step.hpp" />
+    <ClInclude Include="..\Include\Sim_Signal_Data.hpp" />
+    <ClInclude Include="..\Include\Sim_Update_Data.hpp" />
+    <ClInclude Include="..\Include\Sim_Update_Step.hpp" />
+    <ClInclude Include="..\Include\Sim_Transit_Update.hpp" />
     <ClInclude Include="..\Include\Sim_Travel_Data.hpp" />
     <ClInclude Include="..\Include\Sim_Veh_Data.hpp" />
     <ClInclude Include="..\Include\Snapshot_Output.hpp" />
@@ -345,10 +351,7 @@
     <ClInclude Include="..\Include\Sim_Plan_Step.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Service\Set_Lane_Use.cpp" />
-    <ClCompile Include="Service\Set_Turn_Flag.cpp" />
     <ClCompile Include="Service\Sim_Parameters.cpp" />
-    <ClCompile Include="Service\Traffic_Controls.cpp" />
     <ClCompile Include="Sim_Node\Cell_Use.cpp" />
     <ClCompile Include="Sim_Node\Check_Behind.cpp" />
     <ClCompile Include="Sim_Node\Lane_Change.cpp" />
@@ -387,6 +390,14 @@
     <ClCompile Include="Sim_Plan\Sim_Plan_Result.cpp" />
     <ClCompile Include="Sim_Plan\Sim_Plan_Step.cpp" />
     <ClCompile Include="Sim_Travel\Travel_Update.cpp" />
+    <ClCompile Include="Sim_Update\Check_Detector.cpp" />
+    <ClCompile Include="Sim_Update\Signal_Timing.cpp" />
+    <ClCompile Include="Sim_Update\Sim_Control_Update.cpp" />
+    <ClCompile Include="Sim_Update\Sim_Network_Update.cpp" />
+    <ClCompile Include="Sim_Update\Sim_Transit_Update.cpp" />
+    <ClCompile Include="Sim_Update\Sim_Update_Data.cpp" />
+    <ClCompile Include="Sim_Update\Sim_Update_Step.cpp" />
+    <ClCompile Include="Sim_Update\Traffic_Control.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\File_Data_Service\File_Data_Service.vcxproj">

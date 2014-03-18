@@ -223,6 +223,7 @@ void Link_Delay_Output::Summarize (Travel_Step &step)
 		step.veh_type_ptr = &sim->veh_type_array [step.sim_travel_ptr->sim_plan_ptr->Veh_Type ()];
 	}
 	weight = 1.0;
+
 	if (file->Flow_Units () != VEHICLES || !veh_types.empty ()) {
 		if (!veh_types.empty ()) {
 			if (!veh_types.In_Range (step.veh_type_ptr->Type ())) return;
@@ -232,6 +233,8 @@ void Link_Delay_Output::Summarize (Travel_Step &step)
 		} else if (file->Flow_Units () == PCE) {
 			if (step.veh_type_ptr > 0) {
 				weight = UnRound (step.veh_type_ptr->PCE ());
+			} else {
+				weight = 1;
 			}
 		}
 	}

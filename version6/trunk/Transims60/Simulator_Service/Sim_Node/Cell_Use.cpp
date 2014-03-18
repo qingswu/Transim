@@ -167,72 +167,72 @@ bool Sim_Node_Process::Cell_Use (Travel_Step &step)
 	}
 	Dtime max_time = sim->time_step + sim->param.max_wait_time;
 
-	if (sim->use_update_time < max_time) {
-		int i, index, num;
-		Lane_Use_Data *use_ptr;
-		Lane_Use_Period *period_ptr;
-		Link_Dir_Data *use_index;
+	//if (sim->use_update_time < max_time) {
+	//	int i, index, num;
+	//	Lane_Use_Data *use_ptr;
+	//	Lane_Use_Period *period_ptr;
+	//	Link_Dir_Data *use_index;
 
-		Use_Type use = step.veh_type_ptr->Use ();
-		int veh_type = step.sim_travel_ptr->sim_plan_ptr->Veh_Type ();
-		int type = step.sim_travel_ptr->sim_plan_ptr->Type ();
+	//	Use_Type use = step.veh_type_ptr->Use ();
+	//	int veh_type = step.sim_travel_ptr->sim_plan_ptr->Veh_Type ();
+	//	int type = step.sim_travel_ptr->sim_plan_ptr->Type ();
 
-		Dir_Data *dir_ptr = &sim->dir_array [sim_veh_ptr->link];
+	//	Dir_Data *dir_ptr = &sim->dir_array [sim_veh_ptr->link];
 
-		index = dir_ptr->First_Lane_Use ();
-		if (index < 0) goto use_error;
+	//	index = dir_ptr->First_Lane_Use ();
+	//	if (index < 0) goto use_error;
 
-		for (period_ptr = &sim->use_period_array [index]; ; period_ptr = &sim->use_period_array [++index]) {
-			if (period_ptr->Start () >= sim->use_update_time && period_ptr->Start () <= max_time) break;
-			if (period_ptr->Periods () == 0) goto use_error;
-		}
-		num = period_ptr->Records ();
-		index = period_ptr->Index ();
+	//	for (period_ptr = &sim->use_period_array [index]; ; period_ptr = &sim->use_period_array [++index]) {
+	//		if (period_ptr->Start () >= sim->use_update_time && period_ptr->Start () <= max_time) break;
+	//		if (period_ptr->Periods () == 0) goto use_error;
+	//	}
+	//	num = period_ptr->Records ();
+	//	index = period_ptr->Index ();
 
-		for (i=0; i < num; i++, index++) {
-			use_index = &sim->use_period_index [index];
-			use_ptr = &sim->lane_use_array [use_index->Link ()];
+	//	for (i=0; i < num; i++, index++) {
+	//		use_index = &sim->use_period_index [index];
+	//		use_ptr = &sim->lane_use_array [use_index->Link ()];
 
-			if (use_ptr->Offset () > 0 || use_ptr->Length () > 0) {
-				if (use_ptr->Offset () > offset || offset > (use_ptr->Offset () + use_ptr->Length ())) continue;
-			}
-			if (use_ptr->Type () == PROHIBIT) {
-				if (!Use_Permission (use_ptr->Use (), use)) {
-					if (veh_type >= 0 && use_ptr->Min_Veh_Type () >= 0) {
-						if (veh_type < use_ptr->Min_Veh_Type () || veh_type > use_ptr->Max_Veh_Type ()) {
-							if (type > 0 && use_ptr->Min_Traveler () > 0) {
-								if (type < use_ptr->Min_Traveler () || type > use_ptr->Max_Traveler ()) return (true);
-							} else {
-								return (true);
-							}
-						}
-					} else if (type > 0 && use_ptr->Min_Traveler () > 0) {
-						if (type < use_ptr->Min_Traveler () || type > use_ptr->Max_Traveler ()) return (true);
-					} else {
-						return (true);
-					}
-				}
-			} else {
-				if (Use_Permission (use_ptr->Use (), use)) {
-					if (veh_type >= 0 && use_ptr->Min_Veh_Type () >= 0) {
-						if (veh_type >= use_ptr->Min_Veh_Type () && veh_type <= use_ptr->Max_Veh_Type ()) {
-							if (type > 0 && use_ptr->Min_Traveler () > 0) {
-								if (type >= use_ptr->Min_Traveler () && type <= use_ptr->Max_Traveler ()) return (true);
-							} else {
-								return (true);
-							}
-						}
-					} else if (type > 0 && use_ptr->Min_Traveler () > 0) {
-						if (type >= use_ptr->Min_Traveler () && type <= use_ptr->Max_Traveler ()) return (true);
-					} else {
-						return (true);
-					}
-				}
-			}
-		}
-	}
-use_error:
-	step.Problem (USE_PROBLEM);
-	step.Status (1);
+	//		if (use_ptr->Offset () > 0 || use_ptr->Length () > 0) {
+	//			if (use_ptr->Offset () > offset || offset > (use_ptr->Offset () + use_ptr->Length ())) continue;
+	//		}
+	//		if (use_ptr->Type () == PROHIBIT) {
+	//			if (!Use_Permission (use_ptr->Use (), use)) {
+	//				if (veh_type >= 0 && use_ptr->Min_Veh_Type () >= 0) {
+	//					if (veh_type < use_ptr->Min_Veh_Type () || veh_type > use_ptr->Max_Veh_Type ()) {
+	//						if (type > 0 && use_ptr->Min_Traveler () > 0) {
+	//							if (type < use_ptr->Min_Traveler () || type > use_ptr->Max_Traveler ()) return (true);
+	//						} else {
+	//							return (true);
+	//						}
+	//					}
+	//				} else if (type > 0 && use_ptr->Min_Traveler () > 0) {
+	//					if (type < use_ptr->Min_Traveler () || type > use_ptr->Max_Traveler ()) return (true);
+	//				} else {
+	//					return (true);
+	//				}
+	//			}
+	//		} else {
+	//			if (Use_Permission (use_ptr->Use (), use)) {
+	//				if (veh_type >= 0 && use_ptr->Min_Veh_Type () >= 0) {
+	//					if (veh_type >= use_ptr->Min_Veh_Type () && veh_type <= use_ptr->Max_Veh_Type ()) {
+	//						if (type > 0 && use_ptr->Min_Traveler () > 0) {
+	//							if (type >= use_ptr->Min_Traveler () && type <= use_ptr->Max_Traveler ()) return (true);
+	//						} else {
+	//							return (true);
+	//						}
+	//					}
+	//				} else if (type > 0 && use_ptr->Min_Traveler () > 0) {
+	//					if (type >= use_ptr->Min_Traveler () && type <= use_ptr->Max_Traveler ()) return (true);
+	//				} else {
+	//					return (true);
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+//use_error:
+//	step.Problem (USE_PROBLEM);
+//	step.Status (1);
 	return (false);
 }
