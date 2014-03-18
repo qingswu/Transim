@@ -91,7 +91,7 @@ bool Db_Header::Open (string filename)
 
 	filename = Filename ();
 
-	if (!filename.empty () && File_Access () != CREATE) {
+	if (!filename.empty () && File_Access () != CREATE && File_Format () != UNFORMATED) {
 		stat = Read_Def_Header ();
 	} else {
 		stat = false;
@@ -100,7 +100,7 @@ bool Db_Header::Open (string filename)
 	//---- open the file ----
 
 	if (Db_File::Open ()) {
-		if (File_Access () != CREATE) {
+		if (File_Access () != CREATE && File_Format () != UNFORMATED) {
 
 			//---- process the header ----
 

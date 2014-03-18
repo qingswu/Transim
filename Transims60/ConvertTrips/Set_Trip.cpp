@@ -356,6 +356,7 @@ retry:
 
 		if (skim_ptr != 0) {
 			period = skim_file->Period (time);
+
 			if (period >= 0) {
 				skim = skim_ptr [period];
 			}

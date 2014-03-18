@@ -56,7 +56,7 @@ int Data_Service::Put_Route_Nodes_Data (Route_Nodes_File &file, Route_Header &da
 
 		fh << "LINE NAME=\"" << data.Name () << "\"," << endl;
 		fh << "     OWNER=\"" << data.Notes () << "\"," << endl;
-		fh << "     ONEWAY=" << ((data.Oneway () == 1) ? "T" : "F") << ", MODE=" << data.Mode ();
+		fh << "     ONEWAY=" << ((data.Oneway () == 2) ? "F" : "T") << ", MODE=" << data.Mode ();
 
 		for (i=1, period_itr = data.periods.begin (); period_itr != data.periods.end (); period_itr++, i++) {
 			if (i==1 && period_itr->TTime () > 0) {

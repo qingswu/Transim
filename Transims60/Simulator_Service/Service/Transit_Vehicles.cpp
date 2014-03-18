@@ -77,6 +77,7 @@ void Simulator_Service::Transit_Vehicles (void)
 
 	sim_travel_array.reserve (line_array.Num_Runs () + num_travelers);
 	sim_veh_array.reserve (2 * num_travelers + cells);
+	//run_update_time = MAX_INTEGER;
 
 	//---- create a traveler for each transit run ----
 
@@ -94,6 +95,9 @@ void Simulator_Service::Transit_Vehicles (void)
 		//---- create the transit vehicles ----
 
 		for (i=0, run_itr = stop_itr->begin (); run_itr != stop_itr->end (); run_itr++, i++) {
+			//if (i == 0 && run_itr->Schedule () < run_update_time) {
+			//	run_update_time = run_itr->Schedule ();
+			//}
 
 			//---- create the traveler ----
 

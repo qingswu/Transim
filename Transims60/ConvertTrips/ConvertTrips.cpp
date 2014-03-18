@@ -11,7 +11,7 @@
 ConvertTrips::ConvertTrips (void) : Data_Service (), Select_Service ()
 {
 	Program ("ConvertTrips");
-	Version (4);
+	Version (5);
 	Title ("Trip Table Conversion Utility");
 
 	System_File_Type required_files [] = {
@@ -108,7 +108,6 @@ ConvertTrips::ConvertTrips (void) : Data_Service (), Select_Service ()
 
 	trip_copy = hhold_copy = veh_copy = 0;
 	max_hh_in = max_veh_in = 0;
-
 
 	midnight = Dtime (MIDNIGHT, SECONDS);
 	minute.Minutes (1);

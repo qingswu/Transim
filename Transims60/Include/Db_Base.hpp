@@ -37,9 +37,9 @@ public:
 	void Initialize (Access_Type access, string format);
 	void Initialize (Access_Type access = READ, Format_Type format = DEFAULT_FORMAT);
 
-	Format_Type Dbase_Format (void)                  { return (format_type); }
-	void  Dbase_Format (Format_Type type);
-	void  Dbase_Format (string text);
+	virtual Format_Type Dbase_Format (void)          { return (format_type); }
+	virtual void  Dbase_Format (Format_Type type);
+	virtual void  Dbase_Format (string text);
 
 	int   Add_Field (const char *name, Field_Type type, double size = 0, Units_Type units = NO_UNITS, bool binary = false, Nest_Type nest = NO_NEST, int offset = END_OF_RECORD);
 	int   Add_Field (string name, Field_Type type, double size = 0, Units_Type units = NO_UNITS, bool binary = false, Nest_Type nest = NO_NEST, int offset = END_OF_RECORD)

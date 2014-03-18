@@ -143,8 +143,8 @@ void ConvertTrips::Read_Trip_Table (ConvertTrip_Itr group)
 		//---- get the travel time ----
 
 		if (skim_flag) {
-			o = skim_file->Add_Org (ext_org);
-			d = skim_file->Add_Des (ext_des);
+			o = skim_file->Org_Index (ext_org);
+			d = skim_file->Des_Index (ext_des);
 
 			if (o >= 0 && d >= 0) {
 				skim_ptr = skim_file->Time_Skim (o, d);

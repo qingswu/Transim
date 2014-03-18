@@ -96,7 +96,7 @@ void RoutePrep::Write_Route (Db_File *file, Route_Data &data)
 
 	fh << "LINE NAME=\"" << data.name << "\"," << endl;
 	fh << "     OWNER=\"" << data.notes << "\"," << endl;
-	fh << "     ONEWAY=" << ((data.oneway) ? "T" : "F") << ", MODE=" << data.mode;
+	fh << "     ONEWAY=" << ((data.oneway) ? "F" : "F") << ", MODE=" << data.mode;
 
 	if (!speed_flag && data.ttime > 0) {
 		fh << ", RUNTIME=" << data.ttime.Minutes ();

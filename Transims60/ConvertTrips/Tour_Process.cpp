@@ -91,8 +91,8 @@ void ConvertTrips::Tour_Processing (void)
 					mode = map_itr->second.Mode ();
 
 					if (skim_flag) {
-						o = skim_file->Add_Org (org);
-						d = skim_file->Add_Des (des);
+						o = skim_file->Org_Index (org);
+						d = skim_file->Des_Index (des);
 
 						if (o >= 0 && d >= 0) {
 							skim_ptr = skim_file->Time_Skim (o, d);

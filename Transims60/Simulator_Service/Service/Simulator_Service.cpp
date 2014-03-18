@@ -17,8 +17,8 @@ Simulator_Service::Simulator_Service (void) : Data_Service (), Select_Service ()
 	max_subarea = num_vehicles = 0;
 	num_subareas = num_parts = num_sims = 1;
 	first_part = last_part = -1;
-	use_update_time = turn_update_time = 0;
-	signal_update_time = timing_update_time = run_update_time = 0;
+	//use_update_time = turn_update_time = 0;
+	//signal_update_time = timing_update_time = run_update_time = 0;
 	one_second = Dtime (1, SECONDS);
 	num_travelers = 1000;
 	avg_cell_per_veh = 1.25;
@@ -29,15 +29,6 @@ Simulator_Service::Simulator_Service (void) : Data_Service (), Select_Service ()
 	Enable_Threads (true);
 #endif
 	sim = this;
-
-	//snapshot_output.Add_Keys ();
-	//link_delay_output.Add_Keys ();
-	//performance_output.Add_Keys ();
-	//ridership_output.Add_Keys ();
-	//turn_vol_output.Add_Keys ();
-	//occupancy_output.Add_Keys ();
-	//event_output.Add_Keys ();
-	//traveler_output.Add_Keys ();
 }
 
 //---------------------------------------------------------
@@ -134,36 +125,3 @@ bool Simulator_Service::Get_Node_Data (Node_File &file, Node_Data &node_rec)
 	}
 	return (false);
 }
-//
-////---------------------------------------------------------
-////	Check_Output
-////---------------------------------------------------------
-//
-//void Simulator_Service::Check_Output (Travel_Step &step)
-//{
-//	if (step.Traveler () < 0) return;
-//
-//	//---- link delay processing ----
-//
-//	if (link_delay_output.Output_Flag ()) {
-//		link_delay_output.Summarize (step);
-//	}
-//
-//	//----- performance processing -----
-//
-//	if (performance_output.Output_Flag ()) {
-//		performance_output.Summarize (step);
-//	}
-//
-//	//----- turn volume processing -----
-//
-//	if (turn_vol_output.Output_Flag ()) {
-//		turn_vol_output.Summarize (step);
-//	}
-//
-//	//----- occupancy processing -----
-//
-//	if (occupancy_output.Output_Flag ()) {
-//		occupancy_output.Summarize (step);
-//	}
-//}

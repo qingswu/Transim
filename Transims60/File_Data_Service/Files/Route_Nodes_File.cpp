@@ -64,6 +64,29 @@ void Route_Nodes_File::Setup (void)
 }
 
 //---------------------------------------------------------
+//	Dbase_Format
+//---------------------------------------------------------
+
+void Route_Nodes_File::Dbase_Format (string text)
+{
+	Format_Type file_format, model_format;
+
+	Data_Format (text, file_format, model_format);
+
+	Model_Format (model_format);
+
+	if (Model_Format () == TPPLUS) {
+		Header_Lines (0);
+		Dbase_Format (UNFORMATED);
+		Nest (NO_NEST);
+	} else {
+		Nest (NESTED);
+		Header_Lines (2);
+		Dbase_Format (file_format);
+	}
+}
+
+//---------------------------------------------------------
 //	Create_Fields
 //---------------------------------------------------------
 

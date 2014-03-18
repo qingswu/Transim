@@ -48,7 +48,7 @@ Sim_Travel_Ptr Sim_Plan_Process::Plan_Processing (Plan_Data *plan_ptr)
 	//	if (map2_itr != sim->hhold_type.end ()) {
 	//		plan_ptr->Type (map2_itr->second);
 	//	}
-	//}travel
+	//}
 	if (sim->select_travelers && !sim->traveler_range.In_Range (plan_ptr->Type ())) goto skip;
 	if (sim->select_vehicles && plan_ptr->Vehicle () > 0) {
 		if (!sim->vehicle_range.In_Range (plan_ptr->Veh_Type ())) goto skip;

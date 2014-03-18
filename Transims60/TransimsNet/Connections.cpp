@@ -156,7 +156,7 @@ void TransimsNet::Connections (void)
 			for (index=0, map_itr = bear_map.begin (); map_itr != bear_map.end (); map_itr++, index++) {
 				change = map_itr->first;
 
-				if (num_in == num_out) {
+				if (num_in == 1 && num_out == 1) {
 					thru = index;
 					best_diff = change;
 					to_ptr = &dir_array [map_itr->second];

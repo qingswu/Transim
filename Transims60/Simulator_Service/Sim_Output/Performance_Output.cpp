@@ -166,7 +166,7 @@ bool Performance_Output::Output_Check (void)
 
 	if (!time_range.In_Range (sim->time_step)) return (false);
 
-	if (data_flag) {
+	if (!data_flag) {
 
 		//---- initialize the link data ----
 
@@ -221,16 +221,22 @@ void Performance_Output::Summarize (Travel_Step &step)
 {
 	if (step.Traveler () < 0 || !time_range.In_Range (sim->time_step)) return;
 
-	int dir_index, turn_index, cell, cells, occupancy;
+	int dir_index, turn_index, cell, cells, offset, occupancy;
 	double weight, vmt;
 	Dtime vht;
 	bool skip;
 
 	Sim_Veh_Itr sim_veh_itr;
+	Sim_Plan_Ptr plan_ptr;
 	Sim_Leg_Itr leg_itr;
+	Flow_Time_Data *turn_time_ptr;
+	Link_Perf_Data *link_perf_ptr;
 
 	//---- get the vehicle type data ----
 
+	if (step.veh_type_ptr == 0) {
+		step.veh_type_ptr = &sim->veh_type_array [step.sim_travel_ptr->sim_plan_ptr->Veh_Type ()];
+	}
 	weight = 1.0;
 
 	if (file->Flow_Units () != VEHICLES || !veh_types.empty ()) {
@@ -238,10 +244,10 @@ void Performance_Output::Summarize (Travel_Step &step)
 			if (!veh_types.In_Range (step.veh_type_ptr->Type ())) return;
 		}
 		if (file->Flow_Units () == PERSONS) {
-			weight = step.sim_travel_ptr->Passengers ();
+			weight += step.sim_travel_ptr->Passengers ();
 		} else if (file->Flow_Units () == PCE) {
 			if (step.veh_type_ptr > 0) {
-				weight = step.veh_type_ptr->PCE ();
+				weight = UnRound (step.veh_type_ptr->PCE ());
 			} else {
 				weight = 1;
 			}
@@ -253,33 +259,53 @@ void Performance_Output::Summarize (Travel_Step &step)
 	turn_index = -1;
 						
 	if (turn_flag) {
-		Sim_Plan_Ptr plan_ptr = step.sim_travel_ptr->sim_plan_ptr;
+		plan_ptr = step.sim_travel_ptr->sim_plan_ptr;
 		if (plan_ptr != 0) {
 			leg_itr = plan_ptr->begin ();
 			if (leg_itr != plan_ptr->end ()) {
 				turn_index = leg_itr->Connect ();
 			}
 		}
+	} else {
+		plan_ptr = 0;
 	}
+
+	//---- movement size ----
+
+	if (step.Time () == 0) {
+		step.Time (sim->param.step_size);
+	}
+	vht = step.Time () * weight;
+	cells = (int) step.size ();
+	if (cells > 1) vht = vht / (cells - 1);
 
 	//---- process each movement cell ----
 	
-	cells = (int) step.size ();
-	vmt = 0;
 	dir_index = -1;
+	offset = 0;
+	skip = false;
+	link_perf_ptr = 0;
+	turn_time_ptr = 0;
 
-	for (cell=0, sim_veh_itr = step.begin (); cell <= cells; sim_veh_itr++, cell++) {
-		if (cell == cells || sim_veh_itr->link != dir_index) {
-			vht = DTOI (sim->param.step_size * weight);
+	for (cell=0, sim_veh_itr = step.begin (); sim_veh_itr != step.end (); sim_veh_itr++, cell++) {
 
-			if (cells == 0) {
-				dir_index = step.Dir_Index ();
+		if (sim_veh_itr->link != dir_index) {
+			if (cell == 0) {
+				offset = sim_veh_itr->offset;
 			} else {
-				vht = DTOI (vmt * vht / cells);
-				if (vht < 1) vht = 1;
+				offset = 0;
+				if (turn_flag) {
+					if (++leg_itr != plan_ptr->end ()) {
+						turn_index = leg_itr->Connect ();
+					} else {
+						turn_index = -1;
+					}
+				}
 			}
+			dir_index = sim_veh_itr->link;
+			skip = true;
+
 			if (dir_index >= 0) {
-				vmt *= sim->param.cell_size;
 				skip = false;
 
 				if (!link_range.empty () || coord_flag) {
@@ -307,39 +333,35 @@ void Performance_Output::Summarize (Travel_Step &step)
 				}
 				if (!skip && !subarea_range.empty ()) {
 					Sim_Dir_Ptr sim_dir_ptr = &sim->sim_dir_array [dir_index];
-	
+
 					if (!subarea_range.In_Range (sim_dir_ptr->Subarea ())) skip = true;
 				}
 				if (!skip) {
-					Link_Perf_Data *link_perf_ptr = &link_perf [dir_index];
+					link_perf_ptr = &link_perf [dir_index];
 
-					occupancy = Round (weight);
-
-					link_perf_ptr->Add_Flow (vmt);
-					link_perf_ptr->Add_Time (vht);
-					link_perf_ptr->Add_Occupant (occupancy);
-
-					if (step.Speed () == 0) {
-						link_perf_ptr->Add_Stop (occupancy);
-					}
 					if (turn_flag && turn_index >= 0) {
-						Flow_Time_Data *flow_time_ptr = &turn_perf [turn_index];
-
-						flow_time_ptr->Add_Flow (vmt);
-						flow_time_ptr->Add_Time (vht);
+						turn_time_ptr = &turn_perf [turn_index];
 					}
 				}
 			}
-			if (cell == cells) break;
-			dir_index = sim_veh_itr->link;
-			vmt = 1.0;
+		}
+		if (!skip && cell > 0) {
+			vmt = (sim_veh_itr->offset - offset) * weight;
 
-			if (turn_flag && turn_index >= 0) {
-				turn_index = leg_itr->Connect ();
-				leg_itr++;
+			occupancy = Round (weight);
+
+			link_perf_ptr->Add_Flow (vmt);
+			link_perf_ptr->Add_Time (vht);
+			link_perf_ptr->Add_Occupant (occupancy);
+
+			if (step.Speed () == 0) {
+				link_perf_ptr->Add_Stop (occupancy);
 			}
-		} else {
-			vmt += 1.0;
+			if (turn_flag && turn_index >= 0) {
+				turn_time_ptr->Add_Flow (vmt);
+				turn_time_ptr->Add_Time (vht);
+			}
+			offset = sim_veh_itr->offset;
 		}
 	}
 }

@@ -9,7 +9,6 @@
 #include "Data_Range.hpp"
 #include "Performance_File.hpp"
 #include "Performance_Data.hpp"
-#include "Travel_Step.hpp"
 #include "Data_Buffer.hpp"
 
 //---------------------------------------------------------
@@ -28,7 +27,6 @@ public:
 private:
 
 	Performance_File  *file;
-	Time_Periods  time_range;
 	Data_Range  link_range;
 	Data_Range  subarea_range;
 	Data_Range  veh_types;

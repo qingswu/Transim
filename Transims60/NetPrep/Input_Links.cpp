@@ -44,6 +44,22 @@ void NetPrep::Input_Links (void)
 	} else {
 		file = &link_file;
 	}
+
+	//---- set default units ----
+
+	if (file->Model_Format () == TPPLUS) {
+		file->Set_Units (file->Field_Number ("DISTANCE"), ((units_flag) ? KILOMETERS : MILES));
+		file->Set_Units (file->Field_Number ("SPEED"), ((units_flag) ? KPH : MPH));
+	} else {
+		file->Set_Units (file->Field_Number ("LENGTH"), ((units_flag) ? METERS : FEET));
+		file->Set_Units (file->Field_Number ("SETBACK_A"), ((units_flag) ? METERS : FEET));
+		file->Set_Units (file->Field_Number ("SETBACK_B"), ((units_flag) ? METERS : FEET));
+
+		file->Set_Units (file->Field_Number ("SPEED_AB"), ((units_flag) ? KPH : MPH));
+		file->Set_Units (file->Field_Number ("FSPD_AB"), ((units_flag) ? KPH : MPH));
+		file->Set_Units (file->Field_Number ("SPEED_BA"), ((units_flag) ? KPH : MPH));
+		file->Set_Units (file->Field_Number ("FSPD_BA"), ((units_flag) ? KPH : MPH));
+	}
 	num_approach = num_use = 0;
 	min_spd = Round (1);
 
@@ -465,9 +481,8 @@ void NetPrep::Input_Links (void)
 						dir_rec.Capacity (cap_map [index % 10] [index / 10] [lanes] * lanes);
 					}
 				} else {
-					spd = Round (Internal_Units (new_file->Fspd_AB (), ((units_flag) ? KPH : MPH)));
-					speed = Internal_Units (new_file->Speed_AB (), ((units_flag) ? KPH : MPH));
-
+					spd = Round (new_file->Fspd_AB ());
+					speed = new_file->Speed_AB ();
 					dir_rec.Speed (Round (speed));
 					dir_rec.Capacity (new_file->Cap_AB ());
 				}
@@ -551,9 +566,8 @@ void NetPrep::Input_Links (void)
 						dir_rec.Capacity (cap_map [index % 10] [index / 10] [lanes] * lanes);
 					}
 				} else {
-					spd = Round (Internal_Units (new_file->Fspd_BA (), ((units_flag) ? KPH : MPH)));
-					speed = Internal_Units (new_file->Speed_BA (), ((units_flag) ? KPH : MPH));
-
+					spd = Round (new_file->Fspd_BA ());
+					speed = new_file->Speed_BA ();
 					dir_rec.Speed (Round (speed));
 					dir_rec.Capacity (new_file->Cap_AB ());
 				}
@@ -717,9 +731,8 @@ void NetPrep::Input_Links (void)
 					dir_rec.Capacity (cap_map [index % 10] [index / 10] [lanes] * lanes);
 				}
 			} else {
-				spd = Round (Internal_Units (new_file->Fspd_AB (), ((units_flag) ? KPH : MPH)));
-				speed = Internal_Units (new_file->Speed_AB (), ((units_flag) ? KPH : MPH));
-
+				spd = Round (new_file->Fspd_AB ());
+				speed = new_file->Speed_AB ();
 				dir_rec.Speed (Round (speed));
 				dir_rec.Capacity (new_file->Cap_AB ());
 			}
