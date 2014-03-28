@@ -39,7 +39,7 @@ int Data_Service::Put_Route_Nodes_Data (Route_Nodes_File &file, Route_Header &da
 	if (file.Model_Format () == TPPLUS) {
 		int rec, count, i, node, last_node;
 		double speed;
-		bool n_flag, node_flag, skip;
+		bool n_flag, node_flag, skip, first;
 	
 		Route_Node_Itr node_itr;
 		Route_Period_Itr period_itr;
@@ -58,9 +58,14 @@ int Data_Service::Put_Route_Nodes_Data (Route_Nodes_File &file, Route_Header &da
 		fh << "     OWNER=\"" << data.Notes () << "\"," << endl;
 		fh << "     ONEWAY=" << ((data.Oneway () == 2) ? "F" : "T") << ", MODE=" << data.Mode ();
 
+		first = true;
+
 		for (i=1, period_itr = data.periods.begin (); period_itr != data.periods.end (); period_itr++, i++) {
-			if (i==1 && period_itr->TTime () > 0) {
-				fh << ", RUNTIME=" << period_itr->TTime ().Minutes ();
+			if (period_itr->Headway () > 0 && first) {
+				first = false;
+				if (period_itr->TTime () > 0) {
+					fh << ", RUNTIME=" << period_itr->TTime ().Minutes ();
+				}
 			}
 			if (period_itr->Headway () > 0 && i <= 5) {
 				fh << ", FREQ[" << i << "]=" << period_itr->Headway ().Minutes ();

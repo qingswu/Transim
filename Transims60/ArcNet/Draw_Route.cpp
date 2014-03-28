@@ -14,6 +14,7 @@ void ArcNet::Draw_Route (void)
 	int route_field, stops_field, mode_field, type_field, name_field, notes_field;
 	double offset, length, stop_off, link_len, side, side_offset;
 	bool offset_flag;
+	Dtime time;
 
 	Db_Base *file;
 	
@@ -34,8 +35,8 @@ void ArcNet::Draw_Route (void)
 	Int_Map_Itr map_itr;
 	Points_Itr pt_itr;
 	Point_Map_Itr stop_pt_itr;
-	Line_Stop_Itr stop_itr;
-	Line_Run_Itr run_itr;
+	Line_Stop_Itr stop_itr, stop2_itr;
+	Line_Run_Itr run_itr, run2_itr;
 	Stop_Data *stop_ptr;
 	Veh_Type_Data *veh_type_ptr;
 
@@ -75,21 +76,32 @@ void ArcNet::Draw_Route (void)
 		arcview_route.Put_Field (type_field, veh_type_ptr->Type ());
 
 		stop_itr = line_itr->begin ();
+		stop2_itr = --line_itr->end ();
 
 		arcview_route.Put_Field ("NUM_RUNS", (int) stop_itr->size ());
 
 		//---- save the number of runs in each period ----
 
 		if (schedule_flag) {
-			for (i=0; i < sched_breaks.Num_Ranges (); i++) {
+			for (i=j=0; i < sched_breaks.Num_Ranges (); i++, j++) {
 				runs = 0;
+				time = 0;
 
-				for (run_itr = stop_itr->begin (); run_itr != stop_itr->end (); run_itr++) {
+				run_itr = stop_itr->begin ();
+				run2_itr = stop2_itr->begin ();
+
+				for (; run_itr != stop_itr->end (); run_itr++, run2_itr++) {
 					if (sched_breaks.In_Index (run_itr->Schedule ()) == i) {
 						runs++;
+						time = time + (run2_itr->Schedule () - run_itr->Schedule ());
 					}
 				}
-				arcview_route.Put_Field (run_field + i, runs);
+				arcview_route.Put_Field (run_field + j++, runs);
+
+				if (runs > 0) {
+					time = time / runs;
+				}
+				arcview_route.Put_Field (run_field + j, time.Round_Seconds ());
 			}
 		}
 

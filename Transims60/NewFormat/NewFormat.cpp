@@ -11,7 +11,7 @@
 NewFormat::NewFormat (void) : Data_Service (), Select_Service ()
 {
 	Program ("NewFormat");
-	Version (6);
+	Version (7);
 	Title ("Convert Data Files to Version 5.0 Format");
 
 	String v4_range ("[project_directory]Version_4_filename");
@@ -82,7 +82,8 @@ NewFormat::NewFormat (void) : Data_Service (), Select_Service ()
 #ifdef THREADS
 	Enable_Threads (true);
 #endif
-	toll_flag = activity_flag = person_flag = vehicle_flag = plan_flag = route_flag = new_route_flag = copy_flag = false;
+	toll_flag = activity_flag = person_flag = vehicle_flag = route_flag = new_route_flag = copy_flag = false;
+	plan_flag = new_plan_flag = new_trip_flag = false;
 
 	num_new_trip = max_trip_part = num_new_skim = max_skim_part = num_new_act = route_periods = 0;
 	scale = 100;

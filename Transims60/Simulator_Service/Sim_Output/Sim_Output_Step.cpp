@@ -293,28 +293,27 @@ void Sim_Output_Step::Read_Controls (void)
 }
 
 //---------------------------------------------------------
-//	Step_Output
+//	Start_Processing
 //---------------------------------------------------------
 
-bool Sim_Output_Step::Step_Output (void)
+void Sim_Output_Step::Start_Processing (void)
 {
 	if (num_threads > 1) {
-		return (output_barrier.Start ());
+		output_barrier.Start ();
 	} else {
 		Output_Itr itr;
 
 		for (itr = output_array.begin (); itr != output_array.end (); itr++) {
 			(*itr)->Output_Check ();
 		}
-		return (true);
 	}
 }
 
 //---------------------------------------------------------
-//	End_Output
+//	Stop_Processing
 //---------------------------------------------------------
 
-void Sim_Output_Step::End_Output (void)
+void Sim_Output_Step::Stop_Processing (void)
 {
 #ifdef THREADS
 	if (num_threads > 1) {

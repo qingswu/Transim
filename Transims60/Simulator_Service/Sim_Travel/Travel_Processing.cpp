@@ -77,23 +77,30 @@ bool Sim_Travel_Process::Travel_Processing (Sim_Travel_Ptr sim_travel_ptr)
 				//	sim->event_output.Output_Event (event_data);
 				//}
 			}
+
 		} else { 
 
 			if (sim_travel_ptr->Status () == -2) {
 				leg_itr = sim_plan_ptr->begin ();
 
 				if (leg_itr != sim_plan_ptr->end ()) {
-					sim_veh.Location (leg_itr->Index (), 0, 0);
-					step.assign (1, sim_veh);
+					if (leg_itr->Type () == STOP_ID) {
+exe->Write (1, " stop");
+					} else if (leg_itr->Type () == PARKING_ID) {
+exe->Write (1, " parking");
+					} else {
+						sim_veh.Location (leg_itr->Index (), 0, 0);
+						step.assign (1, sim_veh);
 
-					step.sim_dir_ptr = &sim->sim_dir_array [leg_itr->Index ()];
+						step.sim_dir_ptr = &sim->sim_dir_array [leg_itr->Index ()];
 
-					sim_veh.offset = step.sim_dir_ptr->Length ();
-					step.push_back (sim_veh);
+						sim_veh.offset = step.sim_dir_ptr->Length ();
+						step.push_back (sim_veh);
 
-					step.Time (leg_itr->Time ());
+						step.Time (leg_itr->Time ());
 
-					sim->sim_output_step.Check_Output (step);
+						sim->sim_output_step.Check_Output (step);
+					}
 				}
 			}
 			sim_plan_ptr->Next_Leg ();

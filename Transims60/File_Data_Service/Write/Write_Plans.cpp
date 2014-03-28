@@ -33,6 +33,7 @@ void Data_Service::Write_Plans (void)
 		num_part = 1;
 		Show_Message (String ("Writing %s -- Record") % file->File_Type ());
 	}
+	Set_Progress ();
 
 	//---- process plan records in sort order  ----
 

@@ -37,7 +37,7 @@ void ArcRider::Sum_Riders (void)
 
 		if (select_modes && !select_mode [line_ptr->Mode ()]) continue;
 
-		if (line_equiv.Max_Group () > 0) {
+		if (Line_Equiv_Flag ()) {
 			Int_Set *group;
 			Int_Set_Itr itr;
 			flag = false;

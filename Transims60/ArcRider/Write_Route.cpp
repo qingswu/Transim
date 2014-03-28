@@ -12,9 +12,10 @@ void ArcRider::Write_Route (void)
 {
 	int dir, j, riders, max_load, board, alight, run, runs, overlap;
 	int route_field, name_field, mode_field, stops_field, runs_field, riders_field, notes_field;
-	int load_field, board_field, alight_field;
+	int load_field, board_field, alight_field, min_time_field, max_time_field;
 	double length, side, side_offset;
 	bool offset_flag, first;
+	Dtime min_time, max_time, time;
 
 	Int_Map_Itr map_itr;
 	Link_Data *link_ptr;
@@ -24,8 +25,9 @@ void ArcRider::Write_Route (void)
 	Driver_Itr driver_itr;
 	Points_Itr pt_itr;
 	Integers run_flag;
-	Line_Stop_Itr stop_itr;
-	Line_Run_Itr run_itr;
+	Dtimes run_time;
+	Line_Stop_Itr stop_itr, stop2_itr;
+	Line_Run_Itr run_itr, run2_itr;
 
 	side = 0;
 	offset_flag = (route_offset != 0.0);
@@ -39,6 +41,8 @@ void ArcRider::Write_Route (void)
 	load_field = arcview_line.Field_Number ("MAX_LOAD");
 	board_field = arcview_line.Field_Number ("MAX_BOARD");
 	alight_field = arcview_line.Field_Number ("MAX_ALIGHT");
+	min_time_field = arcview_line.Field_Number ("MIN_TIME");
+	max_time_field = arcview_line.Field_Number ("MAX_TIME");
 	notes_field = arcview_line.Field_Number ("NOTES");
 
 	Show_Message (String ("Writing %s -- Record") % arcview_line.File_Type ());
@@ -117,9 +121,25 @@ void ArcRider::Write_Route (void)
 			}
 		}
 
+		//---- set the run time ----
+
+		run_time.assign (line_array.Max_Runs (), 0);
+
+		stop_itr = line_ptr->begin ();
+		stop2_itr = --line_ptr->end ();
+
+		run_itr = stop_itr->begin ();
+		run2_itr = stop2_itr->begin ();
+
+		for (run=0; run_itr != stop_itr->end (); run_itr++, run2_itr++, run++) {
+			run_time [run] = run2_itr->Schedule () - run_itr->Schedule ();
+		}
+
 		//---- save the route ridership data ----
 
 		riders = board = alight = max_load = runs = 0;
+		min_time = MAX_INTEGER;
+		max_time = 0;
 
 		for (stop_itr = line_ptr->begin (); stop_itr != line_ptr->end (); stop_itr++) {
 			for (run=0, run_itr = stop_itr->begin (); run_itr != stop_itr->end (); run_itr++, run++) {
@@ -134,6 +154,9 @@ void ArcRider::Write_Route (void)
 				if (run_flag [run] == 1) {
 					runs++;
 					run_flag [run] = 2;
+
+					if (run_time [run] < min_time) min_time = run_time [run];
+					if (run_time [run] > max_time) max_time = run_time [run];
 				}
 			}
 		}
@@ -150,6 +173,8 @@ void ArcRider::Write_Route (void)
 		arcview_line.Put_Field (load_field, max_load);
 		arcview_line.Put_Field (board_field, board);
 		arcview_line.Put_Field (alight_field, alight);
+		arcview_line.Put_Field (min_time_field, min_time.Round_Seconds ());
+		arcview_line.Put_Field (max_time_field, max_time.Round_Seconds ());
 		arcview_line.Put_Field (notes_field, line_ptr->Notes ());
 				
 		arcview_line.clear ();

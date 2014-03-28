@@ -214,7 +214,7 @@ next_mode:
 			from_type = access_ptr->Type ((from_dir == 0));
 			from_index = access_ptr->ID ((from_dir == 0));
 
-if (!forward_flag) to_dir = (from_dir == 0) ? 1 : 0;
+			if (!forward_flag) to_dir = (from_dir == 0) ? 1 : 0;
 
 			if (from_type == NODE_ID) {
 				from_ptr = &node_path [from_path] [from_index];
@@ -268,14 +268,13 @@ if (!forward_flag) to_dir = (from_dir == 0) ? 1 : 0;
 					} else {
 						in_index = link_ptr->BA_Dir ();
 					}
-
-if (!forward_flag) {
-	if (from_end->End_Type () == PARKING_ID) {
-		Add_Leg (mode, type, index, dir, imped, time, len, cost, path);
-		Add_Leg (OTHER_MODE, PARKING_ID, from_ptr->From (), from_ptr->Dir ());
-		continue;
-	}
-}
+					if (!forward_flag) {
+						if (from_end->End_Type () == PARKING_ID) {
+							Add_Leg (mode, type, index, dir, imped, time, len, cost, path);
+							Add_Leg (OTHER_MODE, PARKING_ID, from_ptr->From (), from_ptr->Dir ());
+							continue;
+						}
+					}
 				} else if (param.walk_detail && (from_type == NODE_ID || from_type == FROM_ID)) {
 					prev_leg = &leg_ptr->back ();
 
@@ -386,7 +385,13 @@ if (!forward_flag) {
 						index = stop_ptr->Link ();
 						dir = from_dir;
 					} else if (mode == TRANSIT_MODE) {
-						Add_Leg (WALK_MODE, type, index);
+						prev_leg = &leg_ptr->back ();
+
+						if (prev_leg->Type () == ROUTE_ID) {
+							Add_Leg (TRANSIT_MODE, type, index);
+						} else {
+							Add_Leg (WALK_MODE, type, index);
+						}
 						prev_imp = imped;
 						prev_time = time;
 						prev_len = len;

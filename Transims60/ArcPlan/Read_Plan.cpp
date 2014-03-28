@@ -11,8 +11,8 @@
 void ArcPlan::Read_Plan (void)
 {
 	Dtime time;
-	int link, dir, index, distance, cost, imped, num_leg, acc, type, prev_stop;
-	int org_field, start_field, des_field, ttime_field, distance_field;	
+	int link, dir, index, distance, cost, imped, num_leg, count, acc, type, prev_stop;
+	int org_field, start_field, des_field, ttime_field, distance_field, num_leg_fld;	
 	int leg_mode_fld, leg_id_fld, leg_time_fld, leg_dist_fld, leg_cost_fld, leg_imp_fld;
 	double offset, length, off, side, near_offset;
 	bool select_flag;
@@ -27,6 +27,7 @@ void ArcPlan::Read_Plan (void)
 	Stop_Data *stop_ptr;
 	Driver_Itr driver_itr;
 	Access_Data *access_ptr;
+	Node_Data *node_ptr;
 
 	XYZ_Point point;
 	Link_Data *link_ptr;
@@ -41,6 +42,7 @@ void ArcPlan::Read_Plan (void)
 	ttime_field = arcview_access.Field_Number ("TTIME");
 	distance_field = arcview_access.Field_Number ("DISTANCE");
 
+	num_leg_fld = arcview_plan.Field_Number ("NUM_LEGS");
 	leg_mode_fld = arcview_plan.Field_Number ("LEG_MODE");
 	leg_id_fld = arcview_plan.Field_Number ("LEG_ID");
 	leg_time_fld = arcview_plan.Field_Number ("LEG_TIME");
@@ -136,11 +138,11 @@ void ArcPlan::Read_Plan (void)
 			//---- process the path legs ----
 
 			time = 0;
-			distance = cost = imped = num_leg = 0;
+			distance = cost = imped = count = prev_stop = 0;
 			offset = length = -1.0;
 			side = 0.0;
 
-			for (leg_itr = prev_itr = plan.begin (); leg_itr != plan.end (); prev_itr = leg_itr++) {
+			for (num_leg=0, leg_itr = prev_itr = plan.begin (); leg_itr != plan.end (); prev_itr = leg_itr++, num_leg++) {
 
 				//---- first leg ----
 
@@ -155,53 +157,11 @@ void ArcPlan::Read_Plan (void)
 
 					if (int_itr != location_map.end ()) {
 						location_ptr = &location_array [int_itr->second];
-
-						if (leg_itr->Access_Type ()) {
-
-							//---- find the end of the access link ----
-
-							acc = leg_itr->Access_ID ();
-							dir = leg_itr->Access_Dir ();
-
-							int_itr = access_map.find (acc);
-
-							if (int_itr != access_map.end ()) {
-								access_ptr = &access_array [int_itr->second];
-
-								if (dir == 1) {
-									index = access_ptr->From_ID ();
-									type = access_ptr->From_Type ();
-								} else {
-									index = access_ptr->To_ID ();
-									type = access_ptr->To_Type ();
-								}
-								if (type == LOCATION_ID) {
-									location_ptr = &location_array [index];
-									pt_itr = location_pt.find (location_ptr->Location ());
-									offset = UnRound (location_ptr->Offset ());
-								} else if (type == PARKING_ID) {
-									parking_ptr = &parking_array [index];
-									pt_itr = parking_pt.find (parking_ptr->Parking ());
-									offset = UnRound (parking_ptr->Offset ());
-								} else if (type == STOP_ID) {
-									stop_ptr = &stop_array [index];
-									pt_itr = stop_pt.find (stop_ptr->Stop ());
-									offset = UnRound (stop_ptr->Offset ());
-								} else {
-									continue;
-								}
-								arcview_plan.push_back (pt_itr->second);
-							
-								if (arrow_flag) Add_Arrow (arcview_plan);	
-
-								arcview_plan.Put_Field (leg_mode_fld, WALK_MODE);
-							}
-						} else {
-							offset = UnRound (location_ptr->Offset ());
-						}
+						offset = UnRound (location_ptr->Offset ());
 					}
+				}
 
-				} else if (leg_itr->Type () == LOCATION_ID) {
+				if (leg_itr->Type () == LOCATION_ID) {
 
 					if (prev_itr->Mode () == WALK_MODE && prev_itr->Link_Type ()) {
 						link = prev_itr->Link_ID ();
@@ -292,7 +252,7 @@ void ArcPlan::Read_Plan (void)
 
 								//---- add the parking attributes to the drive leg ----
 
-								num_leg++;
+								count++;
 								time += leg_itr->Time ();
 								distance += leg_itr->Length ();
 								cost += leg_itr->Cost ();
@@ -300,8 +260,9 @@ void ArcPlan::Read_Plan (void)
 
 								//---- write the shape record ----
 
+								arcview_plan.Put_Field (num_leg_fld, num_leg);
 								arcview_plan.Put_Field (leg_mode_fld, DRIVE_MODE);
-								arcview_plan.Put_Field (leg_id_fld, num_leg);
+								arcview_plan.Put_Field (leg_id_fld, count);
 								arcview_plan.Put_Field (leg_time_fld, time);
 								arcview_plan.Put_Field (leg_dist_fld, UnRound (distance));
 								arcview_plan.Put_Field (leg_cost_fld, UnRound (cost));
@@ -313,7 +274,7 @@ void ArcPlan::Read_Plan (void)
 								num_out++;
 								arcview_plan.clear ();
 								time = 0;
-								distance = cost = imped = num_leg = 0;
+								distance = cost = imped = count = 0;
 
 								arcview_plan.push_back (pt_itr->second);
 
@@ -325,6 +286,7 @@ void ArcPlan::Read_Plan (void)
 						continue;
 
 					} else if (prev_itr->Mode () == WALK_MODE && prev_itr->Link_Type ()) {
+
 						link = prev_itr->Link_ID ();
 						dir = prev_itr->Link_Dir ();
 
@@ -364,8 +326,9 @@ void ArcPlan::Read_Plan (void)
 
 								//---- write the shape record ----
 
+								arcview_plan.Put_Field (num_leg_fld, num_leg);
 								arcview_plan.Put_Field (leg_mode_fld, WALK_MODE);
-								arcview_plan.Put_Field (leg_id_fld, num_leg);
+								arcview_plan.Put_Field (leg_id_fld, count);
 								arcview_plan.Put_Field (leg_time_fld, time);
 								arcview_plan.Put_Field (leg_dist_fld, UnRound (distance));
 								arcview_plan.Put_Field (leg_cost_fld, UnRound (cost));
@@ -380,7 +343,7 @@ void ArcPlan::Read_Plan (void)
 
 								arcview_plan.clear ();
 								time = 0;
-								distance = cost = imped = num_leg = 0;
+								distance = cost = imped = count = 0;
 
 								arcview_plan.push_back (pt_itr->second);
 
@@ -388,7 +351,7 @@ void ArcPlan::Read_Plan (void)
 							}
 						}
 
-					} else if (prev_itr->Type () == LOCATION_ID) {
+					} else if (prev_itr->Type () == LOCATION_ID || prev_itr->Access_Type ()) {
 
 						pt_itr = parking_pt.find (leg_itr->ID ());
 						arcview_plan.push_back (pt_itr->second);
@@ -396,9 +359,10 @@ void ArcPlan::Read_Plan (void)
 						if (arrow_flag) Add_Arrow (arcview_plan);	
 
 						//---- write the shape record ----
-
+								
+						arcview_plan.Put_Field (num_leg_fld, num_leg);
 						arcview_plan.Put_Field (leg_mode_fld, WALK_MODE);
-						arcview_plan.Put_Field (leg_id_fld, num_leg);
+						arcview_plan.Put_Field (leg_id_fld, count);
 						arcview_plan.Put_Field (leg_time_fld, time);
 						arcview_plan.Put_Field (leg_dist_fld, UnRound (distance));
 						arcview_plan.Put_Field (leg_cost_fld, UnRound (cost));
@@ -413,7 +377,7 @@ void ArcPlan::Read_Plan (void)
 
 						arcview_plan.clear ();
 						time = 0;
-						distance = cost = imped = num_leg = 0;
+						distance = cost = imped = count = 0;
 
 						arcview_plan.push_back (pt_itr->second);
 
@@ -616,16 +580,17 @@ void ArcPlan::Read_Plan (void)
 
 						if (arrow_flag) Add_Arrow (arcview_plan);	
 
-						num_leg++;
+						count++;
 						time += leg_itr->Time ();
 						distance += leg_itr->Length ();
 						cost += leg_itr->Cost ();
 						imped += leg_itr->Impedance ();
 
 						//---- write the shape record ----
-
+								
+						arcview_plan.Put_Field (num_leg_fld, num_leg);
 						arcview_plan.Put_Field (leg_mode_fld, TRANSIT_MODE);
-						arcview_plan.Put_Field (leg_id_fld, num_leg);
+						arcview_plan.Put_Field (leg_id_fld, prev_itr->ID ());
 						arcview_plan.Put_Field (leg_time_fld, time);
 						arcview_plan.Put_Field (leg_dist_fld, UnRound (distance));
 						arcview_plan.Put_Field (leg_cost_fld, UnRound (cost));
@@ -640,11 +605,12 @@ void ArcPlan::Read_Plan (void)
 
 						arcview_plan.clear ();
 						time = 0;
-						distance = cost = imped = num_leg = 0;
+						distance = cost = imped = count = 0;
 
 						arcview_plan.push_back (pt_itr->second);
 
-						int_itr = stop_map.find (leg_itr->ID ());
+						prev_stop = leg_itr->ID ();
+						int_itr = stop_map.find (prev_stop);
 
 						if (int_itr != stop_map.end ()) {
 							stop_ptr = &stop_array [int_itr->second];
@@ -656,40 +622,43 @@ void ArcPlan::Read_Plan (void)
 
 						prev_stop = leg_itr->ID ();
 
-						int_itr = stop_map.find (prev_stop);
+						if (!prev_itr->Access_Type ()) {
+							int_itr = stop_map.find (prev_stop);
 
-						if (int_itr != stop_map.end ()) {
-							stop_ptr = &stop_array [int_itr->second];
-							link_ptr = &link_array [stop_ptr->Link ()];
+							if (int_itr != stop_map.end ()) {
 
-							off = length = UnRound (stop_ptr->Offset ());
+								stop_ptr = &stop_array [int_itr->second];
+								link_ptr = &link_array [stop_ptr->Link ()];
 
-							if (abs ((int) (length - offset)) > near_offset) {
-								if (prev_itr->Type () == LOCATION_ID) {
-									if (length > offset) {
-										dir = 0;
+								off = length = UnRound (stop_ptr->Offset ());
+
+								if (abs ((int) (length - offset)) > near_offset) {
+									if (prev_itr->Type () == LOCATION_ID) {
+										if (length > offset) {
+											dir = 0;
+										} else {
+											dir = 1;
+										}
+									} else if (prev_itr->Link_Type ()) {
+										dir = prev_itr->Link_Dir ();
 									} else {
-										dir = 1;
+										dir = stop_ptr->Dir ();
 									}
-								} else if (prev_itr->Link_Type ()) {
-									dir = prev_itr->Link_Dir ();
-								} else {
-									dir = stop_ptr->Dir ();
+									if (link_ptr->AB_Dir () >= 0 && link_ptr->BA_Dir () >= 0) {
+										side = link_offset;
+									} else {
+										side = 0.0;
+									}
+									if (offset > -1) length -= offset;
+
+									Link_Shape (link_ptr, dir, points, offset, length, side);
+
+									arcview_plan.insert (arcview_plan.end (), points.begin (), points.end ());
+
+									if (arrow_flag) Add_Arrow (arcview_plan);	
 								}
-								if (link_ptr->AB_Dir () >= 0 && link_ptr->BA_Dir () >= 0) {
-									side = link_offset;
-								} else {
-									side = 0.0;
-								}
-								if (offset > -1) length -= offset;
-
-								Link_Shape (link_ptr, dir, points, offset, length, side);
-
-								arcview_plan.insert (arcview_plan.end (), points.begin (), points.end ());
-
-								if (arrow_flag) Add_Arrow (arcview_plan);	
+								offset = off;
 							}
-							offset = off;
 						}
 
 						//---- add the stop point and save the leg ----
@@ -697,18 +666,19 @@ void ArcPlan::Read_Plan (void)
 						pt_itr = stop_pt.find (prev_stop);
 						arcview_plan.push_back (pt_itr->second);
 
-						if (arrow_flag) Add_Arrow (arcview_plan);	
+						if (arrow_flag) Add_Arrow (arcview_plan);
 
-						num_leg++;
+						count++;
 						time += leg_itr->Time ();
 						distance += leg_itr->Length ();
 						cost += leg_itr->Cost ();
 						imped += leg_itr->Impedance ();
 
 						//---- write the shape record ----
-
+								
+						arcview_plan.Put_Field (num_leg_fld, num_leg);
 						arcview_plan.Put_Field (leg_mode_fld, WALK_MODE);
-						arcview_plan.Put_Field (leg_id_fld, num_leg);
+						arcview_plan.Put_Field (leg_id_fld, count);
 						arcview_plan.Put_Field (leg_time_fld, time);
 						arcview_plan.Put_Field (leg_dist_fld, UnRound (distance));
 						arcview_plan.Put_Field (leg_cost_fld, UnRound (cost));
@@ -723,7 +693,7 @@ void ArcPlan::Read_Plan (void)
 
 						arcview_plan.clear ();
 						time = 0;
-						distance = cost = imped = num_leg = 0;
+						distance = cost = imped = count = 0;
 
 						arcview_plan.push_back (pt_itr->second);
 						continue;
@@ -778,24 +748,44 @@ void ArcPlan::Read_Plan (void)
 						if (type == LOCATION_ID) {
 							location_ptr = &location_array [index];
 							pt_itr = location_pt.find (location_ptr->Location ());
+							point = pt_itr->second;
 							offset = UnRound (location_ptr->Offset ());
 						} else if (type == PARKING_ID) {
 							parking_ptr = &parking_array [index];
 							pt_itr = parking_pt.find (parking_ptr->Parking ());
+							point = pt_itr->second;
 							offset = UnRound (parking_ptr->Offset ());
 						} else if (type == STOP_ID) {
 							stop_ptr = &stop_array [index];
-							pt_itr = stop_pt.find (stop_ptr->Stop ());
+							prev_stop = stop_ptr->Stop ();
+							pt_itr = stop_pt.find (prev_stop);
+							point = pt_itr->second;
 							offset = UnRound (stop_ptr->Offset ());
+						} else if (type == NODE_ID) {
+							node_ptr = &node_array [index];
+							point.x = UnRound (node_ptr->X ());
+							point.y = UnRound (node_ptr->Y ());
+							point.z = 0;
 						} else {
 							continue;
 						}
-						arcview_plan.push_back (pt_itr->second);
+						arcview_plan.push_back (point);
 
 						if (arrow_flag) Add_Arrow (arcview_plan);	
 					}
+
+				} else if (leg_itr->Type () == NODE_ID) {
+					int_itr = node_map.find (leg_itr->ID ());
+					node_ptr = &node_array [int_itr->second];
+					point.x = UnRound (node_ptr->X ());
+					point.y = UnRound (node_ptr->Y ());
+					point.z = 0;
+
+					arcview_plan.push_back (point);
+
+					if (arrow_flag) Add_Arrow (arcview_plan);
 				}
-				num_leg++;
+				count++;
 				time += leg_itr->Time ();
 				distance += leg_itr->Length ();
 				cost += leg_itr->Cost ();
@@ -819,7 +809,9 @@ void ArcPlan::Read_Plan (void)
 			//---- write the last leg ----
 
 			if (arcview_plan.size () > 0) {
-				arcview_plan.Put_Field (leg_id_fld, num_leg);
+				arcview_plan.Put_Field (num_leg_fld, num_leg);
+				arcview_plan.Put_Field (leg_mode_fld, WALK_MODE);
+				arcview_plan.Put_Field (leg_id_fld, count);
 				arcview_plan.Put_Field (leg_time_fld, time);
 				arcview_plan.Put_Field (leg_dist_fld, UnRound (distance));
 				arcview_plan.Put_Field (leg_cost_fld, UnRound (cost));

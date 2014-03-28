@@ -11,7 +11,7 @@
 PathSkim::PathSkim (void) : Router_Service ()
 {
 	Program ("PathSkim");
-	Version (5);
+	Version (6);
 	Title ("Build and Skim Network Paths");
 
 	System_File_Type required_files [] = {

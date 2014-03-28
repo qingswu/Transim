@@ -44,7 +44,8 @@ protected:
 	virtual bool Get_Route_Nodes_Data (Route_Nodes_File &file, Route_Header &data_rec);
 
 private:
-	bool toll_flag, activity_flag, person_flag, vehicle_flag, plan_flag, route_flag, new_route_flag, snap_flag, copy_flag;
+	bool toll_flag, activity_flag, person_flag, vehicle_flag, route_flag, new_route_flag, snap_flag, copy_flag;
+	bool plan_flag, new_plan_flag, new_trip_flag;
 
 	int num_new_trip, max_trip_part, num_new_skim, max_skim_part, num_new_act, route_periods, scale;
 	Units_Type time_units;

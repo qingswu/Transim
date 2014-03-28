@@ -98,7 +98,7 @@ bool Sim_Transit_Update::Update_Check (void)
 
 			veh_itr = sim->sim_veh_map.find (veh_index);	
 
-			plan_ptr->Vehicle (veh_itr->second);
+			sim_travel_ptr->Vehicle (veh_itr->second);
 		}
 	}
 	return (true);

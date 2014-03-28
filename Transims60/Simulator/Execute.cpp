@@ -89,11 +89,11 @@ void Simulator::Execute (void)
 		start = clock ();
 		Active (false);
 
+		sim_output_step.Start_Processing ();
+
 		sim_travel_step.Start_Processing ();
 
 		sim_node_step.Start_Processing ();
-
-		sim_output_step.Step_Output ();
 
 		MPI_Transfer (Active ());
 
@@ -115,13 +115,9 @@ void Simulator::Execute (void)
 	sim_plan_step.Stop_Processing ();
 	sim_travel_step.Stop_Processing ();
 	sim_node_step.Stop_Processing ();
-	sim_output_step.End_Output ();
+	sim_output_step.Stop_Processing ();
 
 	MPI_Close ();
-
-	//---- write the ridership data ----
-
-	//ridership_output.Output ();
 
 	Print (1, "Simulation Ended at Time ") << time_step.Time_String ();
 

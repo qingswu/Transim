@@ -111,10 +111,10 @@ void LineSum::Program_Control (void)
 
 	//---- open the new peak ridership file ----
 
-	Print (1);
 	key = Get_Control_String (NEW_PEAK_RIDERSHIP_FILE);
 
 	if (!key.empty ()) {
+		Print (1);
 		if (peak_list.size () == 0) {
 			Error ("Input Peak Ridership Files are Required");
 		}
@@ -148,6 +148,7 @@ void LineSum::Program_Control (void)
 	key = Get_Control_String (NEW_OFFPEAK_RIDERSHIP_FILE);
 
 	if (!key.empty ()) {
+		Print (1);
 		if (offpeak_list.size () == 0) {
 			Error ("Input Offpeak Ridership Files are Required");
 		}
@@ -181,6 +182,7 @@ void LineSum::Program_Control (void)
 	key = Get_Control_String (NEW_TOTAL_RIDERSHIP_FILE);
 
 	if (!key.empty ()) {
+		Print (1);
 		if (peak_list.size () == 0 || offpeak_list.size () == 0) {
 			Error ("Input Peak and Offpeak Ridership Files are Required");
 		}

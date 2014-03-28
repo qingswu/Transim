@@ -91,7 +91,7 @@ void NewFormat::Execute (void)
 
 	//---- convert activity file ----
 
-	if (activity_flag && System_File_Flag (NEW_TRIP)) {
+	if (activity_flag && new_trip_flag) {
 		Read_Activity ();
 
 		Trip_File *file = (Trip_File *) System_File_Handle (NEW_TRIP);
@@ -101,7 +101,7 @@ void NewFormat::Execute (void)
 
 	//---- convert trip file ----
 
-	if (System_File_Flag (TRIP) && System_File_Flag (NEW_TRIP)) {
+	if (System_File_Flag (TRIP) && new_trip_flag) {
 		Read_Trips ();
 
 		Trip_File *file = (Trip_File *) System_File_Handle (NEW_TRIP);
@@ -157,9 +157,9 @@ void NewFormat::Execute (void)
 		Write (1, "Number of Input Travelers = ") << old_plan.Num_Travelers ();
 		Write (1, "Number of Input Trips = ") << old_plan.Num_Trips ();
 	} else {
-		if (System_File_Flag (NEW_PLAN)) Write_Plans ();
+		if (new_plan_flag) Write_Plans ();
 	}
-	if (System_File_Flag (NEW_PLAN)) {
+	if (new_plan_flag) {
 		Plan_File *file = (Plan_File *) System_File_Base (NEW_PLAN);
 		file->Print_Summary ();
 	}

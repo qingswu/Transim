@@ -28,15 +28,15 @@ class SYSLIB_API Sim_Output_Step : Static_Service
 
 public:
 	Sim_Output_Step (void);
-	~Sim_Output_Step (void)       { End_Output (); }
+	~Sim_Output_Step (void)       { Stop_Processing (); }
 
 	void Initialize (void);
 
 	void Add_Keys (void);
 	void Read_Controls (void);
-
-	bool Step_Output (void);
-	void End_Output (void);
+	
+	void Start_Processing (void);
+	void Stop_Processing (void);
 
 	void Check_Output (Travel_Step &travel);
 

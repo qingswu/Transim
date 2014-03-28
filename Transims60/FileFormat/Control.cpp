@@ -12,7 +12,7 @@
 
 void FileFormat::Program_Control (void)
 {
-	int i, j, num, field, num_org, num_des, tables;
+	int i, j, num, num_fld, field, num_org, num_des, tables;
 	String key, name, buf;
 	Strings strings;
 	Str_Itr str_itr;
@@ -148,16 +148,16 @@ void FileFormat::Program_Control (void)
 
 			//---- get the new data fields ----
 
-			num = Highest_Control_Group (NEW_DATA_FIELD, i, 0);
+			num_fld = Highest_Control_Group (NEW_DATA_FIELD, i, 0);
 
-			if (num == 0) {
+			if (num_fld == 0) {
 				if (!flag) {
 					Error ("No New Data Fields");
 				}
 			} else {
 				Print (1);
 
-				for (j=1; j <= num; j++) {
+				for (j=1; j <= num_fld; j++) {
 					key = Get_Control_Text (NEW_DATA_FIELD, i, j);
 					if (key.empty ()) continue;
 

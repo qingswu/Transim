@@ -22,6 +22,8 @@ void LineSum::Stop_Names (void)
 
 	while (stop_name_file.Read ()) {
 		stop = stop_name_file.Get_Integer (stop_field);
+		if (stop == 0) continue;
+
 		name = stop_name_file.Get_String (name_field);
 
 		map_stat = stop_names.insert (Str_Map_Data (stop, name));
@@ -30,5 +32,6 @@ void LineSum::Stop_Names (void)
 			Warning (String ("Duplicate Stop Name (%d = %s vs %s)") % stop % map_stat.first->second % name);
 		}
 	}
-	Write (2, "Number of Stop Names = ") << stop_names.size ();
+	Write (1, "Number of Stop Names = ") << stop_names.size ();
+	Write (1);
 }
