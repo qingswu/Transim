@@ -80,6 +80,8 @@ void NewFormat::Program_Control (void)
 			file2->Write_Header ();
 		}
 	}
+	new_plan_flag = System_File_Flag (NEW_PLAN);
+	new_trip_flag = System_File_Flag (NEW_TRIP);
 
 	//---- flatten output flag ----
 
@@ -122,7 +124,7 @@ void NewFormat::Program_Control (void)
 		if (System_File_Flag (NEW_PERFORMANCE)) {
 			System_File_Header (NEW_PERFORMANCE)->Flatten_File ();
 		}
-		if (System_File_Flag (NEW_PLAN)) {
+		if (new_plan_flag) {
 			System_File_Header (NEW_PLAN)->Flatten_File ();
 		}
 	}
@@ -144,7 +146,7 @@ void NewFormat::Program_Control (void)
 		activity_file.Open (Project_Filename (key));
 		activity_flag = true;
 
-		if (!System_File_Flag (NEW_TRIP)) {
+		if (!new_trip_flag) {
 			Error ("A New Trip file is required to convert an Activity File");
 		}
 	}

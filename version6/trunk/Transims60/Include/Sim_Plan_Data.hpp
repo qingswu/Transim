@@ -87,7 +87,7 @@ typedef Sim_Leg_Data *                   Sim_Leg_Ptr;
 class Sim_Plan_Data : public Sim_Leg_Queue
 {
 public:
-	Sim_Plan_Data (void)            { Clear (); }
+	Sim_Plan_Data (void)             { Clear (); }
 
 	int   Tour (void)                { return (x.tour); }
 	int   Trip (void)                { return (x.trip); }

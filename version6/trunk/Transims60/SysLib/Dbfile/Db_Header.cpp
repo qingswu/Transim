@@ -786,6 +786,22 @@ bool Db_Header::Write_dBase_Header (void)
 
 		switch (fld->Type ()) {
 			case DB_TIME:
+				if (fld->Units () == SECONDS) {
+					field.type = 'N';
+				} else if (fld->Units () == MINUTES) {
+					field.type = 'N';
+					if (fld->Decimal () == 0) {
+						fld->Size ((double) fld->Width () + 0.2);
+					}
+				} else if (fld->Units () == HOURS) {
+					field.type = 'F';
+					if (fld->Decimal () == 0) {
+						fld->Size ((double) fld->Width () + 0.3);
+					}
+				} else {
+					field.type = 'C';
+				}
+				break;
 			case DB_STRING:
 			case DB_CHAR:
 				field.type = 'C';

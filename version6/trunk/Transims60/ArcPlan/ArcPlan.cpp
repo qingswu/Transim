@@ -11,7 +11,7 @@
 ArcPlan::ArcPlan (void) : Data_Service (), Select_Service (), Draw_Service ()
 {
 	Program ("ArcPlan");
-	Version (4);
+	Version (5);
 	Title ("Plan File Display Utility");
 
 	System_File_Type required_files [] = {

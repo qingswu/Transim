@@ -270,7 +270,9 @@ void Simulator_Service::Global_Data (void)
 			for (index = dir_ptr->First_Connect (); index >= 0; index = connect_ptr->Next_Index ()) {
 				connect_ptr = &connect_array [index];
 
-				if (node_ptr->Control () < 0) {
+				if (node_ptr->Method () == NO_SIMULATION || node_ptr->Method () == MACROSCOPIC) {
+					connect_ptr->Control (UNCONTROLLED);
+				} else if (node_ptr->Control () < 0) {
 					if (dir_ptr->Sign () == STOP_SIGN || dir_ptr->Sign () == ALL_STOP) {
 						connect_ptr->Control (STOP_GREEN);
 					} else if (dir_ptr->Sign () == YIELD_SIGN) {

@@ -11,17 +11,22 @@
 bool NewFormat::Get_Trip_Data (Trip_File &file, Trip_Data &trip_rec, int partition)
 {
 	static int part_num = -1;
-	static Trip_File *out_file;
+	static Trip_File *out_file = 0;
 
 	if (part_num != partition) {
 		part_num = partition;
-		out_file = (Trip_File *) System_File_Handle (NEW_TRIP);
 
-		if (out_file->Part_Flag () && part_num > 1) {
-			if (!out_file->Open (part_num)) {
-				Error (String ("Opening %s") % out_file->Filename ());
+		if (new_trip_flag) {
+			out_file = (Trip_File *) System_File_Handle (NEW_TRIP);
+
+			if (out_file != 0 && out_file->Part_Flag () && part_num > 1) {
+				if (!out_file->Open (part_num)) {
+					Error (String ("Opening %s") % out_file->Filename ());
+				}
+				if (part_num > max_trip_part) max_trip_part = part_num;
+			} else {
+				max_trip_part = 1;
 			}
-			if (part_num > max_trip_part) max_trip_part = part_num;
 		} else {
 			max_trip_part = 1;
 		}
@@ -44,7 +49,10 @@ bool NewFormat::Get_Trip_Data (Trip_File &file, Trip_Data &trip_rec, int partiti
 				trip_rec.Veh_Type (map_itr->second);
 			}
 		}
-		num_new_trip += Put_Trip_Data (*out_file, trip_rec);
+		if (new_trip_flag) {
+			num_new_trip += Put_Trip_Data (*out_file, trip_rec);
+		}
+		if (new_plan_flag) return (true);
 	}
 	return (false);
 }

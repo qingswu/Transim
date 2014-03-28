@@ -220,6 +220,15 @@ void File_Service::File_Service_Keys (int *keys)
 		{ NOTES_AND_NAME_FIELDS, "NOTES_AND_NAME_FIELDS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ FLOW_UNITS, "FLOW_UNITS", LEVEL0, OPT_KEY, TEXT_KEY, "VEHICLES", FLOW_RANGE, NO_HELP },
 		{ SAVE_LANE_USE_FLOWS, "SAVE_LANE_USE_FLOWS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
+
+		{ ROUTE_NODE_OFFSET_FLAG, "ROUTE_NODE_OFFSET_FLAG", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
+		{ ROUTE_NODE_RUN_TIME_FLAG, "ROUTE_NODE_RUN_TIME_FLAG", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
+		{ ROUTE_NODE_PATTERN_FLAG, "ROUTE_NODE_PATTERN_FLAG", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
+		{ ROUTE_NODE_DWELL_FLAG, "ROUTE_NODE_DWELL_FLAG", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
+		{ ROUTE_NODE_TYPE_FLAG, "ROUTE_NODE_TYPE_FLAG", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
+		{ ROUTE_NODE_LEG_TIME_FLAG, "ROUTE_NODE_LEG_TIME_FLAG", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
+		{ ROUTE_NODE_SPEED_FLAG, "ROUTE_NODE_SPEED_FLAG", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
+
 		{ SKIM_OD_UNITS, "SKIM_OD_UNITS", LEVEL0, OPT_KEY, TEXT_KEY, "ZONES", MATRIX_OD_RANGE, NO_HELP },
 		{ SKIM_TIME_PERIODS, "SKIM_TIME_PERIODS", LEVEL0, OPT_KEY, LIST_KEY, "ALL", TIME_RANGE, NO_HELP},
 		{ SKIM_TIME_INCREMENT, "SKIM_TIME_INCREMENT", LEVEL0, OPT_KEY, TIME_KEY, "0 minutes", MINUTE_RANGE, NO_HELP },
@@ -310,7 +319,7 @@ bool File_Service::Required_File_Check (Db_File &file, System_File_Type type)
 void File_Service::Program_Control (void)
 {
 	int i, parts;
-	bool first_open_net, first_open, first_new_net, first_new, skim_flag;
+	bool first_open_net, first_open, first_new_net, first_new, skim_flag, flag;
 	String key, format;
 	bool turn_delay, turn_perf;
 
@@ -482,6 +491,45 @@ void File_Service::Program_Control (void)
 			case ROUTE_NODES:
 			case NEW_ROUTE_NODES:
 				file->file = new Route_Nodes_File (key, file->access, format);
+				if (i == NEW_ROUTE_NODES) {
+					Route_Nodes_File *route_file = (Route_Nodes_File *) file->file;
+					flag = false;
+
+					if (Check_Control_Key (ROUTE_NODE_OFFSET_FLAG)) {
+						route_file->Offset_Flag (Get_Control_Flag (ROUTE_NODE_OFFSET_FLAG));
+						if (route_file->Offset_Flag () == true) flag = true;
+					}
+					if (Check_Control_Key (ROUTE_NODE_RUN_TIME_FLAG)) {
+						route_file->TTime_Flag (Get_Control_Flag (ROUTE_NODE_RUN_TIME_FLAG));
+						if (route_file->TTime_Flag () == true) flag = true;
+					}
+					if (Check_Control_Key (ROUTE_NODE_PATTERN_FLAG)) {
+						route_file->Pattern_Flag (Get_Control_Flag (ROUTE_NODE_PATTERN_FLAG));
+						if (route_file->Pattern_Flag () == true) flag = true;
+					}
+					if (Check_Control_Key (ROUTE_NODE_DWELL_FLAG)) {
+						route_file->Dwell_Flag (Get_Control_Flag (ROUTE_NODE_DWELL_FLAG));
+						if (route_file->Dwell_Flag () == true) flag = true;
+					}
+					if (Check_Control_Key (ROUTE_NODE_TYPE_FLAG)) {
+						route_file->Type_Flag (Get_Control_Flag (ROUTE_NODE_TYPE_FLAG));
+						if (route_file->Type_Flag () == true) flag = true;
+					}
+					if (Check_Control_Key (ROUTE_NODE_SPEED_FLAG)) {
+						route_file->Speed_Flag (Get_Control_Flag (ROUTE_NODE_SPEED_FLAG));
+						if (route_file->Speed_Flag () == true) flag = true;
+					}
+					if (Check_Control_Key (ROUTE_NODE_LEG_TIME_FLAG)) {
+						route_file->Time_Flag (Get_Control_Flag (ROUTE_NODE_LEG_TIME_FLAG));
+						if (route_file->Time_Flag () == true) flag = true;
+					}
+					if (flag) {
+						route_file->Clear_Fields ();
+						route_file->Create_Fields ();
+						route_file->Write_Header ();
+						Print (1);
+					}
+				}
 				break;
 			case SELECTION:
 			case NEW_SELECTION:

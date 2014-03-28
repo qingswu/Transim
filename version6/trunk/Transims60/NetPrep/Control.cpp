@@ -535,29 +535,11 @@ void NetPrep::Program_Control (void)
 			num_periods = schedule_periods.Num_Periods ();
 			route_nodes->Num_Periods (num_periods);
 
-			//---- get the transit period offset flag ----
-
-			offset_flag = Get_Control_Flag (TRANSIT_PERIOD_OFFSETS);
-			route_nodes->Offset_Flag (offset_flag);
-
-			//---- get the period travel time flag ----
-
-			time_flag = Get_Control_Flag (PERIOD_TRAVEL_TIMES);
-			route_nodes->TTime_Flag (time_flag);
-			
-			//---- get the transit node types flag ----
-
-			route_nodes->Type_Flag (Get_Control_Flag (TRANSIT_NODE_TYPES));
-
 			//---- collapse route data ----
 
 			collapse_routes = Get_Control_Flag (COLLAPSE_ROUTE_DATA);
 
 			//---- update the file header ----
-
-			route_nodes->Dwell_Flag (false);
-			route_nodes->Time_Flag (false);
-			route_nodes->Speed_Flag (false);
 
 			route_nodes->Clear_Fields ();
 			route_nodes->Create_Fields ();
@@ -565,6 +547,8 @@ void NetPrep::Program_Control (void)
 
 			if (num_periods > 0 || time_flag) Print (1);
 		}
+		offset_flag = route_nodes->Offset_Flag ();
+		time_flag = route_nodes->TTime_Flag ();
 
 		//---- first route number ----
 

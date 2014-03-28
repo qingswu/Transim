@@ -13,9 +13,10 @@ void ArcRider::Write_Sum (void)
 	int j, num, dir, routes, tot_on, overlap, index;
 	int riders, max_load, board, alight, stops, run, runs;
 	int group_field, name_field, routes_field, stops_field, runs_field, riders_field;
-	int load_field, board_field, alight_field;
+	int load_field, board_field, alight_field, min_time_field, max_time_field;
 	double side, side_offset, length;
 	bool offset_flag, first, flag_ab, flag_ba;
+	Dtime min_time, max_time;
 
 	Integers stop_flag;
 
@@ -27,8 +28,9 @@ void ArcRider::Write_Sum (void)
 	Int_Set_Itr itr;
 	Int_Map_Itr map_itr;
 	Integers run_flag;
-	Line_Stop_Itr stop_itr;
-	Line_Run_Itr run_itr;
+	Dtimes run_time;
+	Line_Stop_Itr stop_itr, stop2_itr;
+	Line_Run_Itr run_itr, run2_itr;
 	Points_Itr pt_itr;
 	Link_Itr link_itr;
 
@@ -44,6 +46,8 @@ void ArcRider::Write_Sum (void)
 	load_field = arcview_sum.Field_Number ("MAX_LOAD");
 	board_field = arcview_sum.Field_Number ("MAX_BOARD");
 	alight_field = arcview_sum.Field_Number ("MAX_ALIGHT");
+	min_time_field = arcview_sum.Field_Number ("MIN_TIME");
+	max_time_field = arcview_sum.Field_Number ("MAX_TIME");
 
 	Show_Message (String ("Writing %s -- Record") % arcview_sum.File_Type ());
 	Set_Progress ();
@@ -72,6 +76,9 @@ void ArcRider::Write_Sum (void)
 		arcview_sum.parts.clear ();
 
 		riders = board = alight = max_load = runs = stops = routes = 0;
+		min_time = MAX_INTEGER;
+		max_time = 0;
+
 		stop_flag.assign (stop_array.size (), 0);
 
 		//---- set the overlap count ----
@@ -139,6 +146,20 @@ void ArcRider::Write_Sum (void)
 				}
 			}
 
+			//---- set the run time ----
+
+			run_time.assign (line_array.Max_Runs (), 0);
+
+			stop_itr = line_ptr->begin ();
+			stop2_itr = --line_ptr->end ();
+
+			run_itr = stop_itr->begin ();
+			run2_itr = stop2_itr->begin ();
+
+			for (run=0; run_itr != stop_itr->end (); run_itr++, run2_itr++, run++) {
+				run_time [run] = run2_itr->Schedule () - run_itr->Schedule ();
+			}
+
 			//---- save the route ridership data ----
 
 			tot_on = 0;
@@ -157,6 +178,9 @@ void ArcRider::Write_Sum (void)
 					if (run_flag [run] == 1) {
 						runs++;
 						run_flag [run] = 2;
+
+						if (run_time [run] < min_time) min_time = run_time [run];
+						if (run_time [run] > max_time) max_time = run_time [run];
 					}
 					if (stop_flag [stop_itr->Stop ()] == 0) {
 						stops++;
@@ -235,7 +259,8 @@ void ArcRider::Write_Sum (void)
 			arcview_sum.Put_Field (load_field, max_load);
 			arcview_sum.Put_Field (board_field, board);
 			arcview_sum.Put_Field (alight_field, alight);
-
+			arcview_sum.Put_Field (min_time_field, min_time.Round_Seconds ());
+			arcview_sum.Put_Field (max_time_field, max_time.Round_Seconds ());
 			if (!arcview_sum.Write_Record ()) {
 				Error (String ("Writing %s") % arcview_sum.File_Type ());
 			}

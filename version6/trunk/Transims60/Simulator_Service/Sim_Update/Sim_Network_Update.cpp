@@ -78,7 +78,7 @@ bool Sim_Network_Update::Update_Check (void)
 
 		lane_data.Use (link_ptr->Use ());
 
-		lane_array.assign (dir_ptr->Lanes (), lane_data);
+		lane_array.assign (sim_dir_itr->Lanes (), lane_data);
 
 		min_lane = dir_ptr->Left ();
 		max_lane = dir_ptr->Lanes () + min_lane - 1;

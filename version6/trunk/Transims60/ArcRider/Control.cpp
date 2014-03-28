@@ -68,6 +68,8 @@ void ArcRider::Program_Control (void)
 		arcview_line.Add_Field ("MAX_LOAD", DB_INTEGER, 10);
 		arcview_line.Add_Field ("MAX_BOARD", DB_INTEGER, 10);
 		arcview_line.Add_Field ("MAX_ALIGHT", DB_INTEGER, 10);
+		arcview_line.Add_Field ("MIN_TIME", DB_TIME, TIME_FIELD_SIZE, Time_Format ());
+		arcview_line.Add_Field ("MAX_TIME", DB_TIME, TIME_FIELD_SIZE, Time_Format ());
 
 		if (Notes_Name_Flag ()) {
 			arcview_line.Add_Field ("NOTES", DB_STRING, 128);
@@ -107,7 +109,9 @@ void ArcRider::Program_Control (void)
 		arcview_sum.Add_Field ("MAX_LOAD", DB_INTEGER, 10);
 		arcview_sum.Add_Field ("MAX_BOARD", DB_INTEGER, 10);
 		arcview_sum.Add_Field ("MAX_ALIGHT", DB_INTEGER, 10);
-		
+		arcview_sum.Add_Field ("MIN_TIME", DB_TIME, TIME_FIELD_SIZE, Time_Format ());
+		arcview_sum.Add_Field ("MAX_TIME", DB_TIME, TIME_FIELD_SIZE, Time_Format ());
+
 		arcview_sum.Write_Header ();
 
 		arcview_sum.Set_Projection (projection.Input_Projection (), projection.Output_Projection ());

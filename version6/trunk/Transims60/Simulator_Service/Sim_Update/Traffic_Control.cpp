@@ -15,6 +15,7 @@ bool Sim_Control_Update::Traffic_Control (int index, Sim_Signal_Itr signal_itr)
 	Dtime offset, cycle, time, green, end_time;
 	bool flag, barrier_flag [20];
 
+	Node_Data *node_ptr;
 	Signal_Data *signal_ptr;
 	Signal_Time_Itr time_itr;
 	Timing_Itr timing_itr;
@@ -31,6 +32,20 @@ bool Sim_Control_Update::Traffic_Control (int index, Sim_Signal_Itr signal_itr)
 	Connect_Data *connect_ptr;
 
 	signal_ptr = &sim->signal_array [index];
+
+	//---- check the subarea status ----
+
+	if (signal_itr->End_Time () == MAX_INTEGER) {
+		signal_itr->End_Time (MAX_INTEGER - 1);
+
+		for (int_itr = signal_ptr->nodes.begin (); int_itr != signal_ptr->nodes.end (); int_itr++) {
+			node_ptr = &sim->node_array [*int_itr];
+
+			if (node_ptr->Method () == NO_SIMULATION || node_ptr->Method () == MACROSCOPIC) {
+				return (true);
+			}
+		}
+	}
 
 	//---- clear the previous controls ----
 

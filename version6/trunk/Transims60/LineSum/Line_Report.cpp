@@ -118,6 +118,7 @@ void LineSum::Line_Report (Line_Report_Data &report)
 					line_array.push_back (line_rec);
 				}
 				if (map_itr == peak_map.end ()) break;
+				map_itr--;
 				continue;
 			}
 
@@ -272,6 +273,7 @@ void LineSum::Line_Report (Line_Report_Data &report)
 					line_array.push_back (line_rec);
 				}
 				if (map_itr == offpeak_map.end ()) break;
+				map_itr--;
 				continue;
 			}
 

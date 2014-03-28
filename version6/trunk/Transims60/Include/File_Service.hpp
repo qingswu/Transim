@@ -64,6 +64,8 @@ public:
 	void   System_Option_False (System_File_Type type) { if (type < END_FILE) system_file [type].option = false; }
 	void   System_Option_True (System_File_Type type)  { if (type < END_FILE) system_file [type].option = true; }
 
+	bool   System_Control_Check (System_File_Type type) { return ((type < END_FILE) ? Check_Control_Key (SYSTEM_FILE_OFFSET + type) : false); }
+
 	void   System_Read_False (System_File_Type type)   { if (type < END_FILE) system_file [type].read = false; }
 	
 	int    System_Data_Reserve (System_File_Type type) { return ((type < END_FILE) ? system_file [type].reserve : 0); }
@@ -100,6 +102,8 @@ public:
 	
 	enum File_Service_Keys { 
 		NOTES_AND_NAME_FIELDS = FILE_SERVICE_OFFSET, FLOW_UNITS, SAVE_LANE_USE_FLOWS, 
+		ROUTE_NODE_OFFSET_FLAG, ROUTE_NODE_RUN_TIME_FLAG, ROUTE_NODE_PATTERN_FLAG,
+		ROUTE_NODE_DWELL_FLAG, ROUTE_NODE_TYPE_FLAG, ROUTE_NODE_LEG_TIME_FLAG, ROUTE_NODE_SPEED_FLAG, 
 		SKIM_OD_UNITS, SKIM_TIME_PERIODS, SKIM_TIME_INCREMENT, SKIM_TOTAL_TIME_FLAG, 
 		SKIM_TRAVEL_TIME_FORMAT, SKIM_TRIP_LENGTH_FORMAT, NEAREST_NEIGHBOR_FACTOR, 
 		MERGE_TIME_PERIODS, SKIM_FILE_HEADERS, ZONE_EQUIVALENCE_FILE, LINK_EQUIVALENCE_FILE, 

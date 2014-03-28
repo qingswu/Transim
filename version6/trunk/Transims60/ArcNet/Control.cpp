@@ -555,6 +555,10 @@ void ArcNet::Program_Control (void)
 					key = "RUNS_" + low.Time_Label ();
 
 					arcview_route.Add_Field (key, DB_INTEGER, 4);
+
+					key = "TIME_" + low.Time_Label ();
+
+					arcview_route.Add_Field (key, DB_TIME, TIME_FIELD_SIZE, Time_Format ());
 				}
 			} else {
 				schedule_flag = false;

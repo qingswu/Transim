@@ -76,6 +76,8 @@ void Simulator_Service::Transit_Plans (void)
 		sim_plan_ptr = &transit_plans [i];
 
 		sim_plan_ptr->Mode (TRANSIT_MODE);
+		sim_plan_ptr->Vehicle (0);
+
 		traveler = line_array.Vehicle_ID (line_itr->Route (), 0);
 
 		veh_index.Household (traveler);

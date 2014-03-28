@@ -15,6 +15,58 @@ void Simulator_Service::Program_Control (void)
 	Double_List list;
 	Dbl_Itr dbl_itr;
 
+	//---- set / check the signal files ----
+
+	if (Check_Control_Key (MESOSCOPIC_SUBAREAS) || Check_Control_Key (MICROSCOPIC_SUBAREAS)) {
+		param.control_flag = true;
+		key = Get_Control_String (MESOSCOPIC_SUBAREAS);
+		if (key.Equals ("NONE")) {
+			key = Get_Control_String (MICROSCOPIC_SUBAREAS);
+			if (key.Equals ("NONE")) {
+				param.control_flag = false;
+			}
+		}
+	} else if (Check_Control_Key (UNSIMULATED_SUBAREAS) || Check_Control_Key (MACROSCOPIC_SUBAREAS)) {
+		param.control_flag = false;
+		key = Get_Control_String (MACROSCOPIC_SUBAREAS);
+		if (key.Equals ("NONE")) {
+			key = Get_Control_String (UNSIMULATED_SUBAREAS);
+			if (key.Equals ("NONE")) {
+				param.control_flag = true;
+			}
+		}
+	}
+	if (param.control_flag) {
+		if (!System_Control_Check (SIGNAL) || !System_Control_Check (TIMING_PLAN) || !System_Control_Check (PHASING_PLAN)) {
+			Warning ("Signal, Timing Plan, and Phasing Plan files are Required for Signal Processing");
+		}
+	} else {
+		System_File_False (SIGNAL);
+		System_File_False (TIMING_PLAN);
+		System_File_False (PHASING_PLAN);
+		System_File_False (DETECTOR);
+		System_File_False (SIGN);
+	}
+
+	//--- set / check the transit files ----
+
+	param.transit_flag = (System_Control_Check (TRANSIT_STOP) && System_Control_Check (TRANSIT_ROUTE) && 
+					System_Control_Check (TRANSIT_SCHEDULE) && System_Control_Check (TRANSIT_DRIVER));
+
+	if (!param.transit_flag) {
+		if (System_Control_Check (TRANSIT_STOP) || System_Control_Check (TRANSIT_ROUTE) || 
+			System_Control_Check (TRANSIT_SCHEDULE) || System_Control_Check (TRANSIT_DRIVER)) {
+			Warning ("Transit Stop, Route, Schedule and Driver files are Required for Transit Processing");
+		}
+		System_File_False (TRANSIT_STOP);
+		System_File_False (TRANSIT_ROUTE);
+		System_File_False (TRANSIT_SCHEDULE);
+		System_File_False (TRANSIT_DRIVER);
+		System_File_False (TRANSIT_FARE);
+	} 
+
+	//---- process the data controls ----
+
 	//Router_Service::Program_Control ();
 	Data_Service::Program_Control ();
 
@@ -24,26 +76,6 @@ void Simulator_Service::Program_Control (void)
 		param.problem_flag = true;
 		Problem_File *problem_file = (Problem_File *) System_File_Handle (NEW_PROBLEM);
 		problem_file->Simulator_Data ();
-	}
-	param.control_flag = (System_File_Flag (SIGNAL) && System_File_Flag (TIMING_PLAN) && System_File_Flag (PHASING_PLAN));
-	
-	if (!param.control_flag && (System_File_Flag (SIGNAL) || System_File_Flag (TIMING_PLAN) || 
-		System_File_Flag (PHASING_PLAN) || System_File_Flag (DETECTOR))) {
-			Warning ("Signal, Timing Plan, and Phasing Plan files are Required for Signal Processing");
-	}
-	if (!param.control_flag) {
-		Warning ("Signal Processing is Inactive");
-	}
-	param.transit_flag = (System_File_Flag (TRANSIT_STOP) && System_File_Flag (TRANSIT_ROUTE) && 
-					System_File_Flag (TRANSIT_SCHEDULE) && System_File_Flag (TRANSIT_DRIVER));
-
-	if (!param.transit_flag && (System_File_Flag (TRANSIT_STOP) || System_File_Flag (TRANSIT_ROUTE) || 
-		System_File_Flag (TRANSIT_SCHEDULE) || System_File_Flag (TRANSIT_DRIVER) || 
-		System_File_Flag (TRANSIT_FARE))) {
-			Warning ("Transit Stop, Route, Schedule and Driver files are Required for Transit Processing");
-	}
-	if (!param.transit_flag && System_File_Flag (TRANSIT_FARE)) {
-		Warning ("Transit Processing is Inactive");
 	}
 	Print (2, String ("%s Control Keys:") % Program ());
 
@@ -273,6 +305,12 @@ void Simulator_Service::Program_Control (void)
 
 		if (!key.empty ()) {
 			micro_range.Add_Ranges (key);
+		}
+
+		//---- check the subarea definitions ----
+
+		if (no_range.size () == 0 && macro_range.size () == 0 && meso_range.size () == 0 && micro_range.size () == 0) {
+			meso_range.Add_Ranges ("ALL");
 		}
 
 	} else {

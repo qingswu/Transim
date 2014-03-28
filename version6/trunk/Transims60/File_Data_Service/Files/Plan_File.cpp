@@ -62,11 +62,7 @@ void Plan_File::Setup (void)
 
 bool Plan_File::Read_Plan (Plan_Data &plan_rec)
 {
-	//if (!Is_Open ()) return (false);
-	if (!Is_Open ()) {
-exe->Write (1, "******** not open");
-		return (false);
-	}
+	if (!Is_Open ()) return (false);
 	if (!Read (false)) return (false);
 
 	int i, num;

@@ -11,7 +11,7 @@
 Router::Router (void) : Router_Service (), Select_Service ()
 {
 	Program ("Router");
-	Version (22);
+	Version (23);
 	Title ("Network Path Building");
 
 	System_File_Type required_files [] = {
