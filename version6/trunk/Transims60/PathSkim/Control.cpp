@@ -14,7 +14,7 @@ void PathSkim::Program_Control (void)
 	String key;
 
 	if (!Set_Control_Flag (UPDATE_FLOW_RATES) && !Set_Control_Flag (UPDATE_TRAVEL_TIMES)) {
-		System_File_False (NEW_LINK_DELAY);
+		System_File_False (NEW_PERFORMANCE);
 	}
 
 	//---- create the network files ----
@@ -46,7 +46,7 @@ void PathSkim::Program_Control (void)
 		problem_file = (Problem_File *) System_File_Handle (NEW_PROBLEM);
 		problem_file->Router_Data ();
 	}
-	if (!skim_flag && !plan_flag && !problem_flag && !System_File_Flag (NEW_LINK_DELAY)) {
+	if (!skim_flag && !plan_flag && !problem_flag && !System_File_Flag (NEW_PERFORMANCE)) {
 		Error ("No Output Files are Specified");
 	}
 	if (zone_skim_flag && (plan_flag || problem_flag)) {
@@ -391,17 +391,9 @@ void PathSkim::Program_Control (void)
 		zone_equiv.Read (Report_Flag (ZONE_EQUIV));
 	}
 
-	//---- update the link delay controls ----
+	//---- update the performance controls ----
 
-	if (System_File_Flag (NEW_LINK_DELAY)) {
+	if (System_File_Flag (NEW_PERFORMANCE)) {
 		Link_Flows (Flow_Updates ());
-
-		if (Time_Updates () || Flow_Updates ()) {
-			Link_Delay_File *file = (Link_Delay_File *) System_File_Handle (NEW_LINK_DELAY);
-			file->Turn_Flag (false);
-			file->Clear_Fields ();
-			file->Create_Fields ();
-			file->Write_Header ();
-		}
 	}
 }

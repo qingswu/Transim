@@ -14,8 +14,8 @@ void PlanSum::VC_Ratio (double min_vc)
 	Dtime low, high;
 	double flow, vc;
 
-	Flow_Time_Period_Itr period_itr;
-	Flow_Time_Itr data_itr;
+	Perf_Period_Itr period_itr;
+	Perf_Itr data_itr;
 	Dir_Data *dir_ptr;
 	Link_Data *link_ptr;
 	Node_Data *node_ptr;
@@ -33,13 +33,13 @@ void PlanSum::VC_Ratio (double min_vc)
 
 	size = (int) dir_array.size ();
 
-	for (period=0, period_itr = link_delay_array.begin (); period_itr != link_delay_array.end (); period_itr++, period++) {
+	for (period=0, period_itr = perf_period_array.begin (); period_itr != perf_period_array.end (); period_itr++, period++) {
 		
-		link_delay_array.periods->Period_Range (period, low, high);
+		perf_period_array.periods->Period_Range (period, low, high);
 		low = (low + high) / 2;
 
 		for (dir=0, data_itr = period_itr->begin (); data_itr != period_itr->end (); data_itr++, dir++) {
-			flow = data_itr->Flow ();
+			flow = data_itr->Volume ();
 			if (flow == 0.0) continue;
 
 			if (dir < size) {

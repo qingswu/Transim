@@ -17,14 +17,17 @@ void PlanSum::Plan_Processing::Read_Plans (int part)
 
 	Plan_Data plan;
 	Plan_Leg_Itr leg_itr;
-	Flow_Time_Array *flow_time_ptr;
-	Flow_Time_Data *flow_ptr;
+	Perf_Period_Array *perf_period_array_ptr;
+	Perf_Period *perf_period;
+	Perf_Data *perf_ptr;
+	Turn_Period_Array *turn_period_array_ptr;
+	Turn_Period *turn_period;
+	Turn_Data *turn_ptr;
 	Link_Data *link_ptr;
 	Connect_Data *connect_ptr;
 	Int_Map_Itr map_itr;
 	Int2_Map_Itr map2_itr;
 	Select_Map_Itr sel_itr;
-	Flow_Time_Period_Array  *link_flow_ptr, *turn_flow_ptr;
 	Trip_Sum_Data *trip_sum_ptr;
 	Trip_Sum_Data *pass_sum_ptr;
 	Transfer_Array *xfer_ptr;
@@ -54,8 +57,8 @@ void PlanSum::Plan_Processing::Read_Plans (int part)
 		}
 		END_LOCK
 
-		link_flow_ptr = &link_delay_array;
-		turn_flow_ptr = &turn_delay_array;
+		perf_period_array_ptr = &perf_period_array;
+		turn_period_array_ptr = &turn_period_array;
 		trip_sum_ptr = &trip_sum_data;
 		pass_sum_ptr = &pass_sum_data;
 		xfer_ptr = &transfer_array;
@@ -71,8 +74,8 @@ void PlanSum::Plan_Processing::Read_Plans (int part)
 		}
 		exe->Set_Progress ();
 
-		link_flow_ptr = &exe->link_delay_array;
-		turn_flow_ptr = &exe->turn_delay_array;
+		perf_period_array_ptr = &exe->perf_period_array;
+		turn_period_array_ptr = &exe->turn_period_array;
 		trip_sum_ptr = &exe->trip_sum_data;
 		pass_sum_ptr = &exe->pass_sum_data;
 		xfer_ptr = &exe->transfer_array;
@@ -261,7 +264,7 @@ void PlanSum::Plan_Processing::Read_Plans (int part)
 							if (leg_itr->Link_Dir () == 1) {
 								flow_index = index = link_ptr->BA_Dir ();
 								if (leg_itr->Type () == USE_BA && exe->Lane_Use_Flows ()) {
-									flow_index = exe->dir_array [index].Flow_Index ();
+									flow_index = exe->dir_array [index].Use_Index ();
 									if (flow_index < 0) {
 										flow_index = index;
 									}
@@ -269,7 +272,7 @@ void PlanSum::Plan_Processing::Read_Plans (int part)
 							} else {
 								flow_index = index = link_ptr->AB_Dir ();
 								if (leg_itr->Type () == USE_AB && exe->Lane_Use_Flows ()) {
-									flow_index = exe->dir_array [index].Flow_Index ();
+									flow_index = exe->dir_array [index].Use_Index ();
 									if (flow_index < 0) {
 										flow_index = index;
 									}
@@ -279,8 +282,8 @@ void PlanSum::Plan_Processing::Read_Plans (int part)
 								exe->Warning (String ("Traveler=%d-%d-%d-%d Link=%d was Not Found") % plan.Household () % plan.Person () % plan.Tour () % plan.Trip () % leg_itr->ID ());
 								break;
 							}
-							flow_time_ptr = &link_flow_ptr->at (period);
-							flow_ptr = &flow_time_ptr->at (flow_index);
+							perf_period = perf_period_array_ptr->Period_Ptr (period);
+							perf_ptr = perf_period->Data_Ptr (flow_index);
 							
 							if (leg_itr->Length () >= link_ptr->Length ()) {
 								flow = 1.0;
@@ -288,16 +291,16 @@ void PlanSum::Plan_Processing::Read_Plans (int part)
 								flow = (double) leg_itr->Length () / link_ptr->Length ();
 								if (flow < 0.01) flow = 0.01;
 							}
-							flow_ptr->Add_Flow (flow);
+							perf_ptr->Add_Volume (flow);
 
 							if (turn_flag) {
 								if (previous_index >= 0) {
 									map2_itr = exe->connect_map.find (Int2_Key (previous_index, index));
 
 									if (map2_itr != exe->connect_map.end ()) {
-										flow_time_ptr = &turn_flow_ptr->at (period);
-										flow_ptr = &flow_time_ptr->at (map2_itr->second);
-										flow_ptr->Add_Flow (1.0);
+										turn_period = turn_period_array_ptr->Period_Ptr (period);
+										turn_ptr = turn_period->Data_Ptr (map2_itr->second);
+										turn_ptr->Add_Turn (1.0);
 									}
 								}
 								previous_index = index;

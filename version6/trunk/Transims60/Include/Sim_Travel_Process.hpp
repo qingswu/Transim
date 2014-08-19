@@ -1,5 +1,5 @@
 //*********************************************************
-//	Sim_Travel_Process.hpp - simulate travel events
+//	Sim_Travel_Process.hpp - travel event manager
 //*********************************************************
 
 #ifndef SIM_TRAVEL_PROCESS_HPP
@@ -9,13 +9,8 @@
 #include "Static_Service.hpp"
 #include "Sim_Statistics.hpp"
 #include "Sim_Travel_Data.hpp"
-#include "Travel_Step.hpp"
-
-#ifdef THREADS
-#include "Ordered_Work.hpp"
-
-typedef Ordered_Work <Sim_Travel_Data, Sim_Travel_Data> Travel_Queue;
-#endif
+#include "Work_Queue.hpp"
+#include "Threads.hpp"
 
 //---------------------------------------------------------
 //	Sim_Travel_Process - execution class definition
@@ -24,26 +19,25 @@ typedef Ordered_Work <Sim_Travel_Data, Sim_Travel_Data> Travel_Queue;
 class SYSLIB_API Sim_Travel_Process : Static_Service
 {
 public:
-	Sim_Travel_Process (void)  { Initialize (); }
+	Sim_Travel_Process (void);
 
 #ifdef THREADS
-	Sim_Travel_Process (Travel_Queue &queue) 
-	{ 
-		travel_queue = &queue; 
-		Initialize (); 
-	}
-	Travel_Queue *travel_queue;
+	Sim_Travel_Process (Work_Queue *queue, int id = 0); 
+
+	Work_Queue *travel_queue;
 
 	void operator()();
 #endif
-	void Initialize (void);
 
-	bool Travel_Processing (Sim_Travel_Ptr sim_travel_ptr);
-	bool Travel_Update (Travel_Step &step);
+	void Travel_Processing (Sim_Travel_Ptr sim_travel_ptr);
+
+	int  ID (void)                         { return (id); }
 
 	Sim_Statistics & Get_Statistics (void) { return (stats); }
 
 private:
+	int id;
 	Sim_Statistics stats;
 };
+
 #endif

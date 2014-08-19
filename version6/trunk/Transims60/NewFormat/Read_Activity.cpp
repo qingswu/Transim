@@ -64,26 +64,34 @@ void NewFormat::Read_Activity (void)
 		trip_rec.End ((activity_file.Start_Min () + activity_file.Start_Max () + 1) / 2);
 		trip_rec.Duration ((activity_file.Time_Min () + activity_file.Time_Max () + 1) / 2);
 
-		lvalue = activity_file.Vehicle ();
+		int vehicle = activity_file.Vehicle ();
 
-		if (activity_file.Version () <= 40) {
-			lvalue = Fix_Vehicle_ID (lvalue);
-		}
-		trip_rec.Vehicle (lvalue);
-		trip_rec.Veh_Type (0);
-
-		if (vehicle_flag && trip_rec.Vehicle () > 0) {
-			Vehicle_Index veh_index (trip_rec.Household (), trip_rec.Vehicle ());
-			Vehicle_Map_Itr map_itr = vehicle_type.find (veh_index);
-			if (map_itr != vehicle_type.end ()) {
-				trip_rec.Veh_Type (map_itr->second);
-			}
-		}
 		if (activity_file.Version () <= 40) {
 			trip_rec.Mode (Trip_Mode_Map (activity_file.Mode ()));
+
+			if (vehicle > 0) {
+				Veh_ID_Map_Itr itr = vehicle40_map.find (vehicle);
+
+				if (itr == vehicle40_map.end () || itr->second.Household () != hhold) continue;
+
+				vehicle = itr->second.Vehicle ();
+			}
 		} else {
 			trip_rec.Mode (activity_file.Mode ());
 		}
+		if (vehicle > 0) {
+			Vehicle_Index veh_index (hhold, vehicle);
+
+			Vehicle_Map_Itr itr = vehicle_type.find (veh_index);
+
+			if (itr == vehicle_type.end ()) continue;
+
+			trip_rec.Veh_Type (itr->second);
+		} else {
+			trip_rec.Veh_Type (0);
+		}
+		trip_rec.Vehicle (vehicle);
+
 		trip_rec.Purpose (purpose);
 		trip_rec.Constraint (activity_file.Constraint ());
 		trip_rec.Priority (activity_file.Priority ());

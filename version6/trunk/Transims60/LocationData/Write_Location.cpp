@@ -14,15 +14,15 @@
 
 void LocationData::Write_Location (void)
 {
-	int i, field, loc, num_in, num_out;
+	int index, field, loc, num_in, num_out;
 	int x, y, zone, zone_field, join;
 	double dx, dy, weight, weight1, weight2, distance;
 	Dtime time;
 
 	Db_Sort_Array *data;
-	Location_Data *location_ptr, *loc_ptr;
+	Location_Data *location_ptr;
 	Link_Data *link_ptr;
-	Loc_Walk_Itr loc_walk_itr;
+	Loc_Walk_Data *loc_walk_ptr;
 	Subzone_Data *subzone_ptr;
 	Sub_Group_Itr sub_itr;
 	Data_Itr data_itr;
@@ -53,7 +53,8 @@ void LocationData::Write_Location (void)
 		if (loc == 0) continue;
 			
 		int_itr = location_map.find (loc);
-		location_ptr = &location_array [int_itr->second];
+		index = int_itr->second;
+		location_ptr = &location_array [index];
 
 		num_in++;
 
@@ -98,44 +99,9 @@ void LocationData::Write_Location (void)
 		//---- calculate the walk access field ----
 
 		if (walk_access_flag) {
-			link_ptr = &link_array [location_ptr->Link ()];
-			weight = 0;
+			loc_walk_ptr = &loc_walk_array [index];
 
-			//---- check for walk permissions ----
-
-			if (Use_Permission (link_ptr->Use (), WALK)) {
-				x = location_ptr->X ();
-				y = location_ptr->Y ();
-
-				//---- find the best transit access points ----
-
-				weight1 = weight2 = 0;
-
-				for (i=0, loc_walk_itr = loc_walk_array.begin (); loc_walk_itr != loc_walk_array.end (); loc_walk_itr++, i++) {
-					if (loc_walk_itr->weight == 0 || loc_walk_itr->count == 0) continue;
-
-					loc_ptr = &location_array [i];
-
-					dx = UnRound (loc_ptr->X () - x);
-					dy = UnRound (loc_ptr->Y () - y);
-
-					distance = sqrt (dx * dx + dy * dy);
-
-					distance += loc_walk_itr->distance;
-
-					if (distance < walk_distance) {
-						weight = loc_walk_itr->weight * (walk_distance - distance);
-						if (weight > weight1) {
-							weight2 = weight1;
-							weight1 = weight;
-						} else if (weight > weight2) {
-							weight2 = weight;
-						}
-					}
-				}
-				weight = (weight1 + weight2) / 2.0;
-			}
-			output_file->Put_Field (walk_access_field, weight);
+			output_file->Put_Field (walk_access_field, loc_walk_ptr->weight);
 		}
 
 		//---- calculate the subzone fields ----

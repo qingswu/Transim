@@ -41,7 +41,7 @@ public:
 	int   First_Turn_From (void)              { return (turn_from); }
 	int   First_Connect (bool to_flag = true) { return ((to_flag) ? connect_to : connect_from); }
 	int   First_Turn (bool to_flag = true)    { return ((to_flag) ? turn_to : turn_from); } 
-	int   Flow_Index (void)                   { return (flow_index); }
+	int   Use_Index (void)                    { return (use_index); }
 
 	void  Link_Dir (int value)                { link_dir.Link_Dir (value); }
 	void  Link (int value)                    { link_dir.Link (value); }
@@ -62,7 +62,7 @@ public:
 	void  First_Connect_From (int value)      { connect_from = value; }
 	void  First_Turn_To (int value)           { turn_to = value; }
 	void  First_Turn_From (int value)         { turn_from = value; }
-	void  Flow_Index (int value)              { flow_index = value; }
+	void  Use_Index (int value)               { use_index = value; }
 	
 	void  Speed (double value)                { speed = (short) exe->Round (value); }
 	void  Time0 (int value)                   { time0 = value; }
@@ -71,7 +71,7 @@ public:
 	void Clear (void)
 	{
 		Link_Dir (0); lanes = left = right = sign = 0; speed = capacity = in_bear = out_bear = 0; time0 = 0; 
-		first_pocket = first_lane_use = connect_to = connect_from = turn_to = turn_from = flow_index = -1;
+		first_pocket = first_lane_use = connect_to = connect_from = turn_to = turn_from = use_index = -1;
 	}
 private:
 
@@ -91,7 +91,7 @@ private:
 	int           connect_from;
 	int           turn_to;
 	int           turn_from;
-	int           flow_index;
+	int           use_index;
 };
 
 typedef vector <Dir_Data>    Dir_Array;

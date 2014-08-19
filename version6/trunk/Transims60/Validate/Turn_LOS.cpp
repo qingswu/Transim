@@ -52,8 +52,8 @@ void Validate::Turn_LOS (void)
 	Dir_Data *dir_ptr;
 	Dir_Itr dir_itr;
 	Connect_Data *connect_ptr;
-	Flow_Time_Array *array_ptr;
-	Flow_Time_Data *flow_ptr;
+	Turn_Period *period_ptr;
+	Turn_Data *turn_ptr;
 
 	//Signal_Data *signal_ptr;
 	//Timing_Data *timing_ptr, timing_rec;
@@ -239,13 +239,13 @@ void Validate::Turn_LOS (void)
 			total = volume = 0;
 
 			for (i=0; i < num; i++) {
-				array_ptr = &turn_count_array [i];
-				flow_ptr = &array_ptr->at (index);
-				total += flow_ptr->Flow ();
+				period_ptr = turn_count_array.Period_Ptr (i);
+				turn_ptr = period_ptr->Data_Ptr (index);
+				total += turn_ptr->Turn ();
 
-				array_ptr = &turn_delay_array [i];
-				flow_ptr = &array_ptr->at (index);
-				volume += flow_ptr->Flow ();
+				period_ptr = turn_period_array.Period_Ptr (i);
+				turn_ptr = period_ptr->Data_Ptr (index);
+				volume += turn_ptr->Turn ();
 			}
 			if (volume == 0 && total == 0) continue;
 

@@ -33,8 +33,8 @@
 #include "Route_Nodes_File.hpp"
 #include "Selection_File.hpp"
 #include "Household_File.hpp"
-#include "Link_Delay_File.hpp"
 #include "Performance_File.hpp"
+#include "Turn_Delay_File.hpp"
 #include "Ridership_File.hpp"
 #include "Veh_Type_File.hpp"
 #include "Trip_File.hpp"
@@ -88,9 +88,6 @@ public:
 	void   Control_Flag (bool flag)           { control_flag = flag; }
 	bool   Control_Flag (void)                { return (control_flag); }
 
-	Units_Type Flow_Units (void)              { return (flow_units); }
-	void   Flow_Units (Units_Type type)       { flow_units = type; }
-
 	bool   Lane_Use_Flows (void)              { return (lane_use_flows); }
 	void   Lane_Use_Flows (bool flag)         { lane_use_flows = flag; }
 
@@ -101,7 +98,7 @@ public:
 	bool Required_File_Check (Db_File &file, System_File_Type type);
 	
 	enum File_Service_Keys { 
-		NOTES_AND_NAME_FIELDS = FILE_SERVICE_OFFSET, FLOW_UNITS, SAVE_LANE_USE_FLOWS, 
+		NOTES_AND_NAME_FIELDS = FILE_SERVICE_OFFSET, SAVE_LANE_USE_FLOWS, 
 		ROUTE_NODE_OFFSET_FLAG, ROUTE_NODE_RUN_TIME_FLAG, ROUTE_NODE_PATTERN_FLAG,
 		ROUTE_NODE_DWELL_FLAG, ROUTE_NODE_TYPE_FLAG, ROUTE_NODE_LEG_TIME_FLAG, ROUTE_NODE_SPEED_FLAG, 
 		SKIM_OD_UNITS, SKIM_TIME_PERIODS, SKIM_TIME_INCREMENT, SKIM_TOTAL_TIME_FLAG, 
@@ -161,7 +158,6 @@ private:
 
 	bool control_flag, ab_flag, zone_flag, link_flag, stop_flag, line_flag, time_flag, zone_loc_flag;
 	bool lane_use_flows;
-	Units_Type flow_units;
 
 	File_Data system_file [END_FILE];
 

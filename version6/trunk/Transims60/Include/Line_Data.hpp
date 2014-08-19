@@ -178,8 +178,10 @@ public:
 
 	void Add_Route_Stops (int value)     { route_stops += value; }
 	void Sum_Ridership (Plan_Data &plan);
-	double Clear_Ridership (bool capacity_flag = false, double factor = 0.0);
-	
+	void Clear_Ridership (void);
+
+	double Ridership_Gap (bool capacity_flag = false, double factor = 0.0);
+
 	void Clear (void) 
 	{
 		num_runs = max_runs = veh_id = offset = route_records = schedule_records = driver_records = route_stops = 0;

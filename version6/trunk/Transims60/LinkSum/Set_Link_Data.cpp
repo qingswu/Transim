@@ -27,6 +27,10 @@ void LinkSum::Set_Link_Data (Data_Group *group)
 		case VHT_DATA:
 		case CONG_VMT_DATA:
 		case CONG_VHT_DATA:
+		case PMT_DATA:
+		case PHT_DATA:
+		case CONG_PMT_DATA:
+		case CONG_PHT_DATA:
 			group->file->Num_Decimals (1);
 			break;
 		default:

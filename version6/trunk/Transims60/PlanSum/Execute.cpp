@@ -18,14 +18,14 @@ void PlanSum::Execute (void)
 
 	//---- initialize link delay data ----
 
-	if (new_delay_flag && !System_File_Flag (LINK_DELAY)) {
-		link_delay_array.Initialize (&time_periods);
+	if (new_delay_flag && !System_File_Flag (PERFORMANCE)) {
+		perf_period_array.Initialize (&time_periods);
 
 		if (turn_flag) {
 			num = (int) connect_array.size ();
 
 			if (num > 0) {
-				turn_delay_array.Initialize (&time_periods, num);
+				turn_period_array.Initialize (&time_periods, num);
 			}
 		}
 	}
@@ -96,9 +96,9 @@ void PlanSum::Execute (void)
 	if (new_delay_flag && Time_Updates ()) {
 		Update_Travel_Times ();
 	}
-	if (System_File_Flag (NEW_LINK_DELAY)) {
+	if (System_File_Flag (NEW_PERFORMANCE)) {
 		Show_Message (1);
-		Write_Link_Delays ();
+		Write_Performance ();
 	}
 
 	//---- transit ridership output ----

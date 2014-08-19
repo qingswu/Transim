@@ -115,7 +115,7 @@ void Message_Service::Exit_Stat (Exit_Code stat)
 	MPI_Finalize();
 #endif
 	if (Master ()) {
-		if (Pause ()) Pause_Process ();
+		if (Pause_Flag ()) Pause_Process ();
 		cout << endl;
 	}
 	int code = Return_Code ();
@@ -184,7 +184,7 @@ void Message_Service::Show_Error (const char *text)
 		} else {
 			cout << "\n\n\tError: " << text << flush;
 
-			Pause (true);
+			Pause_Flag (true);
 
 			Exit_Stat (FATAL);
 		}
@@ -294,13 +294,16 @@ void Message_Service::Show_Progress (const char *text)
 //	End_Progress
 //---------------------------------------------------------
 
-void Message_Service::End_Progress (void) 
+void Message_Service::End_Progress (bool new_line) 
 {
     if (!Quiet ()) {
 		if (Detail ()) {
-			cout << "\n\tRecord: " << progress << endl << flush; 
+			cout << "\n\tRecord: " << progress;
 		} else {
-			cout << " " << progress << endl;
+			cout << " " << progress;
+		}
+		if (new_line) {
+			cout << endl << flush; 
 		}
 	}
 }

@@ -14,8 +14,9 @@ Router_Service::Router_Service (void) : Data_Service (), Flow_Time_Service ()
 
 	walk_path_flag = bike_path_flag = drive_path_flag = access_link_flag = true;
 	transit_path_flag = parkride_path_flag = kissride_path_flag = skim_check_flag = true;
-	script_flag = hhfile_flag = select_flag = update_flag = thread_flag = false;
+	script_flag = hhfile_flag = select_flag = update_flag = thread_flag = save_trip_gap = false;
 
+	Reset_Skim_Gap ();
 	System_Data_Reserve (HOUSEHOLD, 0);
 
 #ifdef THREADS
@@ -117,7 +118,16 @@ void Router_Service::Router_Service_Keys (int *keys)
 	}
 	int flow_time_service_keys [] = {
 		UPDATE_FLOW_RATES,  UPDATE_TURNING_MOVEMENTS, CLEAR_INPUT_FLOW_RATES, 
-		UPDATE_TRAVEL_TIMES, LINK_DELAY_UPDATE_RATE, LINK_DELAY_FLOW_FACTOR, EQUATION_PARAMETERS, 0
+		UPDATE_TRAVEL_TIMES, TIME_UPDATE_RATE, LINK_FLOW_FACTOR, EQUATION_PARAMETERS, 0
 	};
 	Flow_Time_Service_Keys (flow_time_service_keys);
+}
+
+//---------------------------------------------------------
+//	Router_Service -- Skim_Gap
+//---------------------------------------------------------
+
+double Router_Service::Skim_Gap (void)
+{
+	return ((skim_time > 0) ? skim_gap / skim_time : skim_gap); 
 }

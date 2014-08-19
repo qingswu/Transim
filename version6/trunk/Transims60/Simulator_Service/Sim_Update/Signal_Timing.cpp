@@ -22,8 +22,26 @@ bool Sim_Control_Update::Signal_Timing (int index, Sim_Signal_Itr signal_itr)
 	Int_Itr int_itr;
 	Movement_Itr move_itr;
 	Connect_Data *connect_ptr;
+	Node_Data *node_ptr;
 	
 	signal_ptr = &sim->signal_array [index];
+
+	//---- check the subarea status ----
+
+	flag = false;
+
+	for (int_itr = signal_ptr->nodes.begin (); int_itr != signal_ptr->nodes.end (); int_itr++) {
+		node_ptr = &sim->node_array [*int_itr];
+
+		if (node_ptr->Method () == MESOSCOPIC || node_ptr->Method () == MICROSCOPIC) {
+			flag = true;
+			break;
+		}
+	}
+	if (!flag) {
+		return (true);
+	}
+
 	timing_ptr = &signal_ptr->timing_plan [signal_itr->Timing_Index ()];
 
 	//---- check for a barrier change ----

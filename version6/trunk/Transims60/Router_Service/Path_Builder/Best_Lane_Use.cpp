@@ -8,7 +8,7 @@
 //	Best_Lane_Use
 //---------------------------------------------------------
 
-bool Path_Builder::Best_Lane_Use (int index, Dtime time, Dtime &ttime, Dtime &delay, int &cost, int &group)
+bool Path_Builder::Best_Lane_Use (int index, Dtime time, double len_factor, Dtime &ttime, Dtime &delay, int &cost, int &group)
 {
 	int i, num, tt, cst, imp, lanes, type, grp, use_type [2], costs [2], best [2];
 	Dtime ttimes [2], delays [2];
@@ -19,19 +19,13 @@ bool Path_Builder::Best_Lane_Use (int index, Dtime time, Dtime &ttime, Dtime &de
 	Int_Map_Stat map_stat;
 	Lane_Use_Period *period_ptr;
 	Link_Dir_Data *use_index;
-	Flow_Time_Array *link_delay_ptr;
 
 	dir_ptr = &exe->dir_array [index];
 
 	if (param.delay_flag) {
-		link_delay_ptr = exe->link_delay_array.Period_Ptr (time);
-
-		if (link_delay_ptr != 0) {
-			ttimes [0] = link_delay_ptr->Time (index);
-
-			if (dir_ptr->Flow_Index () >= 0) {
-				ttimes [1] = link_delay_ptr->Time (dir_ptr->Flow_Index ());
-			}
+		ttimes [0] = exe->perf_period_array.Travel_Time (index, time, len_factor, forward_flag);
+		if (dir_ptr->Use_Index () >= 0) {
+			ttimes [1] = exe->perf_period_array.Travel_Time (dir_ptr->Use_Index (), time, len_factor, forward_flag);
 		}
 	}
 	if (ttimes [0] == 0) ttimes [0] = dir_ptr->Time0 ();

@@ -12,7 +12,7 @@ void Data_Service::Read_Veh_Types (void)
 {
 	Veh_Type_File *file = (Veh_Type_File *) System_File_Handle (VEHICLE_TYPE);
 	
-	int num;
+	int num, cell_size;
 	double length, min_len;
 	Veh_Type_Data veh_type_rec;
 	Int_Map_Stat map_stat;
@@ -68,9 +68,11 @@ void Data_Service::Read_Veh_Types (void)
 	}
 	if (length <= 0.0) length = min_len;
 	if (length <= 0.0) return;
+	cell_size = DTOI (min_len);
 
 	for (veh_type_itr = veh_type_array.begin (); veh_type_itr != veh_type_array.end (); veh_type_itr++) {
 		veh_type_itr->PCE (Round (veh_type_itr->Length () / length));
+		veh_type_itr->Cells (MAX (((veh_type_itr->Length () + cell_size / 2) / cell_size), 1));
 	}
 }
 
@@ -113,7 +115,7 @@ bool Data_Service::Get_Veh_Type_Data (Veh_Type_File &file, Veh_Type_Data &veh_ty
 
 	veh_type_rec.Type (type);
 
-	if (file.SubType_Flag () && file.Version () <= 40) {
+	if (file.Version () <= 40) {
 		veh_type_rec.Type (VehType40_Map (type, file.SubType ()));
 	}
 
@@ -146,7 +148,7 @@ bool Data_Service::Get_Veh_Type_Data (Veh_Type_File &file, Veh_Type_Data &veh_ty
 	if (veh_type_rec.Max_Accel () < Round (0.5)) {
 		dvalue = UnRound (veh_type_rec.Max_Accel ());
 
-		Warning (String ("Maximum Acceleration %.1lf for Vehicle Type %d-%d is Out of Range") % type % dvalue); 
+		Warning (String ("Vehicle Type %d Maximum Acceleration %.1lf is Out of Range") % type % dvalue); 
 		return (false);
 	}
 

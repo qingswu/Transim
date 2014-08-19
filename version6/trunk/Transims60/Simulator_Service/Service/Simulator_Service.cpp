@@ -17,13 +17,16 @@ Simulator_Service::Simulator_Service (void) : Data_Service (), Select_Service ()
 	max_subarea = num_vehicles = 0;
 	num_subareas = num_parts = num_sims = 1;
 	first_part = last_part = -1;
-	//use_update_time = turn_update_time = 0;
-	//signal_update_time = timing_update_time = run_update_time = 0;
+	max_method = 0;
+	end_period = MAX_INTEGER;
+	half_second = Dtime (0.5, SECONDS);
 	one_second = Dtime (1, SECONDS);
+	one_minute = Dtime (60, SECONDS);
+	one_hour = Dtime (3600, SECONDS);
 	num_travelers = 1000;
 	avg_cell_per_veh = 1.25;
-	two_step = 2 * one_second;
-	active = step_flag = no_sim_flag = false;
+	active = false;
+	step_code = -1;
 
 #ifdef THREADS
 	Enable_Threads (true);
@@ -40,7 +43,14 @@ void Simulator_Service::Simulator_Service_Keys (int *keys)
 	Control_Key control_keys [] = { //--- code, key, level, status, type, default, range, help ----
 		{ SIMULATION_START_TIME, "SIMULATION_START_TIME", LEVEL0, OPT_KEY, TIME_KEY, "0:00", "", NO_HELP },
 		{ SIMULATION_END_TIME, "SIMULATION_END_TIME", LEVEL0, OPT_KEY, TIME_KEY, "24:00", "", NO_HELP },
-		{ TIME_STEPS, "TIME_STEPS", LEVEL0, OPT_KEY, TIME_KEY, "1.0 seconds", "0.1..10.0 seconds", NO_HELP },
+		{ SIMULATION_TIME_BREAKS, "SIMULATION_TIME_BREAKS", LEVEL0, OPT_KEY, TEXT_KEY, "NONE", TIME_BREAK_RANGE, NO_HELP }, 
+		{ SIMULATION_GROUP_SUBAREAS, "SIMULATION_GROUP_SUBAREAS", LEVEL1, OPT_KEY, LIST_KEY, "ALL", "ALL, 0..10, 15, 20..100", NO_HELP },
+		{ GROUP_PERIOD_METHODS, "GROUP_PERIOD_METHODS", LEVEL1, OPT_KEY, LIST_KEY, "MESOSCOPIC", "UNSIM, MACRO, MESO, MICRO", NO_HELP },
+		{ UNSIMULATED_TIME_STEPS, "UNSIMULATED_TIME_STEPS", LEVEL0, OPT_KEY, TIME_KEY, "1.0 minutes", "1.0..900.0 seconds", NO_HELP },
+		{ MACROSCOPIC_TIME_STEPS, "MACROSCOPIC_TIME_STEPS", LEVEL0, OPT_KEY, TIME_KEY, "6.0 seconds", "1.0..10.0 seconds", NO_HELP },
+		{ MESOSCOPIC_TIME_STEPS, "MESOSCOPIC_TIME_STEPS", LEVEL0, OPT_KEY, TIME_KEY, "1.0 seconds", "0.5..3.0 seconds", NO_HELP },
+		{ MICROSCOPIC_TIME_STEPS, "MICROSCOPIC_TIME_STEPS", LEVEL0, OPT_KEY, TIME_KEY, "0.1 seconds", "0.1..1.0 seconds", NO_HELP },
+
 		{ CELL_SIZE, "CELL_SIZE", LEVEL0, OPT_KEY, FLOAT_KEY, "0.0 feet", "0, 5..35 feet", NO_HELP },
 		{ PLAN_FOLLOWING_DISTANCE, "PLAN_FOLLOWING_DISTANCE", LEVEL0, OPT_KEY, INT_KEY, "1700 feet", "0..6000 feet", NO_HELP },
 		{ LOOK_AHEAD_DISTANCE, "LOOK_AHEAD_DISTANCE", LEVEL0, OPT_KEY, INT_KEY, "800 feet", "0..6000 feet", NO_HELP },
@@ -65,13 +75,6 @@ void Simulator_Service::Simulator_Service_Keys (int *keys)
 		{ RELOAD_CAPACITY_PROBLEMS, "RELOAD_CAPACITY_PROBLEMS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },		
 		{ COUNT_PROBLEM_WARNINGS, "COUNT_PROBLEM_WARNINGS", LEVEL0, OPT_KEY, BOOL_KEY, "TRUE", BOOL_RANGE, NO_HELP },
 		{ PRINT_PROBLEM_MESSAGES, "PRINT_PROBLEM_MESSAGES", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
-		{ UNSIMULATED_SUBAREAS, "UNSIMULATED_SUBAREAS", LEVEL0, OPT_KEY, LIST_KEY, "NONE", RANGE_RANGE, NO_HELP },
-		{ MACROSCOPIC_SUBAREAS, "MACROSCOPIC_SUBAREAS", LEVEL0, OPT_KEY, LIST_KEY, "NONE", RANGE_RANGE, NO_HELP },
-		{ MESOSCOPIC_SUBAREAS, "MESOSCOPIC_SUBAREAS", LEVEL0, OPT_KEY, LIST_KEY, "ALL", RANGE_RANGE, NO_HELP },
-		{ MICROSCOPIC_SUBAREAS, "MICROSCOPIC_SUBAREAS", LEVEL0, OPT_KEY, LIST_KEY, "NONE", RANGE_RANGE, NO_HELP },
-		{ TURN_POCKET_FACTOR, "TURN_POCKET_FACTOR", LEVEL0, OPT_KEY, FLOAT_KEY, "0.8", "0..1.0", NO_HELP },
-		{ MERGE_POCKET_FACTOR, "MERGE_POCKET_FACTOR", LEVEL0, OPT_KEY, FLOAT_KEY, "0.6", "0..1.0", NO_HELP },
-		{ OTHER_POCKET_FACTOR, "OTHER_POCKET_FACTOR", LEVEL0, OPT_KEY, FLOAT_KEY, "0.5", "0..1.0", NO_HELP },
 		{ NUMBER_OF_TRAVELERS, "NUMBER_OF_TRAVELERS", LEVEL0, OPT_KEY, INT_KEY, "1000", "0..100000000", NO_HELP },
 		END_CONTROL
 	};
@@ -105,11 +108,11 @@ void Simulator_Service::Simulator_Service_Keys (int *keys)
 //	Get_Statistics
 //---------------------------------------------------------
 
-Sim_Statistics & Simulator_Service::Get_Statistics (void)
+Sim_Statistics * Simulator_Service::Get_Statistics (void)
 {
 	sim_travel_step.Add_Statistics (stats);
-	sim_node_step.Add_Statistics (stats);
-	return (stats);
+	sim_link_step.Add_Statistics (stats);
+	return (&stats);
 }
 
 //---------------------------------------------------------

@@ -10,8 +10,9 @@
 
 void Simulator_Service::Transit_Plans (void)
 {
-	int i, j, index, offset, last_offset, next_offset, traveler;
+	int i, j, index, offset, last_offset, next_offset, traveler, last_leg;
 	Dtime time, dwell;
+	bool first_flag;
 
 	Line_Itr line_itr;
 	Line_Stop_Itr stop_itr;
@@ -21,9 +22,8 @@ void Simulator_Service::Transit_Plans (void)
 	Stop_Data *stop_ptr;
 	Stop_Itr st_itr;
 	Sim_Dir_Ptr sim_dir_ptr;
-	Sim_Plan_Ptr sim_plan_ptr;
-	Sim_Leg_Data leg_rec;
-	Sim_Leg_RItr leg_itr, last_itr;
+	Sim_Plan_Data sim_plan, *sim_plan_ptr;
+	Sim_Leg_Data leg_rec, *leg_ptr, *last_ptr;
 	Vehicle_Map_Itr veh_map_itr;
 	Vehicle_Index veh_index;
 	Veh_Type_Data *veh_type_ptr;
@@ -31,6 +31,8 @@ void Simulator_Service::Transit_Plans (void)
 	Int2_Map_Itr map2_itr;
 	Connect_Data *connect_ptr;
 	Sim_Stop_Data sim_stop_rec, *sim_stop_ptr;
+	Integers leg_list;
+	Int_RItr int_ritr;
 
 	//---- convert stop offsets to cells ----
 
@@ -62,11 +64,10 @@ void Simulator_Service::Transit_Plans (void)
 	}
 
 	//---- process each transit route ----
-	
-	Sim_Plan_Data zero_plan;
-	transit_plans.assign (line_array.size (), zero_plan);
 
-	leg_rec.Mode (DRIVE_MODE);
+	sim_plan.Clear ();
+	transit_plans.assign (line_array.size (), sim_plan);
+	transit_legs.reserve (line_array.Route_Stops ());
 
 	for (i=0, line_itr = line_array.begin (); line_itr != line_array.end (); line_itr++, i++) {
 		if (line_itr->size () == 0 || line_itr->begin ()->size () == 0) continue;
@@ -77,6 +78,9 @@ void Simulator_Service::Transit_Plans (void)
 
 		sim_plan_ptr->Mode (TRANSIT_MODE);
 		sim_plan_ptr->Vehicle (0);
+		last_leg = -1;
+		first_flag = true;
+		leg_list.clear ();
 
 		traveler = line_array.Vehicle_ID (line_itr->Route (), 0);
 
@@ -116,6 +120,7 @@ void Simulator_Service::Transit_Plans (void)
 				dir_ptr = &dir_array [*driver_itr];
 
 				if (j != 0) {
+					leg_rec.Clear ();
 					leg_rec.Mode (DRIVE_MODE);
 					leg_rec.Type (DIR_ID);
 					leg_rec.Index (*driver_itr);
@@ -127,13 +132,21 @@ void Simulator_Service::Transit_Plans (void)
 					}
 					leg_rec.Time (dir_ptr->Time0 () * offset / sim_dir_ptr->Length () + 1);
 					time += leg_rec.Time ();
-					sim_plan_ptr->push_back (leg_rec);
+					last_leg = transit_legs.Put_Record (leg_rec, last_leg);
+
+					leg_list.push_back (last_leg);
+
+					if (first_flag) {
+						sim_plan_ptr->First_Leg (last_leg);
+						first_flag = false;
+					}
 				}
 				if (*driver_itr == index) break;
 				last_offset = 0;
 			}
 			last_offset = next_offset;
 
+			leg_rec.Clear ();
 			leg_rec.Mode (OTHER_MODE);
 			leg_rec.Type (STOP_ID);
 			leg_rec.Index (stop_itr->Stop ());
@@ -144,57 +157,67 @@ void Simulator_Service::Transit_Plans (void)
 				leg_rec.Time (dwell);
 			}
 			time += leg_rec.Time ();
-			sim_plan_ptr->push_back (leg_rec);
+			last_leg = transit_legs.Put_Record (leg_rec, last_leg);
+
+			leg_list.push_back (last_leg);
+
+			if (first_flag) {
+				sim_plan_ptr->First_Leg (last_leg);
+				first_flag = false;
+			}
 		}
+		sim_plan_ptr->End (time);
 
 		//---- set the lane connections ----
 
-		last_itr = sim_plan_ptr->rend ();
+		last_ptr = 0;
 
-		for (leg_itr = sim_plan_ptr->rbegin (); leg_itr != sim_plan_ptr->rend (); leg_itr++) {
-			if (leg_itr->Type () == STOP_ID) {
-				sim_stop_ptr = &sim_stop_array [leg_itr->Index ()];
+		for (int_ritr = leg_list.rbegin (); int_ritr != leg_list.rend (); int_ritr++) {
+			leg_ptr = transit_legs.Record_Pointer (*int_ritr);
+			
+			if (leg_ptr->Type () == STOP_ID) {
+				sim_stop_ptr = &sim_stop_array [leg_ptr->Index ()];
 
-				leg_itr->In_Lane_Low (sim_stop_ptr->Min_Lane ());
-				leg_itr->In_Lane_High (sim_stop_ptr->Max_Lane ());
-				leg_itr->In_Best_Low (sim_stop_ptr->Min_Lane ());
-				leg_itr->In_Best_High (sim_stop_ptr->Max_Lane ());
+				leg_ptr->In_Lane_Low (sim_stop_ptr->Min_Lane ());
+				leg_ptr->In_Lane_High (sim_stop_ptr->Max_Lane ());
+				leg_ptr->In_Best_Low (sim_stop_ptr->Min_Lane ());
+				leg_ptr->In_Best_High (sim_stop_ptr->Max_Lane ());
 
-				leg_itr->Out_Lane_Low (sim_stop_ptr->Min_Lane ());
-				leg_itr->Out_Lane_High (sim_stop_ptr->Max_Lane ());
-				leg_itr->Out_Best_Low (sim_stop_ptr->Min_Lane ());
-				leg_itr->Out_Best_High (sim_stop_ptr->Max_Lane ());
+				leg_ptr->Out_Lane_Low (sim_stop_ptr->Min_Lane ());
+				leg_ptr->Out_Lane_High (sim_stop_ptr->Max_Lane ());
+				leg_ptr->Out_Best_Low (sim_stop_ptr->Min_Lane ());
+				leg_ptr->Out_Best_High (sim_stop_ptr->Max_Lane ());
 
-				leg_itr->Connect (-1);
+				leg_ptr->Connect (-1);
 
-				if (last_itr != sim_plan_ptr->rend ()) {
-					last_itr->In_Lane_Low (sim_stop_ptr->Min_Lane ());
-					last_itr->In_Lane_High (sim_stop_ptr->Max_Lane ());
-					last_itr->In_Best_Low (sim_stop_ptr->Min_Lane ());
-					last_itr->In_Best_High (sim_stop_ptr->Max_Lane ());
+				if (last_ptr != 0) {
+					last_ptr->In_Lane_Low (sim_stop_ptr->Min_Lane ());
+					last_ptr->In_Lane_High (sim_stop_ptr->Max_Lane ());
+					last_ptr->In_Best_Low (sim_stop_ptr->Min_Lane ());
+					last_ptr->In_Best_High (sim_stop_ptr->Max_Lane ());
 				}
-			} else if (last_itr != sim_plan_ptr->rend ()) {
-				if (last_itr->Type () == STOP_ID) {
-					leg_itr->Out_Lane_Low (last_itr->In_Lane_Low ());
-					leg_itr->Out_Lane_High (last_itr->In_Lane_High ());
-					leg_itr->Out_Best_Low (last_itr->In_Best_Low ());
-					leg_itr->Out_Best_High (last_itr->In_Best_High ());
+			} else if (last_ptr != 0) {
+				if (last_ptr->Type () == STOP_ID) {
+					leg_ptr->Out_Lane_Low (last_ptr->In_Lane_Low ());
+					leg_ptr->Out_Lane_High (last_ptr->In_Lane_High ());
+					leg_ptr->Out_Best_Low (last_ptr->In_Best_Low ());
+					leg_ptr->Out_Best_High (last_ptr->In_Best_High ());
 
-					leg_itr->Max_Speed (1);
-					leg_itr->Connect (-1);
+					leg_ptr->Max_Speed (1);
+					leg_ptr->Connect (-1);
 				} else {
 
 					//---- get the connection to the next link ----
 
-					map2_itr = connect_map.find (Int2_Key (leg_itr->Index (), last_itr->Index ()));
+					map2_itr = connect_map.find (Int2_Key (leg_ptr->Index (), last_ptr->Index ()));
 
 					if (map2_itr == connect_map.end ()) {
 						if (param.print_problems) {
-							dir_ptr = &dir_array [last_itr->Index ()];
+							dir_ptr = &dir_array [last_ptr->Index ()];
 							link_ptr = &link_array [dir_ptr->Link ()];
 							index = link_ptr->Link ();
 
-							dir_ptr = &dir_array [leg_itr->Index ()];
+							dir_ptr = &dir_array [leg_ptr->Index ()];
 							link_ptr = &link_array [dir_ptr->Link ()];
 
 							Warning (String ("Transit Route %d Connection was Not Found between Links %d and %d") % 
@@ -204,23 +227,23 @@ void Simulator_Service::Transit_Plans (void)
 					}
 					connect_ptr = &connect_array [map2_itr->second];
 
-					leg_itr->Out_Lane_Low (connect_ptr->Low_Lane ());
-					leg_itr->Out_Lane_High (connect_ptr->High_Lane ());
-					leg_itr->Out_Best_Low (connect_ptr->Low_Lane ());
-					leg_itr->Out_Best_High (connect_ptr->High_Lane ());
+					leg_ptr->Out_Lane_Low (connect_ptr->Low_Lane ());
+					leg_ptr->Out_Lane_High (connect_ptr->High_Lane ());
+					leg_ptr->Out_Best_Low (connect_ptr->Low_Lane ());
+					leg_ptr->Out_Best_High (connect_ptr->High_Lane ());
 
-					last_itr->In_Lane_Low (connect_ptr->To_Low_Lane ());
-					last_itr->In_Lane_High (connect_ptr->To_High_Lane ());
-					last_itr->In_Best_Low (connect_ptr->To_Low_Lane ());
-					last_itr->In_Best_High (connect_ptr->To_High_Lane ());
+					last_ptr->In_Lane_Low (connect_ptr->To_Low_Lane ());
+					last_ptr->In_Lane_High (connect_ptr->To_High_Lane ());
+					last_ptr->In_Best_Low (connect_ptr->To_Low_Lane ());
+					last_ptr->In_Best_High (connect_ptr->To_High_Lane ());
 
 					if (connect_ptr->Speed () > 0) {
-						leg_itr->Max_Speed (connect_ptr->Speed ());
+						leg_ptr->Max_Speed (connect_ptr->Speed ());
 					}
-					leg_itr->Connect (map2_itr->second);
+					leg_ptr->Connect (map2_itr->second);
 				}
 			}
-			last_itr = leg_itr;
+			last_ptr = leg_ptr;
 		}
 	}
 }

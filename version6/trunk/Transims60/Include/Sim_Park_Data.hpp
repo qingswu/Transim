@@ -5,8 +5,7 @@
 #ifndef SIM_PARK_DATA_HPP
 #define SIM_PARK_DATA_HPP
 
-#include <vector>
-using namespace std;
+#include "Data_Pack.hpp"
 
 //---------------------------------------------------------
 //	Sim_Park_Data class definition
@@ -48,7 +47,7 @@ private:
 	char  max_ba;
 };
 	
-typedef vector <Sim_Park_Data>      Sim_Park_Array;
+typedef Vector <Sim_Park_Data>      Sim_Park_Array;
 typedef Sim_Park_Array::iterator    Sim_Park_Itr;
 typedef Sim_Park_Data *             Sim_Park_Ptr;
 

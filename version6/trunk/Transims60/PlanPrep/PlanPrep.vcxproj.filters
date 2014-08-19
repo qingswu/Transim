@@ -56,6 +56,9 @@
     <ClCompile Include="Write_Temp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Repair_Legs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\PlanPrep.hpp">

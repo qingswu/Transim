@@ -13,10 +13,9 @@
 void TourData::Program_Control (void)
 {
 	int i, num;
-	String key, name;
+	String key, name, format;
 	Strings strings;
 	Str_Itr str_itr;
-	Format_Type format;
 	Table_Group table_group, *table_ptr;
 	Table_Itr table_itr;
 
@@ -171,19 +170,17 @@ void TourData::Program_Control (void)
 
 	format = Db_Header::Def_Format (key);
 
-	if (format == UNFORMATED) {
+	if (format.empty ()) {
 		if (Check_Control_Key (TARGET_TOUR_FORMAT)) {
-			name = Get_Control_String (TARGET_TOUR_FORMAT);
+			format = Get_Control_String (TARGET_TOUR_FORMAT);
 		} else {
-			name = Get_Default_Text (TARGET_TOUR_FORMAT);
+			format = Get_Default_Text (TARGET_TOUR_FORMAT);
 		}
-		format = Format_Code (name);
 	}
-	target_matrix = TDF_Matrix (format);
+	target_matrix = TDF_Matrix (READ, format);
 
 	target_matrix->File_Type ("Target Tour Matrix");
 	target_matrix->File_ID ("Target");
-	target_matrix->Dbase_Format (format);
 
 	target_matrix->Open (key);
 
@@ -200,19 +197,17 @@ void TourData::Program_Control (void)
 
 	format = Db_Header::Def_Format (key);
 
-	if (format == UNFORMATED) {
+	if (format.empty ()) {
 		if (Check_Control_Key (BASE_TOUR_FORMAT)) {
-			name = Get_Control_String (BASE_TOUR_FORMAT);
+			format = Get_Control_String (BASE_TOUR_FORMAT);
 		} else {
-			name = Get_Default_Text (BASE_TOUR_FORMAT);
+			format = Get_Default_Text (BASE_TOUR_FORMAT);
 		}
-		format = Format_Code (name);
 	}
-	base_matrix = TDF_Matrix (format);
+	base_matrix = TDF_Matrix (READ, format);
 
 	base_matrix->File_Type ("Base Tour Matrix");
 	base_matrix->File_ID ("Base");
-	base_matrix->Dbase_Format (format);
 
 	base_matrix->Open (key);
 
@@ -230,15 +225,14 @@ void TourData::Program_Control (void)
 		Print (1);
 
 		if (Check_Control_Key (NEW_RESULT_FORMAT)) {
-			format = Format_Code (Get_Control_String (NEW_RESULT_FORMAT));
+			format = Get_Control_String (NEW_RESULT_FORMAT);
 		} else {
-			format = Format_Code (Get_Default_Text (NEW_RESULT_FORMAT));
+			format = Get_Default_Text (NEW_RESULT_FORMAT);
 		}
-		result_matrix = TDF_Matrix (format);
+		result_matrix = TDF_Matrix (CREATE, format);
 
 		result_matrix->File_Type ("New Result Matrix");
 		result_matrix->File_ID ("Result");
-		result_matrix->Dbase_Format (format);
 
 		result_matrix->Filename (Project_Filename (key));
 

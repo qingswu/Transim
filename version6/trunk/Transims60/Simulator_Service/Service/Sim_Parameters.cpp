@@ -10,8 +10,6 @@
 
 void Sim_Parameters::Clear_Parameters (void)
 {
-	subarea_method.clear ();
-
 	start_time_step = 0;
 	end_time_step = 0;
 	step_size = 0;
@@ -35,10 +33,6 @@ void Sim_Parameters::Clear_Parameters (void)
 	change_priority = 0;
 	connect_lane_weight = 0;
 	lane_use_weight = 0;
-
-	turn_factor = 0.0;
-	merge_factor = 0.0;
-	other_factor = 0.0;
 
 	memset (reaction_time, '\0', sizeof (reaction_time));
 	memset (permission_prob, '\0', sizeof (permission_prob));

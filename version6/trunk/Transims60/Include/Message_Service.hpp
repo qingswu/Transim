@@ -96,7 +96,7 @@ public:
 	void Show_Progress (string text)                 { Show_Progress (text.c_str ()); }
 	void Show_Progress (const char *text);          
 	
-	void End_Progress (void);
+	void End_Progress (bool new_line = true);
 	void End_Progress (string text)                  { End_Progress (text.c_str ()); }
 	void End_Progress (const char *text);
 
@@ -141,8 +141,8 @@ protected:
 	bool Warning_Flag (void)                         { return (warning_flag); }
 	void Warning_Flag (bool flag)                    { warning_flag = flag; }
 
-	bool Pause (void)                                { return (pause); }
-	void Pause (bool flag)                           { pause = flag; }
+	bool Pause_Flag (void)                           { return (pause); }
+	void Pause_Flag (bool flag)                      { pause = flag; }
 
 	bool No_Pause (void)                             { return (no_pause); }
 	void No_Pause (bool flag)                        { no_pause = flag; }

@@ -12,9 +12,9 @@ void Router::Program_Control (void)
 {
 	String key;
 
-	if (!Set_Control_Flag (UPDATE_FLOW_RATES) && !Set_Control_Flag (UPDATE_TRAVEL_TIMES) && Check_Control_Key (NEW_LINK_DELAY)) {
-		Warning ("Flow or Time Updates are required to output a New Link Delay File");
-		System_File_False (NEW_LINK_DELAY);
+	if (!Set_Control_Flag (UPDATE_FLOW_RATES) && !Set_Control_Flag (UPDATE_TRAVEL_TIMES) && Check_Control_Key (NEW_PERFORMANCE)) {
+		Warning ("Flow or Time Updates are required to output a New Performance File");
+		System_File_False (NEW_PERFORMANCE);
 	}
 
 	//---- initialize the MPI thread range ----
@@ -26,6 +26,51 @@ void Router::Program_Control (void)
 	Router_Service::Program_Control ();
 
 	Read_Select_Keys ();
+										
+	Print (2, String ("%s Control Keys:") % Program ());
+
+	//---- application type ----
+
+	key = Get_Control_String (APPLICATION_METHOD);
+	method = Router_Method_Code (key);
+
+	Print (1);
+	Output_Control_Key (APPLICATION_METHOD, Router_Method_Code (method));
+
+	//---- store trips in memory ----
+
+	trip_memory_flag = Get_Control_Flag (STORE_TRIPS_IN_MEMORY);
+
+	if (!trip_memory_flag) {
+		System_Read_False (TRIP);
+		System_Data_Reserve (TRIP, 0);
+	}
+
+	//---- store plans in memory ----
+
+	plan_memory_flag = Get_Control_Flag (STORE_PLANS_IN_MEMORY);
+
+	if (plan_memory_flag) {
+		time_sort_flag = (Trip_Sort () == TIME_SORT);
+		Trip_Sort (TRAVELER_SORT);
+	} else {
+		System_Read_False (PLAN);
+		System_Data_Reserve (PLAN, 0);
+
+		if (Trip_Sort () == TIME_SORT) {
+			Error ("Time Sorting Requires Plans in Memory");
+		}
+	}
+
+	if (!trip_memory_flag || !plan_memory_flag) {
+		if (method == DUE_PLANS) {
+			Error ("Dynamic User Equilibrium Requires Trips and Plans in Memory");
+		}
+	} else {
+		Memory_Flag (true);
+	}
+
+	//---- check file and selection keys ----
 
 	if (percent_flag) {
 		random_select.Seed (random.Seed () + 1);
@@ -40,36 +85,41 @@ void Router::Program_Control (void)
 	}
 
 	if (System_File_Flag (TRIP)) {
-		//Path_Parameters param;
-		//Set_Parameters (param);
-
 		trip_flag = true;
 		trip_file = (Trip_File *) System_File_Handle (TRIP);
-		if (trip_file->Time_Sort ()) {
-			Error ("Trip Files should not be Time Sorted");
+
+		if (trip_file->Version () < 60) {
+			Error (String ("Convert Version %.1lf Trip File to Version 6.0 using NewFormat") % (trip_file->Version () / 10.0));
+		}
+		if (trip_file->Time_Sort () && !trip_memory_flag) {
+			Error ("Trip Files should be Traveler Sorted");
 		}
 		trip_set_flag = (trip_file->Part_Flag ());
 
 		Required_File_Check (*trip_file, LOCATION);
 	}
+	if (System_File_Flag (PLAN)) {
+		plan_flag = true;
+		plan_file = (Plan_File *) System_File_Handle (PLAN);
+
+		if (plan_file->Time_Sort () && !plan_memory_flag) {
+			Error ("Plan Files should be Traveler Sorted");
+		}
+	}
+	if (!trip_flag && !plan_flag) {
+		Error ("An Input Trip or Plan File is Required");
+	}
+
 	if (System_File_Flag (NEW_PLAN)) {
 		new_plan_flag = true;
 		new_plan_file = (Plan_File *) System_File_Handle (NEW_PLAN);
 
-		if (trip_flag) {
+		if (time_sort_flag) {
+			new_plan_file->Sort_Type (TIME_SORT);
+		} else if (trip_flag) {
 			new_plan_file->Sort_Type (trip_file->Sort_Type ());
-		}
-		if (System_File_Flag (PLAN)) {
-			plan_flag = true;
-			plan_file = (Plan_File *) System_File_Handle (PLAN);
-
-			if (trip_flag) {
-				if (plan_file->Time_Sort ()) {
-					Error ("Plan Files should not be Time Sorted");
-				}
-			} else {
-				new_plan_file->Sort_Type (plan_file->Sort_Type ());
-			}
+		} else {
+			new_plan_file->Sort_Type (plan_file->Sort_Type ());
 		}
 		new_plan_file->Update_Def_Header ();
 
@@ -77,31 +127,51 @@ void Router::Program_Control (void)
 
 		if (trip_flag) {
 			if (!Single_Partition ()) {
-				plan_set_flag = new_plan_file->Part_Flag ();
-				if (plan_set_flag && !select_flag && !trip_set_flag) {
+				new_set_flag = new_plan_file->Part_Flag ();
+				if (new_set_flag && !select_flag && !trip_set_flag) {
 					Error ("A Selection File is required to Partition the Trips");
 				}
 				if (plan_flag) {
-					old_plan_flag = (!trip_set_flag && plan_file->Part_Flag ());
+					plan_set_flag = (!trip_set_flag && plan_file->Part_Flag ());
 				}
 			}
-		} else if (!plan_flag) {
-			Error ("An Input Trip or Plan File is Required");
 		} else if (Num_Threads () > 1 && !Single_Partition ()) {
-			plan_set_flag = (plan_file->Part_Flag () && new_plan_file->Part_Flag ());
+			new_set_flag = (plan_file->Part_Flag () && new_plan_file->Part_Flag ());
 		}
+		if (method == DTA_FLOWS) {
+			Warning ("New Plans are not Consistent with DTA Flows");
+		}
+	} else if (method == DUE_PLANS) {
+		Error ("A New Plans File is Required for Dynamic User Equilibrium");
 	}
 	if (System_File_Flag (NEW_PROBLEM)) {
 		problem_flag = true;
 		problem_file = (Problem_File *) System_File_Handle (NEW_PROBLEM);
 		problem_file->Router_Data ();
 
-		if (plan_set_flag) {
+		if (new_set_flag) {
 			problem_set_flag = (problem_file->Part_Flag ());
 		}
 	}
+	if (method == DTA_FLOWS && !System_File_Flag (NEW_PERFORMANCE)) {
+		Error ("A New Performance File is Required for Dynamic Traffic Assignment");
+	}
 
-	Print (2, String ("%s Control Keys:") % Program ());
+	//---- intialize trip priority ----
+
+	if (Check_Control_Key (INITIALIZE_TRIP_PRIORITY)) {
+		key = Get_Control_Text (INITIALIZE_TRIP_PRIORITY);
+
+		if (!key.empty () && !key.Equals ("NO")) {
+			priority_flag = true;
+			initial_priority = Priority_Code (key);
+		} else {
+			priority_flag = false;
+		}
+	} else {
+		priority_flag = true;
+		initial_priority = CRITICAL;
+	}
 
 	if (new_plan_flag && plan_flag) {
 		if (script_flag) Print (1);
@@ -119,15 +189,8 @@ void Router::Program_Control (void)
 			warn_flag = Get_Control_Flag (PRINT_UPDATE_WARNINGS);
 			Print (1);
 		}
-	} else if (Set_Control_Flag (REROUTE_FROM_TIME_POINT)) {
+	} else if (Get_Control_Time (REROUTE_FROM_TIME_POINT) > 0) {
 		Error ("Re-Routing Required an Input and Output Plan File");
-	}
-	if (!plan_flag && !trip_flag) {
-		Error ("Router requires an input Trip or Plan file");
-	}
-
-	if (select_mode [DRIVE_MODE] || select_mode [PNR_IN_MODE] || select_mode [PNR_OUT_MODE] ||
-		select_mode [KNR_IN_MODE] || select_mode [KNR_OUT_MODE] || select_mode [TAXI_MODE]) {
 	}
 
 	//---- maximum number of iterations ----
@@ -136,15 +199,20 @@ void Router::Program_Control (void)
 	max_iteration = Get_Control_Integer (MAXIMUM_NUMBER_OF_ITERATIONS);
 
 	if (max_iteration > 1) {
+		
 		if (!trip_flag) {
 			Error ("Iterative Processing Requires a Trip File");
 		}
 		if (!Flow_Updates () || !Time_Updates ()) {
 			Error ("Iterative Processing Requires Flow and Travel Time Updates");
 		}
-		//if (Clear_Flow_Flag () && System_File_Flag (LINK_DELAY)) {
-		//	Error ("Clear Input Flow Rates should be False for Iterative Processing");
-		//}
+		if (method == TRAVEL_PLANS) {
+			Warning ("Application Method Upgraded to Dynamic User Equilibrium");
+			method = DUE_PLANS;
+		} else if (method == LINK_FLOWS) {
+			Warning ("Application Method Upgraded to Dynamic Traffic Assignment");
+			method = DTA_FLOWS;
+		}
 		iteration_flag = true;
 
 		//---- link gap criteria ----
@@ -159,39 +227,75 @@ void Router::Program_Control (void)
 
 		transit_gap = Get_Control_Double (TRANSIT_CAPACITY_CRITERIA);
 
-		//---- initial weighting factor ----
+		//---- method specific keys ----
 
-		factor = Get_Control_Double (INITIAL_WEIGHTING_FACTOR);
+		if (method == DTA_FLOWS) {
+
+			//---- initial weighting factor ----
+
+			factor = Get_Control_Double (INITIAL_WEIGHTING_FACTOR);
 		
-		//---- iteration weighting increment ----
+			//---- iteration weighting increment ----
 
-		increment = Get_Control_Double (ITERATION_WEIGHTING_INCREMENT);
+			increment = Get_Control_Double (ITERATION_WEIGHTING_INCREMENT);
 
-		//---- maximum weighting factor ----
+			//---- maximum weighting factor ----
 
-		max_factor = Get_Control_Double (MAXIMUM_WEIGHTING_FACTOR);
+			max_factor = Get_Control_Double (MAXIMUM_WEIGHTING_FACTOR);
 
-		//---- minimize vehicle hours ----
+			//---- minimize vehicle hours ----
 		
-		min_vht_flag = Get_Control_Flag (MINIMIZE_VEHICLE_HOURS);
+			min_vht_flag = Get_Control_Flag (MINIMIZE_VEHICLE_HOURS);
 
-		if (min_vht_flag) {
-			if (Check_Control_Key (INITIAL_WEIGHTING_FACTOR) ||
-				Check_Control_Key (ITERATION_WEIGHTING_INCREMENT) ||
-				Check_Control_Key (MAXIMUM_WEIGHTING_FACTOR)) {
+			if (min_vht_flag) {
+				if ((Check_Control_Key (INITIAL_WEIGHTING_FACTOR) && factor > 0) ||
+					(Check_Control_Key (ITERATION_WEIGHTING_INCREMENT) && increment > 0) ||
+					(Check_Control_Key (MAXIMUM_WEIGHTING_FACTOR) && max_factor > 0)) {
 
-				Warning ("Minimizing Vehicle Hours and Iteration Weighting Factors are Incompatible");
+					Warning ("Minimizing Vehicle Hours and Iteration Weighting Factors are Incompatible");
+				}
+				factor = 1.0;
 			}
-			factor = 1.0;
+
+		} else if (method == DUE_PLANS) {
+
+			//---- maximum number fo reskim iterations ----
+
+			max_speed_updates = Get_Control_Integer (MAXIMUM_RESKIM_ITERATIONS);
+
+			//---- reskim converence criteria ----
+
+			min_speed_diff = Get_Control_Double (RESKIM_CONVERGENCE_CRITERIA);
 		}
 
-		//---- save after each iteration ----
+		//---- save after iterations ----
 
-		save_flag = Get_Control_Flag (SAVE_AFTER_EACH_ITERATION);
+		if (Check_Control_Key (SAVE_AFTER_ITERATIONS)) {
+			key = Get_Control_Text (SAVE_AFTER_ITERATIONS);
 
-		//---- store trips in memory ----
+			if (!key.empty () && !key.Equals ("NONE")) {
+				if (key.Equals ("ALL")) {
+					key ("%d..%d") % 1 % max_iteration;
+				}
+				save_iter_flag = true;
+				if (!save_iter_range.Add_Ranges (key)) {
+					Error ("Adding Iteration Ranges");
+				}
+			}
+		}
 
-		trip_memory_flag = Get_Control_Flag (STORE_TRIPS_IN_MEMORY);
+		//---- output all records ----
+
+		full_flag = Get_Control_Flag (OUTPUT_ALL_RECORDS);
+
+		//---- preload transit vehicles ----
+
+		preload_flag = Get_Control_Flag (PRELOAD_TRANSIT_VEHICLES);
+
+		if (preload_flag && !System_File_Flag (NEW_PERFORMANCE)) {
+			Warning ("A New Performance File is required to Preload Transit Vehicles");
+			preload_flag = false;
+		}
 
 		//---- new link convergence file ----
 
@@ -203,6 +307,7 @@ void Router::Program_Control (void)
 			link_gap_file.Create (Project_Filename (key));
 			link_gap_flag = true;
 		}
+		save_link_gap = (link_gap_flag || link_gap > 0.0 || Report_Flag (LINK_GAP));
 
 		//---- new trip convergence file ----
 
@@ -214,81 +319,41 @@ void Router::Program_Control (void)
 			trip_gap_file.Create (Project_Filename (key));
 			trip_gap_flag = true;
 		}
-		trip_gap_map_flag = (trip_gap_flag || trip_gap > 0.0 || Report_Flag (TRIP_GAP));
+		save_trip_gap = (trip_gap_flag || trip_gap > 0.0 || Report_Flag (TRIP_GAP));
+
+		trip_gap_map_flag = save_trip_gap;
+
 	} else {
+
+		if (method == DUE_PLANS) {
+			Error ("Dynamic User Equilibrium Requires Multiple Iterations");
+		} else if (method == DTA_FLOWS) {
+			Error ("Dynamic Traffic Assignment Requires Multiple Iterations");
+		}
 		trip_gap_map_flag = plan_flag;
-	}
 
-	//---- link person file ----
+		//---- output all records ----
 
-	key = Get_Control_String (LINK_PERSON_FILE);
+		full_flag = Get_Control_Flag (OUTPUT_ALL_RECORDS);
 
-	if (!key.empty ()) {
-		Print (1);
-		old_person_file.File_Type ("Link Person File");
+		//---- preload transit vehicles ----
 
-		if (Check_Control_Key (LINK_PERSON_FORMAT)) {
-			old_person_file.Dbase_Format (Get_Control_String (LINK_PERSON_FORMAT));
+		preload_flag = Get_Control_Flag (PRELOAD_TRANSIT_VEHICLES);
+
+		if (preload_flag && !System_File_Flag (NEW_PERFORMANCE)) {
+			Warning ("A New Performance File is required to Preload Transit Vehicles");
+			preload_flag = false;
 		}
-		old_person_file.Open (Project_Filename (key));
-		old_person_flag = true;
-	}
 
-	//---- link vehicle file ----
-
-	key = Get_Control_String (LINK_VEHICLE_FILE);
-
-	if (!key.empty ()) {
-		Print (1);
-		old_vehicle_file.File_Type ("Link Vehicle File");
-
-		if (Check_Control_Key (LINK_VEHICLE_FORMAT)) {
-			old_vehicle_file.Dbase_Format (Get_Control_String (LINK_VEHICLE_FORMAT));
-		}
-		old_vehicle_file.Open (Project_Filename (key));
-		old_vehicle_flag = true;
-	}
-
-	//---- new link person file ----
-
-	key = Get_Control_String (NEW_LINK_PERSON_FILE);
-
-	if (!key.empty ()) {
-		Print (1);
-		link_person_file.File_Type ("New Link Person File");
-
-		if (Check_Control_Key (NEW_LINK_PERSON_FORMAT)) {
-			link_person_file.Dbase_Format (Get_Control_String (NEW_LINK_PERSON_FORMAT));
-		}
-		link_person_file.Flow_Units (PERSONS);
-		link_person_file.Turn_Flag (false);
-		link_person_file.Create (Project_Filename (key));
-		link_person_flag = true;
-	}
-
-	//---- new link vehicle file ----
-
-	key = Get_Control_String (NEW_LINK_VEHICLE_FILE);
-
-	if (!key.empty ()) {
-		Print (1);
-		link_vehicle_file.File_Type ("New Link Vehicle File");
-
-		if (Check_Control_Key (NEW_LINK_VEHICLE_FORMAT)) {
-			link_vehicle_file.Dbase_Format (Get_Control_String (NEW_LINK_VEHICLE_FORMAT));
-		}
-		link_vehicle_file.Flow_Units (VEHICLES);
-		link_vehicle_file.Turn_Flag (false);
-		link_vehicle_file.Create (Project_Filename (key));
-		link_vehicle_flag = true;
 	}
 
 	//---- set the output link delay format ----
 
-	if (System_File_Flag (NEW_LINK_DELAY) || Flow_Updates () || Turn_Updates ()) {
+	if (System_File_Flag (NEW_PERFORMANCE) || Flow_Updates ()) {
 		Link_Flows (Flow_Updates ());
 		flow_flag = true;
-
+	}
+	if (System_File_Flag (NEW_TURN_DELAY) || Turn_Updates ()) {
 		if (!Turn_Updates ()) {
 			Turn_Flows (false);
 			turn_flag = false;	
@@ -296,15 +361,8 @@ void Router::Program_Control (void)
 			Turn_Flows (true);
 			turn_flag = true;
 		}
-
-		if (System_File_Flag (NEW_LINK_DELAY) && System_File_Flag (VEHICLE_TYPE)) {
-			Link_Delay_File *file = (Link_Delay_File *) System_File_Handle (NEW_LINK_DELAY);
-
-			file->Clear_Fields ();
-			file->Flow_Units (PCE);
-			file->Turn_Flag (turn_flag);
-			file->Create_Fields ();
-			file->Write_Header ();
-		}
+	}
+	if (select_mode [DRIVE_MODE] || select_mode [PNR_IN_MODE] || select_mode [PNR_OUT_MODE] ||
+		select_mode [KNR_IN_MODE] || select_mode [KNR_OUT_MODE] || select_mode [TAXI_MODE]) {
 	}
 }

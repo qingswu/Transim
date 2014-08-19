@@ -57,6 +57,7 @@ public:
 	bool In_Range (String &range);
 
 	String & Clean (void);
+	String & Compress (void);
 
 	String & Center (int size);
 	String & To_Upper (void);

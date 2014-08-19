@@ -318,8 +318,6 @@
     <ClCompile Include="Line_Stats.cpp" />
     <ClCompile Include="Link_Details.cpp" />
     <ClCompile Include="Link_Stats.cpp" />
-    <ClCompile Include="Read_Flow.cpp" />
-    <ClCompile Include="Read_Turn.cpp" />
     <ClCompile Include="Stop_Stats.cpp" />
     <ClCompile Include="Subtotal.cpp" />
     <ClCompile Include="Sum_Group.cpp" />

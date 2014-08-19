@@ -19,8 +19,8 @@ void NewFormat::Program_Control (void)
 	
 	Read_Select_Keys ();
 
-	if (Check_Control_Key (VERSION4_PLAN_FILE) && Check_Control_Key (TRIP_SORT_TYPE)) {
-		Warning ("Plan Sorting is Limited to Version 5 Plan files");
+	if (Check_Control_Key (OLD_PLAN_FILE) && Check_Control_Key (TRIP_SORT_TYPE)) {
+		Warning ("Plan Sorting is Limited to Version 6 Plan files");
 		Show_Message (1);
 	}	
 	Print (2, String ("%s Control Keys:") % Program ());
@@ -39,45 +39,6 @@ void NewFormat::Program_Control (void)
 			Zone_File *file = (Zone_File *) System_File_Handle (ZONE);
 			new_zone_file = (Zone_File *) System_File_Handle (NEW_ZONE);
 			new_zone_file->Add_User_Fields (file);
-		}
-	}
-
-	//---- copy existing configuration ----
-
-	if (System_File_Flag (LINK_DELAY) && System_File_Flag (NEW_LINK_DELAY)) {
-		Link_Delay_File *file = (Link_Delay_File *) System_File_Header (LINK_DELAY);
-		if (file->Turn_Flag ()) {
-			file = (Link_Delay_File *) System_File_Header (NEW_LINK_DELAY);
-			file->Clear_Fields ();
-			file->Turn_Flag (true);
-			file->Set_Nesting (true);
-			file->Create_Fields ();
-			file->Write_Header ();
-		}
-	}
-	if (System_File_Flag (PERFORMANCE) && System_File_Flag (NEW_PERFORMANCE)) {
-		Performance_File *file = (Performance_File *) System_File_Header (PERFORMANCE);
-		if (file->Turn_Flag ()) {
-			file = (Performance_File *) System_File_Header (NEW_PERFORMANCE);
-			file->Clear_Fields ();
-			file->Turn_Flag (true);
-			file->Set_Nesting (true);
-			file->Create_Fields ();
-			file->Write_Header ();
-		}
-	} else if (System_File_Flag (LINK_DELAY) && System_File_Flag (NEW_PERFORMANCE)) {
-		if (!System_File_Flag (LINK)) {
-			Error ("A Link File is Required to Convert Link Delay to Performance");
-		}
-		Link_Delay_File *file = (Link_Delay_File *) System_File_Header (LINK_DELAY);
-		Performance_File *file2 = (Performance_File *) System_File_Header (NEW_PERFORMANCE);
-
-		if (file->Turn_Flag ()) {
-			file2->Clear_Fields ();
-			file2->Turn_Flag (true);
-			file2->Set_Nesting (true);
-			file2->Create_Fields ();
-			file2->Write_Header ();
 		}
 	}
 	new_plan_flag = System_File_Flag (NEW_PLAN);
@@ -118,12 +79,6 @@ void NewFormat::Program_Control (void)
 		if (System_File_Flag (NEW_HOUSEHOLD)) {
 			System_File_Header (NEW_HOUSEHOLD)->Flatten_File ();
 		}
-		if (System_File_Flag (NEW_LINK_DELAY)) {
-			System_File_Header (NEW_LINK_DELAY)->Flatten_File ();
-		}
-		if (System_File_Flag (NEW_PERFORMANCE)) {
-			System_File_Header (NEW_PERFORMANCE)->Flatten_File ();
-		}
 		if (new_plan_flag) {
 			System_File_Header (NEW_PLAN)->Flatten_File ();
 		}
@@ -147,7 +102,10 @@ void NewFormat::Program_Control (void)
 		activity_flag = true;
 
 		if (!new_trip_flag) {
-			Error ("A New Trip file is required to convert an Activity File");
+			Error ("A New Trip file is required to convert an Activity file");
+		}
+		if (!System_File_Flag (VEHICLE_TYPE)) {
+			Error ("A Vehicle Type file is required to convert an Activity file");
 		}
 	}
 
@@ -167,6 +125,20 @@ void NewFormat::Program_Control (void)
 	if (!key.empty ()) {
 		vehicle_file.Open (Project_Filename (key));
 		vehicle_flag = true;
+	} else {
+		if (activity_flag) {
+			Error ("A Vehicle file is required to convert an Activity file");
+		} else if (new_trip_flag && System_File_Flag (TRIP)) {
+			Trip_File *file = (Trip_File *) System_File_Handle (TRIP);
+
+			if (file->Version () < 40) {
+				Error ("A Vehicle file is required to convert an old Trip file");
+
+				if (!System_File_Flag (VEHICLE_TYPE)) {
+					Error ("A Vehicle Type file is required to convert an old Trip file");
+				}
+			}
+		}
 	}
 
 	//---- snapshot file ----
@@ -203,10 +175,10 @@ void NewFormat::Program_Control (void)
 		Error ("A New Snapshot File is required for Output");
 	}
 
-	//---- version 4 time format ----
+	//---- old time format ----
 
-	time_units = Units_Code (Get_Control_Text (VERSION4_TIME_FORMAT));
-	time_flag = Check_Control_Key (VERSION4_TIME_FORMAT);
+	time_units = Units_Code (Get_Control_Text (OLD_TIME_FORMAT));
+	time_flag = Check_Control_Key (OLD_TIME_FORMAT);
 
 	if (time_flag) {
 		int num;
@@ -268,16 +240,22 @@ void NewFormat::Program_Control (void)
 
 	//---- plan file ----
 
-	if (Check_Control_Key (VERSION4_PLAN_FILE)) {
+	if (Check_Control_Key (OLD_PLAN_FILE)) {
 		if (System_File_Flag (PLAN)) {
-			Error ("A plan file and Version 4 plan file must be processed separateley");
+			Error ("A Plan file and old Plan file must be processed separately");
 		}
 		if (!System_File_Flag (NEW_PLAN)) {
-			Error ("A new plan file is required to convert a Version 4 plan file");
+			Error ("A new Plan file is required to convert an old Plan file");
+		}
+		if (!vehicle_flag) {
+			Error ("A Vehicle file is required to convert an old Plan file");
+		}
+		if (!System_File_Flag (VEHICLE_TYPE)) {
+			Error ("A Vehicle Type file is required to convert an old Plan files");
 		}
 		Print (1);
 		plan_flag = true;
-		old_plan.File_Type ("Version4 Plan File");
+		old_plan.File_Type ("Old Plan File");
 
 		//---- get the list type ----
 
@@ -305,16 +283,16 @@ void NewFormat::Program_Control (void)
 
 		//---- get the file format ----
 
-		if (Check_Control_Key (VERSION4_PLAN_FORMAT)) {
-			old_plan.File_Format (Get_Control_String (VERSION4_PLAN_FORMAT));
+		if (Check_Control_Key (OLD_PLAN_FORMAT)) {
+			old_plan.File_Format (Get_Control_String (OLD_PLAN_FORMAT));
 		}
 
 		//---- open the file and print the parameters ----
 
-		if (!old_plan.Open (Project_Filename (Get_Control_String (VERSION4_PLAN_FILE)))) {
-			File_Error ("Opening Version4 Plan File", old_plan.Filename ());
+		if (!old_plan.Open (Project_Filename (Get_Control_String (OLD_PLAN_FILE)))) {
+			File_Error ("Opening Old Plan File", old_plan.Filename ());
 		}
-		Get_Control_Text (VERSION4_PLAN_FORMAT);
+		Get_Control_Text (OLD_PLAN_FORMAT);
 
 		type_flag = old_plan.Node_Based_Flag ();
 
@@ -340,9 +318,9 @@ void NewFormat::Program_Control (void)
 		}
 	}
 
-	//---- Version 4 Route Header and Node files ----
+	//---- Old Route Header and Node files ----
 
-	if (Check_Control_Key (VERSION4_ROUTE_HEADER)) {
+	if (Check_Control_Key (OLD_ROUTE_HEADER_FILE)) {
 		if (!System_File_Flag (NEW_ROUTE_NODES)) {
 			Error ("A New Route Nodes File is Required");
 		}
@@ -357,9 +335,9 @@ void NewFormat::Program_Control (void)
 
 		Route_Nodes_File *file = (Route_Nodes_File *) System_File_Base (NEW_ROUTE_NODES);
 
-		key = Get_Control_String (VERSION4_ROUTE_HEADER);
+		key = Get_Control_String (OLD_ROUTE_HEADER_FILE);
 
-		route_header.File_Type ("Version4 Route Header");
+		route_header.File_Type ("Old Route Header File");
 		route_header.File_ID ("Header");
 
 		route_header.Open (Project_Filename (key));
@@ -392,12 +370,12 @@ void NewFormat::Program_Control (void)
 			file->Create_Fields ();
 			file->Write_Header ();
 		}
-		key = Get_Control_String (VERSION4_ROUTE_NODES);
+		key = Get_Control_String (OLD_ROUTE_NODES_FILE);
 
 		if (key.empty ()) {
-			Error ("A Version4 Route Nodes file is Required");
+			Error ("A Old Route Nodes File is Required");
 		}
-		route_nodes.File_Type ("Version4 Route Nodes");
+		route_nodes.File_Type ("Old Route Nodes File");
 		route_nodes.File_ID ("Nodes");
 
 		route_nodes.Open (Project_Filename (key));
@@ -433,6 +411,35 @@ void NewFormat::Program_Control (void)
 			file->Clear_Fields ();
 			file->Create_Fields ();
 			file->Write_Header ();
+		}
+	}
+
+	//---- link delay file ----
+
+	if (Check_Control_Key (OLD_LINK_DELAY_FILE)) {
+		if (System_File_Flag (PERFORMANCE) || Check_Control_Key (OLD_PERFORMANCE_FILE)) {
+			Error ("A Performance and Link Delay file must be processed separately");
+		}
+		if (!System_File_Flag (NEW_PERFORMANCE)) {
+			Error ("A new Performance file is required to convert a Old Link Delay file");
+		}
+		old_delay_file.Open (Project_Filename (Get_Control_String (OLD_LINK_DELAY_FILE)));
+		old_delay_flag = true;
+	} else {
+
+		//---- old perf file ----
+
+		if (Check_Control_Key (OLD_PERFORMANCE_FILE)) {
+			if (System_File_Flag (PERFORMANCE)) {
+				Error ("A Performance and Old Performance file must be processed separately");
+			}
+			if (!System_File_Flag (NEW_PERFORMANCE)) {
+				Error ("A new Performance file is required to convert a Old Performance file");
+			}
+			old_delay_file.Open (Project_Filename (Get_Control_String (OLD_PERFORMANCE_FILE)));
+			old_delay_flag = true;
+		} else if (System_File_Flag (NEW_PERFORMANCE) && !System_File_Flag (PERFORMANCE)) {
+			Error ("A Performance file is required for creating a New Performance file");
 		}
 	}
 }

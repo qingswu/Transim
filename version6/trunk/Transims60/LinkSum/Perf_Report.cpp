@@ -16,19 +16,20 @@
 
 void LinkSum::Performance_Report (void)
 {
-	int i, j, k, lanes, max_lanes, tod_list, index, flow_index;
-	double base_time, loaded_time, len, flow, factor, flow_factor, cap;
+	int i, j, k, index, use_index;
+	double time, len, speed, factor, flow_factor;
 	Dtime low, high, tod;
 	bool connect_flag;
 
 	Link_Itr link_itr;
 	Dir_Data *dir_ptr;
-	Link_Perf_Period_Itr period_itr;
-	Flow_Time_Period_Itr turn_itr;
-	Flow_Time_Data flow_data, *turn_ptr;
-	Lane_Use_Period *use_ptr;
+	Perf_Period_Itr period_itr;
+	Turn_Period_Itr turn_itr;
+	Perf_Data perf_data;
+	Turn_Data *turn_ptr;
 	Connect_Data *connect_ptr;
 	Doubles_Itr itr;
+	Performance_Data data;
 
 	Show_Message ("Creating the Network Performance Summary Report -- Record");
 	Set_Progress ();
@@ -38,7 +39,7 @@ void LinkSum::Performance_Report (void)
 	for (j=0, itr = sum_bin.begin (); itr != sum_bin.end (); itr++, j++) {
 		itr->assign (NUM_SUM_BINS, 0.0);
 	}	
-	connect_flag = System_Data_Flag (CONNECTION) && (turn_perf_array.size () > 0);
+	connect_flag = System_Data_Flag (CONNECTION) && (turn_period_array.size () > 0);
 
 	tod = sum_periods.Increment ();
 	if (tod < 1) {
@@ -66,62 +67,36 @@ void LinkSum::Performance_Report (void)
 			}
 			if (index < 0) continue;
 			dir_ptr = &dir_array [index];
+			use_index = dir_ptr->Use_Index ();
 
-			base_time = dir_ptr->Time0 ();
-			if (base_time <= 0.0) continue;
-
-			tod_list = dir_ptr->First_Lane_Use ();
-			flow_index = dir_ptr->Flow_Index ();
-
-			lanes = dir_ptr->Lanes ();
-			if (lanes < 1) lanes = 1;
-			max_lanes = lanes;
 
 			//---- process each time period ----
 
-			for (j=0, period_itr = link_perf_array.begin (); period_itr != link_perf_array.end (); period_itr++, j++) {
-				flow_data = period_itr->Total_Flow_Time (index, flow_index);
+			for (j=0, period_itr = perf_period_array.begin (); period_itr != perf_period_array.end (); period_itr++, j++) {
+				perf_period_array.periods->Period_Range (j, low, high);
 
-				loaded_time = flow_data.Time ();
-				flow = flow_data.Flow ();
+				data.Start (low);
+				data.End (high);
+
+				perf_data = period_itr->Total_Performance (index, use_index);
+
+				data.Get_Data (&perf_data, dir_ptr, &(*link_itr));
 
 				//---- check the time ratio ----
 
 				if (select_ratio) {
-					if ((double) loaded_time / dir_ptr->Time0 () < time_ratio) continue;
-				}
-
-				if (tod_list >= 0) {
-
-					//---- get the time period ----
-
-					sum_periods.Period_Range (j, low, high);
-					tod = (low + high + 1) / 2;
-
-					lanes = max_lanes;
-					k = tod_list;
-
-					for (use_ptr = &use_period_array [k]; ; use_ptr = &use_period_array [++k]) {
-						if (use_ptr->Start () <= tod && tod < use_ptr->End ()) {
-							lanes = use_ptr->Lanes0 () + use_ptr->Lanes1 ();
-							break;
-						}
-						if (use_ptr->Periods () == 0) break;
-					}
+					if (data.Time_Ratio () < time_ratio) continue;
 				}
 
 				//---- check the vc ratio ----
 
 				if (select_vc) {
-					cap = dir_ptr->Capacity () * lanes / dir_ptr->Lanes ();
-					if (cap > 0) {
-						if (flow_factor * flow / cap < vc_ratio) continue;
-					}
+					if (data.VC_Ratio () < vc_ratio) continue;
 				}
-				sum_bin [j] [LANE_MILES] += lanes * len;
-				sum_bin [j] [VMT] += flow * len;
-				sum_bin [j] [VHT] += flow * loaded_time;
-				sum_bin [j] [VHD] += flow * (loaded_time - base_time);
+				sum_bin [j] [LANE_MILES] += data.Lane_Len ();
+				sum_bin [j] [VMT] += data.Veh_Dist ();
+				sum_bin [j] [VHT] += data.Veh_Time ();
+				sum_bin [j] [VHD] += data.Veh_Delay ();
 			}
 
 			//---- get the turning movements ----
@@ -133,10 +108,10 @@ void LinkSum::Performance_Report (void)
 					if (connect_ptr->Type () != LEFT && connect_ptr->Type () != RIGHT &&
 						connect_ptr->Type () != UTURN) continue;
 
-					for (j=0, turn_itr = turn_perf_array.begin (); turn_itr != turn_perf_array.end (); turn_itr++, j++) {
+					for (j=0, turn_itr = turn_period_array.begin (); turn_itr != turn_period_array.end (); turn_itr++, j++) {
 						turn_ptr = &turn_itr->at (k);
 
-						sum_bin [j] [TURNS] += turn_ptr->Flow ();
+						sum_bin [j] [TURNS] += turn_ptr->Turn ();
 					}
 				}
 			}
@@ -174,15 +149,18 @@ void LinkSum::Performance_Report (void)
 			sum_bin [num_inc] [TURNS] += sum_bin [i] [TURNS];
 		}
 		len = (sum_bin [i] [VMT] * factor);
-		base_time = sum_bin [i] [VHT] / tod;
-		if (base_time == 0.0) {
-			loaded_time = len;
+		time = sum_bin [i] [VHT] / tod;
+		if (time == 0.0) {
+			speed = len;
 		} else {
-			loaded_time = len / base_time;
+			speed = len / time;
 		}
-		Print (0, String ("%12.2lf %13.2lf %13.2lf %9.2lf %13.2lf %10d") % 
-			(sum_bin [i] [LANE_MILES] * factor) % len % base_time % 
-			loaded_time % (sum_bin [i] [VHD] / tod) % ((int) (sum_bin [i] [TURNS])));
+		Print (0, String ("%12.2lf %13.2lf %13.2lf %9.2lf %13.2lf") % 
+			(sum_bin [i] [LANE_MILES] * factor) % len % time % 
+			speed % (sum_bin [i] [VHD] / tod));
+		if (connect_flag) {
+			Print (0, String (" %10d") % ((int) (sum_bin [i] [TURNS])));
+		}
 	}
 	Header_Number (0);
 }
@@ -201,8 +179,14 @@ void LinkSum::Performance_Header (void)
 		units = "Miles";
 	}
 	Print (1, "Network Performance Summary");
-	Print (2, String ("                   Lane        Vehicle       Vehicle %10.10s     Hours of      Number") % units);
-	Print (1, String ("Time Period   %10.10s    %10.10s        Hours       /Hour       Delay      of Turns") % units % units);
+
+	if (turn_period_array.size () > 0) {
+		Print (2, String ("                   Lane        Vehicle       Vehicle %10.10s     Hours of      Number") % units);
+		Print (1, String ("Time Period   %10.10s    %10.10s        Hours       /Hour       Delay      of Turns") % units % units);
+	} else {
+		Print (2, String ("                   Lane        Vehicle       Vehicle %10.10s     Hours of") % units);
+		Print (1, String ("Time Period   %10.10s    %10.10s        Hours       /Hour       Delay    ") % units % units);
+	}
 	Print (1);
 }
 

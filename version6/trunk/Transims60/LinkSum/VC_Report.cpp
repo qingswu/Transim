@@ -10,17 +10,17 @@
 
 void LinkSum::Volume_Capacity_Report (void)
 {
-	int i, j, k, k1, vc, percent, max_lanes, lanes, tod_list, index, flow_index;
+	int i, j, k, k1, vc, percent, index, use_index;
 	int percentile [NUM_PERCENTILES];
-	double capacity, cap, total, sum, lane_miles, len, flow;
-	Dtime low, high, tod;
+	double total, sum;
+	Dtime low, high;
 
 	Link_Itr link_itr;
 	Dir_Data *dir_ptr;
-	Link_Perf_Period_Itr period_itr;
-	Flow_Time_Data flow_data;
-	Lane_Use_Period *use_ptr;
+	Perf_Period_Itr period_itr;
+	Perf_Data perf_data;
 	Doubles_Itr itr;
+	Performance_Data data;
 
 	Show_Message ("Creating the V/C Ratio Distribution -- Record");
 	Set_Progress ();
@@ -38,8 +38,6 @@ void LinkSum::Volume_Capacity_Report (void)
 
 		if (select_flag && link_itr->Use () == 0) continue;
 
-		len = UnRound (link_itr->Length ());
-
 		for (i=0; i < 2; i++) {
 			if (i == 1) {
 				if (link_itr->Use () == -1) continue;
@@ -50,57 +48,29 @@ void LinkSum::Volume_Capacity_Report (void)
 			}
 			if (index < 0) continue;
 			dir_ptr = &dir_array [index];
-
-			capacity = dir_ptr->Capacity ();
-
-			if (capacity < 20) capacity = 1000.0;
-			cap = capacity *= cap_factor;
-
-			tod_list = dir_ptr->First_Lane_Use ();
-			flow_index = dir_ptr->Flow_Index ();
-
-			lanes = dir_ptr->Lanes ();
-			if (lanes < 1) lanes = 1;
-			max_lanes = lanes;
+			use_index = dir_ptr->Use_Index ();
 
 			//---- process each time period ----
 
-			for (j=0, period_itr = link_perf_array.begin (); period_itr != link_perf_array.end (); period_itr++, j++) {
-				flow_data = period_itr->Total_Flow_Time (index, flow_index);
+			for (j=0, period_itr = perf_period_array.begin (); period_itr != perf_period_array.end (); period_itr++, j++) {
+				perf_data = period_itr->Total_Performance (index, use_index);
 
-				flow = flow_data.Flow ();
-				if (flow < minimum_flow) continue;
+				if (perf_data.Volume () < minimum_volume) continue;
 
-				if (tod_list >= 0) {
+				sum_periods.Period_Range (j, low, high);
 
-					//---- get the time period ----
+				data.Start (low);
+				data.End (high);
 
-					sum_periods.Period_Range (j, low, high);
-					tod = (low + high + 1) / 2;
-
-					cap = capacity;
-					lanes = max_lanes;
-					k = tod_list;
-
-					for (use_ptr = &use_period_array [k]; ; use_ptr = &use_period_array [++k]) {
-						if (use_ptr->Start () <= tod && tod < use_ptr->End ()) {
-							lanes = use_ptr->Lanes0 () + use_ptr->Lanes1 ();
-							cap = capacity * lanes / max_lanes;
-							break;
-						}
-						if (use_ptr->Periods () == 0) break;
-					}
-				}
+				data.Get_Data (&perf_data, dir_ptr, &(*link_itr));
 
 				//---- save the vc ratio ----
 
-				vc = DTOI (flow * RESOLUTION / cap);
+				vc = DTOI (data.VC_Ratio () * RESOLUTION);
 				if (vc < 0 || vc >= NUM_SUM_BINS) vc = NUM_SUM_BINS - 1;
 
-				lane_miles = lanes * len;
-
-				sum_bin [j] [vc] += lane_miles;
-				sum_bin [num_inc] [vc] += lane_miles;
+				sum_bin [j] [vc] += data.Lane_Len ();
+				sum_bin [num_inc] [vc] += data.Lane_Len ();
 			}
 		}
 	}

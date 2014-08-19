@@ -96,16 +96,16 @@ private:
 		bool thread_flag, turn_flag;
 		Doubles start_time, mid_time, end_time;
 
-		Plan_File               *plan_file;
-		Flow_Time_Period_Array  link_delay_array;
-		Flow_Time_Period_Array  turn_delay_array;
-		Trip_Sum_Data           trip_sum_data;
-		Trip_Sum_Data           pass_sum_data;
-		Transfer_Array          transfer_array;
-		Ints_Array              total_on_array;
-		Board_Array             walk_on_array;
-		Board_Array             drive_on_array;
-		Ints_Array              boardings;
+		Plan_File          *plan_file;
+		Perf_Period_Array  perf_period_array;
+		Turn_Period_Array  turn_period_array;
+		Trip_Sum_Data      trip_sum_data;
+		Trip_Sum_Data      pass_sum_data;
+		Transfer_Array     transfer_array;
+		Ints_Array         total_on_array;
+		Board_Array        walk_on_array;
+		Board_Array        drive_on_array;
+		Ints_Array         boardings;
 
 		void Read_Plans (int part);
 	};

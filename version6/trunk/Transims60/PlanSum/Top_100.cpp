@@ -14,8 +14,8 @@ void PlanSum::Top_100_Report (void)
 	Dtime low, high;
 	double flow;
 
-	Flow_Time_Period_Itr period_itr;
-	Flow_Time_Itr data_itr;
+	Perf_Period_Itr period_itr;
+	Perf_Itr data_itr;
 	Dir_Data *dir_ptr;
 	Link_Data *link_ptr;
 	Node_Data *node_ptr;
@@ -40,15 +40,15 @@ void PlanSum::Top_100_Report (void)
 
 	//---- find the highest V/C ratios ----
 
-	for (period=0, period_itr = link_delay_array.begin (); period_itr != link_delay_array.end (); period_itr++, period++) {
+	for (period=0, period_itr = perf_period_array.begin (); period_itr != perf_period_array.end (); period_itr++, period++) {
 		
-		link_delay_array.periods->Period_Range (period, low, high);
+		perf_period_array.periods->Period_Range (period, low, high);
 		low = (low + high) / 2;
 
 		for (dir=0, data_itr = period_itr->begin (); data_itr != period_itr->end (); data_itr++, dir++) {
 			Show_Progress ();
 
-			flow = data_itr->Flow ();
+			flow = data_itr->Volume ();
 			if (flow == 0.0) continue;
 
 			if (dir < size) {

@@ -16,7 +16,7 @@ void PlanSum::Link_Group (double min_vc)
     string label;
 	bool flag;
 
-	Flow_Time_Period_Itr array_itr;
+	Perf_Period_Itr period_itr;
 	Dir_Data *dir_ptr;
 	Link_Data *link_ptr;
 	Lane_Use_Period *period_ptr;
@@ -85,12 +85,12 @@ void PlanSum::Link_Group (double min_vc)
 			lanes = dir_ptr->Lanes ();
 			if (lanes < 1) lanes = 1;
 
-			flow_index = dir_ptr->Flow_Index ();
+			flow_index = dir_ptr->Use_Index ();
 
 			//---- process each time period ----
 
-			for (period=0, array_itr = link_delay_array.begin (); array_itr != link_delay_array.end (); array_itr++, period++) {
-				flow = array_itr->Flow (dir);
+			for (period=0, period_itr = perf_period_array.begin (); period_itr != perf_period_array.end (); period_itr++, period++) {
+				flow = period_itr->Data_Ptr (dir)->Volume ();
 
 				//---- time-of-day capacity ----
 
@@ -124,7 +124,7 @@ void PlanSum::Link_Group (double min_vc)
 					data_ptr->capacity += tod_cap;
 
 					if (flow_index >= 0 && tod_cap2 > 0) {
-						flow = array_itr->Flow (flow_index);
+						flow = period_itr->Data_Ptr (flow_index)->Volume ();
 
 						data_ptr->volume += DTOI (flow);
 						data_ptr->capacity += tod_cap2;

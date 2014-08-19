@@ -10,22 +10,23 @@
 
 bool Path_Builder::Plan_Update (Plan_Data *plan_data)
 {
-	int i, mode, index, dir_index, nlegs, len, cost, imp, veh_id, veh_type, flow_index, group;
+	int i, mode, index, dir_index, nlegs, len, cost, imp, use_index, group;
 	Dtime time, ttime, delay;
 	bool first_park, ab_flag;
 	double factor;
 
 	Plan_Leg *leg_ptr;
-	Flow_Time_Array *link_delay_ptr, *turn_delay_ptr;
-	Flow_Time_Data *data_ptr;
-	Link_Data *link_ptr;
-	Dir_Data *dir_ptr;
+	Perf_Period *perf_period_ptr = 0;
+	Turn_Period *turn_period_ptr = 0;
+	Turn_Data *turn_ptr;
+	Link_Data *link_ptr = 0;
+	Dir_Data *dir_ptr = 0;
 	Connect_Data *connect_ptr;
 	Int_Map_Itr map_itr;
 	Int2_Map_Itr map2_itr;
-	Use_Type use;
 	Vehicle_Index veh_index;
 	Vehicle_Map_Itr veh_itr;
+	Access_Data *access_ptr;
 
 	if (plan_data == 0) {
 		cout << "\tPlan Pointer is Zero" << endl;
@@ -33,12 +34,19 @@ bool Path_Builder::Plan_Update (Plan_Data *plan_data)
 	}
 	plan_flag = true;
 	plan_ptr = plan_data;
+	plan_ptr->Problem (0);
 
-	exe->Set_Parameters (param, plan_ptr->Type ());
+	mode = plan_ptr->Mode ();
+		
+	if (mode == WAIT_MODE || mode == TRANSIT_MODE || mode == WALK_MODE || mode == BIKE_MODE || 
+		mode == RIDE_MODE || mode == OTHER_MODE) return (true);
+
+	//---- set the traveler parameters ----
+
+	exe->Set_Parameters (param, plan_ptr->Type (), plan_ptr->Veh_Type ());
 
 	random_flag = (param.random_imped > 0);
 	turn_flag = (param.left_imped > 0 || param.right_imped > 0 || param.uturn_imped > 0);
-	link_delay_ptr = turn_delay_ptr = 0;
 
 	parking_duration = plan_ptr->Duration ();
 	forward_flag = (plan_ptr->Constraint () != END_TIME);
@@ -46,265 +54,227 @@ bool Path_Builder::Plan_Update (Plan_Data *plan_data)
 
 	mode = plan_ptr->Mode ();
 	param.mode = (Mode_Type) mode;
+	group = 0;
 
-	if (mode != WAIT_MODE && mode != WALK_MODE && mode != BIKE_MODE && 
-		mode != TRANSIT_MODE && mode != OTHER_MODE) {
+	//---- trace the path ----
 
-		//---- get the vehicle record ----
+	if (forward_flag) {
+		time = plan_ptr->Start ();
+		plan_ptr->Depart (time);
+	} else {
+		time = plan_ptr->End ();
+		plan_ptr->Arrive (time);
+	}
+	nlegs = (int) plan_ptr->size ();
 
-		veh_id = plan_ptr->Vehicle ();
+	plan_ptr->Zero_Totals ();
+	dir_index = -1;
+	first_park = true;
 
-		if (veh_id <= 0) {
-			grade_flag = false;
-			op_cost_rate = 0.0;
-			use = CAR;
-			veh_type = -1;
-		} else {
-			veh_type = veh_id;
-
-			if (veh_type_flag) {
-				veh_type_ptr = &exe->veh_type_array [veh_type];
-				use = (Use_Type) veh_type_ptr->Use ();
-				op_cost_rate = UnRound (veh_type_ptr->Op_Cost ());
-
-				if (Metric_Flag ()) {
-					op_cost_rate /= 1000.0;
-				} else {
-					op_cost_rate /= MILETOFEET;
-				}
-				grade_flag = param.grade_flag && veh_type_ptr->Grade_Flag ();
-			} else {
-				grade_flag = false;
-				op_cost_rate = 0.0;
-				use = CAR;
-				veh_type = -1;
-			}
-		}
-		group = 0;
-
-		//---- trace the path ----
-
+	for (i=0; i < nlegs; i++) {
 		if (forward_flag) {
-			time = plan_ptr->Start ();
-			plan_ptr->Depart (time);
+			leg_ptr = &plan_ptr->at (i);
 		} else {
-			time = plan_ptr->End ();
-			plan_ptr->Arrive (time);
+			leg_ptr = &plan_ptr->at (nlegs - i - 1);
 		}
-		nlegs = (int) plan_ptr->size ();
+		mode = leg_ptr->Mode ();
+		ttime = leg_ptr->Time ();
+		len = leg_ptr->Length ();
+		cost = leg_ptr->Cost ();
+		imp = leg_ptr->Impedance ();
 
-		plan_ptr->Zero_Totals ();
-		dir_index = -1;
-		first_park = true;
+		if (mode == DRIVE_MODE) {
+			perf_period_ptr = exe->perf_period_array.Period_Ptr (time);
+			if (perf_period_ptr != 0) {
 
-		for (i=0; i < nlegs; i++) {
-			if (forward_flag) {
-				leg_ptr = &plan_ptr->at (i);
-			} else {
-				leg_ptr = &plan_ptr->at (nlegs - i - 1);
-			}
-			mode = leg_ptr->Mode ();
-			ttime = leg_ptr->Time ();
-			len = leg_ptr->Length ();
-			cost = leg_ptr->Cost ();
-			imp = leg_ptr->Impedance ();
-
-			if (mode == DRIVE_MODE) {
 				if (leg_ptr->Link_Type ()) {
-					link_delay_ptr = exe->link_delay_array.Period_Ptr (time);
+					index = leg_ptr->Link_ID ();
 
-					if (link_delay_ptr != 0) {
-						index = leg_ptr->Link_ID ();
-						map_itr = exe->link_map.find (index);
+					link_ptr = &exe->link_array [index];
 
-						if (map_itr != exe->link_map.end ()) {
-							link_ptr = &exe->link_array [map_itr->second];
-							if (len > link_ptr->Length ()) len = link_ptr->Length ();
+					if (leg_ptr->Link_Dir ()) {
+						index = link_ptr->BA_Dir ();
+					} else {
+						index = link_ptr->AB_Dir ();
+					}
+					dir_ptr = &exe->dir_array [index];
 
-							if (leg_ptr->Link_Dir () == 1) {
-								index = link_ptr->BA_Dir ();
-								ab_flag = false;
-							} else {
-								index = link_ptr->AB_Dir ();
-								ab_flag = true;
+				} else if (leg_ptr->Dir_Type ()) {
+					index = leg_ptr->ID ();
+
+					dir_ptr = &exe->dir_array [index];
+					link_ptr = &exe->link_array [dir_ptr->Link ()];
+				} else {
+					index = -1;
+				}
+				if (index >= 0) {
+					if (len > link_ptr->Length ()) len = link_ptr->Length ();
+					factor = (double) len / link_ptr->Length ();
+
+					if (!Best_Lane_Use (index, time, factor, ttime, delay, cost, group)) {
+						//---- problem ----
+					}
+					cost += DTOI (param.op_cost_rate * len);
+
+					if (param.flow_flag) {
+						if (group == 1) {
+							use_index = dir_ptr->Use_Index (); 
+						} else {
+							use_index = index;
+						}
+						perf_period_array_ptr->Flow_Time (use_index, time, factor, len, param.pce, param.occupancy, forward_flag);
+					}
+					imp = 0;
+
+					if (param.grade_flag) {
+						if (dir_ptr->Dir ()) {
+							ab_flag = false;
+						} else {
+							ab_flag = true;
+						}
+						if (link_ptr->Grade (ab_flag) > 0) {
+							ttime = ttime / param.veh_type_ptr->Grade (link_ptr->Grade (ab_flag));
+						}
+					}
+					ttime += delay;
+
+					if (dir_index >= 0) {
+						if (forward_flag) {
+							map2_itr = exe->connect_map.find (Int2_Key (dir_index, index));
+						} else {
+							map2_itr = exe->connect_map.find (Int2_Key (index, dir_index));
+						}
+						if (map2_itr != exe->connect_map.end ()) {
+							if (param.turn_delay_flag) {
+								turn_period_ptr = exe->turn_period_array.Period_Ptr (time);
+								ttime += turn_period_ptr->Time (map2_itr->second);
+								if (ttime < 1) ttime = 1;
 							}
-							dir_ptr = &exe->dir_array [index];
-
-							if (!Best_Lane_Use (index, time, ttime, delay, cost, group)) {
-								//---- problem ----
+							if (param.turn_flow_flag) {
+								turn_period_ptr = turn_period_array_ptr->Period_Ptr (time);
+								turn_ptr = turn_period_ptr->Data_Ptr (map2_itr->second);
+								turn_ptr->Add_Turn (param.pce);
 							}
-							cost += DTOI (op_cost_rate * len);
+							if (turn_flag) {
+								connect_ptr = &exe->connect_array [map2_itr->second];
 
-							factor = (double) len / link_ptr->Length ();
-							ttime = DTOI (ttime * factor);
-
-							if (param.flow_flag) {
-								if (group == 1) {
-									flow_index = dir_ptr->Flow_Index (); 
-								} else {
-									flow_index = index;
+								if (connect_ptr->Type () == LEFT) {
+									imp += param.left_imped;
+								} else if (connect_ptr->Type () == RIGHT) {
+									imp += param.right_imped;
+								} else if (connect_ptr->Type () == UTURN) {
+									imp += param.uturn_imped;
 								}
-								data_ptr = link_delay_ptr->Data_Ptr (flow_index);
-								data_ptr->Add_Flow (factor);
-							}
-							imp = 0;
-
-							if (grade_flag && link_ptr->Grade (ab_flag) > 0) {
-								ttime = ttime / veh_type_ptr->Grade (link_ptr->Grade (ab_flag));
-							}
-							ttime += delay;
-
-							if (dir_index >= 0) {
-								if (forward_flag) {
-									map2_itr = exe->connect_map.find (Int2_Key (dir_index, index));
-								} else {
-									map2_itr = exe->connect_map.find (Int2_Key (index, dir_index));
-								}
-								if (map2_itr != exe->connect_map.end ()) {
-									if (param.turn_delay_flag) {
-										turn_delay_ptr = exe->turn_delay_array.Period_Ptr (time);
-										ttime += turn_delay_ptr->Time (map2_itr->second);
-										if (ttime < 1) ttime = 1;
-									}
-									if (param.turn_flow_flag) {
-										turn_delay_ptr = turn_flow_ptr->Period_Ptr (time);
-										data_ptr = turn_delay_ptr->Data_Ptr (map2_itr->second);
-										data_ptr->Add_Flow (1.0);
-									}
-									if (turn_flag) {
-										connect_ptr = &exe->connect_array [map2_itr->second];
-
-										if (connect_ptr->Type () == LEFT) {
-											imp += param.left_imped;
-										} else if (connect_ptr->Type () == RIGHT) {
-											imp += param.right_imped;
-										} else if (connect_ptr->Type () == UTURN) {
-											imp += param.uturn_imped;
-										}
-									}
-								}
-							}
-							imp += Resolve (ttime * param.value_time + len * param.value_dist + cost * param.value_cost);
-
-							if (link_ptr->Type () == FREEWAY) {
-								imp = DTOI (imp * param.freeway_fac);
-							} else if (link_ptr->Type () == EXPRESSWAY) {
-								imp = DTOI (imp * param.express_fac);
-							}
-							dir_index = index;
-
-							if (random_flag) {
-								imp = DTOI (imp * (1.0 + param.random_imped * (param.random.Probability () - 0.5) / 100.0));
 							}
 						}
 					}
-				}
-				plan_ptr->Add_Drive (ttime);
-			} else if (mode == TRANSIT_MODE) {
-				plan_ptr->Add_Transit (ttime);
-			} else if (mode == WALK_MODE) {
-				if (leg_ptr->Type () == ACCESS_ID) {
-					index = leg_ptr->ID ();
-					map_itr = exe->access_map.find (index);
+					imp += Resolve (ttime * param.value_time + len * param.value_dist + cost * param.value_cost);
 
-					if (map_itr != exe->access_map.end ()) {
-						Access_Data *access_ptr;
-
-						access_ptr = &exe->access_array [map_itr->second];
-
-						ttime = access_ptr->Time ();
-						cost = Round (access_ptr->Cost ());
-						imp = Resolve (ttime * param.value_walk + cost * param.value_cost);
+					if (link_ptr->Type () == FREEWAY) {
+						imp = DTOI (imp * param.freeway_fac);
+					} else if (link_ptr->Type () == EXPRESSWAY) {
+						imp = DTOI (imp * param.express_fac);
 					}
-				} else {
-					imp = Resolve (ttime * param.value_walk);
+					dir_index = index;
+
+					if (random_flag) {
+						imp = DTOI (imp * (1.0 + param.random_imped * (param.random.Probability () - 0.5) / 100.0));
+					}
 				}
+			}
+			plan_ptr->Add_Drive (ttime);
+		} else if (mode == TRANSIT_MODE) {
+			plan_ptr->Add_Transit (ttime);
+		} else if (mode == WALK_MODE) {
+			if (leg_ptr->Access_Type ()) {
+				index = leg_ptr->Access_ID ();
+				access_ptr = &exe->access_array [index];
+
+				ttime = access_ptr->Time ();
+				cost = Round (access_ptr->Cost ());
+				imp = Resolve (ttime * param.value_walk + cost * param.value_cost);
+			} else {
+				imp = Resolve (ttime * param.value_walk);
+			}
+			if (random_flag) {
+				imp = DTOI (imp * (1.0 + param.random_imped * (param.random.Probability () - 0.5) / 100.0));
+			}
+			plan_ptr->Add_Walk (ttime);
+		} else if (mode == WAIT_MODE) {
+			plan_ptr->Add_Wait (ttime);
+		} else {
+			if (leg_ptr->Type () == PARKING_ID) {
+				index = leg_ptr->ID ();
+
+				Parking_Data *parking_ptr;
+				Park_Nest_Itr park_itr;
+				ttime = 0;
+				cost = 0;
+
+				//if (!first_park && veh_ptr != 0) {
+				//	veh_ptr->Parking (map_itr->second);
+				//}
+				parking_ptr = &exe->parking_array [index];
+
+				if (parking_ptr->size () > 0) {
+					for (park_itr = parking_ptr->begin (); park_itr != parking_ptr->end (); park_itr++) {
+						if (exe->Use_Permission (park_itr->Use (), param.use) &&
+							park_itr->Start () <= time && time < park_itr->End ()) {
+
+							if (forward_flag && first_park) {
+								ttime = park_itr->Time_Out ();
+							} else {
+								ttime = park_itr->Time_In ();
+								cost = DTOI (park_itr->Hourly () * parking_duration.Hours ());
+								if (cost > park_itr->Daily ()) cost = park_itr->Daily ();
+								cost = Round (cost);
+							}
+							break;
+						}
+					}
+				}
+				imp = Resolve (ttime * param.value_park + cost * param.value_cost);
+
 				if (random_flag) {
 					imp = DTOI (imp * (1.0 + param.random_imped * (param.random.Probability () - 0.5) / 100.0));
 				}
-				plan_ptr->Add_Walk (ttime);
-			} else if (mode == WAIT_MODE) {
-				plan_ptr->Add_Wait (ttime);
-			} else {
-				if (leg_ptr->Type () == PARKING_ID) {
-					index = leg_ptr->ID ();
-
-					map_itr = exe->parking_map.find (index);
-
-					if (map_itr != exe->parking_map.end ()) {
-						Parking_Data *parking_ptr;
-						Park_Nest_Itr park_itr;
-						ttime = 0;
-						cost = 0;
-
-						//if (!first_park && veh_ptr != 0) {
-						//	veh_ptr->Parking (map_itr->second);
-						//}
-						parking_ptr = &exe->parking_array [map_itr->second];
-
-						if (parking_ptr->size () > 0) {
-							for (park_itr = parking_ptr->begin (); park_itr != parking_ptr->end (); park_itr++) {
-								if (exe->Use_Permission (park_itr->Use (), use) &&
-									park_itr->Start () <= time && time < park_itr->End ()) {
-
-									if (forward_flag && first_park) {
-										ttime = park_itr->Time_Out ();
-									} else {
-										ttime = park_itr->Time_In ();
-										cost = DTOI (park_itr->Hourly () * parking_duration.Hours ());
-										if (cost > park_itr->Daily ()) cost = park_itr->Daily ();
-										cost = Round (cost);
-									}
-									break;
-								}
-							}
-						}
-						imp = Resolve (ttime * param.value_park + cost * param.value_cost);
-
-						if (random_flag) {
-							imp = DTOI (imp * (1.0 + param.random_imped * (param.random.Probability () - 0.5) / 100.0));
-						}
-					}
-					first_park = !first_park;
-				}
-				plan_ptr->Add_Other (ttime);
+				first_park = !first_park;
 			}
-			leg_ptr->Time (ttime);
-			leg_ptr->Length (len);
-			leg_ptr->Cost (cost);
-			leg_ptr->Impedance (imp);
-
-			plan_ptr->Add_Length (len);
-			plan_ptr->Add_Cost (cost);
-			plan_ptr->Add_Impedance (imp);
-
-			if (forward_flag) {
-				time += ttime;
-			} else {
-				time -= ttime;
-			}
+			plan_ptr->Add_Other (ttime);
 		}
-		plan_ptr->Activity (plan_ptr->Duration ());
+		leg_ptr->Time (ttime);
+		leg_ptr->Length (len);
+		leg_ptr->Cost (cost);
+		leg_ptr->Impedance (imp);
+
+		plan_ptr->Add_Length (len);
+		plan_ptr->Add_Cost (cost);
+		plan_ptr->Add_Impedance (imp);
 
 		if (forward_flag) {
-			plan_ptr->Arrive (time.Round_Seconds ());
-
-			if (plan_ptr->Arrive () > plan_ptr->End () && plan_ptr->Duration () > 0 && 
-				plan_ptr->Constraint () != FIXED_TIME && plan_ptr->Constraint () != DURATION) {
-
-				delay = DTOI (plan_ptr->Duration () * param.duration_factor [plan_ptr->Priority ()]);
-				time = plan_ptr->End () + plan_ptr->Duration ();
-				if (time > plan_ptr->Arrive () + delay.Round_Seconds ()) {
-					plan_ptr->Activity (time - plan_ptr->Arrive ());
-				} else {
-					plan_ptr->Activity (delay.Round_Seconds ());
-				}
-			}
+			time += ttime;
 		} else {
-			plan_ptr->Depart (time.Round_Seconds ());
+			time -= ttime;
 		}
 	}
-	plan_ptr->Problem (0);
+	plan_ptr->Activity (plan_ptr->Duration ());
 
+	if (forward_flag) {
+		plan_ptr->Arrive (time.Round_Seconds ());
+
+		if (plan_ptr->Arrive () > plan_ptr->End () && plan_ptr->Duration () > 0 && 
+			plan_ptr->Constraint () != FIXED_TIME && plan_ptr->Constraint () != DURATION) {
+
+			delay = DTOI (plan_ptr->Duration () * param.duration_factor [plan_ptr->Priority ()]);
+			time = plan_ptr->End () + plan_ptr->Duration ();
+			if (time > plan_ptr->Arrive () + delay.Round_Seconds ()) {
+				plan_ptr->Activity (time - plan_ptr->Arrive ());
+			} else {
+				plan_ptr->Activity (delay.Round_Seconds ());
+			}
+		}
+	} else {
+		plan_ptr->Depart (time.Round_Seconds ());
+	}
 	return (true);
 }

@@ -14,7 +14,7 @@ Performance_Output::Performance_Output (int num) : Sim_Output_Data ()
 	String key;
 
 	Type (PERFORMANCE_OUTPUT_OFFSET);
-	data_flag = flow_flag = turn_flag = false;
+	data_flag = flow_flag = turn_flag = first_step = false;
 	
 	Number (num);
 
@@ -43,29 +43,6 @@ Performance_Output::Performance_Output (int num) : Sim_Output_Data ()
 	if (!key.empty ()) {
 		file->Time_Format (Time_Code (key));
 	}
-
-	//---- get the flow type ----
-
-	key = sim->Get_Control_String (Sim_Output_Step::NEW_PERFORMANCE_FLOW_TYPE, num);
-	if (!key.empty ()) {
-		file->Flow_Units (Flow_Code (key));
-	}
-
-	//---- get the lane use flow flag ----
-
-	key = sim->Get_Control_String (Sim_Output_Step::NEW_PERFORMANCE_LANE_FLOWS, num);
-	if (!key.empty ()) {
-		flow_flag = sim->Set_Control_Flag (Sim_Output_Step::NEW_PERFORMANCE_LANE_FLOWS, num);
-	}
-	file->Lane_Use_Flows (flow_flag);
-
-	//---- get the turn flag ----
-
-	key = sim->Get_Control_String (Sim_Output_Step::NEW_PERFORMANCE_TURN_FLAG, num);
-	if (!key.empty ()) {
-		turn_flag = sim->Set_Control_Flag (Sim_Output_Step::NEW_PERFORMANCE_TURN_FLAG, num);
-	}
-	file->Turn_Flag (turn_flag);
 
 	//---- create the file ----
 
@@ -143,13 +120,9 @@ Performance_Output::Performance_Output (int num) : Sim_Output_Data ()
 		veh_types.Add_Ranges (key);
 	}
 
-	//---- print the turn flag ----
-
-	sim->Get_Control_Flag (Sim_Output_Step::NEW_PERFORMANCE_TURN_FLAG, num);
-
 	//---- print the flow type ----
 
-	sim->Get_Control_Text (Sim_Output_Step::NEW_PERFORMANCE_FLOW_TYPE, num);
+	sim->Get_Control_Text (Sim_Output_Step::NEW_PERFORMANCE_LANE_USE_FLAG, num);
 	return;
 
 coord_error:
@@ -157,40 +130,49 @@ coord_error:
 }
 
 //---------------------------------------------------------
-//	Output_Check
+//	Performance_Output destructor
 //---------------------------------------------------------
 
-bool Performance_Output::Output_Check (void)
+Performance_Output::~Performance_Output ()
 {
-	if (sim->time_step <= sim->Model_Start_Time ()) return (false);;
+	if (file != 0) {
+		file->Close ();
+	}
+}
 
-	if (!time_range.In_Range (sim->time_step)) return (false);
+//---------------------------------------------------------
+//	Write_Check
+//---------------------------------------------------------
+
+void Performance_Output::Write_Check (void)
+{
+	if (sim->time_step <= sim->Model_Start_Time ()) return;
+
+	if (!time_range.In_Range (sim->time_step)) return;
 
 	if (!data_flag) {
 
 		//---- initialize the link data ----
 
-		Link_Perf_Data data_rec;
-		Flow_Time_Data turn_rec;
+		Perf_Data data_rec;
 
-		link_perf.assign (sim->dir_array.size (), data_rec);
+		data_rec.Count (1);
 
-		if (turn_flag) {
-			turn_perf.assign (sim->connect_array.size (), turn_rec);
-		}
-		data_flag = true;
+		perf_period.assign (sim->dir_array.size (), data_rec);
+
+		data_flag = first_step = true;
 
 	} else {
-		Link_Perf_Itr data_itr;
+		Perf_Itr data_itr;
 
 		//---- update the density data ----
 
-		for (data_itr = link_perf.begin (); data_itr != link_perf.end (); data_itr++) {
+		for (data_itr = perf_period.begin (); data_itr != perf_period.end (); data_itr++) {
+
 			if (data_itr->Occupancy () > 0) {
-				if (data_itr->Max_Density () < data_itr->Occupancy ()) {
-					data_itr->Max_Density (data_itr->Occupancy ());
+				if (data_itr->Max_Volume () < data_itr->Occupancy ()) {
+					data_itr->Max_Volume (data_itr->Occupancy ());
 				}
-				data_itr->Add_Density (data_itr->Occupancy ());
 				data_itr->Occupancy (0);
 
 				if (data_itr->Max_Queue () < data_itr->Stop_Count ()) {
@@ -199,6 +181,7 @@ bool Performance_Output::Output_Check (void)
 				data_itr->Add_Queue (data_itr->Stop_Count ());
 				data_itr->Stop_Count (0);
 			}
+			data_itr->Add_Count ();
 		}
 
 		//---- check the output time increment ----
@@ -208,74 +191,57 @@ bool Performance_Output::Output_Check (void)
 			if (sim->Master ()) {
 				Write_Summary ();
 			}
+			first_step = true;
+		} else {
+			first_step = false;
 		}
 	}
-	return (true);
 }
 
 //---------------------------------------------------------
-//	Summarize
+//	Output_Check
 //---------------------------------------------------------
 
-void Performance_Output::Summarize (Travel_Step &step)
+void Performance_Output::Output_Check (Travel_Step &step)
 {
 	if (step.Traveler () < 0 || !time_range.In_Range (sim->time_step)) return;
 
-	int dir_index, turn_index, cell, cells, offset, occupancy;
-	double weight, vmt;
+	int dir_index, cell, cells, offset;
+	double pce, persons, vmt;
 	Dtime vht;
-	bool skip;
+	bool skip, stop_flag;
 
 	Sim_Veh_Itr sim_veh_itr;
-	Sim_Plan_Ptr plan_ptr;
 	Sim_Leg_Itr leg_itr;
-	Flow_Time_Data *turn_time_ptr;
-	Link_Perf_Data *link_perf_ptr;
+	Perf_Data *perf_ptr;
 
 	//---- get the vehicle type data ----
 
+	if (step.sim_plan_ptr == 0) {
+		step.sim_plan_ptr = step.sim_travel_ptr->Get_Plan ();
+	}
 	if (step.veh_type_ptr == 0) {
-		step.veh_type_ptr = &sim->veh_type_array [step.sim_travel_ptr->sim_plan_ptr->Veh_Type ()];
+		step.veh_type_ptr = &sim->veh_type_array [step.sim_plan_ptr->Veh_Type ()];
 	}
-	weight = 1.0;
-
-	if (file->Flow_Units () != VEHICLES || !veh_types.empty ()) {
-		if (!veh_types.empty ()) {
-			if (!veh_types.In_Range (step.veh_type_ptr->Type ())) return;
-		}
-		if (file->Flow_Units () == PERSONS) {
-			weight += step.sim_travel_ptr->Passengers ();
-		} else if (file->Flow_Units () == PCE) {
-			if (step.veh_type_ptr > 0) {
-				weight = UnRound (step.veh_type_ptr->PCE ());
-			} else {
-				weight = 1;
-			}
-		}
-	}
-
-	//---- get the connection ID ----
-
-	turn_index = -1;
-						
-	if (turn_flag) {
-		plan_ptr = step.sim_travel_ptr->sim_plan_ptr;
-		if (plan_ptr != 0) {
-			leg_itr = plan_ptr->begin ();
-			if (leg_itr != plan_ptr->end ()) {
-				turn_index = leg_itr->Connect ();
-			}
-		}
+	if (step.veh_type_ptr != 0) {
+		if (!veh_types.empty () && !veh_types.In_Range (step.veh_type_ptr->Type ())) return;
+		pce = UnRound (step.veh_type_ptr->PCE ());
 	} else {
-		plan_ptr = 0;
+		pce = 1.0;
 	}
+	persons = 1.0 + step.sim_travel_ptr->Passengers ();
 
 	//---- movement size ----
 
 	if (step.Time () == 0) {
-		step.Time (sim->param.step_size);
+		if (step.size () > 0) {
+			Sim_Dir_Ptr sim_dir_ptr = &sim->sim_dir_array [step [0].link];
+			step.Time (sim->method_time_step [sim_dir_ptr->Method ()]);
+		} else {
+			step.Time (sim->param.step_size);
+		}
 	}
-	vht = step.Time () * weight;
+	vht = step.Time () * pce;
 	cells = (int) step.size ();
 	if (cells > 1) vht = vht / (cells - 1);
 
@@ -284,23 +250,19 @@ void Performance_Output::Summarize (Travel_Step &step)
 	dir_index = -1;
 	offset = 0;
 	skip = false;
-	link_perf_ptr = 0;
-	turn_time_ptr = 0;
+	perf_ptr = 0;
+	stop_flag = (step.size () == 1);
 
 	for (cell=0, sim_veh_itr = step.begin (); sim_veh_itr != step.end (); sim_veh_itr++, cell++) {
 
 		if (sim_veh_itr->link != dir_index) {
+			if (dir_index >= 0 && !skip) {
+				perf_ptr->Add_Exit (pce);
+			}
 			if (cell == 0) {
 				offset = sim_veh_itr->offset;
 			} else {
 				offset = 0;
-				if (turn_flag) {
-					if (++leg_itr != plan_ptr->end ()) {
-						turn_index = leg_itr->Connect ();
-					} else {
-						turn_index = -1;
-					}
-				}
 			}
 			dir_index = sim_veh_itr->link;
 			skip = true;
@@ -337,29 +299,26 @@ void Performance_Output::Summarize (Travel_Step &step)
 					if (!subarea_range.In_Range (sim_dir_ptr->Subarea ())) skip = true;
 				}
 				if (!skip) {
-					link_perf_ptr = &link_perf [dir_index];
-
-					if (turn_flag && turn_index >= 0) {
-						turn_time_ptr = &turn_perf [turn_index];
+					perf_ptr = &perf_period [dir_index];
+					if (cell > 0) {
+						perf_ptr->Add_Enter (pce);
+					}
+					if (first_step || cell > 0 || stop_flag) {
+						perf_ptr->Add_Persons (persons);
+						perf_ptr->Add_Volume (pce);
+						perf_ptr->Add_Occupancy (pce);
 					}
 				}
 			}
 		}
-		if (!skip && cell > 0) {
-			vmt = (sim_veh_itr->offset - offset) * weight;
+		if (!skip && perf_ptr > 0 && (cell > 0 || stop_flag)) {
+			vmt = (sim_veh_itr->offset - offset) * pce;
 
-			occupancy = Round (weight);
-
-			link_perf_ptr->Add_Flow (vmt);
-			link_perf_ptr->Add_Time (vht);
-			link_perf_ptr->Add_Occupant (occupancy);
+			perf_ptr->Add_Veh_Dist (vmt);
+			perf_ptr->Add_Veh_Time (vht);
 
 			if (step.Speed () == 0) {
-				link_perf_ptr->Add_Stop (occupancy);
-			}
-			if (turn_flag && turn_index >= 0) {
-				turn_time_ptr->Add_Flow (vmt);
-				turn_time_ptr->Add_Time (vht);
+				perf_ptr->Add_Stop_Count (pce);
 			}
 			offset = sim_veh_itr->offset;
 		}
@@ -370,11 +329,11 @@ void Performance_Output::Summarize (Travel_Step &step)
 //	Cycle_Failure
 //---------------------------------------------------------
 
-void Performance_Output::Cycle_Failure (Dtime step, int dir_index, int vehicles, int persons, int veh_type)
+void Performance_Output::Cycle_Failure (Dtime step, int dir_index, int vehicles, int veh_type)
 {
 	if (dir_index < 0 || vehicles < 0) return;
 
-	Link_Perf_Data *data_ptr;
+	Perf_Data *perf_ptr;
 
 	//---- get the link data ----
 
@@ -416,13 +375,9 @@ void Performance_Output::Cycle_Failure (Dtime step, int dir_index, int vehicles,
 
 	//---- save the failure ----
 
-	data_ptr = &link_perf [dir_index];
+	perf_ptr = &perf_period [dir_index];
 
-	if (file->Flow_Units () == PERSONS) {
-		data_ptr->Add_Failure (persons);
-	} else {
-		data_ptr->Add_Failure (vehicles);
-	}
+	perf_ptr->Add_Failure (vehicles);
 }
 
 //---------------------------------------------------------
@@ -431,240 +386,66 @@ void Performance_Output::Cycle_Failure (Dtime step, int dir_index, int vehicles,
 
 void Performance_Output::Write_Summary (void)
 {
-	int num, index, count;
-	int i, link [20], increment;
-	Dtime time [20];
-	double flow [20], speed, ttime, length, rate, density, factor;
+	int num;
+	int increment;
 
 	Dir_Data *dir_ptr;
 	Link_Data *link_ptr;
-	Flow_Time_Data *turn_perf_ptr;
-	Link_Perf_Itr link_itr;
-	Connect_Data *connect_ptr;
+	Perf_Itr perf_itr;
+	Performance_Data data;
 
 	increment = time_range.Increment ();
 	if (increment < 1) increment = 1;
 
 	//---- output the current increment ----
 
-	for (num=0, link_itr = link_perf.begin (); link_itr != link_perf.end (); link_itr++, num++) {
-		if (link_itr->Flow () == 0) continue;
-			
+	for (num=0, perf_itr = perf_period.begin (); perf_itr != perf_period.end (); perf_itr++, num++) {
+		if (perf_itr->Volume () == 0) {
+			perf_itr->Clear ();
+			continue;
+		}
 		dir_ptr = &sim->dir_array [num];
 		link_ptr = &sim->link_array [dir_ptr->Link ()];
 
+		data.Start (sim->time_step - increment);
+		data.End (sim->time_step);
+
+		data.Get_Data (&(*perf_itr), dir_ptr, link_ptr);
+		perf_itr->Clear ();
+
 		//---- calculate the performance ----
-
-		if (link_itr->Time () > 0) {
-			speed = link_itr->Flow () / link_itr->Time ();
-			if (speed < 0.5) speed = 0.5;
-		} else {
-			speed = 0.5;
-		}
-		length = UnRound (link_ptr->Length ());
-		if (length < 0.1) length = 0.1;
-
-		ttime = length / speed;
-		if (ttime < 0.1) ttime = 0.1;
-
-		rate = UnRound (link_itr->Flow () / length);
-		if (rate < 0.1) rate = 0.1;
-
-		//---- save the link record ----
 
 		file->Link (link_ptr->Link ());
 		file->Dir (dir_ptr->Dir ());
-		file->Start (sim->time_step - increment);
-		file->End (sim->time_step);
-		file->Flow (rate);
-		file->Time (Dtime (ttime, SECONDS));
-		file->Speed (speed);
 
-		density = (double) link_itr->Density () / increment;
-		if (density < 0.01) density = 0.01;
+		file->Type (0);
 
-		factor = dir_ptr->Lanes ();
-		if (factor < 1) factor = 1;
+		file->Start (data.Start ());
+		file->End (data.End ());
 
-		if (sim->Metric_Flag ()) {
-			factor = 1000.0 / (length * factor);
-		} else {
-			factor = MILETOFEET / (length * factor);
-		}
-		density *= factor;
-		if (density > 0.0 && density < 0.01) density = 0.01;
-		file->Density (density);
+		file->Time (data.Time ());
+		file->Persons (data.Persons ());
+		file->Volume (data.Volume ());
+		file->Enter (data.Enter ());
+		file->Exit (data.Exit ());
+		file->Flow (data.Flow ());
+		file->Speed (UnRound (data.Speed ()));
+		file->Time_Ratio (UnRound (data.Time_Ratio ()));
 
-		density = UnRound (link_itr->Max_Density ()) * factor;
-		if (density > 0.0 && density < 0.01) density = 0.01;
-		file->Max_Density (density);
+		file->Delay (data.Delay ());
+		file->Density (data.Density ());
+		file->Max_Density (data.Max_Density ());
+		file->Queue (data.Queue ());
+		file->Max_Queue (data.Max_Queue ());
+		file->Failure (data.Failure ());
+		file->Veh_Dist (UnRound (data.Veh_Dist ()));
+		file->Veh_Time (data.Veh_Time ());
+		file->Veh_Delay (data.Veh_Delay ());
 
-		file->Queue (UnRound (link_itr->Queue ()) / increment);
-		file->Max_Queue (Resolve (link_itr->Max_Queue ()));
-		file->Cycle_Failure (link_itr->Failure ());
-
-		factor = dir_ptr->Time0 ().Seconds ();
-		if (factor < 0.1) factor = 0.1;
-
-		file->Delay (Dtime ((ttime - factor), SECONDS));
-		file->Time_Ratio (100 * ttime / factor);
-
-		//---- clear for the next time slice ----
-
-		link_itr->Clear ();
-
-		//---- gather the turn delays ----
-
-		count = 0;
-
-		if (turn_flag) {
-			for (index = dir_ptr->First_Connect (); index >= 0; index = connect_ptr->Next_Index ()) {
-				connect_ptr = &sim->connect_array [index];
-
-				turn_perf_ptr = &turn_perf [index];
-				if (turn_perf_ptr->Flow () == 0) continue;
-
-				dir_ptr = &sim->dir_array [connect_ptr->To_Index ()];
-				link_ptr = &sim->link_array [dir_ptr->Link ()];
-
-				//---- calculate the performance ----
-
-				if (turn_perf_ptr->Time () > 0) {
-					speed = turn_perf_ptr->Flow () / turn_perf_ptr->Time ();
-					if (speed < 0.5) speed = 0.5;
-				} else {
-					speed = 0.5;
-				}
-				ttime = length / speed;
-				if (ttime < 0.1) ttime = 0.1;
-
-				rate = UnRound (turn_perf_ptr->Flow () / length);
-				if (rate < 0.1) rate = 0.1;
-
-				link [count] = link_ptr->Link ();
-				flow [count] = rate;
-				time [count] = Dtime (ttime, SECONDS);
-				count++;
-
-				//--- clear for the next time slice ----
-
-				turn_perf_ptr->Clear ();
-			}
-		}
-		file->Num_Nest (count);
-
-		if (!file->Write (false)) goto write_error;
-
-		//---- save the turn delays ----
-
-		for (i=0; i < count; i++) {
-			file->Out_Link (link [i]);
-			file->Out_Flow (flow [i]);
-			file->Out_Time (time [i]);
-
-			if (!file->Write (true)) goto write_error;
-		}
-
-		////---- calculate the performance ----
-
-
-	}
-	return;
-
-write_error:
-	sim->Error (String ("Writing %s") % file->File_Type ());
-}
-
-#ifdef MPI_EXE
-
-//---------------------------------------------------------
-//	MPI_Processing
-//---------------------------------------------------------
-
-void Performance_Output::MPI_Processing (Output_Itr output)
-{
-	int i, num, index, rank, link_size, turn_size, tag;
-
-	Flow_Time_Data *turn_ptr, turn_rec;
-	Flow_Time_Itr turn_itr;
-	Link_Perf_Data *link_ptr, link_rec;
-	Link_Perf_Itr link_itr;
-	
-	tag = (sim->Num_Threads () > 1) ? NEW_PERFORMANCE_FILE : 0;
-	link_size = (int) sizeof (Link_Perf_Data);
-	turn_size = (int) sizeof (Flow_Time_Data);
-
-	if (sim->Master ()) {
-		for (i=1; i < sim->MPI_Size (); i++) {
-
-			//---- retrieve the data buffer ----
-
-			rank = sim->Get_MPI_Buffer (data, tag);
-
-			num = (int) data.Size () / (sizeof (int) + link_size);
-
-			while (num-- > 0) {
-				data.Get_Data (&index, sizeof (int));
-				data.Get_Data (&link_rec, link_size);
-
-				link_ptr = &output->link_perf [index];
-
-				link_ptr->Add_Flow (link_rec.Flow ());
-				link_ptr->Add_Time (link_rec.Time ());
-				link_ptr->Add_Density (link_rec.Density ());
-				link_ptr->Add_Max_Density (link_rec.Max_Density ());
-				link_ptr->Add_Queue (link_rec.Queue ());
-				link_ptr->Add_Max_Queue (link_rec.Max_Queue ());
-				link_ptr->Add_Failure (link_rec.Failure ());
-				link_ptr->Add_Occupant (link_rec.Occupancy ());
-				link_ptr->Add_Stop (link_rec.Stop_Count ());
-				link_ptr->Add_Ratio (link_rec.Ratio_Count ());
-				link_ptr->Add_Ratio_VMT (link_rec.Ratio_VMT ());
-				link_ptr->Add_Ratio_VHT (link_rec.Ratio_VHT ());
-			}
-			if (output->turn_flag) {
-				sim->Get_MPI_Buffer (data, tag, rank);
-
-				num = (int) data.Size () / (sizeof (int) + turn_size);
-
-				while (num-- > 0) {
-					data.Get_Data (&index, sizeof (int));
-					data.Get_Data (&turn_rec, turn_size);
-
-					turn_ptr = &output->turn_perf [index];
-
-					turn_ptr->Add_Flow (turn_rec.Flow ());
-					turn_ptr->Add_Time (turn_rec.Time ());
-				}
-			}
-		}
-
-	} else {	//---- slave ----
-
-		data.Size (0);
-			
-		for (index=0, link_itr = output->link_perf.begin (); link_itr != output->link_perf.end (); link_itr++, index++) {
-			if (link_itr->Time () > 0) {
-				data.Add_Data (&index, sizeof (int));
-				data.Add_Data (&(*link_itr), link_size);
-				link_itr->Clear ();
-			}
-		}
-		sim->Send_MPI_Buffer (data, tag);
-
-		if (output->turn_flag) {
-			data.Size (0);
-
-			for (index=0, turn_itr = output->turn_perf.begin (); turn_itr != output->turn_perf.end (); turn_itr++, index++) {
-				if (turn_itr->Time () > 0) {
-					data.Add_Data (&index, sizeof (int));
-					data.Add_Data (&(*turn_itr), turn_size);
-					turn_itr->Clear ();
-				}
-			}
-			sim->Send_MPI_Buffer (data, tag);
+		if (!file->Write ()) {
+			sim->Error (String ("Writing %s") % file->File_Type ());
 		}
 	}
 }
-#endif
+
 

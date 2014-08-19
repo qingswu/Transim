@@ -11,7 +11,7 @@
 void LineSum::Line_Report (Line_Report_Data &report)
 {
 	int i, anode, bnode, dir, dir1, dir2, stop, mode;
-	int ab_pk_tot, ab_op_tot, ba_pk_tot, ba_op_tot;
+	int ab_pk_tot, ab_op_tot, ba_pk_tot, ba_op_tot, total;
 	int dist_tot, time_tot, dist_max, time_max;
 	int ab_pk_pmt, ab_op_pmt, ba_pk_pmt, ba_op_pmt;
 	int ab_pk_pht, ab_op_pht, ba_pk_pht, ba_op_pht;
@@ -612,9 +612,12 @@ void LineSum::Line_Report (Line_Report_Data &report)
 	ab_op.ride = (ab_op_tot) ? ab_op_pmt / ab_op_tot : 0;
 	ba_pk.ride = (ba_pk_tot) ? ba_pk_pmt / ba_pk_tot : 0;
 	ba_op.ride = (ba_op_tot) ? ba_op_pmt / ba_op_tot : 0;
-	ab.ride = ab_pk.ride + ab_op.ride;
-	ba.ride = ba_pk.ride + ba_op.ride;
-	tot.ride = ab.ride + ba.ride;
+	total = ab_pk_tot + ab_op_tot;
+	ab.ride = (total > 0) ? (ab_pk_pmt + ab_op_pmt) / total : 0;
+	total = ba_pk_tot + ba_op_tot;
+	ba.ride = (total > 0) ? (ba_pk_pmt + ba_op_pmt) / total : 0;
+	total += ab_pk_tot + ab_op_tot;
+	tot.ride = (total > 0) ? (ab_pk_pmt + ab_op_pmt + ba_pk_pmt + ba_op_pmt) / total : 0;
 
 	Print (1, String ("Average Trip Length (miles)%11.1f%20.1f%20.1f%20.1f%20.1f%20.1f%20.1f") %
 		(ab_pk.ride / 100.0) % (ab_op.ride / 100.0) % (ab.ride / 100.0) %
@@ -626,9 +629,12 @@ void LineSum::Line_Report (Line_Report_Data &report)
 	ab_op.ride = (ab_op_tot) ? ab_op_pht / ab_op_tot : 0;
 	ba_pk.ride = (ba_pk_tot) ? ba_pk_pht / ba_pk_tot : 0;
 	ba_op.ride = (ba_op_tot) ? ba_op_pht / ba_op_tot : 0;
-	ab.ride = ab_pk.ride + ab_op.ride;
-	ba.ride = ba_pk.ride + ba_op.ride;
-	tot.ride = ab.ride + ba.ride;
+	total = ab_pk_tot + ab_op_tot;
+	ab.ride = (total > 0) ? (ab_pk_pht + ab_op_pht) / total : 0;
+	total = ba_pk_tot + ba_op_tot;
+	ba.ride = (total > 0) ? (ba_pk_pht + ba_op_pht) / total : 0;
+	total += ab_pk_tot + ab_op_tot;
+	tot.ride = (total > 0) ? (ab_pk_pht + ab_op_pht + ba_pk_pht + ba_op_pht) / total : 0;
 
 	Print (1, String ("Average Trip Length (minutes)%9.1f%20.1f%20.1f%20.1f%20.1f%20.1f%20.1f") %
 		(ab_pk.ride / 100.0) % (ab_op.ride / 100.0) % (ab.ride / 100.0) %

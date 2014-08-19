@@ -606,6 +606,32 @@ String & String::Clean (void)
 }
 
 //---------------------------------------------------------
+//	Compress -- remove all white space and comments
+//---------------------------------------------------------
+
+String & String::Compress (void)
+{
+	Clean ();
+
+	if (!empty ()) {
+		int i0;
+		string::iterator itr, itr0;
+
+		i0 = 0;
+		for (itr0 = begin (), itr = begin (); itr != end (); itr++) {
+			if (*itr == ' ' || *itr == '\t') continue;
+			*itr0 = *itr;
+			itr0++;
+			i0++;
+		}
+		if (i0 < (int) length ()) {
+			erase (i0);
+		}
+	}
+	return (*this);
+}
+
+//---------------------------------------------------------
 //	Center -- center text on a string 
 //---------------------------------------------------------
 

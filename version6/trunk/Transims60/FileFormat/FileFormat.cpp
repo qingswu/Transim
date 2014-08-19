@@ -11,7 +11,7 @@
 FileFormat::FileFormat (void) : Execution_Service ()
 {
 	Program ("FileFormat");
-	Version (2);
+	Version (3);
 	Title ("File Format Conversion");
 
 	Control_Key keys [] = { //--- code, key, level, status, type, default, range, help ----

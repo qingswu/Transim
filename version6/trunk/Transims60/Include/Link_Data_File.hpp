@@ -8,6 +8,7 @@
 #include "APIDefs.hpp"
 #include "Db_Header.hpp"
 #include "Time_Periods.hpp"
+#include "Volume_Array.hpp"
 
 //---------------------------------------------------------
 //	Link_Data_File Class definition
@@ -51,8 +52,10 @@ public:
 	int  AB (int period)                        { return ((period >= 0 && period < (int) ab.size ()) ? ab [period] : -1); }
 	int  BA (int period)                        { return ((period >= 0 && period < (int) ba.size ()) ? ba [period] : -1); }
 	
-	bool   Lane_Use_Flows (void)                { return (type_flag); }
-	void   Lane_Use_Flows (bool flag)           { type_flag = flag; }
+	bool Lane_Use_Flows (void)                  { return (type_flag); }
+	void Lane_Use_Flows (bool flag)             { type_flag = flag; }
+
+	void Read_Data (Volume_Array &data);
 
 protected:
 	virtual bool Read_Header (bool stat);

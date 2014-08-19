@@ -5,6 +5,8 @@
 
 #include "Plan_File.hpp"
 
+#include "Data_Service.hpp"
+
 //---------------------------------------------------------
 //	Plan_File constructor
 //---------------------------------------------------------
@@ -69,7 +71,7 @@ bool Plan_File::Read_Plan (Plan_Data &plan_rec)
 
 	Get_Data (plan_rec);
 
-	if (plan_rec.Household () <= 0) return (true);
+	if (plan_rec.Household () < 1) return (true);
 
 	plan_rec.Depart (Depart ());
 	plan_rec.Arrive (Arrive ());

@@ -1,20 +1,29 @@
 //*********************************************************
-//	Sim_Travel_Process.cpp - simulate travel events
+//	Sim_Travel_Process.cpp - travel event manager
 //*********************************************************
 
 #include "Sim_Travel_Process.hpp"
 #include "Simulator_Service.hpp"
 
 //---------------------------------------------------------
-//	Initialize
+//	Sim_Travel_Process -- constructor
 //---------------------------------------------------------
 
-void Sim_Travel_Process::Initialize (void)
+Sim_Travel_Process::Sim_Travel_Process (void) : Static_Service ()
 {
-	stats.Clear_Statistics ();
+	id = 1;
+	stats.Clear_Statistics (); 
 }
 
 #ifdef THREADS
+
+Sim_Travel_Process::Sim_Travel_Process (Work_Queue *queue, int _id) : Static_Service ()
+{ 
+	travel_queue = queue; 
+	id = _id + 1;
+	stats.Clear_Statistics (); 
+}
+
 //---------------------------------------------------------
 //	operator
 //---------------------------------------------------------
@@ -25,12 +34,14 @@ void Sim_Travel_Process::operator()()
 	Sim_Travel_Ptr sim_travel_ptr;
 
 	for (;;) {
-		sim_travel_ptr = travel_queue->Get_Work (number);
-		if (sim_travel_ptr == 0) break;
+		number = travel_queue->Get ();
+		if (number < 0) break;
+
+		sim_travel_ptr = &sim->sim_travel_array [number];
 
 		Travel_Processing (sim_travel_ptr);
 
-		if (!travel_queue->Put_Result (sim_travel_ptr, number)) break;
+		travel_queue->Finished ();
 	}
 }
 #endif

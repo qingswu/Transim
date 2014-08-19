@@ -221,7 +221,7 @@ void TripSum::Trip_Processing::Read_Trips (int part)
 				trip_len_ptr->Add_Trip (trip_data.Start (), distance, ttime);
 			}
 			if (exe->trip_purp_flag) {
-				trip_data.Get_Trip_Index (trip_index);
+				trip_data.Get_Index (trip_index);
 
 				if (prev_index.Household () != trip_index.Household () || prev_index.Person () != trip_index.Person () || prev_index.Tour () != trip_index.Tour ()) {
 					prev_purp = 0;

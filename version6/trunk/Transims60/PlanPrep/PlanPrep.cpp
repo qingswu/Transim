@@ -11,14 +11,14 @@
 PlanPrep::PlanPrep (void) : Data_Service (), Select_Service ()
 {
 	Program ("PlanPrep");
-	Version (1);
+	Version (2);
 	Title ("Travel Plan Processing Utility");
 
 	System_File_Type required_files [] = {
 		PLAN, END_FILE
 	};
 	System_File_Type optional_files [] = {
-		SELECTION, NEW_PLAN, END_FILE
+		NODE, LINK, SELECTION, NEW_PLAN, END_FILE
 	};
 	int data_service_keys [] = {
 		TRIP_SORT_TYPE, PLAN_SORT_TYPE, 0
@@ -33,6 +33,7 @@ PlanPrep::PlanPrep (void) : Data_Service (), Select_Service ()
 		{ MERGE_PLAN_FILE, "MERGE_PLAN_FILE", LEVEL0, OPT_KEY, IN_KEY, "", PARTITION_RANGE, NO_HELP },
 		{ MERGE_PLAN_FORMAT, "MERGE_PLAN_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, FORMAT_HELP },
 		{ MAXIMUM_SORT_SIZE, "MAXIMUM_SORT_SIZE", LEVEL0, OPT_KEY, INT_KEY, "0", "0, >=100000 trips", NO_HELP },
+		{ REPAIR_PLAN_LEGS, "REPAIR_PLAN_LEGS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		END_CONTROL
 	};
 	const char *reports [] = {
@@ -56,8 +57,8 @@ PlanPrep::PlanPrep (void) : Data_Service (), Select_Service ()
 	Enable_MPI (true);
 #endif
 
-	sort_size = 0;
-	select_flag = merge_flag = combine_flag = output_flag = new_plan_flag = false;
+	sort_size = num_repair = 0;
+	select_flag = merge_flag = combine_flag = output_flag = new_plan_flag = repair_flag = false;
 
 	System_Read_False (PLAN);
 	System_Data_Reserve (PLAN, 0);

@@ -374,6 +374,7 @@
     <ClCompile Include="Plan_Processing.cpp" />
     <ClCompile Include="PlanPrep.cpp" />
     <ClCompile Include="Read_Plans.cpp" />
+    <ClCompile Include="Repair_Legs.cpp" />
     <ClCompile Include="Temp_Time_Write.cpp" />
     <ClCompile Include="Temp_Trip_Write.cpp" />
     <ClCompile Include="Time_Combine.cpp" />

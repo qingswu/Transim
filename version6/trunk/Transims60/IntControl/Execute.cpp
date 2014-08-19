@@ -25,12 +25,6 @@ void IntControl::Execute (void)
 		Read_Deletes ();
 	}
 
-	//---- read the turn volumes ----
-
-	if (turn_flag) {
-		Read_Turn ();
-	}
-
 	//---- read the signal file ----
 
 	if (input_signal_flag) {

@@ -28,26 +28,25 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 	Node_Data *node_ptr;
 	Link_Data *link_ptr = 0;
 	Dir_Data *dir_ptr, *app_ptr;
-	Turn_Pen_Data *turn_ptr = 0;
+	Turn_Pen_Data *turn_pen_ptr = 0;
 	Connect_Data *connect_ptr;
 	Path_Data *path_ptr;
 	Path_Itr path_itr;
-	Flow_Time_Array *turn_delay_ptr;
-	Flow_Time_Data *turn_delay;
+	Turn_Period *turn_period_ptr = 0;
+	Turn_Data *turn_ptr = 0;
 	
 	Int_Queue next_index;
 
 	if (from_ptr->size () == 0 || to_ptr->size () == 0) {
 		zero_flag = true;
-		return (Set_Drive_Error ());
+		return (-1);
 	}
 
 	//---- initialize the path building ----
 
 	restrict_flag = restrict_from = restrict_to = restrict_in = false;
 	local_flag = true;
-	turn_delay_ptr = 0;
-	turn_delay = 0;
+
 	x0 = y0 = x1 = y1 = 0;
 	max_len = max_local = local_factor = 0.0;
 	period = -1;
@@ -143,19 +142,19 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 
 			//---- check the lane use ----
 
-			if (!Best_Lane_Use (index, from_time, ttime, delay, cost, group)) {
+			len_factor = (double) length / link_ptr->Length ();
+
+			if (!Best_Lane_Use (index, from_time, len_factor, ttime, delay, cost, group)) {
 				use_flag = true;
 				continue;
 			}
 
 			//---- adjust the travel time ----
 
-			if (grade_flag && link_ptr->Grade (ab_flag) > 0) {
-				ttime = ttime / veh_type_ptr->Grade (link_ptr->Grade (ab_flag));
+			if (param.grade_flag && link_ptr->Grade (ab_flag) > 0) {
+				ttime = ttime / param.veh_type_ptr->Grade (link_ptr->Grade (ab_flag));
 			}
-			len_factor = (double) length / link_ptr->Length ();
-
-			ttime = (int) (ttime * len_factor + 0.5) + delay;
+			ttime += delay;
 
 			//---- check the time schedule ----
 
@@ -174,7 +173,7 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 					continue;
 				}
 			}
-			cost += DTOI (op_cost_rate * length);
+			cost += DTOI (param.op_cost_rate * length);
 
 			//---- calculcate the impedance ----
 
@@ -236,8 +235,9 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 		//---- update the max imp ----
 
 		if (best_flag) {
-			if (best_to >= 0) return (best_to);
-			if (zero_flag) return (Set_Drive_Error ());
+			if (best_to >= 0 || zero_flag) {
+				return (best_to);
+			}
 		} else if (to_flag || zero_flag) {
 			hi_imp = 0;
 
@@ -287,19 +287,19 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 
 			//---- check the lane use ----
 
-			if (!Best_Lane_Use (index, from_time, ttime, delay, cost, group)) {
+			len_factor = (double) length / link_ptr->Length ();
+
+			if (!Best_Lane_Use (index, from_time, len_factor, ttime, delay, cost, group)) {
 				use_flag = true;
 				continue;
 			}
 
 			//---- adjust the travel time ----
 
-			if (grade_flag && link_ptr->Grade (ab_flag) > 0) {
-				ttime = ttime / veh_type_ptr->Grade (link_ptr->Grade (ab_flag));
+			if (param.grade_flag && link_ptr->Grade (ab_flag) > 0) {
+				ttime = ttime / param.veh_type_ptr->Grade (link_ptr->Grade (ab_flag));
 			}
-			len_factor = (double) length / link_ptr->Length ();
-
-			ttime = (int) (ttime * len_factor + 0.5) + delay;
+			ttime += delay;
 
 			//---- check the time schedule ----
 
@@ -318,7 +318,7 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 					continue;
 				}
 			}
-			cost += DTOI (op_cost_rate * length);
+			cost += DTOI (param.op_cost_rate * length);
 
 			//---- calculcate the impedance ----
 
@@ -384,9 +384,13 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 		}
 	}
 	if (param.sort_method) {
-		if (imp_sort.List_Size () == 0) return (best_to);
+		if (imp_sort.List_Size () == 0) {
+			return (best_to);
+		}
 	} else {
-		if (next_index.empty ()) return (best_to);
+		if (next_index.empty ()) {
+			return (best_to);
+		}
 	}
 
 	//---- circuity and restricted access for plan-based trips ----
@@ -528,8 +532,8 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 				continue;
 			}
 		}
-		if (param.delay_flag && param.turn_delay_flag) {
-			turn_delay_ptr = exe->turn_delay_array.Period_Ptr (from_time);
+		if (param.turn_delay_flag) {
+			turn_period_ptr = exe->turn_period_array.Period_Ptr (from_time);
 		}
 		from_len = path_ptr->Length ();
 		from_cost = path_ptr->Cost ();
@@ -604,33 +608,33 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 		for (index = app_ptr->First_Connect (forward_flag); index >= 0; index = connect_ptr->Next_Index (forward_flag)) {
 			connect_ptr = &exe->connect_array [index];
 
-			if (turn_delay_ptr != 0) {
-				turn_delay = turn_delay_ptr->Data_Ptr (index);
+			if (turn_period_ptr != 0) {
+				turn_ptr = turn_period_ptr->Data_Ptr (index);
 			}
 
 			//---- check for time of day turn penalties ----
 
 			penalty = pen_imp = 0;
 
-			for (index = app_ptr->First_Turn (forward_flag); index >= 0; index = turn_ptr->Next_Index (forward_flag)) {
-				turn_ptr = &exe->turn_pen_array [index]; 
+			for (index = app_ptr->First_Turn (forward_flag); index >= 0; index = turn_pen_ptr->Next_Index (forward_flag)) {
+				turn_pen_ptr = &exe->turn_pen_array [index]; 
 
 				if (forward_flag) {
-					if (turn_ptr->To_Index () != connect_ptr->To_Index ()) continue;
+					if (turn_pen_ptr->To_Index () != connect_ptr->To_Index ()) continue;
 				} else {
-					if (turn_ptr->Dir_Index () != connect_ptr->Dir_Index ()) continue;
+					if (turn_pen_ptr->Dir_Index () != connect_ptr->Dir_Index ()) continue;
 				}
-				if (turn_ptr->Start () <= from_time && from_time < turn_ptr->End ()) {
-					if (param.veh_type < 0 || turn_ptr->Min_Veh_Type () < 0 || 
-						(turn_ptr->Min_Veh_Type () <= param.veh_type && param.veh_type <= turn_ptr->Max_Veh_Type ())) {
+				if (turn_pen_ptr->Start () <= from_time && from_time < turn_pen_ptr->End ()) {
+					if (param.veh_type < 0 || turn_pen_ptr->Min_Veh_Type () < 0 || 
+						(turn_pen_ptr->Min_Veh_Type () <= param.veh_type && param.veh_type <= turn_pen_ptr->Max_Veh_Type ())) {
 
-						if (turn_ptr->Use () == 0 || Use_Permission (turn_ptr->Use (), param.use)) break;
+						if (turn_pen_ptr->Use () == 0 || Use_Permission (turn_pen_ptr->Use (), param.use)) break;
 					}
 				}
 			}
 			if (index >= 0) {
-				if (turn_ptr->Penalty () == 0) continue;
-				penalty = turn_ptr->Penalty ();
+				if (turn_pen_ptr->Penalty () == 0) continue;
+				penalty = turn_pen_ptr->Penalty ();
 			}
 
 			//--- get the link ---
@@ -656,7 +660,7 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 
 			//---- check the lane use ----
 
-			if (!Best_Lane_Use (index, from_time, ttime, delay, cost, group)) {
+			if (!Best_Lane_Use (index, from_time, 1.0, ttime, delay, cost, group)) {
 				use_flag = true;
 				continue;
 			}
@@ -664,10 +668,10 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 			//---- get the travel time ----
 
 			if (param.turn_delay_flag && period >= 0) {
-				penalty += turn_delay->Time ();
+				penalty += turn_ptr->Time ();
 			}
-			if (grade_flag && link_ptr->Grade (ab_flag) > 0) {
-				ttime = ttime / veh_type_ptr->Grade (link_ptr->Grade (ab_flag));
+			if (param.grade_flag && link_ptr->Grade (ab_flag) > 0) {
+				ttime = ttime / param.veh_type_ptr->Grade (link_ptr->Grade (ab_flag));
 			}
 			ttime += delay;
 			pen_imp = DTOI (penalty * param.value_time);
@@ -684,7 +688,6 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 				} else {
 					imp = 0;
 				}
-				imp = Round (imp);
 				if (pen_imp <= 0) {
 					pen_imp += imp;
 				} else if (pen_imp < imp) {
@@ -692,7 +695,7 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 				}
 			}
 			cst = cost;
-			op_cost = DTOI (op_cost_rate * link_ptr->Length ());
+			op_cost = DTOI (param.op_cost_rate * link_ptr->Length ());
 			cost += op_cost;
 
 			//---- calculate the link impedance ----

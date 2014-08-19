@@ -21,9 +21,9 @@ class SYSLIB_API Turn_Vol_Output : public Sim_Output_Data
 public:
 	Turn_Vol_Output (int num);
 
-	bool Output_Check (void);
+	bool Write_Check (void);
 
-	void Summarize (Travel_Step &step);
+	void Output_Check (Travel_Step &step);
 
 	typedef struct {
 		int node;

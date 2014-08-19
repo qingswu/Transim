@@ -6,7 +6,7 @@
 #include "Simulator_Service.hpp"
 
 //---------------------------------------------------------
-//	Traveler_Output constructor / destructor
+//	Traveler_Output constructor
 //---------------------------------------------------------
 
 Traveler_Output::Traveler_Output (int num) : Sim_Output_Data ()
@@ -156,62 +156,41 @@ coord_error:
 }
 
 //---------------------------------------------------------
-//	In_Range
+//	Traveler_Output destructor
 //---------------------------------------------------------
 
-bool Traveler_Output::In_Range (Traveler_Data &data)
+Traveler_Output::~Traveler_Output () 
 {
-	if (data.Mode () < MAX_MODE && mode [data.Mode ()]) {
-		if (time_range.In_Range (sim->time_step)) {
-			if (hhold_range.empty ()) return (true);
-			int index = hhold_range.In_Index (data.Household ());
-			if (index >= 0) {
-				if (person_range.empty ()) return (true);
-				Range_Data *range_ptr = &person_range [index];
-				if (data.Person () >= range_ptr->Low () && data.Person () <= range_ptr->High ()) {
-					return (true);
-				}
-			}
-		}
+	if (file != 0) {
+		file->Close ();
 	}
-	return (false);
 }
 
 //---------------------------------------------------------
-//	Output_Traveler
+//	Output_Check
 //---------------------------------------------------------
 
-void Traveler_Output::Output_Traveler (Traveler_Data &traveler_data)
+void Traveler_Output::Output_Check (Travel_Step &step)
 {
+	if (step.Traveler () < 0 || !time_range.In_Range (sim->time_step) || step.size () == 0) return;
 
-#ifdef MPI_EXE
-	if (sim->Num_Threads () > 1) {
-		mutex_lock lock (data_mutex);
-		data.Add_Data (&traveler_data, sizeof (traveler_data));
-	} else {
-		data.Add_Data (&traveler_data, sizeof (traveler_data));
-	}
-#else 
-	if (sim->Num_Threads () > 1) {
- #ifdef THREADS
-		traveler_queue->Put (traveler_data);
- #endif
-	} else {
-		Write_Traveler (traveler_data);
-	}
-#endif
-}
+	Traveler_Data data;
 
-//---------------------------------------------------------
-//	Write_Traveler
-//---------------------------------------------------------
+	data.Time (sim->time_step);
 
-void Traveler_Output::Write_Traveler (Traveler_Data &data)
-{
-	Int_Itr veh_itr;
-	
+	//---- check the mode ----
+
+	Sim_Plan_Ptr sim_plan_ptr = step.sim_travel_ptr->Get_Plan ();
+	if (sim_plan_ptr == 0) return;
+
+	data.Mode (sim_plan_ptr->Mode ());
+
 	if (data.Mode () >= MAX_MODE || !mode [data.Mode ()]) return;
-	if (!time_range.In_Range (data.Time ())) return;
+
+	//---- check the household-person ----
+
+	data.Household (step.sim_travel_ptr->Household ());
+	data.Person (step.sim_travel_ptr->Person ());
 
 	if (!hhold_range.empty ()) {
 		int index = hhold_range.In_Index (data.Household ());
@@ -221,14 +200,15 @@ void Traveler_Output::Write_Traveler (Traveler_Data &data)
 			if (data.Person () < range_ptr->Low () || data.Person () > range_ptr->High ()) return;
 		}
 	}
-	if (data.Dir_Index () >= 0) {
-		Dir_Data *dir_ptr = &sim->dir_array [data.Dir_Index ()];
+
+	if (step.sim_veh_ptr != 0 && step.sim_veh_ptr->link >= 0) {
+		Dir_Data *dir_ptr = &sim->dir_array [step.sim_veh_ptr->link];
 		Link_Data *link_ptr = &sim->link_array [dir_ptr->Link ()];
 
 		if (!link_range.empty () && !link_range.In_Range (link_ptr->Link ())) return;
 
 		if (!subarea_range.empty ()) {
-			Sim_Dir_Ptr sim_dir_ptr = &sim->sim_dir_array [data.Dir_Index ()];
+			Sim_Dir_Ptr sim_dir_ptr = &sim->sim_dir_array [step.sim_veh_ptr->link];
 	
 			if (!subarea_range.In_Range (sim_dir_ptr->Subarea ())) return;
 		}
@@ -263,67 +243,20 @@ void Traveler_Output::Write_Traveler (Traveler_Data &data)
 			}
 		}
 	}
-	sim->Put_Traveler_Data (*file, data);
-}
 
-//---------------------------------------------------------
-//	End_Output
-//---------------------------------------------------------
+	//---- output traveler record ----
 
-void Traveler_Output::End_Output (void)
-{
-#ifdef MPI_EXE
-#else
- #ifdef THREADS
-	if (sim->Num_Threads () > 1) {
-		traveler_queue->End_Queue ();
-		traveler_queue->Exit_Queue ();
+	data.Tour (sim_plan_ptr->Tour ());
+	data.Trip (sim_plan_ptr->Trip ());
+	data.Distance ((int) step.size () * sim->param.cell_size);
+	data.Speed (step.Speed ());
+
+	if (step.sim_veh_ptr != 0) {
+		data.Lane (step.sim_veh_ptr->lane);
+		data.Offset (step.sim_veh_ptr->offset);
 	}
- #endif
-#endif
+	
+	file->Lock ();
+	sim->Put_Traveler_Data (*file, data);
+	file->UnLock ();
 }
-
-////---------------------------------------------------------
-////	Traveler_Output constructor / destructor
-////---------------------------------------------------------
-//
-//Traveler_Output::Traveler_Output (int num) : Output_Data ()
-//{
-//	output_flag = false;
-//#ifdef THREADS
-//	traveler_queue = 0;
-//#endif
-//}
-//
-//Traveler_Output::~Traveler_Output () 
-//{
-//#ifdef THREADS
-//	if (traveler_queue != 0) {
-//		delete traveler_queue;
-//	}
-//#endif
-//}
-//
-////---------------------------------------------------------
-////	Traveler_Output operator
-////---------------------------------------------------------
-//
-//void Traveler_Output::operator()()
-//{
-//#ifdef MPI_EXE
-//	while (sim->output_barrier.Go ()) {
-//		MPI_Processing ();
-//		sim->output_barrier.Finish ();
-//	}
-//#else
-// #ifdef THREADS
-//	Traveler_Data data;
-//
-//	traveler_queue = new Traveler_Queue ();
-//
-//	while (traveler_queue->Get (data)) {
-//		Write_Traveler (data);
-//	}
-// #endif
-//#endif
-//}

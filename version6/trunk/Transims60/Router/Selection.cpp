@@ -17,6 +17,10 @@ bool Router::Selection (Trip_Data *trip_ptr)
 	Select_Map_Itr sel_itr;
 	Int2_Map_Itr map2_itr;
 
+	//---- check the selection priority ----
+
+	if (select_priorities && !select_priority [trip_ptr->Priority ()]) return (false);
+
 	//---- check the household id ----
 
 	hhold = trip_ptr->Household ();

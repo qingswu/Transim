@@ -65,11 +65,11 @@ void Simulator_Service::Transit_Vehicles (void)
 		if (line_itr->run_types.size () > 0) {
 			for (i=0; i < runs; i++) {
 				veh_type_ptr = &veh_type_array [line_itr->Run_Type (i)];
-				cells += MAX (((veh_type_ptr->Length () + sim->param.half_cell) / sim->param.cell_size), 1);
+				cells += veh_type_ptr->Cells ();
 			}
 		} else {
 			veh_type_ptr = &veh_type_array [line_itr->Type ()];
-			cells += runs * MAX (((veh_type_ptr->Length () + sim->param.half_cell) / sim->param.cell_size), 1);
+			cells += runs * veh_type_ptr->Cells ();
 		}
 	}
 
@@ -77,6 +77,12 @@ void Simulator_Service::Transit_Vehicles (void)
 
 	sim_travel_array.reserve (line_array.Num_Runs () + num_travelers);
 	sim_veh_array.reserve (2 * num_travelers + cells);
+
+	//---- insert two blank vehicle cells to avoid numbering conflicts ----
+
+	sim_veh_array.push_back (veh_data);
+	sim_veh_array.push_back (veh_data);
+
 	//run_update_time = MAX_INTEGER;
 
 	//---- create a traveler for each transit run ----
@@ -88,7 +94,7 @@ void Simulator_Service::Transit_Vehicles (void)
 		veh_index.Vehicle (0);
 				
 		veh_type_ptr = &veh_type_array [line_itr->Type ()];
-		line_cells = MAX (((veh_type_ptr->Length () + sim->param.half_cell) / sim->param.cell_size), 1);
+		line_cells = veh_type_ptr->Cells ();
 
 		run_flag = (line_itr->run_types.size () > 0);
 
@@ -125,7 +131,7 @@ void Simulator_Service::Transit_Vehicles (void)
 
 				if (run_flag) {
 					veh_type_ptr = &veh_type_array [line_itr->Run_Type (i)];
-					cells = MAX (((veh_type_ptr->Length () + sim->param.half_cell) / sim->param.cell_size), 1);
+					cells = veh_type_ptr->Cells ();
 				} else {
 					cells = line_cells;
 				}

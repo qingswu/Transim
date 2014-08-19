@@ -25,7 +25,7 @@ public:
 
 protected:
 	enum PlanPrep_Keys { 
-		MERGE_PLAN_FILE = 1, MERGE_PLAN_FORMAT, MAXIMUM_SORT_SIZE
+		MERGE_PLAN_FILE = 1, MERGE_PLAN_FORMAT, MAXIMUM_SORT_SIZE, REPAIR_PLAN_LEGS,
 	};
 	virtual void Program_Control (void);
 
@@ -35,8 +35,8 @@ private:
 	Plan_File *plan_file, *new_plan_file;
 	Plan_File merge_file;
 
-	int sort_size, new_format;
-	bool select_flag, merge_flag, combine_flag, output_flag, new_plan_flag;
+	int sort_size, new_format, num_repair;
+	bool select_flag, merge_flag, combine_flag, output_flag, new_plan_flag, repair_flag;
 	String pathname;
 
 	void MPI_Setup (void);
@@ -44,6 +44,7 @@ private:
 	void Combine_Plans (bool mpi_flag = false);
 	void Time_Combine (Plan_File *temp_file, int num_temp);
 	void Trip_Combine (Plan_File *temp_file, int num_temp);
+	int  Repair_Legs (Plan_Ptr plan_ptr);
 
 	typedef Data_Queue <int> Partition_Queue;
 
@@ -63,7 +64,7 @@ private:
 
 	private:
 		PlanPrep *exe;
-		int  num_temp;
+		int  num_temp, num_repair;
 		bool thread_flag;
 
 		Plan_Ptr_Array  plan_ptr_array;

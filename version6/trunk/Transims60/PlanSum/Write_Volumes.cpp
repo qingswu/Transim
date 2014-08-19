@@ -17,8 +17,8 @@ void PlanSum::Write_Volumes (void)
 
 	Link_Data *link_ptr;
 	Int_Map_Itr map_itr;
-	Flow_Time_Period_Itr period_itr;
-	Flow_Time_Data flow_data;
+	Perf_Period_Itr period_itr;
+	Perf_Data perf_data;
 
 	nrec = 0;
 	flow = 0.0;
@@ -52,10 +52,10 @@ void PlanSum::Write_Volumes (void)
 			period = -1;
 			flow = 0;
 
-			for (j=0, period_itr = link_delay_array.begin (); period_itr != link_delay_array.end (); period_itr++, j++) {
-				flow_data = period_itr->Total_Flow_Time (index);
+			for (j=0, period_itr = perf_period_array.begin (); period_itr != perf_period_array.end (); period_itr++, j++) {
+				perf_data = period_itr->Total_Performance (index);
 
-				link_delay_array.periods->Period_Range (j, low, high);
+				perf_period_array.periods->Period_Range (j, low, high);
 				
 				p = volume_file.Period (low, high);
 
@@ -70,10 +70,10 @@ void PlanSum::Write_Volumes (void)
 							save = true;
 						}
 					}
-					flow = flow_data.Flow ();
+					flow = perf_data.Volume ();
 					period = p;
 				} else {
-					flow += flow_data.Flow ();
+					flow += perf_data.Volume ();
 				}
 			}
 			if (period >= 0) {

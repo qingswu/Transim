@@ -43,7 +43,7 @@ void EventSum::Update_Plans (void)
 		while (plan_file->Read_Plan (plan_data)) {
 			Show_Progress ();
 
-			plan_data.Get_Trip_Index (trip_index);
+			plan_data.Get_Index (trip_index);
 
 			map_itr = travel_time_map.find (trip_index);
 			if (map_itr == travel_time_map.end ()) continue;

@@ -59,10 +59,15 @@ public:
 	bool   Get_Field (int fld, string &data)         { return (Read_Field (Field (fld), (void *) &data, DB_STRING)); }
 	bool   Get_Field (int fld, Dtime &data)          { return (Read_Field (Field (fld), (void *) &data, DB_TIME)); }
 	
-	bool   Get_Field (const char *name, int &data)   { return (Read_Field (Field (name), (void *) &data, DB_INTEGER)); }
-	bool   Get_Field (const char *name, double &data){ return (Read_Field (Field (name), (void *) &data, DB_DOUBLE)); }
-	bool   Get_Field (const char *name, string &data){ return (Read_Field (Field (name), (void *) &data, DB_STRING)); }
-	bool   Get_Field (const char *name, Dtime &data) { return (Read_Field (Field (name), (void *) &data, DB_TIME)); }
+	bool   Get_Field (const char *name, int &data)   { return (Get_Field (Field_Number (name), data)); }
+	bool   Get_Field (const char *name, double &data){ return (Get_Field (Field_Number (name), data)); }
+	bool   Get_Field (const char *name, string &data){ return (Get_Field (Field_Number (name), data)); }
+	bool   Get_Field (const char *name, Dtime &data) { return (Get_Field (Field_Number (name), data)); }
+	
+	bool   Get_Field (string name, int &data)        { return (Get_Field (Field_Number (name), data)); }
+	bool   Get_Field (string name, double &data)     { return (Get_Field (Field_Number (name), data)); }
+	bool   Get_Field (string name, string &data)     { return (Get_Field (Field_Number (name), data)); }
+	bool   Get_Field (string name, Dtime &data)      { return (Get_Field (Field_Number (name), data)); }
 
 	int    Get_Integer (int fld)                     { int data; Get_Field (fld, data); return (data); }
 	double Get_Double (int fld)                      { double data; Get_Field (fld, data); return (data); }
@@ -76,17 +81,29 @@ public:
 	Dtime  Get_Time (const char *name)               { return (Get_Time (Field_Number (name))); }
 	bool   Get_Bool (const char *name)               { return (Get_Bool (Field_Number (name))); }
 	
+	int    Get_Integer (string name)                 { return (Get_Integer (Field_Number (name))); }
+	double Get_Double (string name)                  { return (Get_Double (Field_Number (name))); }
+	String Get_String (string name)                  { return (Get_String (Field_Number (name))); }
+	Dtime  Get_Time (string name)                    { return (Get_Time (Field_Number (name))); }
+	bool   Get_Bool (string name)                    { return (Get_Bool (Field_Number (name))); }
+
 	bool   Put_Field (int fld, int data)             { return (Write_Field (Field (fld), (void *) &data, DB_INTEGER)); }
 	bool   Put_Field (int fld, double data)          { return (Write_Field (Field (fld), (void *) &data, DB_DOUBLE)); }
 	bool   Put_Field (int fld, char *data)           { string s ((data) ? data : ""); return (Put_Field (fld, s)); } 
 	bool   Put_Field (int fld, string data)          { return (Write_Field (Field (fld), (void *) &data, DB_STRING)); }
 	bool   Put_Field (int fld, Dtime data)           { return (Write_Field (Field (fld), (void *) &data, DB_TIME)); }
 	
-	bool   Put_Field (const char *name, int data)    { return (Write_Field (Field (name), (void *) &data, DB_INTEGER)); }
-	bool   Put_Field (const char *name, double data) { return (Write_Field (Field (name), (void *) &data, DB_DOUBLE)); }
-	bool   Put_Field (const char *name, char *data)  { string s ((data) ? data : ""); return (Put_Field (name, s)); }
-	bool   Put_Field (const char *name, string data) { return (Write_Field (Field (name), (void *) &data, DB_STRING)); }
-	bool   Put_Field (const char *name, Dtime data)  { return (Write_Field (Field (name), (void *) &data, DB_TIME)); }
+	bool   Put_Field (const char *name, int data)    { return (Put_Field (Field_Number (name), data)); }
+	bool   Put_Field (const char *name, double data) { return (Put_Field (Field_Number (name), data)); }
+	bool   Put_Field (const char *name, char *data)  { return (Put_Field (Field_Number (name), data)); }
+	bool   Put_Field (const char *name, string data) { return (Put_Field (Field_Number (name), data)); }
+	bool   Put_Field (const char *name, Dtime data)  { return (Put_Field (Field_Number (name), data)); }
+	
+	bool   Put_Field (string name, int data)         { return (Put_Field (Field_Number (name), data)); }
+	bool   Put_Field (string name, double data)      { return (Put_Field (Field_Number (name), data)); }
+	bool   Put_Field (string name, char *data)       { return (Put_Field (Field_Number (name), data)); }
+	bool   Put_Field (string name, string data)      { return (Put_Field (Field_Number (name), data)); }
+	bool   Put_Field (string name, Dtime data)       { return (Put_Field (Field_Number (name), data)); }
 
 	void   Blank_Field (int fld)                     { Blank_Field (Field (fld)); }
 	void   Blank_Field (const char *name)            { Blank_Field (Field (name)); }

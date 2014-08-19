@@ -13,6 +13,7 @@
 #include "Vehicle_File.hpp"
 #include "Vehicle_Index.hpp"
 #include "Old_Plan_File.hpp"
+#include "Old_Delay_File.hpp"
 #include "Data_Queue.hpp"
 #include "Snapshot_File.hpp"
 
@@ -31,10 +32,8 @@ protected:
 	enum NewFormat_Keys { 
 		COPY_EXISTING_FIELDS = 1, FLATTEN_OUTPUT_FLAG, TOLL_FILE, ACTIVITY_FILE, PERSON_FILE, VEHICLE_FILE, 
 		SNAPSHOT_FILE, NEW_SNAPSHOT_FILE, NEW_SNAPSHOT_FORMAT, NEW_SNAPSHOT_COMPRESSION, 
-		VERSION4_TIME_FORMAT, 
-		VERSION4_PLAN_FILE, VERSION4_PLAN_FORMAT,
-		NODE_LIST_PATHS, TRAVELER_SCALING_FACTOR,
-		VERSION4_ROUTE_HEADER, VERSION4_ROUTE_NODES
+		OLD_TIME_FORMAT, OLD_PLAN_FILE, OLD_PLAN_FORMAT, NODE_LIST_PATHS, TRAVELER_SCALING_FACTOR,
+		OLD_ROUTE_HEADER_FILE, OLD_ROUTE_NODES_FILE, OLD_LINK_DELAY_FILE, OLD_PERFORMANCE_FILE,
 	};
 	virtual void Program_Control (void);
 	virtual bool Get_Trip_Data (Trip_File &file, Trip_Data &data, int partition = 0);
@@ -45,7 +44,7 @@ protected:
 
 private:
 	bool toll_flag, activity_flag, person_flag, vehicle_flag, route_flag, new_route_flag, snap_flag, copy_flag;
-	bool plan_flag, new_plan_flag, new_trip_flag;
+	bool plan_flag, new_plan_flag, new_trip_flag, old_delay_flag;
 
 	int num_new_trip, max_trip_part, num_new_skim, max_skim_part, num_new_act, route_periods, scale;
 	Units_Type time_units;
@@ -55,11 +54,13 @@ private:
 	Person_File person_file;
 	Vehicle_File vehicle_file;
 	Old_Plan_File old_plan;
-
-	Vehicle_Map vehicle_type;
+	Old_Delay_File old_delay_file;
 
 	Location_File *new_loc_file;
 	Zone_File *new_zone_file;
+
+	Vehicle_Map vehicle_type;
+	Veh_ID_Map  vehicle40_map;
 
 	Snapshot_File snap_file, new_snap_file;
 
@@ -73,7 +74,7 @@ private:
 	void Check_Phasing_Plans (void);
 	void Read_Routes (void);
 	void Make_Route_Nodes (void);
-	void Create_Performance (void);
+	void Read_Delay (void);
 
 	typedef Data_Queue <int> Partition_Queue;
 

@@ -6,6 +6,9 @@
 #define SIM_OUTPUT_STEP_HPP
 
 #include "Sim_Output_Data.hpp"
+#include "Problem_Output.hpp"
+#include "Threads.hpp"
+#include "Work_Queue.hpp"
 
 #include <vector>
 using namespace std;
@@ -16,19 +19,18 @@ using namespace std;
 
 class SYSLIB_API Sim_Output_Step : Static_Service
 {
-	friend class Sim_Output_Data;	
 	friend class Snapshot_Output;
-	friend class Link_Delay_Output;
 	friend class Performance_Output;
-	friend class Turn_Vol_Output;
+	friend class Turn_Delay_Output;
 	friend class Ridership_Output;
 	friend class Occupancy_Output;
 	friend class Event_Output;
 	friend class Traveler_Output;
+	friend class Problem_Output;
 
 public:
 	Sim_Output_Step (void);
-	~Sim_Output_Step (void)       { Stop_Processing (); }
+	~Sim_Output_Step (void);
 
 	void Initialize (void);
 
@@ -38,7 +40,11 @@ public:
 	void Start_Processing (void);
 	void Stop_Processing (void);
 
-	void Check_Output (Travel_Step &travel);
+	void Output_Check (Travel_Step &travel);
+
+	void Output_Problem (Problem_Data &problem);
+
+	void Event_Check (Event_Type type, Travel_Step &travel);
 
 protected:
 	enum Snaptshot_Keys { 
@@ -47,24 +53,16 @@ protected:
 		NEW_SNAPSHOT_COORDINATES, NEW_SNAPSHOT_MAX_SIZE, NEW_SNAPSHOT_LOCATION_FLAG, NEW_SNAPSHOT_CELL_FLAG,
 		NEW_SNAPSHOT_STATUS_FLAG, NEW_SNAPSHOT_COMPRESSION
 	};
-	enum Link_Delay_Keys { 
-		NEW_LINK_DELAY_FILE = LINK_DELAY_OUTPUT_OFFSET, NEW_LINK_DELAY_FORMAT, 
-		NEW_LINK_DELAY_TIME_FORMAT, NEW_LINK_DELAY_INCREMENT, NEW_LINK_DELAY_TIME_RANGE, 
-		NEW_LINK_DELAY_LINK_RANGE, NEW_LINK_DELAY_SUBAREA_RANGE, NEW_LINK_DELAY_COORDINATES, 
-		NEW_LINK_DELAY_VEH_TYPES, NEW_LINK_DELAY_TURN_FLAG, NEW_LINK_DELAY_FLOW_TYPE,
-		NEW_LINK_DELAY_LANE_FLOWS
-	};
 	enum Performance_Keys { 
 		NEW_PERFORMANCE_FILE = PERFORMANCE_OUTPUT_OFFSET, NEW_PERFORMANCE_FORMAT, 
 		NEW_PERFORMANCE_TIME_FORMAT, NEW_PERFORMANCE_INCREMENT, NEW_PERFORMANCE_TIME_RANGE, 
 		NEW_PERFORMANCE_LINK_RANGE, NEW_PERFORMANCE_SUBAREA_RANGE, NEW_PERFORMANCE_COORDINATES, 
-		NEW_PERFORMANCE_VEH_TYPES, NEW_PERFORMANCE_TURN_FLAG, NEW_PERFORMANCE_FLOW_TYPE,
-		NEW_PERFORMANCE_LANE_FLOWS
+		NEW_PERFORMANCE_VEH_TYPES, NEW_PERFORMANCE_LANE_USE_FLAG
 	};	
-	enum Turn_Vol_Keys { 
-		NEW_TURN_VOLUME_FILE = TURN_VOL_OUTPUT_OFFSET, NEW_TURN_VOLUME_FORMAT, 
-		NEW_TURN_VOLUME_FILTER, NEW_TURN_VOLUME_TIME_FORMAT, NEW_TURN_VOLUME_INCREMENT, 
-		NEW_TURN_VOLUME_TIME_RANGE, NEW_TURN_VOLUME_NODE_RANGE, NEW_TURN_VOLUME_SUBAREA_RANGE
+	enum Turn_Delay_Keys { 
+		NEW_TURN_DELAY_FILE = TURN_DELAY_OUTPUT_OFFSET, NEW_TURN_DELAY_FORMAT, 
+		NEW_TURN_DELAY_FILTER, NEW_TURN_DELAY_TIME_FORMAT, NEW_TURN_DELAY_INCREMENT, 
+		NEW_TURN_DELAY_TIME_RANGE, NEW_TURN_DELAY_NODE_RANGE, NEW_TURN_DELAY_SUBAREA_RANGE
 	};
 	enum Ridership_Keys { 
 		NEW_RIDERSHIP_FILE = RIDERSHIP_OUTPUT_OFFSET, NEW_RIDERSHIP_FORMAT, NEW_RIDERSHIP_TIME_FORMAT,
@@ -87,17 +85,32 @@ protected:
 	};
 
 private:
-	int num_threads;
+	int num_outputs;
+	bool problem_flag;
 
 	typedef vector <Sim_Output_Data *>    Output_Array;
 	typedef Output_Array::iterator        Output_Itr;
 
 	Output_Array output_array;
-	
-	Barrier output_barrier;
 
 #ifdef THREADS
+	int num_threads;
 	Threads threads;
+	Work_Queue output_queue;
+
+	//---------------------------------------------------------
+	//	Sim_Output_Process - output class definition
+	//---------------------------------------------------------
+
+	class Sim_Output_Process
+	{
+	public:
+		Sim_Output_Process (Sim_Output_Step *ptr) 	{ step_ptr = ptr; }
+		Sim_Output_Step *step_ptr;
+
+		void operator()();
+
+	} **sim_output_process;
 #endif
 };
 #endif

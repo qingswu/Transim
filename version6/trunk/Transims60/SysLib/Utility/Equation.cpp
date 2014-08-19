@@ -71,6 +71,13 @@ bool Equation_Array::Add_Equation (int number, string &parameters)
 				}
 				return (false);
 			}
+		} else if (eq_rec.type == FLOW_DENSITY) {
+			if (eq_rec.a < 0.7 || eq_rec.a > 1.3 || eq_rec.b < 0.7 || eq_rec.b > 1.3 || eq_rec.c < 1.5 || eq_rec.c > 2.2) {
+				if (exe->Send_Messages ()) {
+					exe->Error (String ("FLOW_DENSITY Equation Parameters %.2lf, %.2lf, %.2lf are Out of Range") % eq_rec.a % eq_rec.b % eq_rec.c);
+				}
+				return (false);
+			}
 		} else if (eq_rec.type == CONSTANT) {
 			if (eq_rec.a == 0.0) eq_rec.a = 1.0;
 			if (eq_rec.a <= 0.95 || eq_rec.a > 1.2 || eq_rec.b < -5.0 || eq_rec.b > 5.0) {
@@ -120,13 +127,14 @@ bool Equation_Array::Add_Equation (int number, string &parameters)
 //	Apply_Equation
 //---------------------------------------------------------
 
-int Equation_Array::Apply_Equation (int number, int time0, double flow, int capacity, int length)
+int Equation_Array::Apply_Equation (int number, int time0, double volume, int capacity, int length)
 {
-	if (flow <= 0) {
+	if (time0 < 1) time0 = 1;
+
+	if (volume <= 0) {
 		return (time0);
 	} else {
-		int time;
-		double cap, len;
+		double cap, len, ttime;
 		Equation *eq_ptr;
 		Equation_Itr eq_itr;
 		
@@ -142,26 +150,29 @@ int Equation_Array::Apply_Equation (int number, int time0, double flow, int capa
 			cap *= eq_ptr->c;
 			if (cap < 1.0) cap = 1.0;
 
-			time = (int) (time0 * (1.0 + eq_ptr->a * pow ((flow / cap), eq_ptr->b)) + 0.5);
+			ttime = time0 * (1.0 + eq_ptr->a * pow ((volume / cap), eq_ptr->b));
 
 			if (eq_ptr->type == BPR_PLUS) {
 				int max_time = (int) (length / eq_ptr->d + 0.5);
-				if (time > max_time) time = max_time;
+				if (ttime > max_time) ttime = max_time;
 			}
 		} else if (eq_ptr->type == EXP) {
-			len = length / 1000.0;
-
-			time = (int) (time0 + len * MIN (eq_ptr->a * exp (eq_ptr->b * (flow / cap)), eq_ptr->c) + 0.5);
+			if (exe->Metric_Flag ()) {
+				len = length / 1000.0;
+			} else {
+				len = length / 5280.0;
+			}
+			ttime = time0 + len * MIN (eq_ptr->a * exp (eq_ptr->b * (volume / cap)), eq_ptr->c);
 
 		} else if (eq_ptr->type == CONICAL) {
-			cap = 1 - (flow / cap);
+			cap = 1 - (volume / cap);
 
-			time = (int) (time0 * (2 - eq_ptr->b - eq_ptr->a * cap + 
-				sqrt (eq_ptr->a * eq_ptr->a * cap * cap + eq_ptr->b * eq_ptr->b)) + 0.5);
+			ttime = time0 * (2 - eq_ptr->b - eq_ptr->a * cap + 
+				sqrt (eq_ptr->a * eq_ptr->a * cap * cap + eq_ptr->b * eq_ptr->b));
 
 		} else if (eq_ptr->type == AKCELIK && length > 0) {
 			double vc, fac, spd;
-			vc = flow / cap;
+			vc = volume / cap;
 			fac = vc - 1;
 			
 			if (exe->Metric_Flag ()) {
@@ -169,19 +180,30 @@ int Equation_Array::Apply_Equation (int number, int time0, double flow, int capa
 			} else {
 				spd = ((double) time0 / length) * MPHTOFPS;
 			}
-			time = (int) (time0 + ((spd + 0.25 * 0.25 * (fac + sqrt ((fac * fac) + (8 * eq_ptr->a * vc)/cap)))) / spd + 0.5);
+			ttime = time0 + ((spd + 0.25 * 0.25 * (fac + sqrt ((fac * fac) + (8 * eq_ptr->a * vc)/cap)))) / spd;
+		} else if (eq_ptr->type == FLOW_DENSITY && length > 0) {
+			double density = volume / length;
+			double ff_density = eq_ptr->b * cap * time0 / length;
+			if (density <= ff_density) {
+				ttime = time0;
+			} else {
+				double flow = cap * eq_ptr->a - pow ((density - ff_density), eq_ptr->c);
+				double speed = flow / density;
+				if (speed < 0.1) speed = 0.1;
+				ttime = length / speed;
+			}
 		} else if (eq_ptr->type == CONSTANT) {
-			time = (int) (time0 * eq_ptr->a + eq_ptr->b);
+			ttime = time0 * eq_ptr->a + eq_ptr->b;
 		} else {
 			return (time0);
 		}
-		if (time < time0) {
-			if (time < 0) {
-				return (MAX_INTEGER);
-			} else {
-				return (time0);
+		if (ttime > time0) {
+			if (length / ttime < 0.1) {
+				ttime = length / 0.1;
 			}
+			time0 = (int) (ttime + 0.5);
+			if (time0 < 1) time0 = 1;
 		}
-		return (time);
+		return (time0);
 	}
 }

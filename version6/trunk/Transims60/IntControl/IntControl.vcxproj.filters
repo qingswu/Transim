@@ -35,9 +35,6 @@
     <ClCompile Include="Read_Signal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Read_Turn.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Update_Signals.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

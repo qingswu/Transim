@@ -18,7 +18,7 @@ PlanSelect::PlanSelect (void) : Data_Service (), Select_Service ()
 		PLAN, NEW_SELECTION, END_FILE
 	};
 	System_File_Type optional_files [] = {
-		NODE, LINK, LANE_USE, CONNECTION, LOCATION, VEHICLE_TYPE, LINK_DELAY, NEW_PLAN, END_FILE
+		NODE, LINK, LANE_USE, CONNECTION, LOCATION, VEHICLE_TYPE, PERFORMANCE, NEW_PLAN, END_FILE
 	};
 	int file_service_keys [] = {
 		SAVE_LANE_USE_FLOWS, 0

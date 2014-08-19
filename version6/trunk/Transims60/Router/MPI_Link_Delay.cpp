@@ -98,6 +98,7 @@ double Router::MPI_Link_Delay (bool last_flag)
 		if (Time_Updates ()) {
 			Update_Travel_Times (1, reroute_time);
 			gap = Merge_Delay (factor, !last_flag);	
+			num_time_updates++;
 		}
 
 		//---- send the convergence result ----

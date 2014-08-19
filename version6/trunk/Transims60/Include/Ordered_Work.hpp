@@ -16,8 +16,9 @@
 //
 //	bool Put_Result (Result *data, int number);
 //  Result * Get_Result (void);
-//  void Result_Done (void);
+//  void Finishede (void);
 //
+//	void Start_Work (void);
 //	void End_of_Work (void);
 //  void Complete_Work (void);
 //
@@ -152,10 +153,10 @@ public:
 	}
 
 	//--------------------------------------------------------
-	//	Result_Done
+	//	Finished
 	//--------------------------------------------------------
 
-	void Result_Done (void)
+	void Finished (void)
 	{
 		mutex_lock lock (result_mutex);
 		num_out++;

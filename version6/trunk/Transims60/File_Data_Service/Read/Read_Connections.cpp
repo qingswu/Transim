@@ -174,6 +174,7 @@ bool Data_Service::Get_Connect_Data (Connect_File &file, Connect_Data &connect_r
 		return (false);
 	}
 	connect_rec.To_Index (to_index);
+	connect_rec.Node (node);
 
 	//---- lane numbers ----
 
@@ -213,30 +214,6 @@ bool Data_Service::Get_Connect_Data (Connect_File &file, Connect_Data &connect_r
 
 	if (file.Version () <= 40) {
 		Int2_Map_Itr map2_itr;
-
-		//max_in = dir_ptr->Thru () + dir_ptr->Left () + dir_ptr->Right ();
-		//in_bear = dir_ptr->Out_Bearing ();
-
-		//max_out = dir_ptr->Thru () + dir_ptr->Left () + dir_ptr->Right ();
-		//out_bear = dir_ptr->In_Bearing ();
-
-		//---- read and save the data ----
-
-		//int num, node_num, link, dir, in_link, out_link, max_in, max_out, in_bear, out_bear;
-		//int in_low, in_high, out_low, out_high, type, penalty, speed, capacity, change;
-		//if (type == 0 && compass.Num_Points () > 0) {
-		//	change = compass.Change (in_bear, out_bear) * 360 / compass.Num_Points ();
-
-		//	if (change >= -45 && change <= 45) {
-		//		type = THRU;
-		//	} else if (change < -165 || change > 165) {
-		//		type = UTURN;
-		//	} else if (change < 0) {
-		//		type = LEFT;
-		//	} else {
-		//		type = RIGHT;
-		//	}
-		//}
 
 		map2_itr = connect_map.find (Int2_Key (connect_rec.Dir_Index (), connect_rec.To_Index ()));
 

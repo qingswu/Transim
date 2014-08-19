@@ -29,7 +29,7 @@ void TripPrep::Trip_Processing::Time_Write (void)
 		merge_ptr = new Trip_Data ();
 
 		if (merge_file->Read_Trip (*merge_ptr)) {
-			merge_ptr->Get_Time_Index (time_index);
+			merge_ptr->Get_Index (time_index);
 		} else {
 			time_index.Set (MAX_INTEGER, 0);
 		}
@@ -89,7 +89,7 @@ void TripPrep::Trip_Processing::Time_Write (void)
 					}
 				}
 				if (merge_file->Read_Trip (*merge_ptr)) {
-					merge_ptr->Get_Time_Index (time_index);
+					merge_ptr->Get_Index (time_index);
 
 					if (time_index < last_time) {
 						MAIN_LOCK

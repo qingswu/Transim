@@ -11,7 +11,7 @@
 void CountSum::Read_Data (void)
 {
 	int id, volume, speed, count, index, dir_index, day;
-	Dtime time, min_time;
+	Dtime time;
 	String text;
 	Strings date_time;
 	bool select_flag, flag;
@@ -21,11 +21,9 @@ void CountSum::Read_Data (void)
 	Int_Map_Itr map_itr;
 	ID_Offset_Itr id_itr;
 	Offset_Index_Itr offset_itr;
-	Flow_Time_Period_Array *day_array_ptr;
-	Flow_Time_Array *array_ptr;
-	Flow_Time_Data *flow_ptr;
-	Dir_Data *dir_ptr;
-	Link_Data *link_ptr;
+	Vol_Spd_Period_Array *day_array_ptr;
+	Vol_Spd_Period *period_ptr;
+	Vol_Spd_Data *vol_spd_ptr;
 	Strs_Itr days_itr;
 	Str_ID_Stat str_id_stat;
 	Int2_Key dir_offset;
@@ -100,7 +98,7 @@ void CountSum::Read_Data (void)
 			if (!str_id_stat.second) {
 				day = str_id_stat.first->second;
 			} else {
-				day_array_ptr = new Flow_Time_Period_Array ();
+				day_array_ptr = new Vol_Spd_Period_Array ();
 				day_array_ptr->Replicate (count_day_array);
 				count_days.push_back (day_array_ptr);
 			}
@@ -110,10 +108,10 @@ void CountSum::Read_Data (void)
 
 			time = Dtime (date_time [1], data_itr->time_format);
 
-			array_ptr = day_array_ptr->Period_Ptr (time);
-			if (array_ptr == 0) continue;
+			period_ptr = day_array_ptr->Period_Ptr (time);
+			if (period_ptr == 0) continue;
 
-			flow_ptr = &array_ptr->at (index);
+			vol_spd_ptr = period_ptr->Data_Ptr (index);
 
 			volume = data_itr->file->Get_Integer (data_itr->volume_field);
 			if (volume == 0) continue;
@@ -121,17 +119,9 @@ void CountSum::Read_Data (void)
 			speed = data_itr->file->Get_Integer (data_itr->speed_field);
 
 			if (speed > 0) {
-				dir_ptr = &dir_array [dir_index];
-				link_ptr = &link_array [dir_ptr->Link ()];
-
-				time = link_ptr->Length () / (speed * MPHTOFPS);
-
-				min_time = dir_ptr->Time0 () * 0.9;
-				if (time < min_time) time = min_time;
-
-				flow_ptr->Add_Flow_Time (volume * data_itr->factor, time);
+				vol_spd_ptr->Add_Vol_Spd (volume * data_itr->factor, speed);
 			} else {
-				flow_ptr->Add_Flow (volume * data_itr->factor);
+				vol_spd_ptr->Add_Volume (volume * data_itr->factor);
 			}
 			count++;
 		}

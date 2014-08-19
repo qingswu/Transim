@@ -81,6 +81,10 @@ typedef struct {
 	int       max_xfers;                     //---- maximum number of transfers per trip ----
 	int       max_paths;                     //---- maximum number of path options per trip ----
 
+	double    op_cost_rate;                  //---- operating cost per unit of length ----
+	double    pce;                           //---- passenger car equivalence ----
+	double    occupancy;
+
 	bool      stop_pen_flag;                 //---- transit penalty file flag ----
 	bool      park_pen_flag;                 //---- parking penalty file flag ----
 
@@ -109,6 +113,7 @@ typedef struct {
 
 	double    duration_factor [CRITICAL+1];  //---- minimum duration factor by trip priority level ----
 
+	Veh_Type_Data *veh_type_ptr;             //---- vehicle type data for grade processing
 } Path_Parameters;
 
 #endif

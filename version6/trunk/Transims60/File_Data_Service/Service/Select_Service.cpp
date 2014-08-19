@@ -14,10 +14,12 @@ Select_Service::Select_Service (void)
 {
 	select_households = select_purposes = select_start_times = select_end_times = select_origins = select_destinations = false;
 	select_travelers = select_vehicles = select_problems = select_subarea = select_org_zones = select_des_zones = false;
-	select_modes = select_facilities = select_links = select_nodes = delete_flag = select_stops = select_routes = false;
+	select_modes = select_facilities = select_priorities = select_links = select_nodes = delete_flag = select_stops = select_routes = false;
 	percent_flag = time_diff_flag = cost_diff_flag = select_parking = select_vc = select_ratio = select_time_of_day = false;
 	min_time_diff = max_time_diff = 0;
 	min_cost_diff = max_cost_diff = 0;
+	max_min_time_diff = 1;
+	max_min_cost_diff = 1;
 	select_percent = max_percent_select = percent_time_diff = percent_cost_diff = 100.0;
 	vc_ratio = time_ratio = 0.0;
 }
@@ -32,6 +34,7 @@ void Select_Service::Select_Service_Keys (int *keys)
 		{ SELECT_HOUSEHOLDS, "SELECT_HOUSEHOLDS", LEVEL0, OPT_KEY, LIST_KEY, "ALL", RANGE_RANGE, NO_HELP },
 		{ SELECT_MODES, "SELECT_MODES", LEVEL0, OPT_KEY, LIST_KEY, "ALL", "e.g., ALL or 1, 12..14 or WALK, HOV2..HOV4", NO_HELP },
 		{ SELECT_PURPOSES, "SELECT_PURPOSES", LEVEL0, OPT_KEY, LIST_KEY, "ALL", RANGE_RANGE, NO_HELP },
+		{ SELECT_PRIORITIES, "SELECT_PRIORITIES", LEVEL0, OPT_KEY, LIST_KEY, "ALL", "ALL, or 0..4, or LOW, MEDIUM, HIGH, CRITICAL",  NO_HELP },
 		{ SELECT_TIME_OF_DAY, "SELECT_TIME_OF_DAY", LEVEL0, OPT_KEY, TIME_KEY, "ALL", "0:00..24:00", NO_HELP },
 		{ SELECT_START_TIMES, "SELECT_START_TIMES", LEVEL0, OPT_KEY, LIST_KEY, "ALL", TIME_RANGE, NO_HELP },
 		{ SELECT_END_TIMES, "SELECT_END_TIMES", LEVEL0, OPT_KEY, LIST_KEY, "ALL", TIME_RANGE, NO_HELP },
@@ -126,6 +129,61 @@ void Select_Service::Read_Select_Keys (void)
 				exe->Error ("Adding Purpose Ranges");
 			}
 		}
+	}
+
+	//---- select priorities ----
+
+	if (exe->Control_Key_Status (SELECT_PRIORITIES)) {
+		key = exe->Get_Control_Text (SELECT_PRIORITIES);
+
+		if (!key.empty () && !key.Equals ("ALL")) {
+			memset (select_priority, false, sizeof (select_priority));
+			int low, high;
+			String item, low_text, high_text;
+
+			while (!key.empty ()) {
+				key.Split (item);
+				item.Range (low_text, high_text);
+
+				low = exe->Priority_Code (low_text);
+				high = exe->Priority_Code (high_text);
+
+				if (low < 0 || low > CRITICAL) {
+					exe->Error (String ("Specified Priority %s is Out of Range (0..%d)") % low_text % CRITICAL);
+				} else if (high < 0 || high > CRITICAL) {
+					exe->Error (String ("Specified Priority %s is Out of Range (1..%d)") % high_text % CRITICAL);
+				} else if (high < low) {
+					exe->Error (String ("Priority Range %s is Out of Order") % item);
+				} else {
+					if (low == high) {
+						select_priority [low] = true;
+
+						if (low_text [0] >= '0' && low_text [0] <= '9') {
+							exe->Print (0, String (" (%s)") % exe->Priority_Code ((Priority_Type) low));
+						}
+					} else {
+						for (i=low; i <= high; i++) {
+							select_priority [i] = true;
+						}
+						if (low_text [0] >= '0' && low_text [0] <= '9') {
+							exe->Print (0, String (" (%s..%s)") % exe->Priority_Code ((Priority_Type) low) % exe->Priority_Code ((Priority_Type) high));
+						}
+					}
+				}
+			}
+			for (i=0; i <= CRITICAL; i++) {
+				if (!select_priority [i]) {
+					select_priorities = true;
+					break;
+				}
+			}
+		} else {
+			memset (select_priority, true, sizeof (select_priority));
+			select_priorities = false;
+		}	
+	} else {
+		memset (select_priority, true, sizeof (select_priority));
+		select_priorities = false;
 	}
 
 	//---- select time of day ----
@@ -423,6 +481,8 @@ void Select_Service::Read_Select_Keys (void)
 		if (exe->Control_Key_Status (MAXIMUM_TIME_DIFFERENCE)) {
 			max_time_diff = exe->Get_Control_Time (MAXIMUM_TIME_DIFFERENCE);
 		}
+		max_min_time_diff = max_time_diff - min_time_diff;
+		if (max_min_time_diff < 1) max_min_time_diff = 1;
 	}
 
 	//---- percent cost difference ----
@@ -443,6 +503,8 @@ void Select_Service::Read_Select_Keys (void)
 		if (exe->Control_Key_Status (MAXIMUM_COST_DIFFERENCE)) {
 			max_cost_diff = exe->Get_Control_Integer (MAXIMUM_COST_DIFFERENCE);
 		}
+		max_min_cost_diff = max_cost_diff - min_cost_diff;
+		if (max_min_cost_diff < 1) max_min_cost_diff = 1;
 	}
 
 	//---- selection percentage ----

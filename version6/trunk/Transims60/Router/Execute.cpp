@@ -10,67 +10,41 @@
 
 void Router::Execute (void)
 {
+	int i;
+
 	//---- read the network data ----
 
 	Router_Service::Execute ();
 
-
-	//---- build link delay arrays ----
+	//---- build performance arrays ----
 
 	if (Flow_Updates () || Time_Updates ()) {
-		if (Master ()) Build_Flow_Time_Arrays (old_link_array, old_turn_array);
-
-		if (!System_File_Flag (LINK_DELAY)) {
-			Build_Flow_Time_Arrays ();
+		if (Master ()) {
+			Build_Perf_Arrays (old_perf_period_array);
+			if (Turn_Updates ()) {
+				Build_Turn_Arrays (old_turn_period_array);
+			}
+		}
+		if (!System_File_Flag (PERFORMANCE)) {
+			Build_Perf_Arrays ();
 		} else {
-			Link_Delay_File *file = (Link_Delay_File *) System_File_Handle (LINK_DELAY);
-
-			if (Turn_Updates () && turn_delay_array.size () == 0) {
-				Build_Turn_Arrays ();
-			}
 			if (Master ()) {
-
-				//---- copy existing flow data ----
-
-				old_link_array.Copy_Flow_Data (link_delay_array, true);
-
-				if (Turn_Flows () && file->Turn_Flag ()) {
-					old_turn_array.Copy_Flow_Data (turn_delay_array, true);
+				if (reroute_flag && Time_Updates ()) {
+					Update_Travel_Times (1, reroute_time);
+					num_time_updates++;
 				}
-
+				old_perf_period_array.Copy_Flow_Data (perf_period_array, true, reroute_time);
 			} else {	//---- MPI slave ----
-
-				//---- clear flows data ----
-
-				link_delay_array.Zero_Flows (reroute_time);
-
-				if (Turn_Flows () && file->Turn_Flag ()) {
-					turn_delay_array.Zero_Flows (reroute_time);
-				}
+				perf_period_array.Zero_Flows (reroute_time);
 			}
 		}
-	}
-	if (link_person_flag) {
-		link_person_array.Initialize (&time_periods);
-
-		if (max_iteration > 1 || old_person_flag) {
-			old_person_array.Initialize (&time_periods);
-
-			if (old_person_flag) {
-				Flow_Time_Period_Array dummy_turn;
-				Read_Link_Delays (old_person_file, old_person_array, dummy_turn);
-			}
-		}
-	}
-	if (link_vehicle_flag) {
-		link_vehicle_array.Initialize (&time_periods);
-
-		if (max_iteration > 1 || old_vehicle_flag) {
-			old_vehicle_array.Initialize (&time_periods);
-
-			if (old_vehicle_flag) {
-				Flow_Time_Period_Array dummy_turn;
-				Read_Link_Delays (old_vehicle_file, old_vehicle_array, dummy_turn);
+		if (!System_File_Flag (TURN_DELAY)) {
+			Build_Turn_Arrays ();
+		} else if (Turn_Updates ()) {
+			if (Master ()) {
+				old_turn_period_array.Copy_Turn_Data (turn_period_array, true, reroute_time);
+			} else {	//---- MPI slave ----
+				turn_period_array.Zero_Turns (reroute_time);
 			}
 		}
 	}
@@ -79,75 +53,90 @@ void Router::Execute (void)
 
 	Set_Partitions ();
 
-	//---- initialize the plan processor ---
+	//---- allocate memory ----
 
-	if (trip_flag) {
-		Iteration_Loop ();
+	if (Memory_Flag ()) {
+		Map_Trip_Plan ();
+	}
+
+	//---- processing method ----
+
+	if (method == DUE_PLANS) {
+
+		DUE_Loop ();
+
 	} else {
-		part_processor.Copy_Plans ();
 
-		if (Time_Updates () && System_File_Flag (NEW_LINK_DELAY)) {
-			Update_Travel_Times (1, reroute_time);
-			num_time_updates++;
+		//---- initialize the plan processor ---
+
+		if (trip_flag) {
+			Iteration_Loop ();
+		} else {
+			if (preload_flag) {
+				Preload_Transit ();
+			}
+			part_processor.Copy_Plans ();
+
+			if (Time_Updates () && System_File_Flag (NEW_PERFORMANCE)) {
+				Update_Travel_Times (1, reroute_time);
+				num_time_updates++;
+			}
 		}
 	}
 
-	//---- save the link delays ----
+	//---- save the performance data ----
 
-	if (System_File_Flag (NEW_LINK_DELAY)) {
-		if (save_flag) System_File_Handle (NEW_LINK_DELAY)->Create ();
-		Write_Link_Delays ();
+	if (System_File_Flag (NEW_PERFORMANCE)) {
+		if (save_iter_flag) System_File_Handle (NEW_PERFORMANCE)->Create ();
+		Write_Performance (full_flag);
+	}
+
+	//---- save the turn time data ----
+
+	if (System_File_Flag (NEW_TURN_DELAY)) {
+		if (save_iter_flag) System_File_Handle (NEW_TURN_DELAY)->Create ();
+		Write_Turn_Delays (full_flag);
 	}
 
 	//---- save the transit ridership ----
 
 	if (rider_flag) {
 		part_processor.Save_Riders ();
-		if (save_flag) System_File_Handle (NEW_RIDERSHIP)->Create ();
+		if (save_iter_flag) System_File_Handle (NEW_RIDERSHIP)->Create ();
 		Write_Ridership ();
-	}
-
-	//---- save the link persons ----
-
-	if (link_person_flag) {
-		part_processor.Save_Persons ();
-		if (save_flag) link_person_file.Create ();
-		Write_Link_Delays (link_person_file, link_person_array);
-	}
-
-	//---- save the link vehicles ----
-
-	if (link_vehicle_flag) {
-		part_processor.Save_Vehicles ();
-		if (save_flag) link_vehicle_file.Create ();
-		Write_Link_Delays (link_vehicle_file, link_vehicle_array);
 	}
 
 	//---- gather summary statistics ----
 
-	if (trip_flag && trip_set_flag) {
-		for (int i=0; i < num_file_sets; i++) {
-			trip_file->Add_Counters (trip_set [i]);
-			trip_set [i]->Close ();
+	if (plan_memory_flag) {
+		if (new_plan_flag) {
+			Write_Plan_Files ();
 		}
-		if (trip_file->Num_Files () == 0) trip_file->Num_Files (num_file_sets);
-	}
-	if (plan_flag && plan_set_flag) {
-		for (int i=0; i < num_file_sets; i++) {
-			plan_file->Add_Counters (plan_set [i]);
-			plan_set [i]->Close ();
+	} else {
+		if (trip_flag && trip_set_flag) {
+			for (i=0; i < num_file_sets; i++) {
+				trip_file->Add_Counters (trip_file_set [i]);
+				trip_file_set [i]->Close ();
+			}
+			if (trip_file->Num_Files () == 0) trip_file->Num_Files (num_file_sets);
 		}
-		if (plan_file->Num_Files () == 0) plan_file->Num_Files (num_file_sets);
+		if (plan_flag && new_set_flag) {
+			for (i=0; i < num_file_sets; i++) {
+				plan_file->Add_Counters (plan_file_set [i]);
+				plan_file_set [i]->Close ();
+			}
+			if (plan_file->Num_Files () == 0) plan_file->Num_Files (num_file_sets);
+		}
 	}
-	if (new_plan_flag && plan_set_flag) {
-		for (int i=0; i < num_file_sets; i++) {
-			new_plan_file->Add_Counters (new_plan_set [i]);
-			new_plan_set [i]->Close ();
+	if (new_plan_flag && new_set_flag) {
+		for (i=0; i < num_file_sets; i++) {
+			new_plan_file->Add_Counters (new_file_set [i]);
+			new_file_set [i]->Close ();
 		}
 		if (new_plan_file->Num_Files () == 0) new_plan_file->Num_Files (num_file_sets);
 	}
 	if (problem_set_flag) {
-		for (int i=0; i < num_file_sets; i++) {
+		for (i=0; i < num_file_sets; i++) {
 			problem_file->Add_Counters (problem_set [i]);
 			problem_set [i]->Close ();
 		}
@@ -160,7 +149,7 @@ void Router::Execute (void)
 
 	//---- print reports ----
 
-	for (int i=First_Report (); i != 0; i=Next_Report ()) {
+	for (i=First_Report (); i != 0; i=Next_Report ()) {
 		switch (i) {
 			case LINK_GAP:			//---- Link Gap Report ----
 				if (iteration_flag) Link_Gap_Report ();

@@ -90,13 +90,6 @@ private:
 	static bool warning_flag;
 };
 
-//---- array of Dtime ----
-
-typedef vector <Dtime>               Dtimes;
-typedef Dtimes::iterator             Dtime_Itr;
-typedef Dtimes::reverse_iterator     Dtime_RItr;
-typedef Dtimes::pointer              Dtime_Ptr;
-
 //---- Dtime operators ----
 
 inline Dtime operator + (const Dtime &left, const Dtime &right) { return (Dtime (left) + right); }

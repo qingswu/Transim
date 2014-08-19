@@ -27,7 +27,7 @@ void SubareaNet::Write_Route (void)
 	Line_Run line_run;
 	Line_Run_Itr run1_itr, run2_itr;
 	Int_Itr int_itr;
-	Integers *driver_ptr;
+	Driver_Array *driver_ptr;
 
 	Line_File *line_file = (Line_File *) System_File_Header (NEW_TRANSIT_ROUTE);
 	Schedule_File *schedule_file = (Schedule_File *) System_File_Header (NEW_TRANSIT_SCHEDULE);
@@ -158,7 +158,7 @@ void SubareaNet::Write_Route (void)
 
 				first_dir = dir_ptr->Link_Dir ();
 
-				first_stop = dir_ptr->Flow_Index ();
+				first_stop = dir_ptr->Use_Index ();
 
 				line_stop2_ptr = &line_itr->at (first_index);
 
@@ -256,7 +256,7 @@ void SubareaNet::Write_Route (void)
 
 				last_dir = dir_ptr->Link_Dir ();
 
-				last_stop = dir_ptr->Flow_Index ();
+				last_stop = dir_ptr->Use_Index ();
 
 				line_stop1_ptr = &line_itr->at (last_index);
 

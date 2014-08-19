@@ -33,25 +33,28 @@ void Validate::Execute (void)
 	//---- process link volume data ----
 
 	if (link_flag) {
-		if (!delay_flag) {
-			Read_Flow (&volume_file, true);
+		if (delay_flag) {
+			Performance_File *file = (Performance_File *) System_File_Handle (PERFORMANCE);
+			Read_Performance (*file, link_volume_array);
+		} else {
+			Read_Link_Data (volume_file, link_volume_array);
 		}
 
 		//---- read the count file ----
 
-		Read_Flow (&count_file, false);
+		Read_Link_Data (count_file, link_count_array);
 	}
 
 	//---- process turning volume data ----
 
 	if (turn_flag) {
-		if (!delay_flag) {
-			Read_Turn (&turn_volume, false);
+		if (!turn_delay_flag) {
+			Read_Turn_Delays (turn_volume, turn_period_array);
 		}
 
 		//---- read the count file ----
 
-		Read_Turn (&turn_count, true);
+		Read_Turn_Delays (turn_count, turn_count_array);
 	}
 
 	//---- write the output volume file ----

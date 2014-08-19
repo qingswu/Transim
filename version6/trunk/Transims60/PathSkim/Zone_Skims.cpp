@@ -150,15 +150,13 @@ void PathSkim::Zone_Skims (void)
 		if (out_period != last_period) {
 			if (last_period >= 0) {
 				End_Progress ();
-				//skim_processor.Stop_Processing ();
-				skim_processor.Complete_Work ();
+				skim_processor.Stop_Processing ();
 
 				Output_Skims (last_period);
 
 				Show_Message ("Aggregating Zone Skims -- Record");
 				Set_Progress ();
-				//skim_processor.Start_Processing ();
-				skim_processor.Start_Work ();
+				skim_processor.Start_Processing ();
 			}
 			last_period = out_period;
 		}

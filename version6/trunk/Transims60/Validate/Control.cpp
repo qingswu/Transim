@@ -108,9 +108,9 @@ void Validate::Program_Control (void)
 		System_File_False (RIDERSHIP);
 	}
 
-	//---- check for a link delay file ----
+	//---- check for a performance file ----
 
-	if (!System_File_Flag (LINK_DELAY)) {
+	if (!System_File_Flag (PERFORMANCE)) {
 
 		//---- open the link volume file ----
 
@@ -124,8 +124,15 @@ void Validate::Program_Control (void)
 
 			volume_file.Open (Project_Filename (key));
 		
-			Print (1, "Number of Time Periods = ") << volume_file.Num_Periods ();
+			//Print (1, "Number of Time Periods = ") << volume_file.Num_Periods ();
 		}
+	} else {
+		delay_flag = true;
+	}
+
+	//---- check for a turn delay file ----
+
+	if (!System_File_Flag (TURN_DELAY)) {
 
 		//---- open the turn movement file ----
 
@@ -140,7 +147,7 @@ void Validate::Program_Control (void)
 			turn_volume.Open (Project_Filename (key));
 		}
 	} else {
-		delay_flag = true;
+		turn_delay_flag = true;
 	}
 
 	//---- open the traffic count file ----
@@ -210,7 +217,7 @@ void Validate::Program_Control (void)
 
 	if (!key.empty ()) {
 		if (!delay_flag && !link_flag) {
-			Error ("Link Delay or Volume File is Required to Output Volume Data");
+			Error ("Performance or Volume File is Required to Output Volume Data");
 		}
 		Print (1);
 		output_file.File_Type ("New Volume File");

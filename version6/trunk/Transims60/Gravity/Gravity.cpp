@@ -5,13 +5,13 @@
 #include "Gravity.hpp"
 
 //---------------------------------------------------------
-//	Fratar constructor
+//	Gravity constructor
 //---------------------------------------------------------
 
 Gravity::Gravity (void) : Data_Service ()
 {
 	Program ("Gravity");
-	Version (4);
+	Version (5);
 	Title ("File Format Conversion");
 	
 	System_File_Type required_files [] = {

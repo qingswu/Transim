@@ -66,13 +66,16 @@ void NewFormat::Execute (void)
 	//---- write the data files ----
 
 	if (System_File_Flag (NEW_SELECTION)) Write_Selections ();
-	if (System_File_Flag (NEW_LINK_DELAY)) Write_Link_Delays ();
 
 	if (System_File_Flag (NEW_PERFORMANCE)) {
-		if (!System_File_Flag (PERFORMANCE) && System_File_Flag (LINK_DELAY)) {
-			Create_Performance ();
+		if (!System_File_Flag (PERFORMANCE) && old_delay_flag) {
+			Read_Delay ();
+		} else {
+			Write_Performance ();
 		}
-		Write_Performance ();
+	}
+	if (System_File_Flag (TURN_DELAY) && System_File_Flag (NEW_TURN_DELAY)) {
+		Write_Turn_Delays ();
 	}
 	if (System_File_Flag (NEW_RIDERSHIP)) Write_Ridership ();
 	if (System_File_Flag (NEW_VEHICLE_TYPE)) Write_Veh_Types ();

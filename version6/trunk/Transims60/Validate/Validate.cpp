@@ -15,7 +15,7 @@ int Validate::volume_level [] = {
 Validate::Validate (void) : Data_Service ()
 {
 	Program ("Validate");
-	Version (3);
+	Version (5);
 	Title ("Compare Volumes to Counts");
 
 	System_File_Type required_files [] = {
@@ -24,7 +24,7 @@ Validate::Validate (void) : Data_Service ()
 	System_File_Type optional_files [] = {
 		ZONE, POCKET, CONNECTION, SIGNAL, TIMING_PLAN, PHASING_PLAN, 
 		TRANSIT_STOP, TRANSIT_ROUTE, TRANSIT_SCHEDULE, TRANSIT_DRIVER,
-		LINK_DELAY, RIDERSHIP, END_FILE
+		PERFORMANCE, TURN_DELAY, RIDERSHIP, END_FILE
 	};
 	int file_service_keys [] = {
 		NOTES_AND_NAME_FIELDS, SAVE_LANE_USE_FLOWS, LINK_EQUIVALENCE_FILE, ZONE_EQUIVALENCE_FILE, 
@@ -84,6 +84,8 @@ Validate::Validate (void) : Data_Service ()
 	hours = 1.0;
 
 	compass.Set_Points (8);
+	
+	System_Read_False (PERFORMANCE);
 
 	stats_format = "\n%25.25s %7d%10.0lf%10.0lf%9.0lf %7.1lf %7.0lf %6.1lf %7.0lf %6.1lf %6.3lf%6.2lf%6.2lf";
 }

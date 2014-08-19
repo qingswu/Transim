@@ -57,7 +57,7 @@ void TripPrep::Trip_Processing::Read_Trips (int part)
 		process_type = "Merging";
 
 		if (merge_file->Read_Trip (*merge_ptr)) {
-			merge_ptr->Get_Trip_Index (trip_index);
+			merge_ptr->Get_Index (trip_index);
 		} else {
 			trip_index.Set (MAX_INTEGER);
 		}
@@ -152,7 +152,7 @@ void TripPrep::Trip_Processing::Read_Trips (int part)
 				Trip_Index trip_index;
 				Select_Data select_data;
 
-				trip_ptr->Get_Trip_Index (trip_index);
+				trip_ptr->Get_Index (trip_index);
 
 				select_data.Type (trip_ptr->Type ());
 				select_data.Partition (partition);
@@ -192,7 +192,7 @@ void TripPrep::Trip_Processing::Read_Trips (int part)
 		//---- save the sort key ----
 
 		if (exe->Trip_Sort () == TRAVELER_SORT) {
-			trip_ptr->Get_Trip_Index (trip_index);
+			trip_ptr->Get_Index (trip_index);
 
 			trip_stat = traveler_sort.insert (Trip_Map_Data (trip_index, (int) trip_ptr_array.size ()));
 
@@ -210,7 +210,7 @@ void TripPrep::Trip_Processing::Read_Trips (int part)
 				}
 			}
 		} else if (exe->Trip_Sort () == TIME_SORT) {
-			trip_ptr->Get_Time_Index (time_index);
+			trip_ptr->Get_Index (time_index);
 
 			time_stat = time_sort.insert (Time_Map_Data (time_index, (int) trip_ptr_array.size ()));
 
@@ -229,7 +229,7 @@ void TripPrep::Trip_Processing::Read_Trips (int part)
 				}
 			}
 		} else if (exe->merge_flag) {
-			trip_ptr->Get_Trip_Index (trip_rec);
+			trip_ptr->Get_Index (trip_rec);
 
 			if (trip_rec < last_sort) {
 				MAIN_LOCK
@@ -261,7 +261,7 @@ void TripPrep::Trip_Processing::Read_Trips (int part)
 				}
 next:
 				if (merge_file->Read_Trip (*merge_ptr)) {
-					merge_ptr->Get_Trip_Index (trip_index);
+					merge_ptr->Get_Index (trip_index);
 
 					if (trip_index < last_trip) {
 						MAIN_LOCK

@@ -62,8 +62,8 @@ bool Difference_Data::Report_Flags (bool total, bool distrib, bool tot_sum, bool
 void Difference_Data::Initialize (void)
 {
 	int num;	
-	Packed_Integers int_data;
-	PInts_Itr int_itr;
+	Integers int_data;
+	Ints_Itr int_itr;
 	Summary_Data sum_data;
 
 	Clear ();
@@ -623,7 +623,7 @@ void Difference_Data::Merge_Data (Difference_Data &data)
 	int i, j;
 	Summary_Itr sum_itr;
 	Summary_Data *sum_ptr;
-	PInts_Itr int_itr;
+	Ints_Itr int_itr;
 	Integers *int_ptr;
 	Int_Itr itr;
 

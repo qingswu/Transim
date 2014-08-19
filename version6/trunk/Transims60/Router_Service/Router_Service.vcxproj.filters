@@ -163,5 +163,8 @@
     <ClCompile Include="Service\Skim_Processor.cpp">
       <Filter>Service\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Path_Builder\Plan_Reskim.cpp">
+      <Filter>Path_Builder\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

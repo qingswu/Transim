@@ -55,12 +55,14 @@ void PlanPrep::Plan_Processing::Read_Plans (int part)
 		process_type = "Merging";
 
 		if (merge_file->Read_Plan (*merge_ptr)) {
-			merge_ptr->Get_Trip_Index (trip_index);
+			merge_ptr->Get_Index (trip_index);
 		} else {
 			trip_index.Set (MAX_INTEGER);
 		}
 		last_trip = trip_index;
 		trip_rec.Clear ();
+	} else if (exe->repair_flag) {
+		process_type = "Repairing";
 	} else {
 		process_type = "Copying";
 	}
@@ -128,10 +130,16 @@ void PlanPrep::Plan_Processing::Read_Plans (int part)
 
 		if (exe->percent_flag && exe->random.Probability () > exe->select_percent) continue;
 
+		//---- repair plan legs ----
+
+		if (exe->repair_flag) {
+			num_repair += exe->Repair_Legs (plan_ptr);
+		}
+
 		//---- save the sort key ----
 
 		if (exe->Trip_Sort () == TRAVELER_SORT) {
-			plan_ptr->Get_Trip_Index (trip_index);
+			plan_ptr->Get_Index (trip_index);
 
 			trip_stat = traveler_sort.insert (Trip_Map_Data (trip_index, (int) plan_ptr_array.size ()));
 
@@ -168,7 +176,7 @@ void PlanPrep::Plan_Processing::Read_Plans (int part)
 				}
 			}
 		} else if (exe->merge_flag) {
-			plan_ptr->Get_Trip_Index (trip_rec);
+			plan_ptr->Get_Index (trip_rec);
 
 			if (trip_rec < last_sort) {
 				MAIN_LOCK
@@ -188,7 +196,7 @@ void PlanPrep::Plan_Processing::Read_Plans (int part)
 				}
 next:
 				if (merge_file->Read_Plan (*merge_ptr)) {
-					merge_ptr->Get_Trip_Index (trip_index);
+					merge_ptr->Get_Index (trip_index);
 
 					if (trip_index < last_trip) {
 						MAIN_LOCK

@@ -20,9 +20,7 @@ public:
 
 	void Initialize (Router_Service *_exe);
 	void Start_Processing (void);
-	void Start_Work (void);
 	void Skim_Build (One_To_Many *ptr);
-	void Complete_Work (void);
 	void Stop_Processing (void);
 	void Save_Flows (void);
 	int  Num_Threads (void)           { return (num_threads); }

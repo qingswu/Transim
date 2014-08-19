@@ -3,19 +3,24 @@
 //*********************************************************
 
 #include "Work_Queue.hpp"
+#include "Execution_Service.hpp"
+#include "String.hpp"
 
 #ifdef THREADS
 //---------------------------------------------------------
-//	Work_Queue constructor/destructor
+//	Work_Queue constructor
 //---------------------------------------------------------
 
 Work_Queue::Work_Queue (int max_records) 
 {
+	Start_Work ();
 	queue = 0;
-	exit_flag = end_flag = finish_flag = false;
-	num_in = num_out = 0;
 	Max_Records (max_records);
 }
+
+//---------------------------------------------------------
+//	operator ()
+//---------------------------------------------------------
 
 void Work_Queue::operator()()
 {
@@ -24,17 +29,17 @@ void Work_Queue::operator()()
 }
 
 //---------------------------------------------------------
-//	Put_Work
+//	Put
 //---------------------------------------------------------
 
-void Work_Queue::Put_Work (int index) 
+void Work_Queue::Put (int index) 
 {
 	mutex_lock lock (work_mutex);
 
 	while (num_records == max_records) {
 		work_full.wait (lock);
 	}
-	num_in++;
+	num_active++;
 	num_records++;
 	queue [last++] = index;
 
@@ -44,27 +49,23 @@ void Work_Queue::Put_Work (int index)
 }
 
 //---------------------------------------------------------
-//	Get_Work
+//	Get
 //---------------------------------------------------------
 
-int Work_Queue::Get_Work (void) 
+int Work_Queue::Get (void) 
 {
 	while (1) {
 		mutex_lock lock (work_mutex);
 
-		while (!exit_flag && !end_flag && num_records == 0) {
+		while (!end_flag && num_records == 0) {
 			work_empty.wait (lock);
 		}
 		if (num_records == 0) {
-			if (exit_flag) {
-				work_empty.notify_all ();
+			if (end_flag) {
+				end_wait.notify_one ();
 				return (-1);
 			}
-			if (end_flag) {
-				end_flag = false;
-				end_wait.notify_one ();
-				continue;
-			}
+			continue;
 		}
 		num_records--;
 
@@ -85,9 +86,34 @@ void Work_Queue::Finished (void)
 {
 	mutex_lock lock (work_mutex);
 
-	num_out++;
-	if (finish_flag && num_in == num_out) {
+	if (num_active > 0) num_active--;
+
+	if (finish_flag && num_active == 0) {
 		data_wait.notify_one ();
+	}
+}
+
+//--------------------------------------------------------
+//	Start_Work
+//--------------------------------------------------------
+
+void Work_Queue::Start_Work (void)
+{
+	end_flag = finish_flag = false;
+	num_records = num_active = first = last = 0;
+}
+
+//--------------------------------------------------------
+//	Complete_Work
+//--------------------------------------------------------
+
+void Work_Queue::Complete_Work (void)
+{
+	mutex_lock lock (work_mutex);
+
+	if (num_active > 0) {
+		finish_flag = true;
+		data_wait.wait (lock);
 	}
 }
 
@@ -97,31 +123,13 @@ void Work_Queue::Finished (void)
 
 void Work_Queue::End_of_Work (void)
 {
-	mutex_lock lock (work_mutex);
-
-	if (num_records > 0) {
-		end_flag = true;
-		end_wait.wait (lock);
-	}
-	end_flag = false;
-}
-
-//--------------------------------------------------------
-//	Complete_Work
-//--------------------------------------------------------
-
-void Work_Queue::Complete_Work (void)
-{
-	End_of_Work ();
+	Complete_Work ();
 
 	mutex_lock lock (work_mutex);
-	
-	while (num_in > num_out) {
-		finish_flag = true;
-		data_wait.wait (lock);
-	}
-	num_in = num_out = 0;
-	finish_flag = false;
+
+	end_flag = true;
+	work_empty.notify_all ();
+	end_wait.wait (lock);
 }
 
 //---------------------------------------------------------
@@ -130,11 +138,9 @@ void Work_Queue::Complete_Work (void)
 
 void Work_Queue::Exit_Queue (void)
 { 
-	mutex_lock lock (work_mutex);
-	exit_flag = true;
-	work_empty.notify_all ();
+	End_of_Work ();
+	exit_wait.notify_one ();
 }
-
 
 //---------------------------------------------------------
 //	Clear
@@ -146,9 +152,8 @@ void Work_Queue::Clear (void)
 		delete [] queue;
 		queue = 0;
 	}
-	max_records = num_records = 0;
-	first = last = -1;
-	num_in = num_out = 0;
+	max_records = 0;
+	Start_Work ();
 }
 
 //---------------------------------------------------------

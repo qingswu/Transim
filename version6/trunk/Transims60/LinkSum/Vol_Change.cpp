@@ -10,18 +10,18 @@
 
 void LinkSum::Volume_Change (void)
 {
-	int i, j, k, k1, bin, percent, max_lanes, lanes, tod_list, index, flow_index;
+	int i, j, k, k1, bin, percent, index, use_index;
 	int percentile [NUM_PERCENTILES];
-	double total, sum, lane_miles, len, flow, old_flow;
+	double total, sum;
 	Dtime low, high, tod;
 
 	Link_Itr link_itr;
 	Dir_Data *dir_ptr;
-	Link_Perf_Period_Itr period_itr;
-	Link_Perf_Array *period_ptr;
-	Flow_Time_Data flow_data;
-	Lane_Use_Period *use_ptr;
+	Perf_Period_Itr period_itr;
+	Perf_Period *period_ptr;
+	Perf_Data perf_data;
 	Doubles_Itr itr;
+	Performance_Data data;
 
 	Show_Message ("Summarize Volume Changes -- Record");
 	Set_Progress ();
@@ -36,8 +36,6 @@ void LinkSum::Volume_Change (void)
 		Show_Progress ();
 
 		if (select_flag && link_itr->Use () == 0) continue;
-		
-		len = UnRound (link_itr->Length ());
 
 		for (i=0; i < 2; i++) {
 			if (i == 1) {
@@ -49,54 +47,36 @@ void LinkSum::Volume_Change (void)
 			}
 			if (index < 0) continue;
 			dir_ptr = &dir_array [index];
-
-			tod_list = dir_ptr->First_Lane_Use ();
-			flow_index = dir_ptr->Flow_Index ();
-
-			lanes = dir_ptr->Lanes ();
-			if (lanes < 1) lanes = 1;
-			max_lanes = lanes;
+			use_index = dir_ptr->Use_Index ();
 
 			//---- process each time period ----
 
-			for (j=0, period_itr = link_perf_array.begin (); period_itr != link_perf_array.end (); period_itr++, j++) {
-				flow_data = period_itr->Total_Flow_Time (index, flow_index);
-				flow = flow_data.Flow ();
+			for (j=0, period_itr = perf_period_array.begin (); period_itr != perf_period_array.end (); period_itr++, j++) {
+				perf_data = period_itr->Total_Performance (index, use_index);
+				
+				if (perf_data.Volume () < minimum_volume) continue;
 
-				period_ptr = &compare_link_array [j];
+				sum_periods.Period_Range (j, low, high);
 
-				flow_data = period_ptr->Total_Flow_Time (index, flow_index);
-				old_flow = flow_data.Flow ();
+				data.Start (low);
+				data.End (high);
 
-				if (old_flow < minimum_flow) continue;
-				if (old_flow == 0.0) old_flow = 0.1;
+				data.Get_Data (&perf_data, dir_ptr, &(*link_itr));
+				
+				period_ptr = &compare_perf_array [j];
 
-				if (tod_list >= 0) {
+				perf_data = period_ptr->Total_Performance (index, use_index);
 
-					//---- get the time period ----
+				if (perf_data.Volume () < minimum_volume) continue;
 
-					sum_periods.Period_Range (j, low, high);
-					tod = (low + high + 1) / 2;
+				if (perf_data.Volume () == 0.0) perf_data.Volume (0.1);
 
-					lanes = max_lanes;
-					k = tod_list;
-
-					for (use_ptr = &use_period_array [k]; ; use_ptr = &use_period_array [++k]) {
-						if (use_ptr->Start () <= tod && tod < use_ptr->End ()) {
-							lanes = use_ptr->Lanes0 () + use_ptr->Lanes1 ();
-							break;
-						}
-						if (use_ptr->Periods () == 0) break;
-					}
-				}
-				bin = DTOI (abs (DTOI (flow - old_flow)) * 10 * RESOLUTION / old_flow);
+				bin = DTOI (abs (DTOI (data.Volume () - perf_data.Volume ())) * 10 * RESOLUTION / perf_data.Volume ());
 
 				if (bin < 0 || bin >= NUM_SUM_BINS) bin = NUM_SUM_BINS - 1;
-				
-				lane_miles = lanes * len;
 
-				sum_bin [j] [bin] += lane_miles;
-				sum_bin [num_inc] [bin] += lane_miles;
+				sum_bin [j] [bin] += data.Lane_Len ();
+				sum_bin [num_inc] [bin] += data.Lane_Len ();
 			}
 		}
 	}

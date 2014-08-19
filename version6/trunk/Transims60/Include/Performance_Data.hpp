@@ -6,168 +6,297 @@
 #define PERFORMANCE_DATA_HPP
 
 #include "APIDefs.hpp"
-#include "Link_Delay_Data.hpp"
+#include "Execution_Service.hpp"
+#include "Dir_Data.hpp"
+#include "Link_Data.hpp"
+#include "Data_Pack.hpp"
+#include "Time_Periods.hpp"
+#include "Dtime.hpp"
+#include "Volume_Array.hpp"
 
 #include <vector>
 using namespace std;
 
 //---------------------------------------------------------
-//	Performance_Data class definition
+//	Perf_Data class definition
 //---------------------------------------------------------
 
-class SYSLIB_API Performance_Data : public Link_Delay_Data
+class SYSLIB_API Perf_Data
 {
 public:
-	Performance_Data (void)           { Clear (); }
+	Perf_Data (void)                       { Clear (); }
 
-	int    Speed (void)               { return (speed); }
-	Dtime  Delay (void)               { return (delay); }
-	int    Density (void)             { return (density); }
-	int    Max_Density (void)         { return (max_density); }
-	int    Time_Ratio (void)          { return (time_ratio); }
-	int    Queue (void)               { return (queue); }
-	int    Max_Queue (void)           { return (max_queue); }
-	int    Failure (void)             { return (failure); }
+	Dtime  Time (void)                     { return (time); }
+	double Persons (void)                  { return (persons); }
+	double Volume (void)                   { return (volume); }
+	double Enter (void)                    { return (enter); }
+	double Exit (void)                     { return (exit); }
+	double Max_Volume (void)               { return (max_volume); }
+	double Queue (void)                    { return (queue); }
+	double Max_Queue (void)                { return (max_queue); }
+	double Failure (void)                  { return (failure); }
+	double Veh_Dist (void)                 { return (veh_dist); }
+	double Veh_Time (void)                 { return (veh_time); }
+	double Occupancy (void)                { return (value1); }
+	double Stop_Count (void)               { return (value2); }
+	double Ratio_Dist (void)               { return (value1); }
+	double Ratio_Time (void)               { return (value2); } 
+	int    Ratios (void)                   { return (count1); }
+	int    Count (void)                    { return (count2); }
 
-	void   Speed (int value)          { speed = value; }
-	void   Delay (Dtime value)        { delay = value; }
-	void   Density (int value)        { density = value; }
-	void   Max_Density (int value)    { max_density = value; }
-	void   Time_Ratio (int value)     { time_ratio = value; }
-	void   Queue (int value)          { queue = value; }
-	void   Max_Queue (int value)      { max_queue = value; }
-	void   Failure (int value)        { failure = value; }
-	
-	void   Speed (double value)       { speed = exe->Round (value); }
-	void   Delay (int value)          { delay = value; }
-	void   Delay (double value)       { delay = exe->Round (value); }
-	void   Density (double value)     { density = exe->Round (value); }
-	void   Max_Density (double value) { max_density = exe->Round (value); }
-	void   Time_Ratio (double value)  { time_ratio = exe->Round (value); }
-	void   Queue (double value)       { queue = exe->Round (value); }
+
+	void   Time (Dtime value)              { time = value; }
+	void   Persons (double value)          { persons = (float) value; }
+	void   Volume (double value)           { volume = (float) value; }
+	void   Enter (double value)            { enter = (float) value; }
+	void   Exit (double value)             { exit = (float) value; }
+	void   Max_Volume (double value)       { max_volume = (float) value; }
+	void   Queue (double value)            { queue = (float) value; }
+	void   Max_Queue (double value)        { max_queue = (float) value; }
+	void   Failure (double value)          { failure = (float) value; }
+	void   Veh_Dist (double value)         { veh_dist = (float) value; }
+	void   Veh_Time (double value)         { veh_time = (float) value; }
+	void   Occupancy (double value)        { value1 = (float) value; }
+	void   Stop_Count (double value)       { value2 = (float) value; }
+	void   Ratio_Dist (double value)       { value1 = (float) value; }
+	void   Ratio_Time (double value)       { value2 = (float) value; }
+	void   Ratios (int value)              { count1 = (short) value; }
+	void   Count (int value)               { count2 = (short) value; }
+
+	void   Time (int value)                { time = value; }
+	void   Time (double value)             { time = exe->Round (value); }
+
+	void   Add_Time (Dtime value)          { time = time + value; }
+	void   Average_Time (Dtime value)      { time = (time + value) / 2; }
+	void   Weight_Time (Dtime value, double weight)   { time = (int) ((time + value * weight) / (weight + 1) + 0.5); }
+	void   Update_Time (Dtime value);
+
+	void   Add_Persons (double value)      { persons = (float) (persons + value); }
+	void   Add_Volume (double value)       { volume = (float) (volume + value); }
+	void   Add_Enter (double value)        { enter = (float) (enter + value); }
+	void   Add_Exit (double value)         { exit = (float) (exit + value); }
+	void   Add_Max_Volume (double value)   { max_volume = (float) (max_volume + value); }
+	void   Add_Queue (double value)        { queue = (float) (queue + value); }
+	void   Add_Max_Queue (double value)    { max_queue = (float) (max_queue + value); }
+	void   Add_Failure (double value)      { failure = (float) (failure + value); }
+	void   Add_Veh_Dist (double value)     { veh_dist = (float) (veh_dist + value); }
+	void   Add_Veh_Time (double value)     { veh_time = (float) (veh_time + value); }
+	void   Add_Occupancy (double value)    { value1 = (float) (value1 + value); }
+	void   Add_Stop_Count (double value)   { value2 = (float) (value2 + value); }
+	void   Add_Ratio_Dist (double value)   { value1 = (float) (value1 + value); }
+	void   Add_Ratio_Time (double value)   { value2 = (float) (value2 + value); }
+	void   Add_Ratio (int value = 1)       { count1 = (short) (count1 + value); }
+	void   Add_Count (int value = 1)       { count2 = (short) (count2 + value); }
+
+	void   Sum_Max_Volume (double value)   { if (value > max_volume) max_volume = (float) value; }
+	void   Sum_Max_Queue (double value)    { if (value > max_queue) max_queue = (float) value; }
 
 	void   Clear (void)
 	{
-		speed = max_density = time_ratio = queue = max_queue = failure = 0;
-		delay = 0; Link_Delay_Data::Clear ();
+		time = 0; Clear_Flows (); 
 	}
-private:
-
-	int    speed;
-	Dtime  delay;
-	int    density;
-	int    max_density;
-	int    time_ratio;
-	int    queue;
-	int    max_queue;
-	int    failure;
-};
-
-typedef vector <Performance_Data>    Performance_Array;
-typedef Performance_Array::iterator  Performance_Itr;
-
-//---------------------------------------------------------
-//	Link_Perf_Data class definition
-//---------------------------------------------------------
-
-class SYSLIB_API Link_Perf_Data : public Flow_Time_Data
-{
-public:
-	Link_Perf_Data (void)                  { Clear (); }
-
-	int    Density (void)                  { return (density); }
-	int    Max_Density (void)              { return (max_density); }
-	int    Queue (void)                    { return (queue); }
-	int    Max_Queue (void)                { return (max_queue); }
-	int    Failure (void)                  { return (failure); }
-	int    Occupancy (void)                { return (occupancy); }
-	int    Stop_Count (void)               { return (count); }
-	int    Ratio_Count (void)              { return (count); }
-	int    Ratio_VMT (void)                { return (ratio_vmt); }
-	int    Ratio_VHT (void)                { return (ratio_vht); } 
-
-	void   Density (int value)             { density = value; }
-	void   Max_Density (int value)         { max_density = value; }
-	void   Queue (int value)               { queue = value; }
-	void   Max_Queue (int value)           { max_queue = value; }
-	void   Failure (int value)             { failure = value; }
-	void   Occupancy (int value)           { occupancy = value; }
-	void   Stop_Count (int value)          { count = value; }
-	void   Ratio_Count (int value)         { count = value; }
-	void   Ratio_VMT (int value)           { ratio_vmt = value; }
-	void   Ratio_VHT (int value)           { ratio_vht = value; }
-
-	void   Add_Density (int value)         { density += value; }
-	void   Add_Max_Density (int value)     { if (value > max_density) max_density = value; }
-	void   Add_Queue (int value)           { queue += value; }
-	void   Add_Max_Queue (int value)       { if (value > max_queue) max_queue = value; }
-	void   Add_Failure (int value)         { failure += value; }
-	void   Add_Occupant (int value = 1)    { occupancy += value; }
-	void   Add_Stop (int value = 1)        { count += value; }
-	void   Add_Ratio (int value = 1)       { count += value; }
-	void   Add_Ratio_VMT (int value)       { ratio_vmt += value; }
-	void   Add_Ratio_VHT (int value)       { ratio_vht += value; }
-
-	void   Clear (void)
+	void   Clear_Flows (void)
 	{
-		density = max_density = queue = max_queue = failure = occupancy = 0;
-		count = ratio_vmt = ratio_vht = 0; Flow_Time_Data::Clear ();
+		persons = volume = enter = exit = max_volume = queue = max_queue = failure = 0.0;
+		veh_dist = veh_time = value1 = value2 = 0.0; count1 = count2 = 0; 
 	}
+	void   Set_Flows (Perf_Data *perf_ptr);
+	void   Add_Flows (Perf_Data *perf_ptr);
+	void   Average_Flows (Perf_Data *perf_ptr);
+	void   Weight_Flows (Perf_Data *perf_ptr, double weight);
+	void   Weight_Flows (Perf_Data *perf1_ptr, double fac1, Perf_Data *perf2_ptr, double fac2);
+	void   Sum_Periods (Perf_Data *perf_ptr);
 
 private:
-	int    density;
-	int    max_density;
-	int    queue;
-	int    max_queue;
-	int    failure;
-	int    occupancy;
-	int    count;
-	int    ratio_vmt;
-	int    ratio_vht;
+	Dtime  time;
+	float  persons; 
+	float  volume;
+	float  enter;
+	float  exit;
+	float  max_volume;
+	float  queue;
+	float  max_queue;
+	float  failure;
+	float  veh_dist;
+	float  veh_time;
+	float  value1;
+	float  value2;
+	short  count1;
+	short  count2;
 };
 
 //---------------------------------------------------------
-//	Link_Perf_Array class definition
+//	Perf_Period class definition
 //---------------------------------------------------------
 
-class SYSLIB_API Link_Perf_Array : public Vector <Link_Perf_Data>
+class SYSLIB_API Perf_Period : public Vector <Perf_Data>
 {
 public:
-	Link_Perf_Array (void) { }
+	Perf_Period (void) { }
 	
 	Dtime  Time (int index)       { return (at (index).Time ()); }
-	double Flow (int index)       { return (at (index).Flow ()); }
 
-	Link_Perf_Data * Data_Ptr (int index) { return (&at (index)); }
+	Perf_Data * Data_Ptr (int index) { return (&at (index)); }
 
-	Flow_Time_Data Total_Flow_Time (int index);
-	Flow_Time_Data Total_Flow_Time (int index, int flow_index);
-
-	Link_Perf_Data Total_Link_Perf (int index);
-	Link_Perf_Data Total_Link_Perf (int index, int flow_index);
+	Perf_Data Total_Performance (int index);
+	Perf_Data Total_Performance (int index, int use_index);
 };
-typedef Link_Perf_Array::iterator   Link_Perf_Itr;
+typedef Perf_Period::iterator   Perf_Itr;
 
 //---------------------------------------------------------
-//	Link_Perf_Period_Array class definition
+//	Perf_Period_Array class definition
 //---------------------------------------------------------
 
-class SYSLIB_API Link_Perf_Period_Array : public Vector <Link_Perf_Array>
+class SYSLIB_API Perf_Period_Array : public Vector <Perf_Period>
 {
 public:
-	Link_Perf_Period_Array (void) { periods = 0; num_records = 0; }
+	Perf_Period_Array (void) { periods = 0; num_records = 0; }
 
 	void Initialize (Time_Periods *periods, int num_records = 0);
 	
-	void Replicate (Link_Perf_Period_Array &period_array);
+	void Replicate (Perf_Period_Array &period_array);
 
-	Link_Perf_Array * Period_Ptr (Dtime time);
+	void Set_Time0 (void);
+	void Zero_Flows (Dtime first_time = 0);
 
-	Time_Periods *periods;
+	void Copy_Flow_Data (Perf_Period_Array &period_array, bool zero_flag = false, Dtime first_time = 0);
+	void Copy_Time_Data (Perf_Period_Array &period_array, bool zero_flag = true, Dtime first_time = 0);
+
+	void Add_Flows (Perf_Period_Array &period_array, bool zero_flag = false);
+	void Add_Flow_Times (Perf_Period_Array &period_array, bool zero_flag = false);
+
+	void Average_Flows (Perf_Period_Array &period_array, bool zero_flag = false);
+	void Average_Flow_Times (Perf_Period_Array &period_array, int weight = 1, bool zero_flag = false);
+
+	Dtime Travel_Time (int dir_index, Dtime time, double len_factor, bool forward_flag);
+
+	Dtime Flow_Time (int dir_index, Dtime time, double len_factor, double len, double pce, double occ, bool forward_flag = true);
+
+	Perf_Period * Period_Ptr (Dtime time);
+	Perf_Period * Period_Ptr (int period)      { return (&at (period)); }
+
+	Time_Periods * periods;
+	int  Num_Records (void)  { return (num_records); }
 
 private:
 	int num_records;
 };
-typedef Link_Perf_Period_Array::iterator  Link_Perf_Period_Itr;
+typedef Perf_Period_Array::iterator  Perf_Period_Itr;
+
+//---------------------------------------------------------
+//	Performance_Data class definition
+//---------------------------------------------------------
+
+class SYSLIB_API Performance_Data
+{
+public:
+	Performance_Data (void)           { Clear (); }
+
+	int    Dir_Index (void)           { return (dir_index); }
+	int    Type (void)                { return (type); }
+	Dtime  Start (void)               { return (start); }
+	Dtime  End (void)                 { return (end); }
+	Dtime  Time (void)                { return (time); }
+	double Persons (void)             { return (persons); }
+	double Volume (void)              { return (volume); }
+	double Enter (void)               { return (enter); }
+	double Exit (void)                { return (exit); }
+	double Flow (void)                { return (flow); }
+	int    Speed (void)               { return (speed); }
+	int    Time_Ratio (void)          { return (time_ratio); }
+	Dtime  Delay (void)               { return (delay); }
+	double Density (void)             { return (density); }
+	double Max_Density (void)         { return (max_density); }
+	double Queue (void)               { return (queue); }
+	double Max_Queue (void)           { return (max_queue); }
+	double Failure (void)             { return (failure); }
+	double Veh_Dist (void)            { return (veh_dist); }
+	double Veh_Time (void)            { return (veh_time); }
+	double Veh_Delay (void)           { return (veh_delay); }
+	double Lane_Len (void)            { return (lane_len); }
+	double VC_Ratio (void)            { return (vc_ratio); }
+	double Ratio_Dist (void)          { return (ratio_dist); }
+	double Ratio_Time (void)          { return (ratio_time); } 
+	int    Ratios (void)              { return (ratios); }
+	int    Count (void)               { return (count); }
+
+
+	void   Dir_Index (int value)      { dir_index = value; }
+	void   Type (int value)           { type = value; }
+	void   Start (Dtime value)        { start = value; }
+	void   End (Dtime value)          { end = value; }
+	void   Time (Dtime value)         { time = value; }
+	void   Persons (double value)     { persons = (float) value; }
+	void   Volume (double value)      { volume = (float) value; }
+	void   Enter (double value)       { enter = (float) value; }
+	void   Exit (double value)        { exit = (float) value; }
+	void   Flow (double value)        { flow = (float) value; }
+	void   Speed (int value)          { speed = value; }
+	void   Time_Ratio (int value)     { time_ratio = value; }
+	void   Delay (Dtime value)        { delay = value; }
+	void   Density (double value)     { density = (float) value; }
+	void   Max_Density (double value) { max_density = (float) value; }
+	void   Queue (double value)       { queue = (float) value; }
+	void   Max_Queue (double value)   { max_queue = (float) value; }
+	void   Failure (double value)     { failure = (float) value; }
+	void   Veh_Dist (double value)    { veh_dist = value; }
+	void   Veh_Time (double value)    { veh_time = value; }
+	void   Veh_Delay (double value)   { veh_delay = (float) value; }
+	void   Lane_Len (double value)    { lane_len = (float) value; }
+	void   VC_Ratio (double value)    { vc_ratio = (float) value; }
+	void   Ratio_Dist (double value)  { ratio_dist = (float) value; }
+	void   Ratio_Time (double value)  { ratio_time = (float) value; }
+	void   Ratios (int value)         { ratios = value; }
+	void   Count (int value)          { count = value; }
+
+	void   Time (int value)           { time = value; }
+	void   Time (double value)        { time = exe->Round (value); }	
+	void   Speed (double value)       { speed = exe->Round (value); }
+	void   Delay (int value)          { delay = value; }
+	void   Delay (double value)       { delay = exe->Round (value); }
+	void   Time_Ratio (double value)  { time_ratio = exe->Round (value); }
+
+	void   Get_Data (Perf_Data *perf_ptr, int dir_index);
+	void   Get_Data (Perf_Data *perf_ptr, Dir_Data *dir_ptr, Link_Data *link_ptr);
+	void   Get_Data (Vol_Spd_Data *vol_spd_ptr, Dir_Data *dir_ptr, Link_Data *link_ptr);
+
+	void   Clear (void)
+	{
+		dir_index = type = speed = time_ratio = ratios = count = 0; start = end = time = delay = 0; 
+		persons = volume = enter = exit = flow = density = max_density = queue = max_queue = failure = 0.0;   
+		veh_dist = veh_time = 0.0; veh_delay = lane_len = vc_ratio = ratio_dist = ratio_time = 0; 
+	}
+private:
+	int    dir_index;
+	int    type;
+	Dtime  start;
+	Dtime  end;
+	Dtime  time;
+	float  persons;
+	float  volume;
+	float  enter;
+	float  exit;
+	float  flow;
+	int    speed;
+	int    time_ratio;
+	Dtime  delay;
+	float  density;
+	float  max_density;
+	float  queue;
+	float  max_queue;
+	float  failure;
+	float  veh_delay;
+	double veh_dist;
+	double veh_time;
+	float  lane_len; 
+	float  vc_ratio;
+	float  ratio_dist;
+	float  ratio_time;
+	int    ratios;
+	int    count;
+};
+
+typedef vector <Performance_Data>    Performance_Array;
+typedef Performance_Array::iterator  Performance_Itr;
 
 #endif

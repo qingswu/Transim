@@ -9,19 +9,20 @@
 //	Plan_Processing
 //---------------------------------------------------------
 
-Sim_Travel_Ptr Sim_Plan_Process::Plan_Processing (Plan_Data *plan_ptr)
+Sim_Trip_Ptr Sim_Plan_Process::Plan_Processing (Plan_Data *plan_ptr)
 {
-	int index, mode, type, dir, leg;
+	int index, mode, type, dir, leg, last_leg;
 	string label;
 	bool drive_flag;
 
 	Plan_Leg_Itr leg_itr;
+	Sim_Trip_Ptr sim_trip_ptr;
 	Sim_Travel_Ptr sim_travel_ptr;
 	Sim_Plan_Ptr sim_plan_ptr;
-	Sim_Leg_Ptr sim_leg_ptr;
-	Sim_Leg_Data sim_leg_rec;
+	Sim_Leg_Data sim_leg;
 	Int_Map_Itr map_itr;
 	Link_Data *link_ptr;
+	Integers leg_list;
 
 	num_plans++;		//---- count the number of active trips ----
 
@@ -61,9 +62,11 @@ Sim_Travel_Ptr Sim_Plan_Process::Plan_Processing (Plan_Data *plan_ptr)
 	//---- process a new travel plan ----
 
 	index = 0;
-	sim_travel_ptr = new Sim_Travel_Data ();
-	sim_plan_ptr = new Sim_Plan_Data ();
-	sim_travel_ptr->sim_plan_ptr = sim_plan_ptr;
+
+	sim_trip_ptr = new Sim_Trip_Data ();
+
+	sim_travel_ptr = &sim_trip_ptr->sim_travel_data;
+	sim_plan_ptr = &sim_trip_ptr->sim_plan_data;
 
 	sim_travel_ptr->Household (plan_ptr->Household ());
 	sim_travel_ptr->Person (plan_ptr->Person ());
@@ -72,11 +75,9 @@ Sim_Travel_Ptr Sim_Plan_Process::Plan_Processing (Plan_Data *plan_ptr)
 
 	//---- create a new plan record ----
 
-	sim_plan_ptr->assign (plan_ptr->size (), sim_leg_rec);
-
 	sim_plan_ptr->Start (plan_ptr->Depart ());
 	sim_plan_ptr->End (plan_ptr->Arrive ());
-	sim_plan_ptr->Duration (plan_ptr->Activity ());
+	sim_plan_ptr->Activity (plan_ptr->Activity ());
 
 	//---- convert the origin ----
 
@@ -120,13 +121,14 @@ Sim_Travel_Ptr Sim_Plan_Process::Plan_Processing (Plan_Data *plan_ptr)
 	sim_plan_ptr->Mode (plan_ptr->Mode ());
 	sim_plan_ptr->Constraint (plan_ptr->Constraint ());
 	sim_plan_ptr->Type (plan_ptr->Type ());
+	sim_plan_ptr->Leg_Pool (Leg_Pool ());
 
 	//---- process each leg ----
 
 	drive_flag = false;
+	last_leg = -1;
 
 	for (leg = 0, leg_itr = plan_ptr->begin (); leg_itr != plan_ptr->end (); leg_itr++, leg++) {
-		sim_leg_ptr = &sim_plan_ptr->at (leg);
 
 		type = leg_itr->Type ();
 		index = leg_itr->ID ();
@@ -134,9 +136,9 @@ Sim_Travel_Ptr Sim_Plan_Process::Plan_Processing (Plan_Data *plan_ptr)
 		mode = leg_itr->Mode ();
 		if (mode == DRIVE_MODE) drive_flag = true;
 
-		sim_leg_ptr->Mode (mode);
-		sim_leg_ptr->Type (type);
-		sim_leg_ptr->Time (leg_itr->Time ());
+		sim_leg.Mode (mode);
+		sim_leg.Type (type);
+		sim_leg.Time (leg_itr->Time ());
 
 		switch (type) {
 			case LOCATION_ID:
@@ -222,7 +224,7 @@ Sim_Travel_Ptr Sim_Plan_Process::Plan_Processing (Plan_Data *plan_ptr)
 					} else {
 						index = link_ptr->AB_Dir ();
 					}
-					sim_leg_ptr->Type (DIR_ID);
+					sim_leg.Type (DIR_ID);
 
 					if (index < 0) {
 						index = leg_itr->ID ();
@@ -245,26 +247,30 @@ Sim_Travel_Ptr Sim_Plan_Process::Plan_Processing (Plan_Data *plan_ptr)
 				index = type;
 				goto clean_up;
 		}
-		sim_leg_ptr->Index (index);
+		sim_leg.Index (index);
+
+		last_leg = sim_plan_ptr->Add_Leg (sim_leg, last_leg);
+
+		leg_list.push_back (last_leg);
 	}
 	sim->stats.num_trips++;
 	if (drive_flag) {
 		sim->stats.num_veh_trips++;
 
-		if (!Best_Lanes (sim_travel_ptr)) {
+		if (!Best_Lanes (sim_trip_ptr, leg_list)) {
 			//step.Problem (CONNECT_PROBLEM);
 			//step.Status (2);
 			//Output_Step (step);
 			//sim_travel_ptr->Next_Plan ();
 		}
 	}
-	return (sim_travel_ptr);
+	return (sim_trip_ptr);
 
 clean_up:
 	sim->Warning (String ("Plan %d-%d-%d-%d %s %d was Not Found") % plan_ptr->Household () % 
 		plan_ptr->Person () % plan_ptr->Tour () % plan_ptr->Trip () % label % index);
-	return (sim_travel_ptr);
+	return (sim_trip_ptr);
 
 skip:
-	return (new Sim_Travel_Data ());
+	return (new Sim_Trip_Data ());
 }

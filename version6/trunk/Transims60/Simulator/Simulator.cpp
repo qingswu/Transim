@@ -48,9 +48,6 @@ Simulator::Simulator (void) : Simulator_Service ()
 	max_vehicles = 0;
 	time_step = max_time = 0;
 	signal_update_time = timing_update_time = transit_update_time = 0;
-	one_second = Dtime (1, SECONDS);
-	one_minute = Dtime (60, SECONDS);
-	one_hour = Dtime (3600, SECONDS);
 
 	System_Read_False (PLAN);
 	System_Data_Reserve (PLAN, 0);

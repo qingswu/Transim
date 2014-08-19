@@ -9,98 +9,98 @@
 //	Traveler_Processing
 //---------------------------------------------------------
 
-bool Sim_Travel_Process::Travel_Processing (Sim_Travel_Ptr sim_travel_ptr)
+void Sim_Travel_Process::Travel_Processing (Sim_Travel_Ptr sim_travel_ptr)
 {
-	//return true to update the link load queue ----
-
 	Dtime next_event;
-	int subarea;
-
 	Travel_Step step;
 
 	Sim_Plan_Ptr sim_plan_ptr;
-	Sim_Leg_Itr leg_itr, next_leg;
+	Sim_Leg_Ptr sim_leg_ptr, next_leg_ptr;
 	Vehicle_Map_Itr veh_map_itr;
 	Sim_Veh_Ptr sim_veh_ptr;
-	Sim_Dir_Ptr sim_dir_ptr;
 	Sim_Veh_Data sim_veh;
 
-	sim_plan_ptr = sim_travel_ptr->sim_plan_ptr;
+	if (sim_travel_ptr == 0) return;
 
-	if (sim_plan_ptr == 0) return (false);
+	sim_plan_ptr = sim_travel_ptr->Get_Plan ();
+
+	if (sim_plan_ptr == 0) {
+		sim_travel_ptr->Status (NOT_ACTIVE);
+		sim_travel_ptr->Next_Event (sim->param.end_time_step);
+		return;
+	}
 
 	step.Traveler (sim_travel_ptr->Traveler ());
 	step.sim_travel_ptr = sim_travel_ptr;
 
-	subarea = 0;	//************************//
-
 	//---- check the next scheduled event ----
 
 	do {
+#ifdef CHECK
+		if (sim_travel_ptr == 0) sim->Error ("Sim_Travel_Process::Travel_Processing: sim_travel_ptr");
+#endif
 		if (sim_travel_ptr->Next_Event () > sim->time_step) break;
 
-		sim_plan_ptr = sim_travel_ptr->sim_plan_ptr;
-
+		sim_plan_ptr = sim_travel_ptr->Get_Plan ();
+#ifdef CHECK
+		if (sim_plan_ptr == 0) sim->Error ("Sim_Travel_Process::Travel_Processing: sim_plan_ptr");
+#endif
 		//---- new trip ----
 
-		if (sim_travel_ptr->Next_Event () < 0) {
+		if (sim_travel_ptr->Status () == NOT_ACTIVE) {
 
 			//---- check the departure time constraint ----
 
 			if ((sim_plan_ptr->Start () + sim->param.max_start_variance) < sim->time_step) {
 				step.Problem (DEPARTURE_PROBLEM);
-				step.Status (3);
-
-				if (!Travel_Update (step)) break;
+				sim->Output_Step (step);
 				continue;
 			}
+
+			//---- activate the trip ----
+
 			sim_travel_ptr->Next_Event (sim_plan_ptr->Start ());
+			sim_travel_ptr->Status (OFF_NET_START);
 
 			if (sim_travel_ptr->Person () > 0) {
 				stats.num_start++;
-				sim_travel_ptr->Status (-1);
 
-				//---- output event record ----
+				//---- output start event ----
 
-				//if (sim->event_output.In_Range (TRIP_START_EVENT, sim_plan_ptr->Mode (), subarea)) {
-				//	Event_Data event_data;
-
-				//	event_data.Household (sim_travel_ptr->Household ());
-				//	event_data.Person (sim_travel_ptr->Person ());
-				//	event_data.Tour (sim_plan_ptr->Tour ());
-				//	event_data.Trip (sim_plan_ptr->Trip ());
-				//	event_data.Mode (sim_plan_ptr->Mode ());
-				//	event_data.Schedule (sim_plan_ptr->Start ());
-				//	event_data.Actual (sim->time_step);
-				//	event_data.Event (TRIP_START_EVENT);
-
-				//	sim->event_output.Output_Event (event_data);
-				//}
+				sim->sim_output_step.Event_Check (TRIP_START_EVENT, step);
 			}
 
-		} else { 
+		} else {
 
-			if (sim_travel_ptr->Status () == -2) {
-				leg_itr = sim_plan_ptr->begin ();
+			if (sim_travel_ptr->Status () <= OFF_NET_END) {
+				sim_leg_ptr = sim_plan_ptr->Get_Leg ();
 
-				if (leg_itr != sim_plan_ptr->end ()) {
-					if (leg_itr->Type () == STOP_ID) {
-exe->Write (1, " stop");
-					} else if (leg_itr->Type () == PARKING_ID) {
-exe->Write (1, " parking");
-					} else {
-						sim_veh.Location (leg_itr->Index (), 0, 0);
+				if (sim_leg_ptr != 0) {
+
+					if (sim_leg_ptr->Type () == STOP_ID) {
+						if (sim_leg_ptr->Mode () == TRANSIT_MODE) {
+							stats.num_transit++;
+						}
+					} else if (sim_leg_ptr->Type () == PARKING_ID) {
+
+					} else if (sim_leg_ptr->Type () == DIR_ID) {
+						sim_veh.Location (sim_leg_ptr->Index (), 0, 0);
 						step.assign (1, sim_veh);
 
-						step.sim_dir_ptr = &sim->sim_dir_array [leg_itr->Index ()];
+						step.Dir_Index (sim_leg_ptr->Index ());
+#ifdef CHECK
+						if (sim_leg_ptr->Type () != DIR_ID) sim->Error (String ("Sim_Travel_Process::Travel_Processing: Leg Type=%d") % sim_leg_ptr->Type ());
+						if (step.Dir_Index () < 0 || (int) sim->sim_dir_array.size () <= step.Dir_Index ()) sim->Error ("Sim_Travel_Process::Travel_Processing: Dir_Index");
+#endif
+						step.sim_dir_ptr = &sim->sim_dir_array [sim_leg_ptr->Index ()];
 
 						sim_veh.offset = step.sim_dir_ptr->Length ();
 						step.push_back (sim_veh);
 
-						step.Time (leg_itr->Time ());
+						step.Time (sim_leg_ptr->Time ());
 
-						sim->sim_output_step.Check_Output (step);
-					}
+						sim->Output_Step (step);
+					} 
 				}
 			}
 			sim_plan_ptr->Next_Leg ();
@@ -108,30 +108,21 @@ exe->Write (1, " parking");
 
 		//---- end of the trip ----
 
-		if (sim_plan_ptr->size () == 0) {
+		if (sim_plan_ptr->First_Leg () < 0) {
+			sim_travel_ptr->Status (OFF_NET_END);
+
 			if (sim_travel_ptr->Person () == 0) {
 				stats.num_run_end++;
-				break;
+			} else {
+				stats.num_end++;
+
+				stats.tot_hours += sim->time_step - sim_plan_ptr->Start ();
+
+				//---- output end event ----
+
+				sim->sim_output_step.Event_Check (TRIP_END_EVENT, step);
 			}
-			stats.num_end++;
-
-			//---- output event record ----
-
-			//if (sim->event_output.In_Range (TRIP_END_EVENT, sim_plan_ptr->Mode (), subarea)) {
-			//	Event_Data event_data;
-
-			//	event_data.Household (sim_travel_ptr->Household ());
-			//	event_data.Person (sim_travel_ptr->Person ());
-			//	event_data.Tour (sim_plan_ptr->Tour ());
-			//	event_data.Trip (sim_plan_ptr->Trip ());
-			//	event_data.Mode (sim_plan_ptr->Mode ());
-			//	event_data.Schedule (sim_plan_ptr->End ());
-			//	event_data.Actual (sim->time_step);
-			//	event_data.Event (TRIP_END_EVENT);
-
-			//	sim->event_output.Output_Event (event_data);
-			//}
-			if (!Travel_Update (step)) break;
+			sim->Output_Step (step);
 			continue;
 		}
 
@@ -139,42 +130,55 @@ exe->Write (1, " parking");
 
 		if ((sim_plan_ptr->End () + sim->param.max_end_variance) < sim->time_step) {
 			step.Problem (ARRIVAL_PROBLEM);
-			step.Status (3);
-
-			if (!Travel_Update (step)) break;
+			sim->Output_Step (step);
 			continue;
 		}
 
 		//---- get the current plan leg ----
 
-		leg_itr = sim_plan_ptr->begin ();
-		if (leg_itr == sim_plan_ptr->end ()) {
-			if (!Travel_Update (step)) break;
-			continue;
+		sim_leg_ptr = sim_plan_ptr->Get_Leg ();
+
+		if (sim_leg_ptr == 0) {
+			sim->Warning ("End of Plan Problem");
+			break;
 		}
-		next_event = sim->time_step + leg_itr->Time ();
+		next_event = sim->time_step + sim_leg_ptr->Time ();
 
 		//---- check the leg type ----
 
-		if (leg_itr->Mode () == DRIVE_MODE) {
+		if (sim_leg_ptr->Mode () == DRIVE_MODE) {
 
-			if (leg_itr->Type () != DIR_ID) {
-				sim->Write (1, "drive type error=") << leg_itr->Type ();
+			if (sim_leg_ptr->Type () != DIR_ID) {
+				sim->Warning ("Drive Type Error=") << sim_leg_ptr->Type ();
+				break;
 			} else {
-				sim_dir_ptr = &sim->sim_dir_array [leg_itr->Index ()];
+				step.Dir_Index (sim_leg_ptr->Index ());
+#ifdef CHECK
+				if (sim_leg_ptr->Type () != DIR_ID) sim->Error (String ("Sim_Travel_Process::Travel_Processing: Leg Type=%d") % sim_leg_ptr->Type ());
+				if (step.Dir_Index () < 0 || (int) sim->sim_dir_array.size () <= step.Dir_Index ()) sim->Error ("Sim_Travel_Process::Travel_Processing: Dir_Index");
+#endif
+				step.sim_dir_ptr = &sim->sim_dir_array [sim_leg_ptr->Index ()];
 
-				if (sim_dir_ptr->Method () == NO_SIMULATION) {
-
+				if (step.sim_dir_ptr->Method () == NO_SIMULATION) {
+					sim_travel_ptr->Status (OFF_NET_DRIVE);
 				} else {
-					sim->Write (1, "start drive simulation");
+
+					//---- add the vehicle to the link load queue ----
+
+					sim_travel_ptr->Status (OFF_ON_DRIVE);
+
+					sim->sim_dir_array.Lock (step.sim_dir_ptr);
+					step.sim_dir_ptr->Load_Queue (sim_travel_ptr->Traveler ());
+					sim->sim_dir_array.UnLock (step.sim_dir_ptr);
+					break;
 				}
 			}
-		} else if (leg_itr->Type () == PARKING_ID || leg_itr->Type () == STOP_ID) {
-			next_leg = leg_itr + 1;
+		} else if (sim_leg_ptr->Type () == PARKING_ID || sim_leg_ptr->Type () == STOP_ID) {
+			next_leg_ptr = sim_plan_ptr->Get_Next (sim_leg_ptr);
 
 			//---- check for a network link ----
 
-			if (next_leg != sim_plan_ptr->end () && next_leg->Mode () == DRIVE_MODE && next_leg->Type () == DIR_ID) {
+			if (next_leg_ptr != 0 && next_leg_ptr->Mode () == DRIVE_MODE && next_leg_ptr->Type () == DIR_ID) {
 
 				//---- find the vehicle ----
 
@@ -182,9 +186,7 @@ exe->Write (1, " parking");
 
 				if (veh_map_itr == sim->sim_veh_map.end ()) {
 					step.Problem (VEHICLE_PROBLEM);
-					step.Status (3);
-
-					if (!Travel_Update (step)) break;
+					sim->Output_Step (step);
 					continue;
 				}
 
@@ -199,88 +201,68 @@ exe->Write (1, " parking");
 				sim_travel_ptr->Vehicle (veh_map_itr->second);
 
 				//---- check the simulation method ----
+						
+				step.Dir_Index (next_leg_ptr->Index ());
+#ifdef CHECK
+				if (next_leg_ptr->Type () != DIR_ID) sim->Error (String ("Sim_Travel_Process::Travel_Processing: Next Type=%d") % next_leg_ptr->Type ());
+				if (step.Dir_Index () < 0 || (int) sim->sim_dir_array.size () <= step.Dir_Index ()) sim->Error ("Sim_Travel_Process::Travel_Processing: Dir_Index");
+#endif
+				step.sim_dir_ptr = &sim->sim_dir_array [next_leg_ptr->Index ()];
 
-				sim_dir_ptr = &sim->sim_dir_array [next_leg->Index ()];
-
-				if (sim_dir_ptr->Method () == NO_SIMULATION) {
-
-					sim_travel_ptr->Status (-2);
-
+				if (step.sim_dir_ptr->Method () == NO_SIMULATION) {
 					if (sim_travel_ptr->Person () == 0) {
-						stats.num_run_start++;
+						if (sim_travel_ptr->Status () == OFF_NET_START)	stats.num_run_start++;
 					} else {
 						stats.num_veh_start++;
+						sim->sim_output_step.Event_Check (VEH_START_EVENT, step);
+					}
+					sim_travel_ptr->Status (OFF_NET_LOAD);
 
-						//---- output event record ----
+				} else if (sim_leg_ptr->Type () == STOP_ID) {
 
-						//if (sim->event_output.In_Range (VEH_START_EVENT, sim_plan_ptr->Mode (), subarea)) {
-						//	Event_Data event_data;
+					//---- add the firt stop to the link load queue ----
 
-						//	event_data.Household (sim_travel_ptr->Household ());
-						//	event_data.Person (sim_travel_ptr->Person ());
-						//	event_data.Tour (sim_plan_ptr->Tour ());
-						//	event_data.Trip (sim_plan_ptr->Trip ());
-						//	event_data.Mode (sim_plan_ptr->Mode ());
-						//	event_data.Schedule (sim_travel_ptr->Next_Event ().Round_Seconds ());
-						//	event_data.Actual (sim->time_step);
-						//	event_data.Event (VEH_START_EVENT);
-						//	event_data.Dir_Index (next_leg->Index ());
-						//	//event_data.Offset (offset);
-						//	//event_data.Lane (lane);
-						//	event_data.Offset (0);
-						//	event_data.Lane (0);
-						//	event_data.Route (-1);
+					if (sim_travel_ptr->Status () == OFF_NET_START) {
+						sim_travel_ptr->Status (OFF_ON_LOAD);
 
-						//	sim->event_output.Output_Event (event_data);
-						//}
+						sim->sim_dir_array.Lock (step.sim_dir_ptr);
+						step.sim_dir_ptr->Load_Queue (sim_travel_ptr->Traveler ());
+						sim->sim_dir_array.UnLock (step.sim_dir_ptr);
+						break;
 					}
 
 				} else {
 
 					//---- add the vehicle to the link load queue ----
 
-					sim_dir_ptr->Load_Queue (sim_travel_ptr->Traveler ());
+					sim_travel_ptr->Status (OFF_ON_LOAD);
 
-					sim_travel_ptr->Status (2);
+					sim->sim_dir_array.Lock (step.sim_dir_ptr);
+					step.sim_dir_ptr->Load_Queue (sim_travel_ptr->Traveler ());
+					sim->sim_dir_array.UnLock (step.sim_dir_ptr);
 					break;
 				}
-			//} else if (leg_itr->Type () == PARKING_ID) {  ???? STOP_ID
 
 			} else {
 
 				//---- park the vehicle ----
 
-				sim_travel_ptr->Status (-1);
-
-				if (sim_travel_ptr->Person () == 0) {
-					stats.num_run_end++;
-				} else {
+				if (sim_travel_ptr->Person () > 0) {
 					stats.num_veh_end++;
+					sim_travel_ptr->Status (OFF_NET_MOVE);
 
-					stats.tot_hours += sim->time_step - sim_plan_ptr->Start ();
+					//---- output vehicle end event ----
 
-					//---- output event record ----
-
-					//if (sim->event_output.In_Range (VEH_END_EVENT, sim_plan_ptr->Mode (), subarea)) {
-					//	Event_Data event_data;
-
-					//	event_data.Household (sim_travel_ptr->Household ());
-					//	event_data.Person (sim_travel_ptr->Person ());
-					//	event_data.Tour (sim_plan_ptr->Tour ());
-					//	event_data.Trip (sim_plan_ptr->Trip ());
-					//	event_data.Mode (sim_plan_ptr->Mode ());
-					//	event_data.Schedule (sim_travel_ptr->Schedule ());
-					//	event_data.Actual (sim->time_step);
-					//	event_data.Event (VEH_END_EVENT);
-
-					//	sim->event_output.Output_Event (event_data);
-					//}
+					sim->sim_output_step.Event_Check (VEH_END_EVENT, step);
+					sim_plan_ptr->Next_Leg ();
+				} else {
+					sim_travel_ptr->Next_Plan ();
+					stats.num_run_end++;
+					sim_travel_ptr->Status (NOT_ACTIVE);
 				}
 			}
 		}
 		sim_travel_ptr->Next_Event (next_event);
 
-	} while (sim_travel_ptr->sim_plan_ptr && sim_travel_ptr->Next_Event () <= sim->time_step && sim_travel_ptr->Status () <= 0);
-
-	return (true);
+	} while (sim_travel_ptr->Plan_Index () >= 0 && sim_travel_ptr->Next_Event () <= sim->time_step && sim_travel_ptr->Status () <= OFF_NET_END);
 }

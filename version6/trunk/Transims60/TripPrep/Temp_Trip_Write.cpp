@@ -58,7 +58,7 @@ void TripPrep::Trip_Processing::Temp_Trip_Write (int part)
 		index_ptr = trip_rec_set [num];
 
 		if (stat) {
-			trip_ptr->Get_Trip_Index (*index_ptr);
+			trip_ptr->Get_Index (*index_ptr);
 		} else {
 			index_ptr->Set (MAX_INTEGER);
 		}
@@ -129,7 +129,7 @@ void TripPrep::Trip_Processing::Temp_Trip_Write (int part)
 			index_ptr = trip_rec_set [num];
 
 			if (stat) {
-				trip_ptr->Get_Trip_Index (*index_ptr);
+				trip_ptr->Get_Index (*index_ptr);
 			} else {
 				index_ptr->Set (MAX_INTEGER);
 			}
@@ -165,7 +165,7 @@ void TripPrep::Trip_Processing::Temp_Trip_Write (int part)
 					}
 				}
 				if (merge_file->Read_Trip (*merge_ptr)) {
-					 merge_ptr->Get_Trip_Index (trip_index);
+					 merge_ptr->Get_Index (trip_index);
 
 					if (trip_index < last_trip) {
 						MAIN_LOCK

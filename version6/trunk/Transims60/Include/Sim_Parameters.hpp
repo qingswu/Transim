@@ -17,8 +17,6 @@ public:
 	void Clear_Parameters (void);
 	//void Set_Parameters (Sim_Parameters &p);
 
-	Integer_List subarea_method;                   //---- macro, meso, micro method ----
-
 	Dtime  start_time_step;                        //---- simulation start time step ----
 	Dtime  end_time_step;                          //---- simulation end time step ----
 	Dtime  step_size;
@@ -43,10 +41,6 @@ public:
 	int    change_priority;
 	int    connect_lane_weight;
 	int    lane_use_weight;
-
-	double turn_factor;
-	double merge_factor;
-	double other_factor;
 
 	double reaction_time [EXTERNAL+1];
 	double permission_prob [EXTERNAL+1];

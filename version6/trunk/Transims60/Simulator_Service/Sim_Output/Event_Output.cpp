@@ -6,7 +6,7 @@
 #include "Simulator_Service.hpp"
 
 //---------------------------------------------------------
-//	Event_Output constructor / destructor
+//	Event_Output constructor
 //---------------------------------------------------------
 
 Event_Output::Event_Output (int num) : Sim_Output_Data ()
@@ -64,11 +64,11 @@ Event_Output::Event_Output (int num) : Sim_Output_Data ()
 
 	//---- event range ----
 
-	sim->Event_Range_Key (Sim_Output_Step::NEW_EVENT_TYPE_RANGE, type, num);
+	sim->Event_Range_Key (Sim_Output_Step::NEW_EVENT_TYPE_RANGE, type_flag, num);
 
 	//---- mode range ----
 
-	sim->Mode_Range_Key (Sim_Output_Step::NEW_EVENT_MODE_RANGE, mode, num);
+	sim->Mode_Range_Key (Sim_Output_Step::NEW_EVENT_MODE_RANGE, mode_flag, num);
 
 	//---- get the link range ----
 
@@ -126,59 +126,65 @@ coord_error:
 }
 
 //---------------------------------------------------------
-//	In_Range
+//	Event_Output destructor
 //---------------------------------------------------------
 
-bool Event_Output::In_Range (Event_Type t, int m, int subarea)
+Event_Output::~Event_Output ()
 {
-	if (t < MAX_EVENT && type [t]) {
-		if (m < MAX_MODE && mode [m]) {
-			if (time_range.In_Range (sim->time_step)) {
-				if (subarea_range.empty () || subarea_range.In_Range (subarea)) {
-					return (true);
-				}
+	if (file != 0) {
+		file->Close ();
+	}
+}
+
+//---------------------------------------------------------
+//	Event_Check
+//---------------------------------------------------------
+
+void Event_Output::Event_Check (Event_Type type, Travel_Step &step)
+{
+	if (type >= MAX_EVENT || !type_flag [type]) return;
+	if (!time_range.In_Range (sim->time_step)) return;
+
+	if (step.sim_plan_ptr == 0) {
+		step.sim_plan_ptr = step.sim_travel_ptr->Get_Plan ();
+		if (step.sim_plan_ptr == 0) return;
+	}
+	int mode = step.sim_plan_ptr->Mode ();
+	if (mode >= MAX_MODE || !mode_flag [mode]) return;
+
+	if (step.sim_dir_ptr != 0) {
+		int subarea = step.sim_dir_ptr->Subarea ();
+		if (!subarea_range.empty () && !subarea_range.In_Range (subarea)) return;
+	}
+	Event_Data data;
+
+	data.Household (step.sim_travel_ptr->Household ());
+	data.Person (step.sim_travel_ptr->Person ());
+	data.Tour (step.sim_plan_ptr->Tour ());
+	data.Trip (step.sim_plan_ptr->Trip ());
+	data.Mode (mode);
+	if (type == TRIP_START_EVENT) {
+		data.Schedule (step.sim_plan_ptr->Start ());
+	} else if (type == TRIP_END_EVENT) {
+		data.Schedule (step.sim_plan_ptr->End ());
+	} else if (type == VEH_START_EVENT) {
+		data.Schedule (step.sim_travel_ptr->Next_Event ().Round_Seconds ());
+	} else {
+		data.Schedule (step.sim_plan_ptr->Schedule ());
+
+		if (step.sim_dir_ptr != 0) {
+			data.Dir_Index (step.Dir_Index ());
+
+			if (step.sim_veh_ptr != 0) {
+				data.Dir_Index (step.sim_veh_ptr->link);
+				data.Lane (step.sim_veh_ptr->lane);
+				data.Offset (step.sim_veh_ptr->offset);
 			}
 		}
 	}
-	return (false);
-}
+	data.Actual (sim->time_step);
+	data.Event (type);
 
-//---------------------------------------------------------
-//	Output_Event
-//---------------------------------------------------------
-
-void Event_Output::Output_Event (Event_Data &event_data)
-{
-
-#ifdef MPI_EXE
-	if (sim->Num_Threads () > 1) {
-		mutex_lock lock (data_mutex);
-		data.Add_Data (&event_data, sizeof (event_data));
-	} else {
-		data.Add_Data (&event_data, sizeof (event_data));
-	}
-#else 
-	if (sim->Num_Threads () > 1) {
- #ifdef THREADS
-		event_queue->Put (event_data);
- #endif
-	} else {
-		Write_Event (event_data);
-	}
-#endif
-}
-
-//---------------------------------------------------------
-//	Write_Event
-//---------------------------------------------------------
-
-void Event_Output::Write_Event (Event_Data &data)
-{
-	Int_Itr veh_itr;
-	
-	if (data.Event () >= MAX_EVENT || !type [data.Event ()]) return;
-	if (data.Mode () >= MAX_MODE || !mode [data.Mode ()]) return;
-	if (!time_range.In_Range (data.Actual ())) return;
 	if (abs ((int) (data.Actual () - data.Schedule ())) < filter) return;
 
 	if (data.Dir_Index () >= 0) {
@@ -187,11 +193,6 @@ void Event_Output::Write_Event (Event_Data &data)
 
 		if (!link_range.empty () && !link_range.In_Range (link_ptr->Link ())) return;
 
-		if (!subarea_range.empty ()) {
-			Sim_Dir_Ptr sim_dir_ptr = &sim->sim_dir_array [data.Dir_Index ()];
-
-			if (!subarea_range.In_Range (sim_dir_ptr->Subarea ())) return;
-		}
 		if (coord_flag) {
 			int ax, ay, bx, by;
 			Node_Data *node_ptr;
@@ -223,66 +224,7 @@ void Event_Output::Write_Event (Event_Data &data)
 			}
 		}
 	}
+	file->Lock ();
 	sim->Put_Event_Data (*file, data);
+	file->UnLock ();
 }
-
-//---------------------------------------------------------
-//	End_Output
-//---------------------------------------------------------
-
-void Event_Output::End_Output (void)
-{
-#ifdef MPI_EXE
-#else
- #ifdef THREADS
-	if (sim->Num_Threads () > 1) {
-		event_queue->End_Queue ();
-		event_queue->Exit_Queue ();
-	}
- #endif
-#endif
-}
-
-////---------------------------------------------------------
-////	Event_Output constructor / destructor
-////---------------------------------------------------------
-//
-//Event_Output::Event_Output (int num) : Output_Data ()
-//{
-//	output_flag = false;
-//#ifdef THREADS
-//	event_queue = 0;
-//#endif
-//}
-//
-//Event_Output::~Event_Output ()
-//{
-//#ifdef THREADS
-//	if (event_queue != 0) {
-//		delete event_queue;
-//	}
-//#endif
-//}
-//
-////---------------------------------------------------------
-////	Event_Output operator
-////---------------------------------------------------------
-//
-//void Event_Output::operator()()
-//{
-//#ifdef MPI_EXE
-//	while (sim->output_barrier.Go ()) {
-//		MPI_Processing ();
-//		sim->output_barrier.Finish ();
-//	}
-//#else
-// #ifdef THREADS
-//	Event_Data data;
-//	event_queue = new Event_Queue ();
-//
-//	while (event_queue->Get (data)) {
-//		Write_Event (data);
-//	}
-// #endif
-//#endif
-//}

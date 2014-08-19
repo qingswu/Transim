@@ -11,14 +11,14 @@
 CountSum::CountSum (void) : Data_Service ()
 {
 	Program ("CountSum");
-	Version (6);
+	Version (7);
 	Title ("Traffic Count Processing");
 
 	System_File_Type required_files [] = {
 		NODE, LINK, END_FILE
 	};
 	System_File_Type optional_files [] = {
-		SHAPE, NEW_LINK_DELAY, END_FILE
+		SHAPE, NEW_PERFORMANCE, END_FILE
 	};
 	int file_service_keys [] = {
 		NOTES_AND_NAME_FIELDS, 0

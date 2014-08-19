@@ -26,32 +26,35 @@ void NewFormat::Read_Vehicles (void)
 		if (hhold <= 0) continue;
 
 		vehicle = vehicle_file.Vehicle ();
-
-		if (vehicle_file.Version () <= 40) {
-			vehicle = Fix_Vehicle_ID (vehicle);
-		}
 		type = vehicle_file.Type ();
 
-		if (vehicle_file.SubType_Flag () && vehicle_file.Version () <= 40) {
+		if (vehicle_file.Version () <= 40) {
 			type = VehType40_Map (type, vehicle_file.SubType ());
-		}
-		if (type > 0) {
-			map_itr = veh_type_map.find (type);
-			if (map_itr == veh_type_map.end ()) {
-				if (System_Data_Flag (VEHICLE_TYPE)) {
-					Warning (String ("Household %d Vehicle %d Type %d was Not Found") % hhold % vehicle % type);
-					type = 0;
-				}
-			} else {
-				type = map_itr->second;
+
+			Veh_ID_Map_Itr itr = vehicle40_map.find (vehicle);
+			if (itr != vehicle40_map.end ()) {
+				Warning ("Duplicate Vehicle ID ") << vehicle;
+				continue;
 			}
+			int veh = 1;
+			veh_index.Household (hhold);
+			veh_index.Vehicle (veh);
+
+			Vehicle_Map_Itr map_itr;
+
+			for (map_itr = vehicle_type.find (veh_index); map_itr != vehicle_type.end (); map_itr++) {
+				veh_index = map_itr->first;
+				if (veh_index.Household () != hhold) break;
+				veh = veh_index.Vehicle () + 1;
+			}
+			veh_index.Household (hhold);
+			veh_index.Vehicle (veh);
+
+			vehicle40_map.insert (Veh_ID_Map_Data (vehicle, veh_index));
 		} else {
-			type = 0;
+			veh_index.Household (hhold);
+			veh_index.Vehicle (vehicle);
 		}
-
-		veh_index.Household (hhold);
-		veh_index.Vehicle (vehicle);
-
 		vehicle_type.insert (Vehicle_Map_Data (veh_index, type));
 	}
 	End_Progress ();

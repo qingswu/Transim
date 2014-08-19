@@ -6,6 +6,7 @@
 #define SIM_TRANSIT_UPDATE_HPP
 
 #include "Sim_Update_Data.hpp"
+#include "Dtime.hpp"
 
 //---------------------------------------------------------
 //	Sim_Transit_Update Class definition

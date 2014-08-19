@@ -46,7 +46,7 @@ void SubareaNet::Write_Boundary (void)
 		for (line_itr = line_array.begin (); line_itr != line_array.end (); line_itr++) {
 			for (itr = line_itr->driver_array.begin (); itr != line_itr->driver_array.end (); itr++) {
 				dir_ptr = &dir_array [*itr];
-				dir_ptr->Flow_Index (0);
+				dir_ptr->Use_Index (0);
 			}
 		}
 	} else {
@@ -255,7 +255,7 @@ void SubareaNet::Write_Boundary (void)
 
 			//---- add the transit external ----
 
-			if (transit_flag && dir_ptr->Flow_Index () == 0) {
+			if (transit_flag && dir_ptr->Use_Index () == 0) {
 
 				//---- add transit stop ----
 
@@ -297,7 +297,7 @@ void SubareaNet::Write_Boundary (void)
 				stop_map.insert (Int_Map_Data (max_stop, index));
 				stop_array.push_back (stop_rec);
 
-				dir_ptr->Flow_Index (index);
+				dir_ptr->Use_Index (index);
 
 				//---- add access link ----
 

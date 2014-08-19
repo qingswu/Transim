@@ -149,7 +149,29 @@ void Line_Array::Sum_Ridership (Plan_Data &plan)
 //	Clear_Ridership
 //---------------------------------------------------------
 
-double Line_Array::Clear_Ridership (bool cap_flag, double factor)
+void Line_Array::Clear_Ridership (void)
+{
+	Line_Itr line_itr;
+	Line_Stop_Itr stop_itr;
+	Line_Run_Itr run_itr, run2_itr;
+
+	for (line_itr = begin (); line_itr != end (); line_itr++) {
+		for (stop_itr = line_itr->begin (); stop_itr != line_itr->end (); stop_itr++) {
+			for (run_itr = stop_itr->begin (); run_itr != stop_itr->end (); run_itr++) {
+				run_itr->Board (0);
+				run_itr->Alight (0);
+				run_itr->Load (0);
+				run_itr->Factor (0);
+			}
+		}
+	}
+}
+
+//---------------------------------------------------------
+//	Ridership_Gap
+//---------------------------------------------------------
+
+double Line_Array::Ridership_Gap (bool cap_flag, double factor)
 {
 	int r, capacity, cap, max_load, max, penalty;
 	Dtime wait;

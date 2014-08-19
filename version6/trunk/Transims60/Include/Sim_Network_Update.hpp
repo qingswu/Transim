@@ -6,6 +6,7 @@
 #define SIM_NETWORK_UPDATE_HPP
 
 #include "Sim_Update_Data.hpp"
+#include "Dtime.hpp"
 
 //---------------------------------------------------------
 //	Sim_Network_Update Class definition

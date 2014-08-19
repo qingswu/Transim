@@ -60,7 +60,7 @@ bool Trip_File::Read_Trip (Trip_Data &trip_rec)
 
 	Get_Data (trip_rec);
 
-	if (trip_rec.Household () <= 0) return (true);
+	if (trip_rec.Household () < 1) return (true);
 
 	Add_Trip (trip_rec.Household (), trip_rec.Person (), trip_rec.Tour ());
 
@@ -89,9 +89,13 @@ bool Trip_File::Write_Trip (Trip_Data &trip_rec)
 
 void Trip_File::Get_Data (Trip_Data &trip_rec)
 {
+	if (Version () < 60) {
+		exe->Error (String ("Version %.1lf %s files should be converted to Version 6.0 using NewFormat") % (Version () / 10.0) % File_ID ());
+	}
 	trip_rec.Household (Household ());
 	trip_rec.Person (Person ());
 	trip_rec.Tour (Tour ());
+	if (trip_rec.Tour () < 1) trip_rec.Tour (1);
 	trip_rec.Trip (Trip ());
 
 	trip_rec.Start (Start ());
@@ -102,12 +106,13 @@ void Trip_File::Get_Data (Trip_Data &trip_rec)
 	trip_rec.Destination (Destination ());
 
 	trip_rec.Purpose (Purpose ());
-	trip_rec.Mode (Mode ());
 	trip_rec.Constraint (Constraint ());
 	trip_rec.Priority (Priority ());
 
+	trip_rec.Mode (Mode ());
 	trip_rec.Vehicle (Vehicle ());
 	trip_rec.Veh_Type (Veh_Type ());
+
 	trip_rec.Type (Type ());
 	trip_rec.Partition (Partition ());
 }
@@ -135,8 +140,13 @@ void Trip_File::Put_Data (Trip_Data &trip_rec)
 	Constraint (trip_rec.Constraint ());
 	Priority (trip_rec.Priority ());
 
-	Vehicle (trip_rec.Vehicle ());
-	Veh_Type (trip_rec.Veh_Type ());
+	if (trip_rec.Vehicle () < 0 || trip_rec.Veh_Type () < 0) {
+		Vehicle (0);
+		Veh_Type (0);
+	} else {
+		Vehicle (trip_rec.Vehicle ());
+		Veh_Type (trip_rec.Veh_Type ());
+	}
 	Type (trip_rec.Type ());
 	Partition (trip_rec.Partition ());
 }

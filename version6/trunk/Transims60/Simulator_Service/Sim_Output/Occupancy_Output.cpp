@@ -123,14 +123,25 @@ coord_error:
 }
 
 //---------------------------------------------------------
-//	Output_Check
+//	Occupancy_Output destructor
 //---------------------------------------------------------
 
-bool Occupancy_Output::Output_Check (void)
+Occupancy_Output::~Occupancy_Output ()
 {
-	if (sim->time_step <= sim->Model_Start_Time ()) return (false);
+	if (file != 0) {
+		file->Close ();
+	}
+}
 
-	if (!time_range.In_Range (sim->time_step)) return (false);
+//---------------------------------------------------------
+//	Write_Check
+//---------------------------------------------------------
+
+void Occupancy_Output::Write_Check (void)
+{
+	if (sim->time_step <= sim->Model_Start_Time ()) return;
+
+	if (!time_range.In_Range (sim->time_step)) return;
 
 	if (!data_flag) {
 
@@ -236,14 +247,13 @@ bool Occupancy_Output::Output_Check (void)
 			}
 		}
 	}
-	return (true);
 }
 
 //---------------------------------------------------------
-//	Summarize
+//	Output_Check
 //---------------------------------------------------------
 
-void Occupancy_Output::Summarize (Travel_Step &step)
+void Occupancy_Output::Output_Check (Travel_Step &step)
 {
 	if (!total_flag || step.Traveler () < 0) return;
 	

@@ -18,6 +18,7 @@ void PathSkim::User_Locations (void)
 	Str_Itr range_itr;
 	Ints_Map_Stat zone_loc_stat;
 	Integers locations, *loc_ptr;
+	Int_Map_Itr loc_itr;
 
 	Show_Message (2, "Reading User Location Files -- Record");
 	Set_Progress ();
@@ -69,12 +70,18 @@ void PathSkim::User_Locations (void)
 			}
 			for (num = n1; num <= n2; num++) {
 				if (num_org > 0 && count > num_org) break;
+
+				loc_itr = location_map.find (num);
+				if (loc_itr == location_map.end ()) {
+					Warning (String ("Origin Location %d was Not Found") % num);
+					continue;
+				}
 				count++;
 
 				if (zone_skim_flag || district_flag) {
-					loc_ptr->push_back (num);
+					loc_ptr->push_back (loc_itr->second);
 				} else {
-					org_loc.push_back (num);
+					org_loc.push_back (loc_itr->second);
 					if (skim_flag) skim_file->Add_Org (num);
 				}
 			}
@@ -127,6 +134,12 @@ void PathSkim::User_Locations (void)
 			}
 			for (num = n1; num <= n2; num++) {
 				if (num_org > 0 && count > num_org) break;
+
+				loc_itr = location_map.find (num);
+				if (loc_itr == location_map.end ()) {
+					Warning (String ("Destinationn Location %d was Not Found") % num);
+					continue;
+				}
 				count++;
 
 				if ((zone_skim_flag || district_flag) && loc_ptr) {

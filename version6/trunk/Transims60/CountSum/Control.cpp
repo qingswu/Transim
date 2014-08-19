@@ -563,13 +563,13 @@ void CountSum::Program_Control (void)
 	Print (1);
 	day_flag = Get_Control_Flag (OUTPUT_DAY_DATA);
 
-	if (day_flag && System_File_Flag (NEW_LINK_DELAY)) {
-		Link_Delay_File *file = (Link_Delay_File *) System_File_Handle (NEW_LINK_DELAY);
+	if (day_flag && System_File_Flag (NEW_PERFORMANCE)) {
+		Performance_File *file = (Performance_File *) System_File_Handle (NEW_PERFORMANCE);
 
-		link_delay_name = file->Filename ();
-		link_delay_name.Split_Last (link_delay_ext, ".");
+		perf_name = file->Filename ();
+		perf_name.Split_Last (perf_ext, ".");
 
-		Print (2, String ("Link Delay Files by Day = %s_day.%s") % link_delay_name % link_delay_ext);
+		Print (2, String ("Performance Files by Day = %s_day.%s") % perf_name % perf_ext);
 	}
 
 	//---- output min-max data ----
@@ -577,17 +577,17 @@ void CountSum::Program_Control (void)
 	Print (1);
 	min_max_flag = Get_Control_Flag (OUTPUT_MIN_MAX_DATA);
 
-	if (min_max_flag && System_File_Flag (NEW_LINK_DELAY)) {
-		Link_Delay_File *file = (Link_Delay_File *) System_File_Handle (NEW_LINK_DELAY);
+	if (min_max_flag && System_File_Flag (NEW_PERFORMANCE)) {
+		Performance_File *file = (Performance_File *) System_File_Handle (NEW_PERFORMANCE);
 
-		link_delay_name = file->Filename ();
-		link_delay_name.Split_Last (link_delay_ext, ".");
+		perf_name = file->Filename ();
+		perf_name.Split_Last (perf_ext, ".");
 
-		Print (2, String ("Minimum Link Delay File = %s_MIN.%s") % link_delay_name % link_delay_ext);
-		Print (1, String ("Maximum Link Delay File = %s_MAX.%s") % link_delay_name % link_delay_ext);
+		Print (2, String ("Minimum Performance File = %s_MIN.%s") % perf_name % perf_ext);
+		Print (1, String ("Maximum Performance File = %s_MAX.%s") % perf_name % perf_ext);
 	}
 
-	//---- new link data file ----
+	//---- new performance file ----
 
 	key = Get_Control_String (NEW_LINK_DATA_FILE);
 
@@ -621,8 +621,8 @@ void CountSum::Program_Control (void)
 			Print (2, String ("Minimum Link Data File = %s_MIN.%s") % link_data_name % link_data_ext);
 			Print (1, String ("Maximum Link Data File = %s_MAX.%s") % link_data_name % link_data_ext);
 		}
-	} else if (!System_File_Flag (NEW_LINK_DELAY)) {
-		Error ("A New Link Delay or Link Data File is Requried");
+	} else if (!System_File_Flag (NEW_PERFORMANCE)) {
+		Error ("A New Performance or Link Data File is Requried");
 	}
 
 	//---- new signal node file ----

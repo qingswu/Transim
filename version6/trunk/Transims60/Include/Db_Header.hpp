@@ -74,7 +74,7 @@ public:
 	bool Code_Flag (void)                       { return (Dbase_Format () == BINARY || Dbase_Format () == SQLITE3); }
 	bool Update_Def_Header (void)               { return (Write_Def_Header (Header_Record ())); }
 
-	static Format_Type Def_Format (string filename);
+	static string Def_Format (string filename);
 
 	int  LinkDir_Type_Field (void);	
 

@@ -17,8 +17,7 @@ class SYSLIB_API Ridership_Output : public Sim_Output_Data
 {
 public:
 	Ridership_Output (int num);
-
-	bool Output_Check (void);
+	~Ridership_Output (void);
 
 	void Output (void);
 

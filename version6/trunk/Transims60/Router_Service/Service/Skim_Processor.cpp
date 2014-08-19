@@ -76,22 +76,9 @@ void Skim_Processor::Start_Processing (void)
 		//---- create the path threads ----
 
 		for (int i=0; i < num_builders; i++) {
-			threads.push_back (thread (*(path_builder [i])));
+			threads.push_back (thread (ref (*(path_builder [i]))));
 		}
 		threads.push_back (thread (save_results));
-	}
-#endif
-}
-
-//---------------------------------------------------------
-//	Skim_Processor -- Start_Work
-//---------------------------------------------------------
-
-void Skim_Processor::Start_Work (void)
-{
-#ifdef THREADS
-	if (num_threads > 1) {
-		skim_queue->Start_Work ();
 	}
 #endif
 }
@@ -112,19 +99,6 @@ void Skim_Processor::Skim_Build (One_To_Many *ptr)
 #else
 	path_builder.Skim_Build (ptr);
 	exe->Save_Skims (ptr);
-#endif
-}
-
-//---------------------------------------------------------
-//	Skim_Processor -- Complete_Work
-//---------------------------------------------------------
-
-void Skim_Processor::Complete_Work (void)
-{
-#ifdef THREADS
-	if (num_threads > 1) {
-		skim_queue->Complete_Work ();
-	}
 #endif
 }
 
@@ -171,7 +145,7 @@ void Skim_Processor::Save_Results::operator()()
 
 	while ((skim_ptr = ptr->skim_queue->Get_Result ()) != 0) {
 		ptr->exe->Save_Skims (skim_ptr);
-		ptr->skim_queue->Result_Done ();
+		ptr->skim_queue->Finished ();
 	}
 }
 #endif

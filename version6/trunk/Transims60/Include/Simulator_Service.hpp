@@ -8,9 +8,8 @@
 //#include "Router_Service.hpp"
 #include "Data_Service.hpp"
 #include "Select_Service.hpp"
-#include "Barrier.hpp"
-#include "Work_Step.hpp"
 #include "TypeDefs.hpp"
+#include "Dtime.hpp"
 
 #include "Sim_Parameters.hpp"
 #include "Sim_Statistics.hpp"
@@ -27,14 +26,13 @@
 #include "Sim_Update_Step.hpp"
 #include "Sim_Plan_Step.hpp"
 #include "Sim_Travel_Step.hpp"
-#include "Sim_Node_Step.hpp"
+#include "Sim_Link_Step.hpp"
 #include "Sim_Output_Step.hpp"
 
 #include "Problem_Output.hpp"
 #include "Snapshot_Output.hpp"
-#include "Link_Delay_Output.hpp"
 #include "Performance_Output.hpp"
-#include "Turn_Vol_Output.hpp"
+#include "Turn_Delay_Output.hpp"
 #include "Ridership_Output.hpp"
 #include "Occupancy_Output.hpp"
 #include "Event_Output.hpp"
@@ -57,18 +55,17 @@ class SYSLIB_API Simulator_Service : public Data_Service, public Select_Service
 	friend class Sim_Plan_Process;
 	friend class Sim_Travel_Step;
 	friend class Sim_Travel_Process;
-	friend class Sim_Node_Step;
-	friend class Sim_Node_Process;
+	friend class Sim_Link_Step;
+	friend class Sim_Link_Process;
 	friend class Sim_Output_Step;
 	friend class Sim_Output_Data;
 
 	friend class Problem_Output;
 	friend class Simulator_Output;
 	friend class Snapshot_Output;
-	friend class Link_Delay_Output;
 	friend class Performance_Output;
+	friend class Turn_Delay_Output;
 	friend class Ridership_Output;
-	friend class Turn_Vol_Output;
 	friend class Occupancy_Output;
 	friend class Event_Output;
 	friend class Traveler_Output;
@@ -77,13 +74,19 @@ class SYSLIB_API Simulator_Service : public Data_Service, public Select_Service
 	friend class Sim_Network_Update;
 	friend class Sim_Transit_Update;
 
+	friend class Sim_Plan_Data;
+	friend class Sim_Travel_Data;
+
 public:
 
 	Simulator_Service (void);
 
 protected:
 	enum Simulator_Service_Keys { 
-		SIMULATION_START_TIME = SIM_SERVICE_OFFSET, SIMULATION_END_TIME, TIME_STEPS, 
+		SIMULATION_START_TIME = SIM_SERVICE_OFFSET, SIMULATION_END_TIME, SIMULATION_TIME_BREAKS, 
+		SIMULATION_GROUP_SUBAREAS, GROUP_PERIOD_METHODS,
+		UNSIMULATED_TIME_STEPS, MACROSCOPIC_TIME_STEPS, MESOSCOPIC_TIME_STEPS, MICROSCOPIC_TIME_STEPS,
+
 		CELL_SIZE, PLAN_FOLLOWING_DISTANCE, LOOK_AHEAD_DISTANCE, LOOK_AHEAD_LANE_FACTOR, 
 		LOOK_AHEAD_TIME_FACTOR, LOOK_AHEAD_VEHICLE_FACTOR, MAXIMUM_SWAPPING_SPEED, 
 		MAXIMUM_SPEED_DIFFERENCE, ENFORCE_PARKING_LANES, 
@@ -91,16 +94,18 @@ protected:
 		MAX_COMFORTABLE_SPEED, TRAVELER_TYPE_FACTORS, PRIORITY_LOADING_TIME, MAXIMUM_LOADING_TIME, 
 		PRIORITY_WAITING_TIME, MAXIMUM_WAITING_TIME, MAX_DEPARTURE_TIME_VARIANCE, 
 		MAX_ARRIVAL_TIME_VARIANCE, RELOAD_CAPACITY_PROBLEMS, COUNT_PROBLEM_WARNINGS, 
-		PRINT_PROBLEM_MESSAGES, UNSIMULATED_SUBAREAS, MACROSCOPIC_SUBAREAS, MESOSCOPIC_SUBAREAS, 
-		MICROSCOPIC_SUBAREAS, TURN_POCKET_FACTOR, MERGE_POCKET_FACTOR, OTHER_POCKET_FACTOR,
-		NUMBER_OF_TRAVELERS,
+		PRINT_PROBLEM_MESSAGES, NUMBER_OF_TRAVELERS,
 	};
 	void Simulator_Service_Keys (int *keys = 0);
 
 	virtual void Program_Control (void);
 	virtual void Execute (void);
 
+	Sim_Statistics * Stop_Simulation (void);
+
 	void Global_Data (void);
+	Dtime Set_Sim_Period (void);
+	bool Output_Step (Travel_Step &step);
 
 	virtual bool Get_Node_Data (Node_File &file, Node_Data &data);
 
@@ -110,11 +115,8 @@ protected:
 	bool Active (void)                     { return (active); }
 	void Active (bool flag)                { active = flag; }
 
-	bool Step_Flag (void)                  { return (step_flag); }
-	void Step_Flag (Dtime step)            { step_flag = ((step % two_step) == 0); }
-
-	bool No_Sim_Flag (void)                { return (no_sim_flag); }
-	void No_Sim_Flag (bool flag)           { no_sim_flag = flag; }
+	int  Step_Code (void)                  { return (step_code); }
+	void Step_Code (Dtime step)            { step_code = (step & 0x7FFF); }
 
 	int  Num_Subareas (void)               { return (num_subareas); }
 	void Num_Subareas (int value)          { num_subareas = value; }
@@ -135,20 +137,42 @@ protected:
 	void Num_Vehicles (int value)          { num_vehicles = value; }
 	void Add_Vehicles (int value = 1)      { num_vehicles += value; }
 
-	//void Add_Statistics (Sim_Statistics &_stats);
-	//Sim_Statistics & Get_Statistics (void) { return (stats); }
-	Sim_Statistics & Get_Statistics (void);
+	int Offset_Cell (int offset)           { return ((offset > 0) ? (offset - 1) / param.cell_size : 0); }
+
+	Sim_Statistics * Get_Statistics (void);
 	Sim_Parameters param;
 
-	Dtime time_step, one_second;
+	int sim_period, max_method;
+	Time_Periods sim_periods;
+	Shts_Array period_subarea_method;
+	bool method_time_flag [MICROSCOPIC + 1];
+	Dtime method_time_step [MICROSCOPIC + 1];
+	Dtime time_step, end_period, half_second, one_second, one_minute, one_hour;
+	Dtimes period_step_size;
 
-	Data_Range no_range, macro_range, meso_range, micro_range;
+	//---- simulation groups ----
+
+	struct Simulation_Group
+	{
+		int        group;
+		Data_Range subareas;
+		Integers   methods;
+	};
+	typedef vector <Simulation_Group>    Sim_Group_Array;
+	typedef Sim_Group_Array::iterator    Sim_Group_Itr;
+
+	Sim_Group_Array sim_group_array;
 
 	Sim_Travel_Array sim_travel_array;
-	Sim_Plan_Array transit_plans;
-	Vehicle_Map  sim_veh_map;
 
+	Vehicle_Map  sim_veh_map;
 	Sim_Veh_Array sim_veh_array;
+
+	Sim_Plan_Pool transit_plans;
+	Sim_Leg_Pool  transit_legs;
+
+	Sim_Plan_Pool  sim_plan_array;
+	Leg_Pool_Array sim_leg_array;
 
 	Sim_Dir_Array  sim_dir_array;
 	Sim_Connect_Array sim_connection;
@@ -161,16 +185,10 @@ protected:
 	Sim_Update_Step sim_update_step;
 	Sim_Plan_Step sim_plan_step;
 	Sim_Travel_Step sim_travel_step;
-	Sim_Node_Step sim_node_step;
+	Sim_Link_Step sim_link_step;
 	Sim_Output_Step sim_output_step;
 
-	Barrier node_barrier;
-	Integers node_list, node_link, link_list;
-
-	Problem_Output problem_output;
-
 	Int2s_Array transfers;
-	Work_Step work_step;
 
 #ifdef MPI_EXE
 	Ints_Array   mpi_parts;
@@ -181,10 +199,10 @@ protected:
 #endif
 
 private:
-	int two_step, num_subareas, max_subarea, num_sims, num_vehicles, transit_id;
-	int first_part, last_part, num_parts, num_travelers;
+	int num_subareas, max_subarea, num_sims, num_vehicles, transit_id;
+	int first_part, last_part, num_parts, num_travelers, step_code;
 	double avg_cell_per_veh;
-	bool active, step_flag, no_sim_flag;
+	bool active;
 	Sim_Statistics stats;
 };
 

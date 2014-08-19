@@ -90,7 +90,7 @@ private:
 
 	Summary_Array summary_array;
 
-	Packed_Ints_Array diff_distrib;
+	Ints_Array diff_distrib;
 
 	Time_Periods periods;
 	Db_File distrib_file;

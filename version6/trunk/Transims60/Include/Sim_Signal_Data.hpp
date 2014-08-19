@@ -7,9 +7,6 @@
 
 #include "TypeDefs.hpp"
 
-#include <vector>
-using namespace std;
-
 //---------------------------------------------------------
 //	Ring_Data class definition
 //---------------------------------------------------------
@@ -33,7 +30,7 @@ public:
 
 	void Clear (void)
 	{
-		start = check = 0; status = 0; phase = barrier = 0; clear ();
+		start = check = 0; status = 0; phase = barrier = 0; Free ();
 	}
 private:
 	Dtime  start;
@@ -43,7 +40,7 @@ private:
 	char   barrier;
 };
 
-typedef vector <Ring_Data>    Ring_Array;
+typedef Vector <Ring_Data>    Ring_Array;
 typedef Ring_Array::iterator  Ring_Itr;
 
 //---------------------------------------------------------
@@ -58,25 +55,25 @@ public:
 	Dtime End_Time (void)           { return (end_time); }
 	Dtime Check_Time (void)         { return (check_time); }
 	int   Timing_Index (void)       { return (timing_index); }
-	int   Partition (void)          { return (part); }
+	int   Status (void)             { return (status); }
 
 	void  End_Time (Dtime value)    { end_time = value; }
 	void  Check_Time (Dtime value)  { check_time = value; }
 	void  Timing_Index (int value)  { timing_index = value; }
-	void  Partition (int value)     { part = value; }
+	void  Status (int value)        { status = value; }
 
 	void Clear (void)
 	{
-		end_time = check_time = MAX_INTEGER; timing_index = part = -1; clear ();
+		end_time = check_time = MAX_INTEGER; timing_index = -1; status = 0; Free ();
 	}
 private:
 	Dtime end_time;
 	Dtime check_time;
 	int   timing_index;
-	int   part;
+	int   status;
 };
 
-typedef vector <Sim_Signal_Data>    Sim_Signal_Array;
+typedef Vector <Sim_Signal_Data>    Sim_Signal_Array;
 typedef Sim_Signal_Array::iterator  Sim_Signal_Itr;
 
 #endif

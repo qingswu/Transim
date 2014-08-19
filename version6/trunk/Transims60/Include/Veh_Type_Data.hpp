@@ -40,6 +40,7 @@ public:
 	bool     Grade_Flag (void)         { return (grade_flag); }
 	double   Grade (int num)           { return ((num > 0 && num <= 100) ? grade [num-1] : 1.0); }
 	int      PCE (void)                { return (pce); }
+	int      Cells (void)              { return (cells); }
 
 	void     Type (int value)          { type = value; }
 	void     Length (int value)        { length = value; }
@@ -60,6 +61,7 @@ public:
 	void     Grade_Flag (bool flag)    { grade_flag = flag; }
 	void     Grade (int n, double fac) { grade [n] = (float) fac; }
 	void     PCE (int value)           { pce = value; }
+	void     Cells (int value)         { cells = value; }
 
 	void     Length (double value)     { length = exe->Round (value); }
 	void     Max_Speed (double value)  { max_speed = exe->Round (value); }
@@ -71,10 +73,11 @@ public:
 	void     Unloading (double value)  { unloading = exe->Round (value * 10.0); } 
 	void     PCE (double value)        { pce = exe->Round (value); }
 
+
 	void     Clear (void)
 	{
 		type = length = max_speed = max_accel = max_decel = capacity = max_load = occupancy = loading = unloading = method = min_dwell = max_dwell = op_cost = 0;
-		use = ANY; grade_flag = false; memset (grade, '\0', sizeof (grade)); pce = 10; Notes_Data::Clear ();
+		use = ANY; grade_flag = false; memset (grade, '\0', sizeof (grade)); pce = 10; cells = 1; Notes_Data::Clear ();
 	}
 private:
 	int      type;
@@ -95,6 +98,7 @@ private:
 	bool     grade_flag;
 	float    grade [100];
 	int      pce;
+	int      cells;
 };
 
 typedef vector <Veh_Type_Data>    Veh_Type_Array;

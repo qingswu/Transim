@@ -34,7 +34,7 @@ void TripPrep::Time_Combine (Trip_File *temp_file, int num_temp)
 		time_ptr = time_rec_set [num];
 
 		if (temp_file_set [num]->Read_Trip (*trip_ptr)) {
-			trip_ptr->Get_Time_Index (*time_ptr);
+			trip_ptr->Get_Index (*time_ptr);
 		} else {
 			time_ptr->Set (MAX_INTEGER, 0, 0);
 		}
@@ -74,7 +74,7 @@ void TripPrep::Time_Combine (Trip_File *temp_file, int num_temp)
 		time_ptr = time_rec_set [num];
 
 		if (temp_file_set [num]->Read_Trip (*trip_ptr)) {
-			trip_ptr->Get_Time_Index (*time_ptr);
+			trip_ptr->Get_Index (*time_ptr);
 		} else {
 			time_ptr->Set (MAX_INTEGER, 0, 0);
 		}

@@ -7,6 +7,7 @@
 
 #include "Sim_Update_Data.hpp"
 #include "Simulator_Service.hpp"
+#include "Dtime.hpp"
 
 //---------------------------------------------------------
 //	Sim_Control_Update Class definition

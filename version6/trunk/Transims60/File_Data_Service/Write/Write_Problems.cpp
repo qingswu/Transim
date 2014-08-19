@@ -92,5 +92,7 @@ int Data_Service::Put_Problem_Data (Problem_File &file, Problem_Data &data)
 	} else {
 		file.Notes (data.Notes ());
 	}
+	data.External_IDs ();
+
 	return (Put_Trip_Data (file, data));
 }

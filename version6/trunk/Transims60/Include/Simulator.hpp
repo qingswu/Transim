@@ -28,9 +28,7 @@ private:
 	//enum Simulator_Reports { FIRST_REPORT = 1, SECOND_REPORT };
 
 	bool io_flag;
-
-	Dtime one_second, one_minute, one_hour, max_time;
-	Dtime signal_update_time, timing_update_time, transit_update_time;
+	Dtime max_time, signal_update_time, timing_update_time, transit_update_time;
 
 	int lane_change_levels, max_vehicles;
 	

@@ -15,7 +15,7 @@ void Router::Link_Gap_Report (void)
 	int i;
 	double gap, diff, vht, std_dev, rmse, num, hour;
 
-	Gap_Itr gap_itr;
+	Gap_Sum_Itr gap_itr;
 
 	hour = Dtime (1.0, HOURS);
 
@@ -30,8 +30,8 @@ void Router::Link_Gap_Report (void)
 		if (gap_itr->count == 0) continue;
 
 		num = gap_itr->count;
-		vht = gap_itr->total;
-		diff = gap_itr->diff;
+		vht = gap_itr->current;
+		diff = gap_itr->abs_diff;
 
 		if (vht > 0.0) {
 			gap = diff / vht;
@@ -66,7 +66,7 @@ void Router::Link_Gap_Report (void)
 void Router::Link_Gap_Header (void)
 {
 	Print (1, "Link Gap Report");
-	Print (2, "          ---- ---------- Link Gap ---- ----------      %     ----------- VHT ----------");
+	Print (2, "          --------------- Link Gap ---------------      %     ------- PCE Hours -------");
 	Print (1, "Iteration        Total       Std.Dev       Maximum     RMSE     Difference         Total");
 	Print (1);
 }
@@ -75,7 +75,7 @@ void Router::Link_Gap_Header (void)
 
 	Link Gap Report
 
-              -------------- Link Gap --------------     %     ---------- VHT ----------
+              -------------- Link Gap --------------     %     ------- PCE Hours -------
 	Iteration        Total      Std.Dev      Maximum    RMSE     Difference        Total
 
 	dddddd    fffff.ffffff fffff.ffffff fffff.ffffff  fffff.f  ffffffffffff ffffffffffff

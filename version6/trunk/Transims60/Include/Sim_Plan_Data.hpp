@@ -5,18 +5,14 @@
 #ifndef SIM_PLAN_DATA_HPP
 #define SIM_PLAN_DATA_HPP
 
-#include "Data_Pack.hpp"
-#include "Trip_Data.hpp"
-
-#include <vector>
-#include <map>
-using namespace std;
+#include "Memory_Pool.hpp"
+#include "Dtime.hpp"
 
 //---------------------------------------------------------
 //	Sim_Leg_Data class definition
 //---------------------------------------------------------
 
-class Sim_Leg_Data
+class Sim_Leg_Data : public Memory_Record
 {
 public:
 	Sim_Leg_Data (void)               { Clear (); }
@@ -52,11 +48,11 @@ public:
 	void  Out_Best_Low (int value)    { out_best_low = (char) value; }
 	void  Out_Best_High (int value)   { out_best_high = (char) value; }
 	void  Connect (int value)         { connect = value; }
+	
+	void  Clear (void)                { memset (this, '\0', sizeof (*this)); Memory_Record::Clear (); }
 
-	void  Clear (void)                { memset (this, '\0', sizeof (*this)); }
-
-	bool Pack (Data_Buffer &data)     { return (data.Add_Data (this, sizeof (*this))); }
-	bool UnPack (Data_Buffer &data)   { return (data.Get_Data (this, sizeof (*this))); }
+	bool  Pack (Data_Buffer &data)    { return (data.Add_Data (this, sizeof (*this))); }
+	bool  UnPack (Data_Buffer &data)  { return (data.Get_Data (this, sizeof (*this))); }
 
 private:
 	int   index;
@@ -75,116 +71,91 @@ private:
 	int   connect;			//---- connect_array index ---- 
 };
 
-typedef Deque <Sim_Leg_Data>             Sim_Leg_Queue;
-typedef Sim_Leg_Queue::iterator          Sim_Leg_Itr;
-typedef Sim_Leg_Queue::reverse_iterator  Sim_Leg_RItr;
-typedef Sim_Leg_Data *                   Sim_Leg_Ptr;
+typedef Memory_Pool <Sim_Leg_Data> Sim_Leg_Pool;
+typedef Sim_Leg_Pool::iterator     Sim_Leg_Itr;
+typedef Sim_Leg_Data *             Sim_Leg_Ptr;
+
+typedef vector <Sim_Leg_Pool>      Leg_Pool_Array;
+typedef Leg_Pool_Array::iterator   Leg_Pool_Itr;
+typedef Sim_Leg_Pool *             Leg_Pool_Ptr;
 
 //---------------------------------------------------------
 //	Sim_Plan_Data class definition
 //---------------------------------------------------------
 
-class Sim_Plan_Data : public Sim_Leg_Queue
+class Sim_Plan_Data : public Memory_Record
 {
 public:
-	Sim_Plan_Data (void)             { Clear (); }
+	Sim_Plan_Data (void)              { Clear (); }
 
-	int   Tour (void)                { return (x.tour); }
-	int   Trip (void)                { return (x.trip); }
-	int   Type (void)                { return (x.type); }
-	Dtime Start (void)               { return (x.start); }
-	Dtime End (void)                 { return (x.end_time); }
-	Dtime Duration (void)            { return (x.duration); }
-	int   Origin (void)              { return (x.origin); }
-	int   Destination (void)         { return (x.destination); }
-	int   Purpose (void)             { return (x.purpose); }
-	int   Mode (void)                { return (x.mode); }
-	int   Constraint (void)          { return (x.constraint); }
-	int   Priority (void)            { return (x.priority); }
-	int   Vehicle (void)             { return (x.vehicle); }
-	int   Veh_Type (void)            { return (x.veh_type); }
+	int   Tour (void)                 { return (tour); }
+	int   Trip (void)                 { return (trip); }
+	int   Type (void)                 { return (type); }
+	Dtime Start (void)                { return (start); }
+	Dtime End (void)                  { return (end_time); }
+	Dtime Activity (void)             { return (activity); }
+	Dtime Schedule (void)             { return (schedule); }
+	int   Origin (void)               { return (origin); }
+	int   Destination (void)          { return (destination); }
+	int   Purpose (void)              { return (purpose); }
+	int   Mode (void)                 { return (mode); }
+	int   Constraint (void)           { return (constraint); }
+	int   Priority (void)             { return (priority); }
+	int   Vehicle (void)              { return (vehicle); }
+	int   Veh_Type (void)             { return (veh_type); }
+	int   Leg_Pool (void)             { return (leg_pool); }
+	int   First_Leg (void)            { return (first_leg); }
 
-	void  Tour (int value)           { x.tour = (char) value; }
-	void  Trip (int value)           { x.trip = (char) value; }
-	void  Type (int value)           { x.type = (short) value; }
-	void  Start (Dtime value)        { x.start = value; }
-	void  End (Dtime value)          { x.end_time = value; }
-	void  Duration (Dtime value)     { x.duration = value; }
-	void  Origin (int value)         { x.origin = value; }
-	void  Destination (int value)    { x.destination = value; }
-	void  Purpose (int value)        { x.purpose = (char) value; }
-	void  Mode (int value)           { x.mode = (char) value; }
-	void  Constraint (int value)     { x.constraint = (char) value; }
-	void  Priority (int value)       { x.priority = (char) value; }
-	void  Vehicle (int value)        { x.vehicle = (short) value; }
-	void  Veh_Type (int value)       { x.veh_type = (short) value; }
+	void  Tour (int value)            { tour = (char) value; }
+	void  Trip (int value)            { trip = (char) value; }
+	void  Type (int value)            { type = (short) value; }
+	void  Start (Dtime value)         { start = value; }
+	void  End (Dtime value)           { end_time = value; }
+	void  Activity (Dtime value)      { activity = value; }
+	void  Schedule (Dtime value)      { schedule = value; }
+	void  Origin (int value)          { origin = value; }
+	void  Destination (int value)     { destination = value; }
+	void  Purpose (int value)         { purpose = (char) value; }
+	void  Mode (int value)            { mode = (char) value; }
+	void  Constraint (int value)      { constraint = (char) value; }
+	void  Priority (int value)        { priority = (char) value; }
+	void  Vehicle (int value)         { vehicle = (char) value; }
+	void  Veh_Type (int value)        { veh_type = (char) value; }
+	void  Leg_Pool (int value)        { leg_pool = (short) value; }
+	void  First_Leg (int value)       { first_leg = value; }
 
-	bool  Active (void)              { return (!empty ()); }
-	bool  Check_Ahead (void)         { return (size () > 1); }
-	bool  Next_Leg (void)            { if (Active ()) { /*x.schedule += front ().Time ();*/ pop_front (); } return (Active ()); }
+	Sim_Leg_Ptr Get_Leg (void);
+	Sim_Leg_Ptr Get_Next (Sim_Leg_Ptr leg_ptr = 0);
+	bool  Next_Leg (void);
+	int   Add_Leg (Sim_Leg_Data &leg, int last_leg);
 
-	Sim_Plan_Data *next_plan_ptr;
+	void  Clear (void)                { memset (this, '\0', sizeof (*this)); Memory_Record::Clear (); First_Leg (-1); }
 
-	void  Clear (void)
-	{
-		memset (&x, '\0', sizeof (x)); next_plan_ptr = 0;; clear ();
-	}
-	bool Pack (Data_Buffer &data)
-	{
-		if (data.Add_Data (&x, sizeof (x))) {
-			if (Sim_Leg_Queue::Pack (data)) {
-				if (next_plan_ptr == 0) {
-					int flag = 0;
-					return (data.Add_Data (&flag, sizeof (int)));
-				} else {
-					int flag = 1;
-					if (data.Add_Data (&flag, sizeof (int))) {
-						return (data.Add_Data (next_plan_ptr, sizeof (Sim_Plan_Data)));
-					}
-				}
-			}
-		}
-		return (false);
-	}
-	bool UnPack (Data_Buffer &data)
-	{
-		if (data.Get_Data (&x, sizeof (x))) {
-			if (Sim_Leg_Queue::UnPack (data)) {
-				int flag;
-				if (data.Get_Data (&flag, sizeof (int))) {
-					if (flag == 0) {
-						next_plan_ptr = 0;
-						return (true);
-					}
-					return (data.Get_Data (next_plan_ptr, sizeof (Sim_Plan_Data)));
-				}
-			}
-		}
-		return (false);
-	}
+	bool  Pack (Data_Buffer &data)    { return (data.Add_Data (this, sizeof (*this))); }
+	bool  UnPack (Data_Buffer &data)  { return (data.Get_Data (this, sizeof (*this))); }
 
 private:
-	struct {
-		char  tour;
-		char  trip;
-		short type;
-		Dtime start;
-		Dtime end_time;
-		Dtime duration;
-		int   origin;
-		int   destination;
-		char  purpose;
-		char  mode;
-		char  constraint;
-		char  priority;
-		short vehicle;
-		short veh_type;
-	} x;
+	char  tour;
+	char  trip;
+	short type;
+	Dtime start;
+	Dtime end_time;
+	Dtime activity;
+	Dtime schedule;
+	int   origin;
+	int   destination;
+	char  purpose;
+	char  mode;
+	char  constraint;
+	char  priority;
+	char  vehicle;
+	char  veh_type;
+	short leg_pool;
+	int   first_leg;
 };
-typedef Vector <Sim_Plan_Data>    Sim_Plan_Array;
-typedef Sim_Plan_Array::iterator  Sim_Plan_Itr;
-typedef Sim_Plan_Data *           Sim_Plan_Ptr;
 
-typedef Deque <Sim_Plan_Data>     Sim_Plan_Queue;
+typedef Memory_Pool <Sim_Plan_Data> Sim_Plan_Pool;
+typedef Sim_Plan_Pool::iterator     Sim_Plan_Itr;
+typedef Sim_Plan_Data *             Sim_Plan_Ptr;
 
 #endif

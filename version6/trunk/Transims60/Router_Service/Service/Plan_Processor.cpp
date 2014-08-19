@@ -17,7 +17,7 @@ void Plan_Processor::Initialize (Router_Service *_exe)
 	plan_queue = 0;
 
 	num_builders = num_threads = exe->Sub_Threads ();
-	if (num_builders > 4) num_builders--;
+	if (!exe->Memory_Flag () && num_builders > 4) num_builders--;
 
 	path_builder = new Path_Builder * [num_builders];
 
@@ -67,7 +67,7 @@ Plan_Processor::~Plan_Processor (void)
 //	Plan_Processor -- Start_Processing
 //---------------------------------------------------------
 
-void Plan_Processor::Start_Processing (void)
+void Plan_Processor::Start_Processing (bool update_times, bool zero_flows)
 {
 #ifdef THREADS
 	if (num_threads > 1) {
@@ -77,24 +77,25 @@ void Plan_Processor::Start_Processing (void)
 
 		threads.clear ();
 		for (int i=0; i < num_builders; i++) {
-			threads.push_back (thread (*(path_builder [i])));
+			Path_Builder *ptr = path_builder [i];
+
+			ptr->Update_Times (update_times);
+			ptr->Zero_Flows (zero_flows);
+			ptr->Reset_Skim_Gap ();
+
+			threads.push_back (thread (ref (*ptr)));
 		}
 		threads.push_back (thread (save_results));
+	} else {
+		if (zero_flows) (*path_builder)->Zero_Flows ();
+		(*path_builder)->Reset_Skim_Gap ();
 	}
+#else
+	update_times = false;
+	if (zero_flows) path_builder.Zero_Flows ();
+	path_builder.Reset_Skim_Gap ();
 #endif
-}
-
-//---------------------------------------------------------
-//	Plan_Processor -- Start_Work
-//---------------------------------------------------------
-
-void Plan_Processor::Start_Work (void)
-{
-#ifdef THREADS
-	if (num_threads > 1) {
-		plan_queue->Start_Work ();
-	}
-#endif
+	exe->Reset_Skim_Gap ();
 }
 
 //---------------------------------------------------------
@@ -117,30 +118,28 @@ void Plan_Processor::Plan_Build (Plan_Ptr_Array *array_ptr)
 }
 
 //---------------------------------------------------------
-//	Plan_Processor -- Complete_Work
-//---------------------------------------------------------
-
-void Plan_Processor::Complete_Work (void)
-{
-#ifdef THREADS
-	if (num_threads > 1) {
-		plan_queue->Complete_Work ();
-	}
-#endif
-}
-
-//---------------------------------------------------------
 //	Plan_Processor -- Stop_Processing
 //---------------------------------------------------------
 
-void Plan_Processor::Stop_Processing (void)
+void Plan_Processor::Stop_Processing (bool save_flows)
 {
 #ifdef THREADS
 	if (num_threads > 1) {
 		plan_queue->End_of_Work ();
 		threads.Join_All ();
+
+		if (save_flows) {
+			for (int i=0; i < num_builders; i++) {
+				path_builder [i]->Save_Flows ();
+			}
+		}
+	} else {
+		(*path_builder)->Save_Skim_Gap ();
 	}
+#else
+	path_builder.Save_Skim_Gap ();
 #endif
+	save_flows = false;
 }
 
 //---------------------------------------------------------
@@ -172,7 +171,7 @@ void Plan_Processor::Save_Results::operator()()
 
 	while ((array_ptr = ptr->plan_queue->Get_Result ()) != 0) {
 		ptr->exe->Save_Plans (array_ptr);
-		ptr->plan_queue->Result_Done ();
+		ptr->plan_queue->Finished ();
 	}
 }
 #endif

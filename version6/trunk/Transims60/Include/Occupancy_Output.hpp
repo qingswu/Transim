@@ -20,10 +20,11 @@ class SYSLIB_API Occupancy_Output : public Sim_Output_Data
 {
 public:
 	Occupancy_Output (int num);
+	~Occupancy_Output (void);
 
-	bool Output_Check (void);
+	void Write_Check (void);
 	
-	void Summarize (Travel_Step &step);
+	void Output_Check (Travel_Step &step);
 
 private:
 

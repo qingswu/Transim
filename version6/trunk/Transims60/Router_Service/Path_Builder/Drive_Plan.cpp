@@ -20,7 +20,6 @@ int Path_Builder::Drive_Plan (int lot)
 		from_ptr = &trip_des;
 		to_ptr = &trip_org;
 	}
-	parking_lot = -1;
 
 	//---- re-route from a link offset ----
 

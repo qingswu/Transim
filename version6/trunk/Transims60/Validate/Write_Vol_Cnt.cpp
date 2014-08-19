@@ -16,8 +16,6 @@ void Validate::Write_Volume_Count (void)
 
 	Link_Data *link_ptr;
 	Int_Map_Itr itr;
-	Flow_Time_Array *array_ptr;
-	Flow_Time_Data *flow_ptr;
 
 	nrec = 0;
 
@@ -58,14 +56,10 @@ void Validate::Write_Volume_Count (void)
 			//---- process each period ----
 
 			for (i=0; i < num; i++) {
-				array_ptr = &link_count_array [i];
-				flow_ptr = &array_ptr->at (dir_index);
-				count = flow_ptr->Flow ();
+				count = link_count_array.Volume (i, dir_index);
 				if (count > 0.0) save = true;
 
-				array_ptr = &link_delay_array [i];
-				flow_ptr = &array_ptr->at (dir_index);
-				volume = flow_ptr->Flow ();
+				volume = link_volume_array.Volume (i, dir_index);
 
 				diff = volume - count;
 
@@ -98,14 +92,10 @@ void Validate::Write_Volume_Count (void)
 			//---- process each period ----
 
 			for (i=0; i < num; i++) {
-				array_ptr = &link_count_array [i];
-				flow_ptr = &array_ptr->at (dir_index);
-				count = flow_ptr->Flow ();
+				count = link_count_array.Volume (i, dir_index);
 				if (count > 0.0) save = true;
 
-				array_ptr = &link_delay_array [i];
-				flow_ptr = &array_ptr->at (dir_index);
-				volume = flow_ptr->Flow ();
+				volume = link_volume_array.Volume (i, dir_index);
 
 				diff = volume - count;
 

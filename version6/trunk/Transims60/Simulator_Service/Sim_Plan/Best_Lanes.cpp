@@ -9,25 +9,28 @@
 //	Best_Lanes
 //---------------------------------------------------------
 
-bool Sim_Plan_Process::Best_Lanes (Sim_Travel_Ptr sim_travel_ptr)
+bool Sim_Plan_Process::Best_Lanes (Sim_Trip_Ptr sim_trip_ptr, Integers &leg_list)
 {
 	int index, offset, low_lane, high_lane, lane, org_off, des_off, length;
 	int in_low, in_high, best_low, best_high, out_low, out_high, best, total;
-	int dir_index, to_index, lane_factor, in_lanes, out_lanes;
-	bool first_lot, drive_flag, bound_flag;
+	int dir_index, to_index, lane_factor, in_lanes, out_lanes, period, period1, period2;
+	bool first_lot, drive_flag, bound_flag, flag, first_leg;
 	Dtime time;
 
+	Sim_Travel_Ptr sim_travel_ptr;
 	Sim_Plan_Ptr sim_plan_ptr;
+	Leg_Pool_Ptr leg_pool_ptr;
 	Int_Map_Itr map_itr;
 	Int2_Map_Itr map2_itr;
-	Sim_Leg_Itr leg_itr, last_leg;
-	Sim_Leg_RItr leg_ritr, from_leg;
+	Sim_Leg_Data *leg_ptr, *last_leg;
 	Sim_Dir_Ptr sim_dir_ptr;
 	Connect_Data *connect_ptr;
 	Sim_Park_Ptr sim_park_ptr;
 	Link_Data *link_ptr;
 	Dir_Data *dir_ptr;
 	Veh_Type_Data *veh_type_ptr;
+	Int_RItr int_ritr, from_ritr;
+	Int_Itr int_itr;
 
 	low_lane = high_lane = -1;
 
@@ -35,24 +38,56 @@ bool Sim_Plan_Process::Best_Lanes (Sim_Travel_Ptr sim_travel_ptr)
 	first_lot = true;
 	org_off = des_off = dir_index = offset = 0;
 	length = 1;
-	time = 0;
 
-	sim_plan_ptr = sim_travel_ptr->sim_plan_ptr;
+	sim_travel_ptr = &sim_trip_ptr->sim_travel_data;
+	sim_plan_ptr = &sim_trip_ptr->sim_plan_data;
 
 	veh_type_ptr = &sim->veh_type_array [sim_plan_ptr->Veh_Type ()];
 
-	for (leg_itr = last_leg = sim_plan_ptr->begin (); leg_itr != sim_plan_ptr->end (); last_leg = leg_itr++) {
-		index = leg_itr->Index ();
+	//---- set the time period range ----
+
+	period1 = sim->sim_periods.Period (sim_plan_ptr->Start ());
+	if (period1 < 0) period1 = 0;
+
+	time = MIN ((3 * (sim_plan_ptr->End () - sim_plan_ptr->Start ())), sim->param.max_end_variance);
+
+	period2 = sim->sim_periods.Period (sim_plan_ptr->End () + time);
+
+	if (period2 < 0) period2 = sim->sim_periods.Num_Periods () - 1;
+	if (period2 < period1) period2 = period1;
+
+	//---- process each leg ----
+
+	time = 0;
+	first_leg = true;
+	last_leg = 0;
+	leg_pool_ptr = &sim->sim_leg_array [sim_plan_ptr->Leg_Pool ()];
+
+	for (int_itr = leg_list.begin (); int_itr != leg_list.end (); int_itr++, last_leg = leg_ptr) {
+		leg_ptr = leg_pool_ptr->Record_Pointer (*int_itr);
+
+		if (first_leg) {
+			last_leg = leg_ptr;
+			first_leg = false;
+		}
+		index = leg_ptr->Index ();
 
 		//---- destination parking lot ----
 
-		if (leg_itr->Type () == PARKING_ID && !first_lot) {
+		if (leg_ptr->Type () == PARKING_ID && !first_lot) {
 			first_lot = true;
 			drive_flag = true;
 			last_leg->Connect (-1);
 
 			sim_dir_ptr = &sim->sim_dir_array [last_leg->Index ()];
-			if (sim_dir_ptr->Method () == NO_SIMULATION) continue;
+
+			for (flag=false, period=period1; period <= period2; period++) {
+				if (sim->period_subarea_method [period] [sim_dir_ptr->Subarea ()] != NO_SIMULATION) {
+					flag = true;
+					break;
+				}
+			}
+			if (!flag) continue;
 
 			dir_ptr = &sim->dir_array [last_leg->Index ()];
 
@@ -90,7 +125,7 @@ bool Sim_Plan_Process::Best_Lanes (Sim_Travel_Ptr sim_travel_ptr)
 			last_leg->Time (time);
 			continue;
 		}
-		if (leg_itr->Mode () != DRIVE_MODE) continue;
+		if (leg_ptr->Mode () != DRIVE_MODE) continue;
 
 		sim_dir_ptr = &sim->sim_dir_array [index];
 		to_index = index;
@@ -133,10 +168,10 @@ bool Sim_Plan_Process::Best_Lanes (Sim_Travel_Ptr sim_travel_ptr)
 			if (last_leg->Max_Speed () > veh_type_ptr->Max_Speed ()) {
 				last_leg->Max_Speed (veh_type_ptr->Max_Speed ());
 			}
-			leg_itr->In_Lane_Low (low_lane);
-			leg_itr->In_Lane_High (high_lane);
-			leg_itr->In_Best_Low (low_lane);
-			leg_itr->In_Best_High (high_lane);
+			leg_ptr->In_Lane_Low (low_lane);
+			leg_ptr->In_Lane_High (high_lane);
+			leg_ptr->In_Best_Low (low_lane);
+			leg_ptr->In_Best_High (high_lane);
 
 			dir_index = to_index;
 			des_off = length = sim_dir_ptr->Length ();
@@ -147,10 +182,13 @@ bool Sim_Plan_Process::Best_Lanes (Sim_Travel_Ptr sim_travel_ptr)
 
 		//---- skip links outside the subarea ---
 
-		if (sim_dir_ptr->Method () == NO_SIMULATION) {
-			dir_index = to_index;
-			continue;
+		for (flag=false, period=period1; period <= period2; period++) {
+			if (sim->period_subarea_method [period] [sim_dir_ptr->Subarea ()] != NO_SIMULATION) {
+				flag = true;
+				break;
+			}
 		}
+		if (!flag) continue;
 
 		//---- get the connection to the next link ----
 
@@ -165,10 +203,11 @@ bool Sim_Plan_Process::Best_Lanes (Sim_Travel_Ptr sim_travel_ptr)
 				dir_ptr = &sim->dir_array [dir_index];
 				link_ptr = &sim->link_array [dir_ptr->Link ()];
 				dir_index = link_ptr->Link ();
-
+MAIN_LOCK
 				sim->Warning (String ("Plan %d-%d-%d-%d Connection was Not Found between Links %d and %d") % 
 					sim_travel_ptr->Household () % sim_travel_ptr->Person () % sim_plan_ptr->Tour () % 
 					sim_plan_ptr->Trip () % dir_index % to_index);
+END_LOCK
 			}	
 			return (false);
 		}
@@ -179,10 +218,10 @@ bool Sim_Plan_Process::Best_Lanes (Sim_Travel_Ptr sim_travel_ptr)
 		last_leg->Out_Best_Low (connect_ptr->Low_Lane ());
 		last_leg->Out_Best_High (connect_ptr->High_Lane ());
 
-		leg_itr->In_Lane_Low (connect_ptr->To_Low_Lane ());
-		leg_itr->In_Lane_High (connect_ptr->To_High_Lane ());
-		leg_itr->In_Best_Low (connect_ptr->To_Low_Lane ());
-		leg_itr->In_Best_High (connect_ptr->To_High_Lane ());
+		leg_ptr->In_Lane_Low (connect_ptr->To_Low_Lane ());
+		leg_ptr->In_Lane_High (connect_ptr->To_High_Lane ());
+		leg_ptr->In_Best_Low (connect_ptr->To_Low_Lane ());
+		leg_ptr->In_Best_High (connect_ptr->To_High_Lane ());
 
 		if (connect_ptr->Speed () > 0) {
 			last_leg->Max_Speed (connect_ptr->Speed ());
@@ -208,34 +247,37 @@ bool Sim_Plan_Process::Best_Lanes (Sim_Travel_Ptr sim_travel_ptr)
 	lane_factor = sim->param.plan_follow * 2 / sim->param.lane_change_levels;
 	if (lane_factor < 1) lane_factor = 1;
 
-	for (leg_ritr = sim_plan_ptr->rbegin (); leg_ritr != sim_plan_ptr->rend (); leg_ritr++) {
-		if (leg_ritr->Type () != PARKING_ID && leg_ritr->Mode () != DRIVE_MODE) continue;
+	for (int_ritr = leg_list.rbegin (); int_ritr != leg_list.rend (); int_ritr++) {
+		leg_ptr = leg_pool_ptr->Record_Pointer (*int_ritr);
 
-		if (leg_ritr->Type () == PARKING_ID && first_lot) {
+		if (leg_ptr->Type () != PARKING_ID && leg_ptr->Mode () != DRIVE_MODE) continue;
+
+		if (leg_ptr->Type () == PARKING_ID && first_lot) {
 			offset = des_off;
 			first_lot = false;
 			continue;
-		} else {
-			from_leg = leg_ritr + 1;
-			if (from_leg == sim_plan_ptr->rend ()) break;
-
-			if (from_leg->Type () == PARKING_ID) {
-				offset -= org_off;
-			} else if (from_leg->Type () != DIR_ID) {
-				break;
-			}
 		}
-		in_low = best_low = leg_ritr->In_Lane_Low ();
-		in_high = best_high = leg_ritr->In_Lane_High ();
+		from_ritr = int_ritr + 1;
+		if (from_ritr == leg_list.rend ()) break;
+
+		last_leg = leg_pool_ptr->Record_Pointer (*from_ritr);
+
+		if (last_leg->Type () == PARKING_ID) {
+			offset -= org_off;
+		} else if (last_leg->Type () != DIR_ID) {
+			break;
+		}
+		in_low = best_low = leg_ptr->In_Lane_Low ();
+		in_high = best_high = leg_ptr->In_Lane_High ();
 		total += offset;
 
 		if (total <= sim->param.plan_follow) {
 			lane = total / lane_factor;
-			best = leg_ritr->Out_Best_Low () - lane;
+			best = leg_ptr->Out_Best_Low () - lane;
 			if (best_low < best) {
 				best_low = MIN (best_high, best);
 			}
-			best = leg_ritr->Out_Best_High () + lane;
+			best = leg_ptr->Out_Best_High () + lane;
 			if (best_high > best) {
 				best_high = MAX (best_low, best);
 			}
@@ -244,22 +286,22 @@ bool Sim_Plan_Process::Best_Lanes (Sim_Travel_Ptr sim_travel_ptr)
 
 			if (total <= sim->param.plan_follow) {
 				lane = total / lane_factor;
-				best = leg_ritr->Out_Lane_Low () - lane;
+				best = leg_ptr->Out_Lane_Low () - lane;
 
 				if (best_low < best) {
 					best_low = MIN (best_high, best);
 				}
-				best = leg_ritr->Out_Lane_High () + lane;
+				best = leg_ptr->Out_Lane_High () + lane;
 
 				if (best_high > best) {
 					best_high = MAX (best_low, best);
 				}
 			}
 		}
-		if (from_leg->Type () != PARKING_ID) {
+		if (last_leg->Type () != PARKING_ID) {
 			if (total <= sim->param.plan_follow) {
-				out_low = from_leg->Out_Best_Low ();
-				out_high = from_leg->Out_Best_High ();
+				out_low = last_leg->Out_Best_Low ();
+				out_high = last_leg->Out_Best_High ();
 
 				if (best_low > in_low || best_high < in_high) {
 					in_lanes = best_high - best_low + 1;
@@ -279,16 +321,16 @@ bool Sim_Plan_Process::Best_Lanes (Sim_Travel_Ptr sim_travel_ptr)
 						if (best_low == in_low && best_high == in_high) break;
 					}
 				}
-				from_leg->Out_Best_Low (out_low);
-				from_leg->Out_Best_High (out_high);
+				last_leg->Out_Best_Low (out_low);
+				last_leg->Out_Best_High (out_high);
 			}
-			dir_index = from_leg->Index ();
+			dir_index = last_leg->Index ();
 
 			sim_dir_ptr = &sim->sim_dir_array [dir_index];
 			offset = sim_dir_ptr->Length ();
 		}
-		leg_ritr->In_Best_Low (best_low);
-		leg_ritr->In_Best_High (best_high);
+		leg_ptr->In_Best_Low (best_low);
+		leg_ptr->In_Best_High (best_high);
 	}
 	return (true);
 }

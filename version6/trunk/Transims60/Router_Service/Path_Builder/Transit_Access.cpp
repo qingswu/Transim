@@ -201,9 +201,9 @@ bool Path_Builder::Transit_Access (Path_End_Array *from_ptr, Path_End_Array *to_
 				ab_flag = (length >= 0);
 				if (!ab_flag) length = -length;
 
-				to_len = from_len + length;
+				to_walk = from_walk + length;
 
-				if (walk_flag && to_len >= param.max_walk) {
+				if (walk_flag && to_walk >= param.max_walk) {
 					length_flag = true;
 					continue;
 				}
@@ -227,15 +227,15 @@ bool Path_Builder::Transit_Access (Path_End_Array *from_ptr, Path_End_Array *to_
 						continue;
 					}
 				}
-				to_walk = from_walk + length;
+				to_len = from_len + length;
 
 				//---- calculate and check the impedance ----
 
 				imped = DTOI (ttime * param.value_walk);
 				if (imped < 1) imped = 1;
 
-				if (walk_flag && to_len > param.walk_pen) {
-					factor = (double) to_len / param.walk_pen;
+				if (walk_flag && to_walk > param.walk_pen) {
+					factor = (double) to_walk / param.walk_pen;
 					factor = ((factor * factor) - 1) * param.walk_fac + 1;
 					imped = DTOI (imped * factor);
 				} else if (random_flag) {
@@ -474,7 +474,7 @@ bool Path_Builder::Transit_Access (Path_End_Array *from_ptr, Path_End_Array *to_
 			}
 			to_walk = from_walk + length;
 
-			if (to_walk >= param.max_walk) {
+			if (walk_flag && to_walk >= param.max_walk) {
 				length_flag = true;
 				continue;
 			}

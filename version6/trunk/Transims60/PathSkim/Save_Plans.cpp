@@ -19,6 +19,7 @@ bool PathSkim::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 	for (itr = array_ptr->begin (); itr != array_ptr->end (); itr++) {
 		plan_ptr = *itr;
 		if (plan_ptr == 0) continue;
+		plan_ptr->External_IDs ();
 
 		total_records++;
 

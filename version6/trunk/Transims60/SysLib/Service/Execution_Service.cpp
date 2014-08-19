@@ -56,7 +56,7 @@ Execution_Service::Execution_Service (void) : Control_Service ()
 	random_seed = 0;
 	num_threads = sub_threads = 1;
 	thread_flag = false;
-	vehicle_flag = false;
+	memory_flag = false;
 	report_flag = false;
 	mpi_flag = false;
 	debug = false;
@@ -263,7 +263,7 @@ bool Execution_Service::Command_Line (Strings &commands)
 					if (Master ()) Syntax_Help ();
 					help_flag = syntax_flag = banner_flag = true;
 				} else if (ch == 'P' || ch == 'p') {
-					if (Master ()) Pause (true);
+					if (Master ()) Pause_Flag (true);
 				} else if (ch == 'N' || ch == 'n') {
 					if (Master ()) No_Pause (true);
 				} else if (ch == 'D' || ch == 'd' ||
@@ -337,7 +337,7 @@ bool Execution_Service::Command_Line (Strings &commands)
 					message += " has Too Many Parameters";
 					Show_Warning (message);
 				}
-				Pause (true);
+				Pause_Flag (true);
 				Exit_Stat (DONE);
 				return (false);
 			} else if (XML_Flag () || control_flag || doc_flag) {

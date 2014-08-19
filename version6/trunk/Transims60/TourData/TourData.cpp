@@ -11,7 +11,7 @@
 TourData::TourData (void) : Data_Service ()
 {
 	Program ("TourData");
-	Version (1);
+	Version (2);
 	Title ("Tour Data Processor");
 
 	System_File_Type required_files [] = {

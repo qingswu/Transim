@@ -12,6 +12,7 @@
 #include "Plan_Data.hpp"
 #include "Plan_File.hpp"
 #include "Partition_Files.hpp"
+#include "Threads.hpp"
 
 //---------------------------------------------------------
 //	Sim_Plan_Step - read and process travel plans
@@ -21,9 +22,10 @@ class SYSLIB_API Sim_Plan_Step : public Static_Service
 {
 public:
 	Sim_Plan_Step (void);
-	~Sim_Plan_Step (void)      { Stop_Processing (); }
+	~Sim_Plan_Step (void);
 
 	void Initialize (void);
+	bool Start_Processing (void);
 	void Stop_Processing (void);
 
 	bool First_Plan (void);
@@ -38,7 +40,7 @@ private:
 	Partition_Data <Plan_Data> plan_set;
 	Partition_Data <Time_Index> time_set;
 
-	bool Sim_Plan_Result (Sim_Travel_Ptr ptr);
+	bool Sim_Plan_Result (Sim_Trip_Ptr ptr);
 
 #ifdef THREADS
 	int num_threads;
@@ -53,13 +55,13 @@ private:
 	class Save_Results
 	{
 	public:
-		Save_Results (Sim_Plan_Step *_ptr = 0)   { ptr = _ptr; }
+		Save_Results ()                       { step_ptr = 0; }
 
-		void Initialize (Sim_Plan_Step *_ptr)    { ptr = _ptr; };
+		void Initialize (Sim_Plan_Step *ptr)  { step_ptr = ptr; };
 
 		void operator()();
 
-		Sim_Plan_Step *ptr;
+		Sim_Plan_Step *step_ptr;
 	} save_results;
 
 #else

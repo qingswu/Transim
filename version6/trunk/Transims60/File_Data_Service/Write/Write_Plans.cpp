@@ -72,7 +72,9 @@ void Data_Service::Write_Plans (void)
 			if (part < 0) continue;
 			file = new_file_set [part];
 		}
-		count += Put_Plan_Data (*file, *plan_ptr);
+		if (plan_ptr->External_IDs ()) {
+			count += Put_Plan_Data (*file, *plan_ptr);
+		}
 	}
 	End_Progress ();
 

@@ -62,6 +62,12 @@ void PlanPrep::Execute (void)
 
 	MPI_Processing ();
 
+	//---- repair results ----
+
+	if (repair_flag) {
+		Write (2, "Number of Repaired Plan Legs = ") << num_repair;
+	}
+
 	//---- print processing summary ----
 
 	plan_file->Print_Summary ();

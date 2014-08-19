@@ -8,9 +8,6 @@
 #include "TypeDefs.hpp"
 #include "Lane_Map_Data.hpp"
 
-#include <vector>
-using namespace std;
-
 #define NUM_SIM_CONFLICTS	2
 
 //---------------------------------------------------------
@@ -37,7 +34,7 @@ private:
 	int  conflict [NUM_SIM_CONFLICTS];
 };
 
-typedef vector <Sim_Connection>      Sim_Connect_Array;
+typedef Vector <Sim_Connection>      Sim_Connect_Array;
 typedef Sim_Connect_Array::iterator  Sim_Connect_Itr;
 typedef Sim_Connection *             Sim_Connect_Ptr;
 

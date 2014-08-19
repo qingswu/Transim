@@ -4,18 +4,20 @@
 
 #include "Path_Builder.hpp"
 
+extern int hhold;
+
 //---------------------------------------------------------
 //	Trace_Path
 //---------------------------------------------------------
 
 int Path_Builder::Trace_Path (Trip_End *org, Path_End_Array *from, Path_End *to)
 {
-	int type, index, dir, in_index, out_index, flow_index;
+	int type, index, dir, in_index, out_index, use_index;
 	int imped, len, cost, mode, path, tot_len, prev_len, prev_imp, wait_imp;
 	int from_index, from_type, from_path, from_dir, to_index, to_type, to_path, to_dir;
 	bool ab_flag, park_flag;
-	Dtime time, duration, prev_time, wait_time, tod, tod2;
-	double flow;
+	Dtime time, duration, prev_time, wait_time, tod;
+	double len_factor;
 
 	Trip_End *parking_end;
 	Path_End *from_end;
@@ -24,8 +26,8 @@ int Path_Builder::Trace_Path (Trip_End *org, Path_End_Array *from, Path_End *to)
 	Path_RItr path_ritr;
 	Link_Data *link_ptr;
 	Dir_Data *dir_ptr;
-	Flow_Time_Array *link_delay_ptr, *turn_delay_ptr;
-	Flow_Time_Data *flow_ptr;
+	Turn_Period *turn_period_ptr;
+	Turn_Data *turn_ptr;
 	Int2_Map_Itr map2_itr;
 	Plan_Leg_RItr leg_itr;
 	Plan_Leg *prev_leg;
@@ -117,7 +119,8 @@ next_mode:
 		//---- don't write parking ID twice ----
 
 		if (to->End_Type () == PARKING_ID && type == PARKING_ID && 
-			(param.mode == PNR_IN_MODE || param.mode == KNR_IN_MODE)) {
+			(((param.mode == PNR_IN_MODE || param.mode == KNR_IN_MODE) && forward_flag) || 
+			((param.mode == PNR_OUT_MODE || param.mode == KNR_OUT_MODE) && !forward_flag))) {
 			to_ptr = from_ptr;
 			continue;
 		}
@@ -412,52 +415,40 @@ next_mode:
 			//---- accumulate flow and turning movement data ----
 
 			if (flow_flag && mode == DRIVE_MODE) {
-				if (forward_flag) {
-					tod = from_ptr->Time ();
-					tod2 = to_ptr->Time ();
+				if (path == 0) {
+					use_index = in_index;
 				} else {
-					tod = to_ptr->Time ();
-					tod2 = from_ptr->Time ();
+					dir_ptr = &exe->dir_array [in_index];
+					use_index = dir_ptr->Use_Index ();
+					if (use_index < 0) use_index = in_index;
 				}
-				link_delay_ptr = link_flow_ptr->Period_Ptr (tod);
+				if (type == DIR_ID) {
+					dir_ptr = &exe->dir_array [index];
+					link_ptr = &exe->link_array [dir_ptr->Link ()];
+				} else {
+					link_ptr = &exe->link_array [abs (index)];
+				}
+				if (len >= link_ptr->Length ()) {
+					len_factor = 1.0;
+				} else {
+					len_factor = (double) len / link_ptr->Length ();
+				}
+				perf_period_array_ptr->Flow_Time (use_index, to_ptr->Time (), len_factor, len, param.pce, param.occupancy, forward_flag);
 
-				if (link_delay_ptr != 0) {
-					if (path == 0) {
-						flow_index = in_index;
+				if (out_index >= 0 && param.turn_flow_flag) {
+					if (forward_flag) {
+						map2_itr = exe->connect_map.find (Int2_Key (in_index, out_index));
+						tod = to_ptr->Time ();
 					} else {
-						dir_ptr = &exe->dir_array [in_index];
-						flow_index = dir_ptr->Flow_Index ();
-						if (flow_index < 0) flow_index = in_index;
+						map2_itr = exe->connect_map.find (Int2_Key (out_index, in_index));
+						tod = from_ptr->Time ();
 					}
-					flow_ptr = link_delay_ptr->Data_Ptr (flow_index);
+					if (map2_itr != exe->connect_map.end ()) {
+						turn_period_ptr = turn_period_array_ptr->Period_Ptr (tod);
 
-					if (type == DIR_ID) {
-						dir_ptr = &exe->dir_array [index];
-						link_ptr = &exe->link_array [dir_ptr->Link ()];
-					} else {
-						link_ptr = &exe->link_array [abs (index)];
-					}
-					if (len >= link_ptr->Length ()) {
-						flow = pce;
-					} else {
-						flow = pce * len / link_ptr->Length ();
-						if (flow < 0.01) flow = 0.01;
-					}
-					flow_ptr->Add_Flow (flow);
-
-					if (out_index >= 0 && param.turn_flow_flag) {
-						if (forward_flag) {
-							map2_itr = exe->connect_map.find (Int2_Key (in_index, out_index));
-						} else {
-							map2_itr = exe->connect_map.find (Int2_Key (out_index, in_index));
-						}
-						if (map2_itr != exe->connect_map.end ()) {
-							turn_delay_ptr = turn_flow_ptr->Period_Ptr (tod2);
-
-							if (turn_delay_ptr != 0) {
-								flow_ptr = turn_delay_ptr->Data_Ptr (map2_itr->second);
-								flow_ptr->Add_Flow (pce);
-							}
+						if (turn_period_ptr != 0) {
+							turn_ptr = turn_period_ptr->Data_Ptr (map2_itr->second);
+							turn_ptr->Add_Turn (param.pce);
 						}
 					}
 				}
@@ -590,14 +581,19 @@ bool Path_Builder::Add_Leg (int mode, int type, int index, int dir, int imped, i
 	if (!param.skim_only || (flow_flag && mode == DRIVE_MODE)) {
 		switch (type) {
 			case DIR_ID:
+			case USE_ID:
+				id = index;
 				dir_ptr = &exe->dir_array [index];
+				link_ptr = &exe->link_array [dir_ptr->Link ()];
+				if (len > link_ptr->Length ()) len = link_ptr->Length ();
 
-				index = dir_ptr->Link ();
-				dir = dir_ptr->Dir ();
+				if (path > 0 && mode == DRIVE_MODE) {
+					type = USE_ID;
+				}
+				break;
 			case LINK_ID:
+				id = index;
 				link_ptr = &exe->link_array [index];
-
-				id = link_ptr->Link ();
 				if (path > 0 && mode == DRIVE_MODE) {
 					type = (dir == 1) ? USE_BA : USE_AB;
 				} else {
@@ -606,11 +602,13 @@ bool Path_Builder::Add_Leg (int mode, int type, int index, int dir, int imped, i
 				if (len > link_ptr->Length ()) len = link_ptr->Length ();
 				break;
 			case NODE_ID:
-				id = exe->node_array [index].Node ();
+			case STOP_ID:
+			case ROUTE_ID:
+				id = index;
 				break;
 			case LOCATION_ID:
 				if (index >= 0) {
-					id = exe->location_array [index].Location ();
+					id = index;
 				} else {
 					id = -index;
 				}
@@ -621,17 +619,11 @@ bool Path_Builder::Add_Leg (int mode, int type, int index, int dir, int imped, i
 				} else {
 					parking_lot = index;
 				}
-				id = exe->parking_array [index].Parking ();
+				id = index;
 				break;
 			case ACCESS_ID:
-				id = exe->access_array [index].Link ();
+				id = index;
 				type = (dir == 1) ? ACCESS_BA : ACCESS_AB;
-				break;
-			case STOP_ID:
-				id = exe->stop_array [index].Stop ();
-				break;
-			case ROUTE_ID:
-				id = exe->line_array [index].Route ();
 				break;
 			default:
 				exe->Write (1, "ID Type=") << type << " not implemented";

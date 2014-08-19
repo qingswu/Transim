@@ -11,7 +11,7 @@
 LineSum::LineSum (void) : Execution_Service ()
 {
 	Program ("LineSum");
-	Version (2);
+	Version (3);
 	Title ("Transit Ridership Summary");
 
 	Control_Key keys [] = { //--- code, key, level, status, type, default, range, help ----

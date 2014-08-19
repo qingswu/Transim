@@ -10,7 +10,7 @@
 
 bool Path_Builder::Plan_ReRoute (Plan_Data *plan_data)
 {
-	int veh_id, lot, stat, len, cost, imp, link, mode;
+	int stat, len, cost, imp, link, mode;
 	Dtime tod, time, reroute_time;
 	double factor;
 	bool start_flag;
@@ -18,11 +18,7 @@ bool Path_Builder::Plan_ReRoute (Plan_Data *plan_data)
 	Trip_End trip_end;
 	Path_End path_end;
 	Path_Data path_data;
-	Int_Map_Itr map_itr;
-	Location_Data *loc_ptr;
 	Link_Data *link_ptr;
-	Vehicle_Index veh_index;
-	Vehicle_Map_Itr veh_itr;
 	Plan_Leg_Itr leg_itr;
 
 	if (plan_data == 0) {
@@ -34,7 +30,7 @@ bool Path_Builder::Plan_ReRoute (Plan_Data *plan_data)
 
 	//---- set the traveler parameters ----
 
-	exe->Set_Parameters (param, plan_ptr->Type ());
+	exe->Set_Parameters (param, plan_ptr->Type (), plan_ptr->Veh_Type ());
 
 	param.mode = (Mode_Type) plan_ptr->Mode (),
 	parking_duration = plan_ptr->Duration ();
@@ -61,11 +57,11 @@ bool Path_Builder::Plan_ReRoute (Plan_Data *plan_data)
 			if (leg_itr->Mode () == DRIVE_MODE) break;
 
 			if (start_flag) {
-				if (param.flow_flag) {
-					return (Plan_Flow (plan_data));
-				} else {
+				//if (param.flow_flag) {
+				//	return (Plan_Flow (plan_data));
+				//} else {
 					return (true);
-				}
+				//}
 			} else {
 				return (Plan_Build (plan_data));
 			}
@@ -119,6 +115,8 @@ bool Path_Builder::Plan_ReRoute (Plan_Data *plan_data)
 		//---- set the origin ----
 
 		if (tod >= reroute_time) {
+			if (!leg_itr->Link_Type ()) return (true);
+
 			path_end.Clear ();
 			path_end.Trip_End (0);
 			path_end.End_Type (FROM_ID);
@@ -126,21 +124,18 @@ bool Path_Builder::Plan_ReRoute (Plan_Data *plan_data)
 
 			link = leg_itr->Link_ID ();
 
-			map_itr = exe->link_map.find (link);
-			if (map_itr != exe->link_map.end ()) {
-				path_end.Index (map_itr->second);
+			path_end.Index (link);
+			link_ptr = &exe->link_array [link];
 
-				link_ptr = &exe->link_array [map_itr->second];
+			path_end.Offset (len);
 
-				path_end.Offset (len);
-
-				if (leg_itr->Link_Dir () == 0) {
-					path_data.From (link_ptr->AB_Dir ());
-				} else {
-					path_data.From (link_ptr->BA_Dir ());
-				}
-				path_data.Type (DIR_ID);
+			if (leg_itr->Link_Dir () == 0) {
+				path_data.From (link_ptr->AB_Dir ());
+			} else {
+				path_data.From (link_ptr->BA_Dir ());
 			}
+			path_data.Type (DIR_ID);
+
 			path_data.Time (reroute_time);
 			path_data.Imped (Round ((int) plan_ptr->Impedance ()));
 			path_data.Length (plan_ptr->Length ());
@@ -168,64 +163,20 @@ bool Path_Builder::Plan_ReRoute (Plan_Data *plan_data)
 	if (++leg_itr != plan_ptr->end ()) {
 		plan_ptr->erase (leg_itr, plan_ptr->end ());
 	}
-	if (param.flow_flag) {
-		Plan_Flow (plan_data);
-	}
+	//if (param.flow_flag) {
+	//	Plan_Flow (plan_data);
+	//}
 
 	//---- set the destination ----
 
-	map_itr = exe->location_map.find (plan_ptr->Destination ());
-
-	if (map_itr == exe->location_map.end ()) {
-		plan_ptr->Problem (LOCATION_PROBLEM);
-		return (true);
-	}
-	loc_ptr = &exe->location_array [map_itr->second];
-
+	trip_end.Index (plan_ptr->Destination ());
 	trip_end.Type (LOCATION_ID);
-	trip_end.Index (map_itr->second);
 	trip_end.Time (plan_ptr->End ());
 
 	trip_des.push_back (trip_end);
 
-	//---- get the vehicle record ----
+	stat = Build_Path (-1);
 
-	veh_id = plan_ptr->Vehicle ();
-	lot = -1;
-	pce = 1.0;
-
-	if (veh_id <= 0 || !veh_type_flag) {
-		grade_flag = false;
-		op_cost_rate = 0.0;
-		param.use = CAR;
-		param.veh_type = -1;
-	} else {
-		map_itr = exe->veh_type_map.find (plan_ptr->Veh_Type ());
-
-		if (map_itr != exe->veh_type_map.end ()) {
-			param.veh_type = map_itr->second;
-			veh_type_ptr = &exe->veh_type_array [param.veh_type];
-
-			param.use = veh_type_ptr->Use ();
-			op_cost_rate = UnRound (veh_type_ptr->Op_Cost ());
-
-			if (Metric_Flag ()) {
-				op_cost_rate /= 1000.0;
-			} else {
-				op_cost_rate /= MILETOFEET;
-			}
-			grade_flag = param.grade_flag && veh_type_ptr->Grade_Flag ();
-			pce = UnRound (veh_type_ptr->PCE ());
-		} else {
-			param.veh_type = -1;
-			grade_flag = false;
-			op_cost_rate = 0.0;
-			param.use = CAR;
-			exe->Warning (String ("Vehicle Type %d was Not Found") % plan_ptr->Veh_Type ());
-		}
-	}
-	stat = Build_Path (lot);
-	
 	if (stat < 0) return (false);
 	if (stat > 0) {
 		if (!param.ignore_errors) {

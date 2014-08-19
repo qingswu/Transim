@@ -32,9 +32,6 @@
     <ClCompile Include="Read_Data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Write_Link_Data.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Read_Signal_Map.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

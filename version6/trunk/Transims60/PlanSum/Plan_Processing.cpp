@@ -31,13 +31,7 @@ void PlanSum::Plan_Processing::operator()()
 	int part = 0;
 
 	if (exe->new_delay_flag) {
-		Link_Delay_File *file = (Link_Delay_File *) exe->System_File_Handle (NEW_LINK_DELAY);
-
-		if (file != 0) {
-			turn_flag = file->Turn_Flag ();
-		} else {
-			turn_flag = exe->System_File_Flag (CONNECTION);
-		}
+		turn_flag = exe->System_File_Flag (CONNECTION);
 	}
 	plan_file = new Plan_File (exe->plan_file->File_Access (), exe->plan_file->Dbase_Format ());
 	plan_file->Part_Flag (exe->plan_file->Part_Flag ());
@@ -49,13 +43,13 @@ void PlanSum::Plan_Processing::operator()()
 		//---- initialize link delay data ----
 
 		if (exe->new_delay_flag) {
-			link_delay_array.Initialize (&exe->time_periods);
+			perf_period_array.Initialize (&exe->time_periods);
 
 			if (turn_flag) {
 				int num = (int) exe->connect_array.size ();
 
 				if (num > 0) {
-					turn_delay_array.Initialize (&exe->time_periods, num);
+					turn_period_array.Initialize (&exe->time_periods, num);
 				}
 			}
 		}
@@ -128,10 +122,10 @@ void PlanSum::Plan_Processing::operator()()
 		//---- combine the link flow data ----
 
 		if (exe->new_delay_flag) {
-			exe->link_delay_array.Add_Flows (link_delay_array, true);
+			exe->perf_period_array.Add_Flows (perf_period_array, true);
 
 			if (turn_flag) {
-				exe->turn_delay_array.Add_Flows (turn_delay_array, true);
+				exe->turn_period_array.Add_Turns (turn_period_array, true);
 			}
 		}
 

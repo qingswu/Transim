@@ -30,8 +30,8 @@ File_Service::File_Key  File_Service::file_keys [] = {
 
 	{ SELECTION, "SELECTION_FILE", "SELECTION_FORMAT" },
 	{ HOUSEHOLD, "HOUSEHOLD_FILE", "HOUSEHOLD_FORMAT" },
-	{ LINK_DELAY, "LINK_DELAY_FILE", "LINK_DELAY_FORMAT" },
 	{ PERFORMANCE, "PERFORMANCE_FILE", "PERFORMANCE_FORMAT" },
+	{ TURN_DELAY, "TURN_DELAY_FILE", "TURN_DELAY_FORMAT" },
 	{ RIDERSHIP, "RIDERSHIP_FILE", "RIDERSHIP_FORMAT" },
 	{ VEHICLE_TYPE, "VEHICLE_TYPE_FILE", "VEHICLE_TYPE_FORMAT" },
 	{ TRIP, "TRIP_FILE", "TRIP_FORMAT" },
@@ -66,8 +66,8 @@ File_Service::File_Key  File_Service::file_keys [] = {
 
 	{ NEW_SELECTION, "NEW_SELECTION_FILE", "NEW_SELECTION_FORMAT" },
 	{ NEW_HOUSEHOLD, "NEW_HOUSEHOLD_FILE", "NEW_HOUSEHOLD_FORMAT" },
-	{ NEW_LINK_DELAY, "NEW_LINK_DELAY_FILE", "NEW_LINK_DELAY_FORMAT" },
 	{ NEW_PERFORMANCE, "NEW_PERFORMANCE_FILE", "NEW_PERFORMANCE_FORMAT" },
+	{ NEW_TURN_DELAY, "NEW_TURN_DELAY_FILE", "NEW_TURN_DELAY_FORMAT" },
 	{ NEW_RIDERSHIP, "NEW_RIDERSHIP_FILE", "NEW_RIDERSHIP_FORMAT" },
 	{ NEW_VEHICLE_TYPE, "NEW_VEHICLE_TYPE_FILE", "NEW_VEHICLE_TYPE_FORMAT" },
 	{ NEW_TRIP, "NEW_TRIP_FILE", "NEW_TRIP_FORMAT" },
@@ -102,7 +102,6 @@ File_Service::File_Service (void) : Execution_Service ()
 	}
 	control_flag = zone_flag = link_flag = stop_flag = line_flag = time_flag = zone_loc_flag = false;
 	lane_use_flows = false;
-	flow_units = VEHICLES;
 
 	AB_Map_Flag (false);
 }
@@ -218,7 +217,6 @@ void File_Service::File_Service_Keys (int *keys)
 {
 	Control_Key control_keys [] = { //--- code, key, level, status, type, help ----
 		{ NOTES_AND_NAME_FIELDS, "NOTES_AND_NAME_FIELDS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
-		{ FLOW_UNITS, "FLOW_UNITS", LEVEL0, OPT_KEY, TEXT_KEY, "VEHICLES", FLOW_RANGE, NO_HELP },
 		{ SAVE_LANE_USE_FLOWS, "SAVE_LANE_USE_FLOWS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 
 		{ ROUTE_NODE_OFFSET_FLAG, "ROUTE_NODE_OFFSET_FLAG", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
@@ -330,12 +328,6 @@ void File_Service::Program_Control (void)
 
 	Execution_Service::Program_Control ();
 
-	if (Control_Key_Status (FLOW_UNITS)) {
-		key = Get_Control_String (FLOW_UNITS);
-		if (!key.empty ()) {
-			Flow_Units (Flow_Code (key));
-		}
-	}
 	if (Control_Key_Status (SAVE_LANE_USE_FLOWS)) {
 		Lane_Use_Flows (Set_Control_Flag (SAVE_LANE_USE_FLOWS));
 	}
@@ -547,27 +539,13 @@ void File_Service::Program_Control (void)
 					if (parts > 1) Print (0, String (" (%d partitions)") % parts);
 				}
 				break;
-			case LINK_DELAY:
-			case NEW_LINK_DELAY:
-				file->file = new Link_Delay_File (key, file->access, format, flow_units, turn_delay, lane_use_flows);
-				if (i == LINK_DELAY) {
-					turn_delay = ((Link_Delay_File *) file->file)->Turn_Flag ();
-					flow_units = ((Link_Delay_File *) file->file)->Flow_Units ();
-				}
-				if (i == NEW_LINK_DELAY) {
-					flow_units = ((Link_Delay_File *) file->file)->Flow_Units ();
-				}
-				break;
 			case PERFORMANCE:
 			case NEW_PERFORMANCE:
-				file->file = new Performance_File (key, file->access, format, flow_units, turn_perf, lane_use_flows);
-				if (i == PERFORMANCE) {
-					turn_perf = ((Performance_File *) file->file)->Turn_Flag ();
-					flow_units = ((Performance_File *) file->file)->Flow_Units ();
-				}
-				if (i == NEW_PERFORMANCE) {
-					flow_units = ((Performance_File *) file->file)->Flow_Units ();
-				}
+				file->file = new Performance_File (key, file->access, format, lane_use_flows);
+				break;
+			case TURN_DELAY:
+			case NEW_TURN_DELAY:
+				file->file = new Turn_Delay_File (key, file->access, format);
 				break;
 			case RIDERSHIP:
 			case NEW_RIDERSHIP:

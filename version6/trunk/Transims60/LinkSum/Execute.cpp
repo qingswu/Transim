@@ -20,7 +20,10 @@ void LinkSum::Execute (void)
 	//---- read compare performance file ----
 
 	if (compare_flag) {
-		Read_Performance (compare_file, compare_link_array, compare_turn_array);
+		Read_Performance (compare_file, compare_perf_array);
+	}
+	if (turn_compare_flag) {
+		Read_Turn_Delays (turn_compare_file, compare_turn_array);
 	}
 
 	//---- flag selected links ----
@@ -29,6 +32,11 @@ void LinkSum::Execute (void)
 		Select_Links ();
 	}
 
+	//---- new performance file ----
+
+	if (System_File_Flag (NEW_PERFORMANCE)) {
+		Write_Performance ();
+	}
 
 	//---- write the link activity file ----
 
@@ -68,33 +76,33 @@ void LinkSum::Execute (void)
 
 	//---- write the perf data file ----
 
-	if (detail_flag) {
-		Perf_Detail_File ();
+	if (summary_flag) {
+		Summary_File ();
 	}
 
 	//---- write the group perf file ----
 
-	if (group_perf_flag) {
-		Group_Perf_File ();
+	if (group_sum_flag) {
+		Group_Sum_File ();
 	}
 
 	//---- write the turn volume file ----
 
-	if (turn_vol_flag) {
-		Write_Turn_Volume ();
+	if (turn_flag && System_File_Flag (NEW_TURN_DELAY)) {
+		Write_Turn_Data ();
 	}
 
 	//---- print reports ----
 
 	for (int i=First_Report (); i != 0; i=Next_Report ()) {
 		switch (i) {
-			case TOP_LINK_FLOW:		//---- Top 100 Link Flow Report ----
+			case TOP_LINK_VOL:		//---- Top 100 Link Volume Report ----
 				Top_100_Report (i);
 				break;
-			case TOP_LANE_FLOW:		//---- Top 100 Lane Flow Report ----
+			case TOP_LANE_VOL:		//---- Top 100 Lane Volume Report ----
 				Top_100_Report (i);
 				break;
-			case TOP_PERIOD:		//---- Top 100 Period Flow Report ----
+			case TOP_PERIOD:		//---- Top 100 Period Volume Report ----
 				Top_100_Report (i);
 				break;
 			case TOP_SPEED:			//---- Top 100 Speed Reductions ----
@@ -136,14 +144,14 @@ void LinkSum::Execute (void)
 			case PERF_REPORT:		//---- Network Performance Summary ----
 				Performance_Report ();
 				break;
-			case PERF_DETAIL:		//---- Network Performance Details ----
-				Perf_Detail_Report ();
+			case PERF_SUMMARY:		//---- Network Performance Details ----
+				Perf_Sum_Report ();
 				break;
 			case GROUP_REPORT:		//---- Group Performance Summary ----
 				Group_Report ();
 				break;
-			case GROUP_DETAIL:		//---- Group Performance Details ----
-				Group_Detail_Report ();
+			case GROUP_SUMMARY:		//---- Group Performance Details ----
+				Group_Sum_Report ();
 				break;
 			case RELATIVE_GAP:		//---- Relative Gap Report ----
 				Relative_Gap_Report ();
@@ -162,13 +170,13 @@ void LinkSum::Execute (void)
 void LinkSum::Page_Header (void)
 {
 	switch (Header_Number ()) {
-		case TOP_LINK_FLOW:		//---- Top 100 Link Flow Report ----
+		case TOP_LINK_VOL:		//---- Top 100 Link Volume Report ----
 			Top_100_Link_Header ();
 			break;
-		case TOP_LANE_FLOW:		//---- Top 100 Lane Flow Report ----
+		case TOP_LANE_VOL:		//---- Top 100 Lane Volume Report ----
 			Top_100_Lane_Header ();
 			break;
-		case TOP_PERIOD:		//---- Top 100 Period Flow Report ----
+		case TOP_PERIOD:		//---- Top 100 Period Volume Report ----
 			Top_100_Time_Header ();
 			break;
 		case TOP_SPEED:			//---- Top 100 Speed Reductions ----
@@ -210,14 +218,14 @@ void LinkSum::Page_Header (void)
 		case PERF_REPORT:		//---- Network Performance Summary ----
 			Performance_Header ();
 			break;
-		case PERF_DETAIL:		//---- Network Performance Details ----
-			Perf_Detail_Header ();
+		case PERF_SUMMARY:		//---- Network Performance Details ----
+			Perf_Sum_Header ();
 			break;
 		case GROUP_REPORT:		//---- Group Performance Summary ----
 			Group_Header ();
 			break;
-		case GROUP_DETAIL:		//---- Group Performance Details ----
-			Group_Detail_Header ();
+		case GROUP_SUMMARY:		//---- Group Performance Details ----
+			Group_Sum_Header ();
 			break;
 		case RELATIVE_GAP:		//---- Relative Gap Report
 			Relative_Gap_Header ();

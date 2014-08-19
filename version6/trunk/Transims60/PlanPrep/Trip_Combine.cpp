@@ -36,7 +36,7 @@ void PlanPrep::Trip_Combine (Plan_File *temp_file, int num_temp)
 		trip_ptr = trip_rec_set [num];
 
 		if (temp_file_set [num]->Read_Plan (*plan_ptr)) {
-			plan_ptr->Get_Trip_Index (*trip_ptr);
+			plan_ptr->Get_Index (*trip_ptr);
 		} else {
 			trip_ptr->Set (MAX_INTEGER, 0, 0);
 		}
@@ -76,7 +76,7 @@ void PlanPrep::Trip_Combine (Plan_File *temp_file, int num_temp)
 		trip_ptr = trip_rec_set [num];
 
 		if (temp_file_set [num]->Read_Plan (*plan_ptr)) {
-			plan_ptr->Get_Trip_Index (*trip_ptr);
+			plan_ptr->Get_Index (*trip_ptr);
 		} else {
 			trip_ptr->Set (MAX_INTEGER, 0, 0);
 		}
