@@ -12,21 +12,26 @@
 
 void LocationData::Walk_Access (void)
 {
-	int distance, runs;
+	int distance, runs, stop, loc;
 	Dtime time;
 
+	Int_Itr int_itr;
 	Access_Itr access_itr;
 	Line_Itr line_itr;
 	Line_Stop_Itr stop_itr;
 	Line_Run_Itr run_itr;
 	Loc_Walk_Data loc_walk_rec, *loc_walk_ptr;
 	Loc_Walk_Itr loc_walk_itr;
+	Stop_Data *stop_ptr;
+	Location_Itr loc_itr;
+	Link_Data *link_ptr;
 
 	//---- initialize the arrays ----
 
 	if (stop_runs.size () == 0) {
 		stop_runs.assign (stop_array.size (), 0);
 	}
+	memset (&loc_walk_rec, '\0', sizeof (loc_walk_rec));
 	loc_walk_array.assign (location_array.size (), loc_walk_rec);
 
 	//---- calculate the number of runs serving each stop ----
@@ -60,13 +65,44 @@ void LocationData::Walk_Access (void)
 				if (distance > 0) {
 					loc_walk_ptr->count++;
 					loc_walk_ptr->distance += distance;
-					loc_walk_ptr->weight = distance * runs;
+					loc_walk_ptr->weight += distance * runs;
 				}
 			}
 		}
 	}
 
-	//********** need to create stop-location links without access links ***************
+	//---- match stops and locations on the same link ----
+
+	for (loc=0, loc_itr = location_array.begin (); loc_itr != location_array.end (); loc_itr++, loc++) {
+		loc_walk_ptr = &loc_walk_array [loc];
+		link_ptr = &link_array [loc_itr->Link ()];
+
+		//---- check for walk permissions ----
+
+		if (Use_Permission (link_ptr->Use (), WALK)) {
+			for (stop=0, int_itr = stop_runs.begin (); int_itr != stop_runs.end (); int_itr++, stop++) {
+				runs = *int_itr;
+				if (runs == 0) continue;
+
+				stop_ptr = &stop_array [stop];
+				if (stop_ptr->Link () == loc_itr->Link ()) {
+					if (stop_ptr->Dir () == loc_itr->Dir ()) {
+						distance = loc_itr->Offset ();
+					} else {
+						distance = (link_ptr->Length () - loc_itr->Offset ());
+					}
+					distance = abs (distance - stop_ptr->Offset ());
+					distance = walk_distance - Resolve (distance);
+
+					if (distance > 0) {
+						loc_walk_ptr->count++;
+						loc_walk_ptr->distance += distance;
+						loc_walk_ptr->weight += distance * runs;
+					}
+				}
+			}
+		}
+	}
 
 	//---- normalize the location weights ----
 

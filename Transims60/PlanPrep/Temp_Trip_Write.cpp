@@ -59,7 +59,7 @@ void PlanPrep::Plan_Processing::Temp_Trip_Write (int part)
 		trip_ptr = trip_rec_set [num];
 
 		if (stat) {
-			plan_ptr->Get_Trip_Index (*trip_ptr);
+			plan_ptr->Get_Index (*trip_ptr);
 		} else {
 			trip_ptr->Set (MAX_INTEGER);
 		}
@@ -130,7 +130,7 @@ void PlanPrep::Plan_Processing::Temp_Trip_Write (int part)
 			trip_ptr = trip_rec_set [num];
 
 			if (stat) {
-				plan_ptr->Get_Trip_Index (*trip_ptr);
+				plan_ptr->Get_Index (*trip_ptr);
 			} else {
 				trip_ptr->Set (MAX_INTEGER);
 			}
@@ -155,7 +155,7 @@ void PlanPrep::Plan_Processing::Temp_Trip_Write (int part)
 					new_plan_file->Write_Plan (*merge_ptr);
 				}
 				if (merge_file->Read_Plan (*merge_ptr)) {
-					 merge_ptr->Get_Trip_Index (trip_index);
+					 merge_ptr->Get_Index (trip_index);
 
 					if (trip_index < last_trip) {
 						MAIN_LOCK

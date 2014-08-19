@@ -11,13 +11,13 @@
 void LinkSum::Link_Report (double min_volume)
 {
 	bool flag;
-	int i, ab_index, ba_index, ab_flow, ba_flow, an, bn;
-	double flow;
+	int i, ab_index, ba_index, ab_use, ba_use, an, bn;
+	double volume;
 	String ab, ba;
 	
 	Link_Itr link_itr;
-	Link_Perf_Period_Itr period_itr;
-	Flow_Time_Data flow_data;
+	Perf_Period_Itr period_itr;
+	Perf_Data perf_data;
 
 	Show_Message ("Creating a Link Event Report -- Record");
 	Set_Progress ();
@@ -37,31 +37,31 @@ void LinkSum::Link_Report (double min_volume)
 		ab_index = (link_itr->Use () != -2) ? link_itr->AB_Dir () : -1;
 		ba_index = (link_itr->Use () != -1) ? link_itr->BA_Dir () : -1;
 
-		ab_flow = (ab_index >= 0) ? dir_array [ab_index].Flow_Index () : -1;
-		ba_flow = (ba_index >= 0) ? dir_array [ba_index].Flow_Index () : -1;
+		ab_use = (ab_index >= 0) ? dir_array [ab_index].Use_Index () : -1;
+		ba_use = (ba_index >= 0) ? dir_array [ba_index].Use_Index () : -1;
 
 		//---- scan each period volume ----
 
-		for (i=0, period_itr = link_perf_array.begin (); period_itr != link_perf_array.end (); period_itr++, i++) {
+		for (i=0, period_itr = perf_period_array.begin (); period_itr != perf_period_array.end (); period_itr++, i++) {
 			ab.clear ();
 			ba.clear ();
 			flag = false;
 
 			if (ab_index >= 0) {
-				flow_data = period_itr->Total_Flow_Time (ab_index, ab_flow);
+				perf_data = period_itr->Total_Performance (ab_index, ab_use);
 
-				flow = flow_data.Flow ();
-				if (flow >= min_volume) {
-					ab = String ("%d") % DTOI (flow);
+				volume = perf_data.Volume ();
+				if (volume >= min_volume) {
+					ab = String ("%d") % DTOI (volume);
 					flag = true;
 				}
 			}
 			if (ba_index >= 0) {
-				flow_data = period_itr->Total_Flow_Time (ba_index, ba_flow);
+				perf_data = period_itr->Total_Performance (ba_index, ba_use);
 
-				flow = flow_data.Flow ();
-				if (flow >= min_volume) {
-					ba = String ("%d") % DTOI (flow);
+				volume = perf_data.Volume ();
+				if (volume >= min_volume) {
+					ba = String ("%d") % DTOI (volume);
 					flag = true;
 				}
 			}

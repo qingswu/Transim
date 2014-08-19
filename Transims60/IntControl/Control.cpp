@@ -317,35 +317,16 @@ void IntControl::Program_Control (void)
 		}
 	}
 
-	//---- turn volume file ----
+	//---- turn delay file ----
 
-	key = Get_Control_String (TURN_VOLUME_FILE);
-
-	if (!key.empty ()) {
-		Print (1);
-		turn_file.Open (Project_Filename (key));
-
-		turn_flag = true;
-	}
-
-	//---- link delay file ----
-
-	if (System_File_Flag (LINK_DELAY)) {
-		if (turn_flag) {
-			Error ("Use Link Delay or Turn Movements, but not both");
-		}
-		Link_Delay_File *file = (Link_Delay_File *) System_File_Handle (LINK_DELAY);
-		if (!file->Turn_Flag ()) {
-			Error ("The Link Delay File does not include Turning Movements");
-		}
+	if (System_File_Flag (TURN_DELAY)) {
 		delay_flag = true;
-	}
-	if (turn_flag || delay_flag) {
+
 		if (!volume_flag && !update_flag) {
-			Warning ("Link Delay or Turn Volumes are used by Volume/Update Methods");
+			Warning ("Turn Delays are used by Volume/Update Methods");
 		}
 	} else if (volume_flag || update_flag) {
-		Error ("Volume or Update Methods require Link Delay or Turn Movements");
+		Error ("Volume or Update Methods require Turn Delays");
 	}
 	update_report = Report_Flag (TIMING_UPDATE);
 } 

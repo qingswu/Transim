@@ -42,7 +42,9 @@ void Data_Service::Write_Trips (void)
 			if (part < 0) continue;
 			file = new_file_set [part];
 		}
-		count += Put_Trip_Data (*file, *trip_ptr);
+		if (trip_ptr->External_IDs ()) {
+			count += Put_Trip_Data (*file, *trip_ptr);
+		}
 	}
 	End_Progress ();
 
@@ -58,44 +60,7 @@ void Data_Service::Write_Trips (void)
 
 int Data_Service::Put_Trip_Data (Trip_File &file, Trip_Data &data)
 {
-	int veh, type;
-
-	Location_Data *loc_ptr;
-	Veh_Type_Data *type_ptr;
-
-	file.Household (data.Household ());
-	file.Person (data.Person ());
-	file.Tour (MAX (data.Tour (), 1));
-	file.Trip (data.Trip ());
-	file.Start (data.Start ());
-	file.End (data.End ());
-	file.Duration (data.Duration ());
-
-	loc_ptr = &location_array [data.Origin ()];
-	file.Origin (loc_ptr->Location ());
-
-	loc_ptr = &location_array [data.Destination ()];
-	file.Destination (loc_ptr->Location ());
-
-	file.Purpose (data.Purpose ());
-	file.Mode (data.Mode ());
-	file.Constraint (data.Constraint ());
-	file.Priority (data.Priority ());
-
-	veh = data.Vehicle ();
-	type = data.Veh_Type ();
-
-	if (veh < 0) {
-		veh = type = 0;
-	} else {
-		type_ptr = &veh_type_array [type];
-		type = type_ptr->Type ();
-	}
-	file.Vehicle (veh);
-	file.Veh_Type (type);
-
-	file.Type (data.Type ());
-	file.Partition (data.Partition ());
+	file.Put_Data (data);
 
 	if (!file.Write ()) {
 		Error (String ("Writing %s") % file.File_Type ());

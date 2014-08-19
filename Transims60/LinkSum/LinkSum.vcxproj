@@ -302,7 +302,7 @@
       <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -313,19 +313,19 @@
     <ClCompile Include="Execute.cpp" />
     <ClCompile Include="Gap_Report.cpp" />
     <ClCompile Include="Get_Location_Data.cpp" />
-    <ClCompile Include="Group_Detail.cpp" />
-    <ClCompile Include="Group_Perf_File.cpp" />
     <ClCompile Include="Group_Report.cpp" />
+    <ClCompile Include="Group_Summary.cpp" />
+    <ClCompile Include="Group_Sum_File.cpp" />
     <ClCompile Include="Group_Time.cpp" />
     <ClCompile Include="Link_Group.cpp" />
     <ClCompile Include="Link_Report.cpp" />
     <ClCompile Include="LinkSum.cpp" />
-    <ClCompile Include="Perf_Detail.cpp" />
-    <ClCompile Include="Perf_File.cpp" />
     <ClCompile Include="Perf_Report.cpp" />
+    <ClCompile Include="Perf_Summary.cpp" />
     <ClCompile Include="Select_Links.cpp" />
     <ClCompile Include="Set_Link_Data.cpp" />
     <ClCompile Include="Set_Link_Dir.cpp" />
+    <ClCompile Include="Summary_File.cpp" />
     <ClCompile Include="Time_Change.cpp" />
     <ClCompile Include="Time_Report.cpp" />
     <ClCompile Include="Top_100.cpp" />
@@ -336,7 +336,7 @@
     <ClCompile Include="Write_Group.cpp" />
     <ClCompile Include="Write_Link_Data.cpp" />
     <ClCompile Include="Write_Link_Dir.cpp" />
-    <ClCompile Include="Write_Turn_Vol.cpp" />
+    <ClCompile Include="Write_Turn_Data.cpp" />
     <ClCompile Include="Write_Zone.cpp" />
     <ClCompile Include="Zone_Summary.cpp" />
   </ItemGroup>

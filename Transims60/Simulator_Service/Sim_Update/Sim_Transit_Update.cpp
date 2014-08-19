@@ -24,12 +24,14 @@ bool Sim_Transit_Update::Update_Check (void)
 {
 	if (run_update_time > sim->time_step) return (false);
 
-	int i, j, traveler;
+	int i, j, leg, last_leg, traveler;
 
 	Sim_Plan_Itr plan_itr;
-	Sim_Plan_Ptr plan_ptr;
+	Sim_Plan_Ptr sim_plan_ptr;
+	Sim_Leg_Data sim_leg;
 	Line_Data *line_ptr;
 	Line_Stop_Itr stop_itr;
+	Line_Stop *last_stop_ptr;
 	Line_Run_Itr run_itr;
 	Person_Index person_index;
 	Person_Map_Stat person_stat;
@@ -43,16 +45,18 @@ bool Sim_Transit_Update::Update_Check (void)
 		line_ptr = &sim->line_array [i];
 
 		stop_itr = line_ptr->begin ();
+		last_stop_ptr = &line_ptr->back ();
 
 		for (j=0, run_itr = stop_itr->begin (); run_itr != stop_itr->end (); run_itr++, j++) {
-			if (run_itr->Schedule () < sim->time_step) continue;
+			if (run_itr->Schedule () <= run_itr->Time ()) continue;
 			if (run_itr->Schedule () > sim->time_step) {
 				if (run_itr->Schedule () < run_update_time) {
 					run_update_time = run_itr->Schedule ();
 				}
-				continue;
+				break;
 			}
 			sim->stats.num_runs++;
+			run_itr->Time (sim->time_step);
 
 			//---- find the traveler ----
 
@@ -78,20 +82,16 @@ bool Sim_Transit_Update::Update_Check (void)
 			sim_travel_ptr->Person (0);
 			sim_travel_ptr->Traveler (traveler);
 			sim_travel_ptr->random.Seed (sim->Random_Seed () + traveler);
-			sim_travel_ptr->Status (-1);
+			sim_travel_ptr->Status (NOT_ACTIVE);
 
-			//sim_travel_ptr->Type (0);
-			//sim_travel_ptr->Status (-2);
+			sim_travel_ptr->Add_Plan (*plan_itr);
+			sim_plan_ptr = sim_travel_ptr->Get_Plan ();
 
-			plan_ptr = sim_travel_ptr->sim_plan_ptr = new Sim_Plan_Data ();
+			sim_plan_ptr->Tour (1);
+			sim_plan_ptr->Trip (j+1);
 
-			*plan_ptr = (*plan_itr);
-
-			plan_ptr->Tour (1);
-			plan_ptr->Trip (j+1);
-
-			plan_ptr->Start (run_itr->Schedule ());
-			plan_ptr->End (plan_ptr->Start () + plan_ptr->Duration ());
+			sim_plan_ptr->Start (run_itr->Schedule ());
+			sim_plan_ptr->End (last_stop_ptr->at (j).Schedule ());
 
 			veh_index.Household (sim_travel_ptr->Household ());
 			veh_index.Vehicle (0);
@@ -99,6 +99,17 @@ bool Sim_Transit_Update::Update_Check (void)
 			veh_itr = sim->sim_veh_map.find (veh_index);	
 
 			sim_travel_ptr->Vehicle (veh_itr->second);
+
+			//---- copy legs ----
+
+			last_leg = -1;
+			sim_plan_ptr->First_Leg (last_leg);
+
+			for (leg = plan_itr->First_Leg (); leg >= 0; ) {
+				sim_leg = sim->transit_legs [leg];
+				leg = sim_leg.Next_Record ();
+				last_leg = sim_plan_ptr->Add_Leg (sim_leg, last_leg);
+			}
 		}
 	}
 	return (true);

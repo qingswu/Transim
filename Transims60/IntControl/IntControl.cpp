@@ -11,7 +11,7 @@
 IntControl::IntControl (void) : Data_Service ()
 {
 	Program ("IntControl");
-	Version (1);
+	Version (2);
 	Title ("Intersection Traffic Controls");
 
 	System_File_Type required_files [] = {
@@ -20,7 +20,7 @@ IntControl::IntControl (void) : Data_Service ()
 	System_File_Type optional_files [] = {
 		SHAPE, LANE_USE, SIGN, SIGNAL, TIMING_PLAN, PHASING_PLAN, DETECTOR,
 		NEW_SIGN, NEW_SIGNAL, NEW_TIMING_PLAN, NEW_PHASING_PLAN, NEW_DETECTOR, 
-		LINK_DELAY, END_FILE
+		TURN_DELAY, END_FILE
 	};
 	int file_service_keys [] = {
 		NOTES_AND_NAME_FIELDS, SAVE_LANE_USE_FLOWS, 0
@@ -52,7 +52,6 @@ IntControl::IntControl (void) : Data_Service ()
 		{ EXTENDED_GREEN_FACTOR, "EXTENDED_GREEN_FACTOR", LEVEL1, OPT_KEY, LIST_KEY, "0.5", "0.1..1.0", NO_HELP },
 		{ MAXIMUM_GREEN_FACTOR, "MAXIMUM_GREEN_FACTOR", LEVEL1, OPT_KEY, LIST_KEY, "2.0", "0.2..10.0", NO_HELP },
 		{ SIGNAL_DETECTOR_LENGTH, "SIGNAL_DETECTOR_LENGTH", LEVEL1, OPT_KEY, FLOAT_KEY, "50 feet", "15..150 feet", NO_HELP },
-		{ TURN_VOLUME_FILE, "TURN_VOLUME_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		END_CONTROL
 	};
 	const char *reports [] = {
@@ -72,7 +71,7 @@ IntControl::IntControl (void) : Data_Service ()
 
 	delay_flag = range_flag = no_control_flag = signal_flag = sign_flag = delete_flag = update_flag = false;
 	detector_flag = coord_flag = update_report = regen_flag = volume_flag = false;
-	merge_flag = warning_flag = input_sign_flag = input_signal_flag = time_flag = turn_flag = false;
+	merge_flag = warning_flag = input_sign_flag = input_signal_flag = time_flag = false;
 	num_new = num_update = nsign = ntiming = nsignal = nphasing = ndetector = 0;
 }
 #ifdef _CONSOLE

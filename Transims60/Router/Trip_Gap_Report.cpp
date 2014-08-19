@@ -15,7 +15,7 @@ void Router::Trip_Gap_Report (void)
 	int i;
 	double gap, diff, total, std_dev, rmse, num;
 
-	Gap_Itr gap_itr;
+	Gap_Sum_Itr gap_itr;
 
 	Header_Number (TRIP_GAP);
 
@@ -28,8 +28,8 @@ void Router::Trip_Gap_Report (void)
 		if (gap_itr->count == 0) continue;
 
 		num = gap_itr->count;
-		total = gap_itr->total;
-		diff = gap_itr->diff;
+		total = gap_itr->current;
+		diff = gap_itr->abs_diff;
 
 		if (total > 0.0) {
 			gap = diff / total;

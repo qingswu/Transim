@@ -11,15 +11,18 @@
 
 Sim_Plan_Process::Sim_Plan_Process (void) : Static_Service ()
 {
-	num_plans = 0;
+	num_plans = leg_pool = 0;
+	id = 1;
 }
 
 #ifdef THREADS
 
-Sim_Plan_Process::Sim_Plan_Process (Plan_Queue &queue) : Static_Service ()
+Sim_Plan_Process::Sim_Plan_Process (Plan_Queue *queue, int _id) : Static_Service ()
 { 
-	plan_queue = &queue; 
+	plan_queue = queue; 
 	num_plans = 0;
+	leg_pool = _id;
+	id = _id + 1;
 }
 
 //---------------------------------------------------------
@@ -30,28 +33,18 @@ void Sim_Plan_Process::operator()()
 {
 	int number;
 	Plan_Data *plan_ptr;
-	Sim_Travel_Ptr sim_travel_ptr;
+	Sim_Trip_Ptr sim_trip_ptr;
 
 	for (;;) {
 		plan_ptr = plan_queue->Get_Work (number);
 		if (plan_ptr == 0) break;
 
-		sim_travel_ptr = Plan_Processing (plan_ptr);
+		sim_trip_ptr = Plan_Processing (plan_ptr);
 		delete plan_ptr;
 
-		if (sim_travel_ptr == 0) break;
-
-		if (!plan_queue->Put_Result (sim_travel_ptr, number)) break;
+		if (sim_trip_ptr == 0) break;
+		if (!plan_queue->Put_Result (sim_trip_ptr, number)) break;
 	}
 }
 #endif
-
-//---------------------------------------------------------
-//	Initialize
-//---------------------------------------------------------
-
-void Sim_Plan_Process::Initialize (void)
-{
-	num_plans = 0;
-}
 

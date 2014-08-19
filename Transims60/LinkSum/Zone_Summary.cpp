@@ -10,13 +10,14 @@
 
 void LinkSum::Zone_Summary (void)
 {
-	int i, j, z, count, link, nrec, nzone, index, flow_index;
-	double factor, vmt, vht, flow;
-	Dtime time;
+	int i, j, z, count, link, nrec, nzone, index, use_index;
+	double factor;
 
 	Link_Data *link_ptr;
-	Link_Perf_Period_Itr period_itr;
-	Flow_Time_Data flow_data;
+	Dir_Data *dir_ptr;
+	Perf_Period_Itr period_itr;
+	Perf_Data perf_data;
+	Performance_Data data;
 
 	Link_Loc_Map_Itr loc_itr, first_itr;
 	Doubles dbl;
@@ -117,21 +118,15 @@ void LinkSum::Zone_Summary (void)
 				index = link_ptr->AB_Dir ();
 			}
 			if (index < 0) continue;
-			flow_index = dir_array [index].Flow_Index ();
 
-			for (j=0, period_itr = link_perf_array.begin (); period_itr != link_perf_array.end (); period_itr++, j++) {
-				flow_data = period_itr->Total_Flow_Time (index, flow_index);
+			dir_ptr = &dir_array [index];
+			use_index = dir_ptr->Use_Index ();
 
-				flow = flow_data.Flow ();
-				time = flow_data.Time ();
+			for (j=0, period_itr = perf_period_array.begin (); period_itr != perf_period_array.end (); period_itr++, j++) {
+				perf_data = period_itr->Total_Performance (index, use_index);
 
-				if (flow > 0) {
-					vmt = flow * factor;
-					vht = flow * time / loc_itr->second.count;
-
-					zone_vmt [j] [z] += vmt;
-					zone_vht [j] [z] += vht;
-				}
+				zone_vmt [j] [z] += perf_data.Veh_Dist () * factor;
+				zone_vht [j] [z] += perf_data.Veh_Time () * factor;
 			}
 		}
 	}

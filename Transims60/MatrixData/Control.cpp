@@ -13,7 +13,7 @@
 void MatrixData::Program_Control (void)
 {
 	int i, j, num, tabs, field, zone, num_org, num_des;
-	String key, name, buf;
+	String key, name, buf, format;
 	Strings strings, labels;
 	Str_Itr str_itr;
 	Data_Group data_rec, *data_ptr;
@@ -22,7 +22,6 @@ void MatrixData::Program_Control (void)
 	Matrix_Group matrix_rec, *matrix_ptr;
 	Matrix_Itr matrix_itr;
 	Db_Field *fld_ptr;
-	Format_Type format;
 	Field_Type type = DB_INTEGER;
 	Units_Type units;
 	double size;
@@ -202,15 +201,14 @@ void MatrixData::Program_Control (void)
 
 			format = Db_Header::Def_Format (key);
 
-			if (format == UNFORMATED) {
+			if (format.empty ()) {
 				if (Check_Control_Key (MATRIX_FORMAT, i)) {
-					name = Get_Control_String (MATRIX_FORMAT, i);
+					format = Get_Control_String (MATRIX_FORMAT, i);
 				} else {
-					name = Get_Default_Text (MATRIX_FORMAT);
+					format = Get_Default_Text (MATRIX_FORMAT);
 				}
-				format = Format_Code (name);
 			}
-			matrix_ptr->matrix = TDF_Matrix (format);
+			matrix_ptr->matrix = TDF_Matrix (READ, format);
 
 			if (num > 1) {
 				matrix_ptr->matrix->File_Type (String ("Matrix File #%d") % i);
@@ -219,8 +217,6 @@ void MatrixData::Program_Control (void)
 				matrix_ptr->matrix->File_Type ("Matrix File");
 				matrix_ptr->matrix->File_ID ("Matrix");
 			}
-			matrix_ptr->matrix->Dbase_Format (format);
-
 			matrix_ptr->matrix->Open (key);
 
 			if (matrix_ptr->matrix->Num_Periods () > 1) {
@@ -301,7 +297,7 @@ void MatrixData::Program_Control (void)
 		input_file.Open (Project_Filename (key));
 		input_flag = true;
 
-		input_matrix = 	TDF_Matrix (TAB_DELIMITED);
+		input_matrix = 	TDF_Matrix (READ, TAB_DELIMITED);
 
 		Read_Square_Table ();
 	}
@@ -335,20 +331,17 @@ void MatrixData::Program_Control (void)
 
 		format = Db_Header::Def_Format (key);
 
-		if (format == UNFORMATED) {
+		if (format.empty ()) {
 			if (Check_Control_Key (GROWTH_FACTOR_FORMAT)) {
-				name = Get_Control_String (GROWTH_FACTOR_FORMAT);
+				format = Get_Control_String (GROWTH_FACTOR_FORMAT);
 			} else {
-				name = Get_Default_Text (GROWTH_FACTOR_FORMAT);
+				format = Get_Default_Text (GROWTH_FACTOR_FORMAT);
 			}
-			format = Format_Code (name);
 		}
-		factor_file = TDF_Matrix (format);
+		factor_file = TDF_Matrix (READ, format);
 
 		factor_file->File_Type ("Growth Factor File");
 		factor_file->File_ID ("Factor");
-
-		factor_file->Dbase_Format (format);
 
 		Print (1);
 		factor_file->Open (key);
@@ -412,21 +405,20 @@ void MatrixData::Program_Control (void)
 		new_flag = true;
 
 		if (Check_Control_Key (NEW_MATRIX_FORMAT)) {
-			format = Format_Code (Get_Control_String (NEW_MATRIX_FORMAT));
+			format = Get_Control_String (NEW_MATRIX_FORMAT);
 		} else {
-			format = Format_Code (Get_Default_Text (NEW_MATRIX_FORMAT));
+			format = Get_Default_Text (NEW_MATRIX_FORMAT);
 		}
+		new_matrix = TDF_Matrix (CREATE, format);
 	} else {
-		format = TAB_DELIMITED;
+		new_matrix = TDF_Matrix (CREATE, TAB_DELIMITED);
 	}
-	new_matrix = TDF_Matrix (format);
 
 	new_matrix->File_Type ("New Matrix File");
 	new_matrix->File_ID ("NewMatrix");
 
 	if (new_flag) {
 		new_matrix->Filename (Project_Filename (key));
-		new_matrix->Dbase_Format (format);
 	}
 
 	//---- build matrix fields ----

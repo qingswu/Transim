@@ -18,14 +18,12 @@ public:
 	Plan_Processor (Router_Service *exe = 0) { Initialize (exe); }
 	~Plan_Processor (void);
 
-	void Initialize (Router_Service *_exe);
-	void Start_Processing (void);
-	void Start_Work (void);
-	void Plan_Build (Plan_Ptr_Array *ptr);
-	void Complete_Work (void);
-	void Stop_Processing (void);
-	void Save_Flows (void);
-	int  Num_Threads (void)           { return (num_threads); }
+	void   Initialize (Router_Service *_exe);
+	void   Start_Processing (bool update_times = false, bool zero_flows = false);
+	void   Plan_Build (Plan_Ptr_Array *ptr);
+	void   Stop_Processing (bool save_flows = false);
+	void   Save_Flows (void);
+	int    Num_Threads (void)           { return (num_threads); }
 
 private:
 	Router_Service  *exe;

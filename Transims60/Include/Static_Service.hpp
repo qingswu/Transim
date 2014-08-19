@@ -126,9 +126,15 @@ public:
 	
 	static Problem_Type Problem_Code (String text);
 	static const char * Problem_Code (Problem_Type code)         { return (Type_Code (code, problem_codes)); }
+	
+	static Simulation_Type Simulation_Code (String text)         { return ((Simulation_Type) Type_Code (text, simulation_codes, "Simulation")); }
+	static const char * Simulation_Code (Simulation_Type code)   { return (Type_Code (code, simulation_codes)); }
 
 	static Event_Type Event_Code (String text)                   { return ((Event_Type) Type_Code (text, event_codes, "Event")); }
 	static const char * Event_Code (Event_Type code)             { return (Type_Code (code, event_codes)); }
+
+	static Travel_Type Travel_Code (String text)                 { return ((Travel_Type) Type_Code (text, travel_codes, "Travel")); }
+	static const char * Travel_Code (Travel_Type code)           { return (Type_Code (code, travel_codes)); }
 
 	static Constraint_Type Constraint_Code (String text)         { return ((Constraint_Type) Type_Code (text, constraint_codes, "Constraint")); }
 	static const char * Constraint_Code (Constraint_Type code)   { return (Type_Code (code, constraint_codes)); }
@@ -184,6 +190,9 @@ public:
 	static Combine_Type Combine_Code (String text)               { return ((Combine_Type) Type_Code (text, combine_codes, "Combine Method")); }
 	static const char * Combine_Code (Combine_Type code)         { return (Type_Code (code, combine_codes)); }
 	
+	static Router_Method_Type Router_Method_Code (String text)   { return ((Router_Method_Type) Type_Code (text, router_method_codes, "Router Method")); }
+	static const char * Router_Method_Code (Router_Method_Type code) { return (Type_Code (code, router_method_codes)); }
+
 	static Sel_Method_Type Select_Method_Code (String text)      { return ((Sel_Method_Type) Type_Code (text, select_method_codes, "Selection Method")); }
 	static const char * Select_Method_Code (Sel_Method_Type code){ return (Type_Code (code, select_method_codes)); }
 
@@ -240,7 +249,7 @@ public:
 
 	static char * Clean (char *text);
 	
-	static Units_Type Performance_Units_Map (Performance_Type code, Units_Type flow_type = VEHICLES);
+	static Units_Type Performance_Units_Map (Performance_Type code);
 
 	static Units_Type  Time_Format (void)           { return (time_format); }
 	static void Time_Format (Units_Type format)     { time_format = format; }
@@ -301,6 +310,7 @@ private:
 	static Code_Text problem_codes [];
 	static Code_Text simulation_codes [];
 	static Code_Text event_codes [];
+	static Code_Text travel_codes [];
 	static Code_Text constraint_codes [];
 	static Code_Text priority_codes [];
 	static Code_Text time_point_codes [];
@@ -319,6 +329,7 @@ private:
 	static Code_Text relate_codes [];
 	static Code_Text gender_codes [];
 	static Code_Text combine_codes [];
+	static Code_Text router_method_codes [];
 	static Code_Text select_method_codes [];
 	static Code_Text loc_method_codes [];
 	static Code_Text signal_split_codes [];

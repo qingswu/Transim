@@ -25,7 +25,7 @@ public:
 
 	bool Add_Equation (int number, string &parameters);
 
-	int  Apply_Equation (int number, int time0, double flow, int capacity, int length);
+	int  Apply_Equation (int number, int time0, double volume, int capacity, int length);
 
 private:
 

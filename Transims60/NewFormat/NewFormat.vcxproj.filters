@@ -59,13 +59,13 @@
     <ClCompile Include="Make_Route_Nodes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Create_Performance.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Read_Routes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Get_Router_Nodes_Data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Read_Delay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

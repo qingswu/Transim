@@ -74,10 +74,7 @@ bool PathSkim::Location_List (int zone, int num_sel, Integers *locations, Intege
 			zone_ptr = &zone_array [map_itr->second];
 
 			for (int_itr = locations->begin (); int_itr != locations->end (); int_itr++) {
-				map_itr = location_map.find (*int_itr);
-				if (map_itr == location_map.end ()) continue;
-
-				location_ptr = &location_array [map_itr->second];
+				location_ptr = &location_array [*int_itr];
 
 				dx = location_ptr->X () - zone_ptr->X ();
 				dy = location_ptr->Y () - zone_ptr->Y ();
@@ -116,10 +113,7 @@ bool PathSkim::Location_List (int zone, int num_sel, Integers *locations, Intege
 			compass.Set_Points (4);
 
 			for (int_itr = locations->begin (); int_itr != locations->end (); int_itr++) {
-				map_itr = location_map.find (*int_itr);
-				if (map_itr == location_map.end ()) continue;
-
-				location_ptr = &location_array [map_itr->second];
+				location_ptr = &location_array [*int_itr];
 
 				dx = location_ptr->X () - zone_ptr->X ();
 				dy = location_ptr->Y () - zone_ptr->Y ();
@@ -173,4 +167,3 @@ bool PathSkim::Location_List (int zone, int num_sel, Integers *locations, Intege
 	}
 	return ((selected.size () > 0));
 }
-

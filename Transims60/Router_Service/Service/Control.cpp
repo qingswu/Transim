@@ -56,14 +56,10 @@ void Router_Service::Program_Control (void)
 
 		param.limit_access = Get_Control_Flag (LIMIT_PARKING_ACCESS);
 
-		param.delay_flag = System_File_Flag (LINK_DELAY);
-		if (param.delay_flag) {
-			Link_Delay_File *file = (Link_Delay_File *) System_File_Handle (LINK_DELAY);
-			param.turn_delay_flag = file->Turn_Flag ();
-		} else {
-			param.turn_delay_flag = false;
-			if (Time_Updates () && update_rate > 0) param.delay_flag = true;
-		}
+		param.delay_flag = System_File_Flag (PERFORMANCE);
+		param.turn_delay_flag = System_File_Flag (TURN_DELAY);
+
+		if (Time_Updates () && update_rate > 0) param.delay_flag = true;
 	}
 
 	//---- adjust activity schedule ----

@@ -10,20 +10,20 @@
 
 void LinkSum::Write_Link_Data (Data_Group_Itr &group)
 {
-	int i, j, k, nrec, lanes, lane, index, flow_index, tod_list, type;
+	int i, j, nrec, index, use_index, type;
 	bool save, ab_flag, type_flag;	
-	double data, cap, capacity;
-	Dtime low, high, tod;
+	double value;
+	Dtime low, high;
 
 	Link_Data *link_ptr;
 	Dir_Data *dir_ptr;
-	Lane_Use_Period *use_ptr;
 	Int_Map_Itr map_itr;
-	Link_Perf_Period_Itr period_itr;
-	Link_Perf_Data perf_data;
+	Perf_Period_Itr period_itr;
+	Perf_Data perf_data;
+	Performance_Data data;
 
-	nrec = tod_list = lanes = 0;
-	capacity = cap = data = 0.0;
+	nrec = 0;
+	value = 0.0;
 
 	Show_Message (String ("Writing %s -- Record") % group->file->File_Type ());
 	Set_Progress ();
@@ -62,135 +62,112 @@ void LinkSum::Write_Link_Data (Data_Group_Itr &group)
 				if (index < 0) continue;
 				dir_ptr = &dir_array [index];
 
-				flow_index = dir_ptr->Flow_Index ();
-				if (type == 1 && flow_index < 0) continue;
+				use_index = dir_ptr->Use_Index ();
+				if (type == 1 && use_index < 0) continue;
 
-				//---- get the capacity data ----
+				for (j=0, period_itr = perf_period_array.begin (); period_itr != perf_period_array.end (); period_itr++, j++) {
+					perf_period_array.periods->Period_Range (j, low, high);
 
-				if (group->field == VC_DATA) {
-					capacity = dir_ptr->Capacity ();
+					data.Start (low);
+					data.End (high);
 
-					if (capacity < 20) capacity = 1000.0;
-					cap = capacity *= cap_factor;
-
-					tod_list = dir_ptr->First_Lane_Use ();
-
-					lanes = dir_ptr->Lanes ();
-					if (lanes < 1) lanes = 1;
-				}
-
-
-				for (j=0, period_itr = link_perf_array.begin (); period_itr != link_perf_array.end (); period_itr++, j++) {
 					if (type_flag) {
 						if (type == 0) {
 							perf_data = period_itr->at (index);
 						} else {
-							perf_data = period_itr->at (flow_index);
+							data.Type (1);
+							perf_data = period_itr->at (use_index);
 						}
 					} else {
-						perf_data = period_itr->Total_Link_Perf (index, flow_index);
+						perf_data = period_itr->Total_Performance (index, use_index);
 					}
+					data.Get_Data (&perf_data, dir_ptr, link_ptr);
 
 					switch (group->field) {
-						case FLOW_DATA:
-							data = perf_data.Flow ();
-							break;
 						case TTIME_DATA:
-							data = perf_data.Time ();
+							value = data.Time ().Seconds ();
 							break;
-						case VC_DATA:
-							data = perf_data.Flow ();
-
-							if (data > 0.0) {
-								if (tod_list >= 0) {
-									sum_periods.Period_Range (j, low, high);
-
-									tod = (low + high + 1) / 2;
-									cap = capacity;
-									k = tod_list;
-
-									for (use_ptr = &use_period_array [k]; ; use_ptr = &use_period_array [++k]) {
-										if (use_ptr->Start () <= tod && tod < use_ptr->End ()) {
-											if (type_flag) {
-												if (type == 0) {
-													lane = use_ptr->Lanes0 ();
-												} else {
-													lane = use_ptr->Lanes1 ();
-												}
-											} else {
-												lane = use_ptr->Lanes0 () + use_ptr->Lanes1 ();
-											}
-											cap = capacity * lane / lanes;
-											break;
-										}
-										if (use_ptr->Periods () == 0) break;
-									}
-								}
-								if (cap > 0.0) {
-									data = 100.0 * data / cap;
-								} else {
-									data = 0.0;
-								}
-							}
+						case PERSON_DATA:
+							value = data.Persons ();
 							break;
-						case RATIO_DATA:
-							if (dir_ptr->Time0 () > 0) {
-								data = (double) 100.0 * perf_data.Time () / dir_ptr->Time0 ();
-							} else {
-								data = 100.0;
-							}
+						case VOLUME_DATA:
+							value = data.Volume ();
+							break;
+						case ENTER_DATA:
+							value = data.Enter ();
+							break;
+						case EXIT_DATA:
+							value = data.Exit ();
+							break;
+						case FLOW_DATA:
+							value = data.Flow ();
 							break;
 						case SPEED_DATA:
-							if (perf_data.Time () > 0) {
-								data = (double) link_ptr->Length () / perf_data.Time ();
-							} else {
-								data = (double) link_ptr->Length () / dir_ptr->Time0 ();
-							}
-							if (data < 0.1) data = 0.1;
+							value = data.Speed ();
+							break;
+						case RATIO_DATA:
+							value = data.Time_Ratio ();
 							break;
 						case DELAY_DATA:
-							data = perf_data.Time () - dir_ptr->Time0 ();
+							value = data.Delay ();
 							break;
 						case DENSITY_DATA:
-							data = perf_data.Density ();
+							value = data.Density ();
 							break;
 						case MAX_DENSITY_DATA:
-							data = perf_data.Max_Density ();
+							value = data.Max_Density ();
 							break;
 						case QUEUE_DATA:
-							data = perf_data.Queue ();
+							value = data.Queue ();
 							break;
 						case MAX_QUEUE_DATA:
-							data = perf_data.Max_Queue ();
+							value = data.Max_Queue ();
 							break;
 						case FAILURE_DATA:
-							data = perf_data.Failure ();
+							value = data.Failure ();
+							break;
+						case VC_DATA:
+							value = data.VC_Ratio ();
 							break;
 						case VMT_DATA:
-							data = perf_data.Flow () * UnRound (link_ptr->Length ());
+						case PMT_DATA:
+							value = data.Veh_Dist ();
 							break;
 						case VHT_DATA:
-							data = perf_data.Time () * perf_data.Flow ();
+						case PHT_DATA:
+							value = data.Veh_Time ();
 							break;
 						case VHD_DATA:
-							data = (perf_data.Time () - dir_ptr->Time0 ()) * perf_data.Flow ();
+						case PHD_DATA:
+							value = data.Veh_Delay ();
+							break;
 						case CONG_VMT_DATA:
-							data = perf_data.Ratio_VMT ();
+						case CONG_PMT_DATA:
+							value = data.Ratio_Dist ();
 							break;
 						case CONG_VHT_DATA:
-							data = perf_data.Ratio_VHT ();
+						case CONG_PHT_DATA:
+							value = data.Ratio_Time ();
 							break;
 						case CONG_TIME_DATA:
-							data = perf_data.Occupancy ();
-							if (data <= 0.0) data = 1.0;
-							data = 100.0 * perf_data.Ratio_Count () / data;
+							value = data.Count ();
+							if (value <= 0.0) value = 1.0;
+							value = 100.0 * data.Ratios () / value;
+							break;
+						default:
+							value = 0.0;
 							break;
 					}
-					if (data != 0.0) {
+					if (value != 0.0) {
+						if (data.Volume () > 0 && 
+							(group->field == PMT_DATA || group->field == PHT_DATA || group->field == PHD_DATA ||
+							group->field == CONG_PMT_DATA || group->field == CONG_PHT_DATA)) {
+							value *= data.Persons () / data.Volume ();
+						}
 						if (ab_flag) {
-							group->file->Data_AB (j, data);
+							group->file->Data_AB (j, value);
 						} else {
-							group->file->Data_BA (j, data);
+							group->file->Data_BA (j, value);
 						}
 						save = true;
 					}
@@ -199,7 +176,7 @@ void LinkSum::Write_Link_Data (Data_Group_Itr &group)
 
 			//---- save non-zero records ----
 
-			if (save) {
+			if (save || minimum_volume == 0.0) {
 				nrec++;
 
 				group->file->Link (link_ptr->Link ());

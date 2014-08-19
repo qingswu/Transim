@@ -109,6 +109,8 @@ bool Data_Service::Get_Problem_Data (Problem_File &file, Problem_Data &problem_r
 		
 	if (!Get_Trip_Data (file, problem_rec, partition)) return (false);
 
+	problem_rec.Internal_IDs ();
+
 	problem_rec.Problem (file.Problem ());
 	problem_rec.Survey (file.Survey ());
 	problem_rec.Time (file.Time ());

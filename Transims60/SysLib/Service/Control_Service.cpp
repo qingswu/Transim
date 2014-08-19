@@ -113,12 +113,10 @@ void Control_Service::Write_Control_File (void)
 			fprintf (file, "\n#---- Simulation Service Keys ----\n\n");
 		} else if (key_itr->code == SNAPSHOT_OUTPUT_OFFSET) {
 			fprintf (file, "\n#---- Snapshot Output Keys ----\n\n");
-		} else if (key_itr->code == LINK_DELAY_OUTPUT_OFFSET) {
-			fprintf (file, "\n#---- Link Delay Output Keys ----\n\n");
 		} else if (key_itr->code == PERFORMANCE_OUTPUT_OFFSET) {
 			fprintf (file, "\n#---- Performance Output Keys ----\n\n");
-		} else if (key_itr->code == TURN_VOL_OUTPUT_OFFSET) {
-			fprintf (file, "\n#---- Turn Volume Output Keys ----\n\n");
+		} else if (key_itr->code == TURN_DELAY_OUTPUT_OFFSET) {
+			fprintf (file, "\n#---- Turn Delay Output Keys ----\n\n");
 		} else if (key_itr->code == RIDERSHIP_OUTPUT_OFFSET) {
 			fprintf (file, "\n#---- Ridership Output Keys ----\n\n");
 		} else if (key_itr->code == OCCUPANCY_OUTPUT_OFFSET) {
@@ -2552,12 +2550,10 @@ void Control_Service::Document_Controls (FILE *file, bool flag)
 			fprintf (file, "\n\nSimulation Service Keys:");
 		} else if (key_itr->code == SNAPSHOT_OUTPUT_OFFSET) {
 			fprintf (file, "\n\nSnapshot Output Keys:");
-		} else if (key_itr->code == LINK_DELAY_OUTPUT_OFFSET) {
-			fprintf (file, "\n\nLink Delay Output Keys:");
 		} else if (key_itr->code == PERFORMANCE_OUTPUT_OFFSET) {
 			fprintf (file, "\n\nPerformance Output Keys:");
-		} else if (key_itr->code == TURN_VOL_OUTPUT_OFFSET) {
-			fprintf (file, "\n\nTurn Volume Output Keys:");
+		} else if (key_itr->code == TURN_DELAY_OUTPUT_OFFSET) {
+			fprintf (file, "\n\nTurn Delay Output Keys:");
 		} else if (key_itr->code == RIDERSHIP_OUTPUT_OFFSET) {
 			fprintf (file, "\n\nRidership Output Keys:");
 		} else if (key_itr->code == PROJECTION_OFFSET) {

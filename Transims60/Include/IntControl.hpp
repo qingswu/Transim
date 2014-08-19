@@ -8,7 +8,7 @@
 #include "Data_Service.hpp"
 #include "Best_List.hpp"
 #include "Db_Array.hpp"
-#include "Turn_Vol_File.hpp"
+#include "Turn_Delay_File.hpp"
 #include "List_Data.hpp"
 #include "TypeDefs.hpp"
 
@@ -35,7 +35,7 @@ protected:
 		RED_CLEAR_PHASE_TIME, SIGNAL_DETECTOR_LENGTH, 
 		POCKET_LANE_FACTOR, SHARED_LANE_FACTOR, TURN_MOVEMENT_FACTOR, PERMITTED_LEFT_FACTOR,
 		GENERAL_GREEN_FACTOR, EXTENDED_GREEN_FACTOR, MAXIMUM_GREEN_FACTOR, SIGNAL_SPLIT_METHOD, 
-		MINIMUM_LANE_CAPACITY, MAXIMUM_LANE_CAPACITY, TURN_VOLUME_FILE
+		MINIMUM_LANE_CAPACITY, MAXIMUM_LANE_CAPACITY
 	};
 	virtual void Program_Control (void);
 	virtual void Page_Header (void);
@@ -44,7 +44,7 @@ private:
 	enum IntControl_Reports { TIMING_UPDATE = 1 };
 
 	bool merge_flag, delay_flag, range_flag, signal_flag, sign_flag, delete_flag, update_flag;
-	bool no_control_flag, warning_flag, input_sign_flag, input_signal_flag, time_flag, turn_flag;
+	bool no_control_flag, warning_flag, input_sign_flag, input_signal_flag, time_flag;
 	bool detector_flag, coord_flag, update_report, regen_flag, volume_flag;
 	int num_new, num_update, nsign, ntiming, nsignal, nphasing, ndetector;
 
@@ -54,8 +54,6 @@ private:
 
 	Int_Set update_signal;
 	List_Array node_list;
-
-	Turn_Vol_File turn_file;
 
 	typedef struct {
 		Integer_List signal_type;
@@ -87,7 +85,6 @@ private:
 
 	void Node_Links (void);
 	void Read_Deletes (void);
-	void Read_Turn (void);
 	void Read_Sign (void);
 	void Read_Signal (void);
 	void Create_Signals (void);

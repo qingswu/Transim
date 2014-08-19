@@ -13,12 +13,15 @@ void Router::Set_Partitions (void)
 	if (trip_set_flag) {
 		num_file_sets = trip_file->Num_Parts ();
 	}
-	if (plan_set_flag) {
+	if (new_set_flag) {
 		int num;
 
 		if (select_flag) {
-			num = select_map.Max_Partition () + 1;
-
+			if (First_Partition () >= 0) {
+				num = Num_Partitions ();
+			} else {
+				num = select_map.Max_Partition () + 1;
+			}
 			if (trip_set_flag) {
 				if (num_file_sets != num) {
 					Error (String ("Trip and Selection Partitions are Not Equal (%d vs %d)") %
@@ -66,21 +69,30 @@ void Router::Set_Partitions (void)
 		}
 	}
 	if (trip_set_flag) {
-		trip_set.Initialize (trip_file, num_file_sets);
+		trip_file_set.Initialize (trip_file, num_file_sets);
 
 		if (trip_memory_flag) {
 			trip_arrays.Initialize (num_file_sets);
 		}
 	}
-	if (plan_set_flag && plan_flag) {
-		plan_set.Initialize (plan_file, num_file_sets);
-	
-		if (old_plan_flag) {
-			old_plan_array.resize (num_file_sets);
+	if (new_set_flag) {
+		if (plan_flag) {
+			plan_file_set.Initialize (plan_file, num_file_sets);
 		}
-	}
-	if (plan_set_flag && new_plan_flag) {
-		new_plan_set.Initialize (new_plan_file, num_file_sets);
+		if (plan_set_flag) {
+			plan_ptr_arrays.resize (num_file_sets);
+
+			if (plan_memory_flag) {
+				plan_ptr_set.Initialize (num_file_sets);
+			}
+		}
+		if (new_plan_flag) {
+			new_file_set.Initialize (new_plan_file, num_file_sets);
+
+			if (plan_memory_flag) {
+				new_ptr_set.Initialize (num_file_sets);
+			}
+		}
 	}
 	if (problem_set_flag) {
 		problem_set.Initialize (problem_file, num_file_sets);

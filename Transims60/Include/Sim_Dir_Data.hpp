@@ -6,9 +6,7 @@
 #define SIM_DIR_DATA_HPP
 
 #include "TypeDefs.hpp"
-
-#include <vector>
-using namespace std;
+#include "Threads.hpp"
 
 //---------------------------------------------------------
 //	Sim_Dir_Data class definition
@@ -31,13 +29,13 @@ public:
 	bool  Turn (void)                { return (turn > 0); }
 	int   Subarea (void)             { return (subarea); }
 	int   Count (void)               { return (count); }
+	int   Max_Flow (void)            { return (max_flow); }
 	int   Max_Cell (void)            { return (max_cell); }
+	int   Load_Cell (void)           { return (load_cell); }
 	int   In_Cell (void)             { return (in_cell); }
 	int   Out_Cell (void)            { return (out_cell); }
 	int   Use (void)                 { return (use); }
 	int   Use_Type (void)            { return (use_type); }
-	int   Low_Lane (void)            { return (low_lane); }
-	int   High_Lane (void)           { return (high_lane); }
 	int   Min_Veh_Type (void)        { return (min_veh); }
 	int   Max_Veh_Type (void)        { return (max_veh); }
 	int   Min_Traveler (void)        { return (min_trav); }
@@ -54,13 +52,14 @@ public:
 	void  Method (int value)         { method = (char) value; }
 	void  Turn (bool flag)           { turn = (flag) ? 1 : 0; }
 	void  Subarea (int value)        { subarea = (char) value; }
+	void  Count (int value)          { count = (short) value; }
+	void  Max_Flow (int value)       { max_flow = (short) value; }
 	void  Max_Cell (int value)       { max_cell = (short) value; }
+	void  Load_Cell (int value)      { load_cell = (short) value; }
 	void  In_Cell (int value)        { in_cell = (char) value; }
 	void  Out_Cell (int value)       { out_cell = (short) value; }
 	void  Use (int value)            { use = (short) value; }
 	void  Use_Type (int value)       { use_type = (char) value; }
-	void  Low_Lane (int value)       { low_lane = (char) value; }
-	void  High_Lane (int value)      { high_lane = (char) value; }
 	void  Min_Veh_Type (int value)   { min_veh = (char) value; }
 	void  Max_Veh_Type (int value)   { max_veh = (char) value; }
 	void  Min_Traveler (int value)   { min_trav = (char) value; }
@@ -70,13 +69,13 @@ public:
 	void  Load_Queue (int value)             { load_queue.push_back (value); }
 	Integers load_queue;
 
-	void Make_Cells (void)                   { assign ((max_cell + 1) * lanes, 0); }
+	void Make_Cells (void)                   { assign ((max_cell + 1) * lanes, 0); thru.assign (lanes * 2, 0); }
 
-	int  Index (int lane, int cell)          { return ((max_cell - cell) * lanes + lane); }
+	int  Index (int lane, int cell)          { return (cell * lanes + lane); }
 	int  Lane (int index)                    { return (index % lanes); }
-	int  Cell (int index)                    { return (max_cell - (index / lanes)); }
+	int  Cell (int index)                    { return (index / lanes); }
 
-	int  Front (int index)                   { return ((Cell (index) < max_cell) ? index - lanes : -1); } 
+	int  Front (int index)                   { return ((Cell (index) < max_cell) ? index + lanes : -1); } 
 	int  Right (int index)                   { return ((Lane (index) < lanes - 1) ? index + 1 : -1); }
 	int  Left (int index)                    { return ((Lane (index) > 0) ? index - 1 : -1); }
 
@@ -93,53 +92,85 @@ public:
 	void Clear (int lane, int cell)          { at (Index (lane, cell)) = 0; }
 
 	void Add (void)                          { count++; }
-	void Add (int index, int value)          { Set (index, value); count++; }
-	void Add (int lane, int cell, int value) { Set (lane, cell, value); count++; }
+	void Add (int index, int value)          { Set (index, value); Add (); }
+	void Add (int lane, int cell, int value) { Set (lane, cell, value); Add (); }
 
-	void Remove (void)                       { count--; }
-	void Remove (int index)                  { Clear (index); count--; }
-	void Remove (int lane, int cell)         { Clear (lane, cell); count--; }
+	void Remove (void)                       { if (count > 0) count--; }
+	void Remove (int index)                  { Clear (index); Remove (); }
+	void Remove (int lane, int cell)         { Clear (lane, cell); Remove (); }
+	
+	int  Thru_Link (int lane)                { return (thru [lane]); }
+	void Thru_Link (int lane, int to_link)   { thru [lane] = to_link; }
+
+	int  Thru_Lane (int lane)                { return (thru [lanes + lane]); }
+	void Thru_Lane (int lane, int to_lane)   { thru [lanes + lane] = to_lane; }
+
+	int  Lock (void)                         { return (lock); }
+	void Lock (int value)                    { lock = (short) value; }
 
 	void Clear_Use (int use = ANY_USE_CODE) 
 	{
-		Use (use); use_type = LIMIT; low_lane = high_lane = min_veh = max_veh = min_trav = max_trav = -1; first_use = -1;
+		Use (use); use_type = LIMIT; max_flow = 0; min_veh = max_veh = min_trav = max_trav = -1; first_use = -1;
 	}
 
 	void Clear (void)
 	{
-		length = 0; speed = setback = in_offset = max_cell = out_cell = count = 0; 
-		dir = lanes = method = turn = type = subarea = 0; load_queue.clear ();
+		length = 0; speed = setback = in_offset = max_cell = out_cell = load_cell = count = lock = 0; 
+		dir = lanes = method = turn = type = subarea = 0; load_queue.clear (); thru.clear ();
 		Clear_Use ();
 	}
 
 private:
-	short  speed;
-	char   dir;
-	char   lanes;
-	int    length;
-	short  setback;
-	short  in_offset;
-	char   method;
-	char   turn;
-	char   type;
-	char   subarea;
-	short  count;
-	short  max_cell;
-	short  out_cell;
-	char   in_cell;
-	char   use_type;
-	short  use;
-	char   low_lane;
-	char   high_lane;
-	char   min_veh;
-	char   max_veh;
-	char   min_trav;
-	char   max_trav;
-	int    first_use;
+	short    speed;
+	char     dir;
+	char     lanes;
+	int      length;
+	short    setback;
+	short    in_offset;
+	char     method;
+	char     turn;
+	char     type;
+	char     subarea;
+	short    count;
+	short    max_flow;
+	short    max_cell;
+	short    load_cell;
+	short    out_cell;
+	char     in_cell;
+	char     use_type;
+	short    use;
+	char     min_veh;
+	char     max_veh;
+	char     min_trav;
+	char     max_trav;
+	short    lock;
+	int      first_use;
+	Integers thru;
 };
 
-typedef vector <Sim_Dir_Data>    Sim_Dir_Array;
-typedef Sim_Dir_Array::iterator  Sim_Dir_Itr;
 typedef Sim_Dir_Data *           Sim_Dir_Ptr;
+
+//---------------------------------------------------------
+//	Sim_Dir_Array class definition
+//---------------------------------------------------------
+ 
+class Sim_Dir_Array : public Vector <Sim_Dir_Data>
+{
+public:
+	Sim_Dir_Array (void) {}
+
+	void Lock (int index, int id = 0)    { Lock (&at (index), id); }
+	void Lock (Sim_Dir_Ptr ptr, int id = 0);
+
+	void UnLock (int index, int id = 0)  { UnLock (&at (index), id); }
+	void UnLock (Sim_Dir_Ptr ptr, int id = 0);
+
+#ifdef THREADS
+	condition_variable lock_wait;
+	mutex  lock_mutex;
+#endif
+};
+typedef Sim_Dir_Array::iterator  Sim_Dir_Itr;
+
 
 #endif

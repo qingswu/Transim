@@ -17,14 +17,18 @@ using namespace std;
 //---------------------------------------------------------
 //	Bounded_Queue <Type> (int max_records = 200);
 //
-//	void Put (Type &data);
-//
-//  bool Get (Type &data);
-//
 //  void operator ();
-//  void End_Queue (void);
-//  void Exit_Queue (void);
 //
+//	void Put (Type &data);
+//  bool Get (Type &data);
+//	void Finished (void);
+//
+//	void Start_Work (void);
+//	void Complete_Work (void);
+//	void End_of_Work (void);
+//	void Exit_Queue (void);
+//
+//  int  Num_Records (void);
 //	bool Max_Records (int max_records);
 //---------------------------------------------------------
 
@@ -41,7 +45,7 @@ public:
 
 	Bounded_Queue (int _max_records = 200)
 	{
-		Reset ();
+		Start_Work ();
 		Max_Records (_max_records);
 	}
 
@@ -51,7 +55,7 @@ public:
 
 	void operator()()
 	{
-		mutex_lock lock (queue_mutex);
+		mutex_lock lock (work_mutex);
 		exit_wait.wait (lock);
 	}
 
@@ -61,17 +65,18 @@ public:
 
 	void Put (Type &data)
 	{
-		mutex_lock lock (queue_mutex);
+		mutex_lock lock (work_mutex);
 
 		while (num_records == max_records) {
-			queue_full.wait (lock);
+			work_full.wait (lock);
 		}
+		num_active++;
 		num_records++;
-		type_array [last_index++] = data;
+		type_array [last++] = data;
 
-		if (last_index >= max_records) last_index = 0;
+		if (last >= max_records) last = 0;
 
-		queue_empty.notify_one ();
+		work_empty.notify_one ();
 	}
 
 	//---------------------------------------------------------
@@ -81,46 +86,81 @@ public:
 	bool Get (Type &data)
 	{
 		while (1) {
-			mutex_lock lock (queue_mutex);
+			mutex_lock lock (work_mutex);
 
-			while (!exit_flag && !end_flag && num_records == 0) {
-				queue_empty.wait (lock);
+			while (!end_flag && num_records == 0) {
+				work_empty.wait (lock);
 			}
 			if (num_records == 0) {
-				if (exit_flag) {
-					queue_empty.notify_all ();
+				if (end_flag) {
+					end_wait.notify_one ();
 					return (false);
 				}
-				if (end_flag) {
-					end_flag = false;
-					end_wait.notify_one ();
-					continue;
-				}
+				continue;
 			}
 			num_records--;
 
-			data = type_array [first_index++];
+			data = type_array [first++];
 
-			if (first_index >= max_records) first_index = 0;
+			if (first >= max_records) first = 0;
 
-			queue_full.notify_one ();
+			work_full.notify_one ();
 			return (true);
 		}
 	}
 
 	//--------------------------------------------------------
-	//	End_Queue
+	//	Finished
 	//--------------------------------------------------------
 
-	void End_Queue (void)
+	void Finished (void)
 	{
-		mutex_lock lock (queue_mutex);
+		mutex_lock lock (work_mutex);
 
-		if (num_records > 0) {
-			end_flag = true;
-			end_wait.wait (lock);
+		if (num_active > 0) num_active--;
+
+		if (finish_flag && num_active == 0) {
+			data_wait.notify_one ();
 		}
-		end_flag = false;
+	}
+
+	//--------------------------------------------------------
+	//	Start_Work
+	//--------------------------------------------------------
+
+	void Start_Work (void)
+	{
+		end_flag = finish_flag = false;
+		num_records = num_active = first = last = 0;
+	}
+
+	//--------------------------------------------------------
+	//	Complete_Work
+	//--------------------------------------------------------
+
+	void Complete_Work (void)
+	{
+		mutex_lock lock (work_mutex);
+	
+		while (num_active > 0) {
+			finish_flag = true;
+			data_wait.wait (lock);
+		}
+	}
+
+	//--------------------------------------------------------
+	//	End_of_Work
+	//--------------------------------------------------------
+
+	void End_of_Work (void)
+	{
+		Complete_Work ();
+
+		mutex_lock lock (work_mutex);
+
+		end_flag = true;
+		work_empty.notify_all ();
+		end_wait.wait (lock);
 	}
 
 	//---------------------------------------------------------
@@ -129,19 +169,17 @@ public:
 
 	void Exit_Queue (void)
 	{ 
-		mutex_lock lock (queue_mutex);
-		exit_flag = true;
-		queue_empty.notify_all ();
+		End_of_Work ();
+		exit_wait.notify_one ();
 	}
-	
+
 	//---------------------------------------------------------
-	//	Reset
+	//	Num_Records
 	//---------------------------------------------------------
 
-	void Reset (void)
+	int Num_Records (void)
 	{
-		num_records = first_index = last_index = 0;
-		exit_flag = end_flag = false;
+		return (num_records);
 	}
 
 	//---------------------------------------------------------
@@ -159,11 +197,11 @@ private:
 
 	//---- data ----
 
-	int num_records, max_records, first_index, last_index;
-	bool exit_flag, end_flag;
+	int num_records, num_active, max_records, first, last;
+	bool end_flag, finish_flag;
 
-	condition_variable  queue_full, queue_empty, exit_wait, end_wait;
-	mutex  queue_mutex;
+	condition_variable  work_full, work_empty, exit_wait, end_wait, data_wait;
+	mutex  work_mutex;
 
 	Type_Array type_array;
 };

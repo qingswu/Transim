@@ -22,7 +22,6 @@ int Path_Builder::Magic_Move ()
 	} else {
 		from_ptr = &trip_des [0];
 	}
-	parking_lot = -1;
 	from_array.clear ();
 
 	path_end.End_Type (LOCATION_ID);

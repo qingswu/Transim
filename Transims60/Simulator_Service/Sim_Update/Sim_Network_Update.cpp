@@ -24,8 +24,9 @@ bool Sim_Network_Update::Update_Check (void)
 {
 	if (use_update_time > sim->time_step && turn_update_time > sim->time_step) return (false);
 
-	int i, dir, index, min_lane, max_lane, num;
+	int i, dir, index, min_lane, max_lane, num, lanes;
 	bool complex, match, use_update_flag, turn_update_flag;
+	double rate, rate_factor, pockets;
 
 	Lane_Data lane_data, *lane_ptr;
 	Lane_Array lane_array;
@@ -42,11 +43,17 @@ bool Sim_Network_Update::Update_Check (void)
 
 	turn_update_flag = (turn_update_time <= sim->time_step);
 	if (turn_update_flag) turn_update_time = MAX_INTEGER;
+		
+	rate_factor = sim->method_time_step [MACROSCOPIC];
+	if (rate_factor <= 0.0) rate_factor = Dtime (6, SECONDS);
+	rate_factor = rate_factor / Dtime (1, HOURS);
 
 	//---- initialize link dir data ----
 
 	for (dir=0, sim_dir_itr = sim->sim_dir_array.begin (); sim_dir_itr != sim->sim_dir_array.end (); sim_dir_itr++, dir++) {
 		dir_ptr = &sim->dir_array [dir];
+
+		lanes = dir_ptr->Lanes ();
 
 		if (!use_update_flag || dir_ptr->First_Lane_Use () < 0) goto exit_use;
 
@@ -132,7 +139,11 @@ bool Sim_Network_Update::Update_Check (void)
 
 					if (use_ptr->Type () == PROHIBIT || use_ptr->Type () == LIMIT) {
 						if (use_ptr->Type () == PROHIBIT) {
-							lane_ptr->Use (lane_ptr->Use () ^ use_ptr->Use ());
+							if (use_ptr->Use () == ANY_USE_CODE) {
+								lane_ptr->Use (0);
+							} else {
+								lane_ptr->Use (lane_ptr->Use () ^ use_ptr->Use ());
+							}
 						} else {
 							lane_ptr->Use (use_ptr->Use ());
 						}
@@ -154,6 +165,7 @@ bool Sim_Network_Update::Update_Check (void)
 
 		complex = false;
 		match = true;
+		lanes = 0;
 
 		for (i = min_lane; i <= max_lane; i++) {
 			lane_ptr = &lane_array [i];
@@ -174,6 +186,9 @@ bool Sim_Network_Update::Update_Check (void)
 					sim_dir_itr->First_Use (index);
 				}
 			}
+			if (lane_ptr->Use ()) {
+				lanes++;
+			}
 		}
 		if (match) {
 			sim_dir_itr->Use_Type (lane_data.Type ());
@@ -187,6 +202,16 @@ bool Sim_Network_Update::Update_Check (void)
 		}
 
 exit_use:
+
+		//---- macroscopic flow rate -----
+
+		if (lanes < dir_ptr->Lanes ()) {
+			pockets = (dir_ptr->Left () + dir_ptr->Right ()) * 0.5;
+			rate = (double) dir_ptr->Capacity () * (lanes + pockets) / (dir_ptr->Lanes () + pockets);
+		} else {
+			rate = dir_ptr->Capacity ();
+		}
+		sim_dir_itr->Max_Flow (Round (rate * rate_factor));
 
 		if (turn_update_flag) {
 

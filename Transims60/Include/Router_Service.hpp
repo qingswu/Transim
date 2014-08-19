@@ -16,6 +16,7 @@
 #include "Route_Stop_Data.hpp"
 #include "Lot_XY_Data.hpp"
 #include "One_To_Many.hpp"
+#include "Gap_Data.hpp"
 
 #define MAX_PATHS	10
 
@@ -37,17 +38,23 @@ public:
 	void Transit_Paths (bool flag)                { transit_path_flag = flag; }
 	void ParkRide_Paths (bool flag)               { parkride_path_flag = flag; }
 	void KissRide_Paths (bool flag)               { kissride_path_flag = flag; }
-	void Link_Delays (bool flag)                  { param.delay_flag = flag; }
+	void Use_Link_Delays (bool flag)              { param.delay_flag = flag; }
 	void Link_Flows (bool flag)                   { param.flow_flag = flag; }
 	void Turn_Flows (bool flag)                   { param.turn_flow_flag = flag; }
 	void Skim_Total_Time (bool flag)              { param.skim_total_time = flag; }
 	void Skim_Check_Flag (bool flag)              { skim_check_flag = flag; }
+	void Save_Trip_Gap (bool flag)                { save_trip_gap = flag; }
+	void Reset_Skim_Gap (void)                    { skim_gap = skim_time = 0; }
 
 	bool Link_Flows (void)                        { return (param.flow_flag); }
 	bool Turn_Flows (void)                        { return (param.turn_flow_flag); }
 	bool Skim_Check_Flag (void)                   { return (skim_check_flag); }
-	
-	void Set_Parameters (Path_Parameters &param, int type = 0);
+	bool Save_Trip_Gap (void)                     { return (save_trip_gap); }
+	bool Cap_Penalty_Flag (void)                  { return (param.cap_penalty_flag); }
+
+	double Skim_Gap (void);
+
+	void Set_Parameters (Path_Parameters &param, int traveler_type = 0, int veh_type = -1);
 	
 	virtual bool Save_Plans (Plan_Ptr_Array *ptr, int part=0) { delete ptr; part=0; return (false); }
 
@@ -88,10 +95,15 @@ protected:
 
 	virtual bool Get_Household_Data (Household_File &file, Household_Data &data, int partition = 0);
 
+	double skim_gap, skim_time;
+
+	Gap_Sum_Array   link_gap_array, trip_gap_array;
+	Gap_Data_Array  gap_data_array;
+
 	User_Program type_script;
 	Int2_Map hhold_type;
 	Db_File script_file;
-	bool script_flag, hhfile_flag, select_flag, update_flag, thread_flag;
+	bool script_flag, hhfile_flag, select_flag, update_flag, thread_flag, save_trip_gap;
 
 private:
 

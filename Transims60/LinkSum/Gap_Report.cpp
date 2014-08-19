@@ -17,24 +17,24 @@
 
 void LinkSum::Relative_Gap_Report (void)
 {
-	int i, j, k, index, flow_index;
+	int i, j, k, index, use_index;
 	double flow, flow2, loaded_time, factor, speed, speed2;
 	bool connect_flag;
 
 	Link_Itr link_itr;
 	Dir_Data *dir_ptr;
-	Link_Perf_Period_Itr period_itr;
-	Link_Perf_Array *period_ptr;
-	Flow_Time_Period_Itr turn_itr;
-	Flow_Time_Array *turn_ptr;
-	Flow_Time_Data flow_data;
+	Perf_Period_Itr period_itr;
+	Perf_Period *period_ptr;
+	Turn_Period_Itr turn_itr;
+	Perf_Data perf_data;
+	Turn_Data *turn_ptr;
 	Connect_Data *connect_ptr;
 	Doubles_Itr itr;
 
 	Show_Message ("Creating the Relative Gap Report -- Record");
 	Set_Progress ();
 
-	connect_flag = System_Data_Flag (CONNECTION) && (turn_perf_array.size () > 0) && (compare_turn_array.size () > 0);
+	connect_flag = System_Data_Flag (CONNECTION) && (turn_period_array.size () > 0) && (compare_turn_array.size () > 0);
 
 	//---- clear the summary bins -----
 
@@ -60,31 +60,22 @@ void LinkSum::Relative_Gap_Report (void)
 			}
 			if (index < 0) continue;
 			dir_ptr = &dir_array [index];
-			flow_index = dir_ptr->Flow_Index ();
+			use_index = dir_ptr->Use_Index ();
 
 			//---- process each time period ----
 
-			for (j=0, period_itr = link_perf_array.begin (); period_itr != link_perf_array.end (); period_itr++, j++) {
-				flow_data = period_itr->Total_Flow_Time (index, flow_index);
+			for (j=0, period_itr = perf_period_array.begin (); period_itr != perf_period_array.end (); period_itr++, j++) {
+				perf_data = period_itr->Total_Performance (index, use_index);
 
-				flow = flow_data.Flow ();
-				loaded_time = flow_data.Time ();
+				sum_bin [j] [VHT] += perf_data.Veh_Time ();
+				sum_bin [j] [VMT] += perf_data.Veh_Dist ();
 
-				sum_bin [j] [VHT] += flow * loaded_time;
-				sum_bin [j] [VMT] += flow * link_itr->Length ();
+				period_ptr = &compare_perf_array [j];
 
-				period_ptr = &compare_link_array [j];
+				perf_data = period_ptr->Total_Performance (index, use_index);
 
-				flow_data = period_ptr->Total_Flow_Time (index, flow_index);
-
-				flow2 = flow_data.Flow ();
-				loaded_time = flow_data.Time ();
-
-				//sum_bin [j] [VHT] += flow * loaded_time;
-				sum_bin [j] [VHD] += flow2 * loaded_time;
-
-				//sum_bin [j] [VMT] += flow * link_itr->Length ();
-				sum_bin [j] [VMT2] += flow2 * link_itr->Length ();
+				sum_bin [j] [VHD] += perf_data.Veh_Time ();
+				sum_bin [j] [VMT2] += perf_data.Veh_Dist ();
 			}
 
 			//---- get the turning movements ----
@@ -93,23 +84,14 @@ void LinkSum::Relative_Gap_Report (void)
 				for (k=dir_ptr->First_Connect (); k >= 0; k = connect_ptr->Next_Index ()) {
 					connect_ptr = &connect_array [k];
 
-					for (j=0, turn_itr = turn_perf_array.begin (); turn_itr != turn_perf_array.end (); turn_itr++, j++) {
-						flow_data = turn_itr->at (k);
+					for (j=0, turn_itr = turn_period_array.begin (); turn_itr != turn_period_array.end (); turn_itr++, j++) {
+						turn_ptr = turn_itr->Data_Ptr (k);
 
-						flow = flow_data.Flow ();
-						loaded_time = flow_data.Time ();
+						sum_bin [j] [VHT] += turn_ptr->Turn () * turn_ptr->Time ();
 
-						sum_bin [j] [VHT] += flow * loaded_time;
+						turn_ptr = compare_turn_array [j].Data_Ptr (k);
 
-						turn_ptr = &compare_turn_array [j];
-
-						flow_data = turn_ptr->at (k);
-
-						flow2 = flow_data.Flow ();
-						loaded_time = flow_data.Time ();
-
-						//sum_bin [j] [VHT] += flow * loaded_time;
-						sum_bin [j] [VHD] += flow2 * loaded_time;
+						sum_bin [j] [VHD] += turn_ptr->Turn () * turn_ptr->Time ();
 					}
 				}
 			}

@@ -1143,9 +1143,8 @@ bool Db_Header::Write_SQLite3_Header (void)
 //	Def_Format
 //---------------------------------------------------------
 
-Format_Type Db_Header::Def_Format (string filename) 
+string Db_Header::Def_Format (string filename) 
 {
-	Format_Type type = UNFORMATED;
 	char buffer [4094];
 	const char *delim = ",\t";
 	String name, record, token;
@@ -1153,16 +1152,16 @@ Format_Type Db_Header::Def_Format (string filename)
 
 	//---- construct the definition filename ----
 
-	if (filename.empty ()) return (type);
+	if (filename.empty ()) return ("");
 
 	name = filename + ".def";
 
 	def = f_open (name, "rt");
-	if (def == 0) return (type);
+	if (def == 0) return ("");
 
 	//---- get the header line ----
 
-	if (fgets (buffer, sizeof (buffer), def) == 0) return (type);
+	if (fgets (buffer, sizeof (buffer), def) == 0) return ("");
 
 	record = buffer;
 	fclose (def);
@@ -1171,13 +1170,13 @@ Format_Type Db_Header::Def_Format (string filename)
 
 	record.Split (token, delim);
 
-	if (!token.Starts_With ("TRANSIMS")) return (type);
+	if (!token.Starts_With ("TRANSIMS")) return ("");
 
 	//---- file format ----
 
 	record.Split (token, delim);
 
-	return (Format_Code (token));
+	return (token);
 }
 
 //-----------------------------------------------------------

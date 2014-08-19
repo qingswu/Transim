@@ -56,9 +56,9 @@ void PlanCompare::Plan_Processing::Read_Plans (int part)
 
 	if (compare_file->Read_Plan (compare_plan)) {
 		if (time_sort) {
-			compare_plan.Get_Time_Index (time_index);
+			compare_plan.Get_Index (time_index);
 		} else {
-			compare_plan.Get_Trip_Index (trip_index);
+			compare_plan.Get_Index (trip_index);
 		}
 		num_compare++;
 	} else if (time_sort) {
@@ -101,7 +101,7 @@ void PlanCompare::Plan_Processing::Read_Plans (int part)
 
 		//---- check the selection records ----
 
-		plan.Get_Trip_Index (trip_rec);
+		plan.Get_Index (trip_rec);
 
 		if (exe->select_flag && exe->select_map.Best (trip_rec) == exe->select_map.end ()) continue;
 
@@ -146,7 +146,7 @@ void PlanCompare::Plan_Processing::Read_Plans (int part)
 					}
 					last_time_index = time_index;
 				} else {
-					compare_plan.Get_Trip_Index (trip_index);
+					compare_plan.Get_Index (trip_index);
 
 					if (trip_index < last_trip_index) {
 						MAIN_LOCK

@@ -10,12 +10,12 @@
 
 void LinkSum::Link_Group (double min_volume)
 {
-	int i, j, num, lnk, dir, link, flow_index, group_num;
+	int i, j, num, lnk, dir, link, use_index, group_num;
 	String label;
 
 	Link_Data *link_ptr;
-	Link_Perf_Period_Itr period_itr;
-	Flow_Time_Data flow_data;
+	Perf_Period_Itr period_itr;
+	Perf_Data perf_data;
 	Int_Set *group;
 	Int_Set_Itr itr;
 	Int_Map_Itr map_itr;
@@ -66,16 +66,16 @@ void LinkSum::Link_Group (double min_volume)
 				dir = link_ptr->AB_Dir ();
 			}
 			if (dir < 0) continue;
-			flow_index = dir_array [dir].Flow_Index ();
+			use_index = dir_array [dir].Use_Index ();
 
 			group_num++;
 
 			//---- get the directional data ----
 		
-			for (j=0, period_itr = link_perf_array.begin (); period_itr != link_perf_array.end (); period_itr++, j++) {
-				flow_data = period_itr->Total_Flow_Time (dir, flow_index);
+			for (j=0, period_itr = perf_period_array.begin (); period_itr != perf_period_array.end (); period_itr++, j++) {
+				perf_data = period_itr->Total_Performance (dir, use_index);
 
-				group_data [j] += flow_data.Flow ();
+				group_data [j] += perf_data.Volume ();
 			}
 		}
 		if (group_num == 0) continue;

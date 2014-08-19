@@ -46,9 +46,11 @@ public:
 	void  Add_Cost (int value)        { cost = (unsigned short) (cost + value); }
 	void  Add_Imped (int value)       { imped += value; }
 
-	bool  Link_Type (void)            { return (type == LINK_ID || type == LINK_AB || type == LINK_BA || type == USE_AB || type == USE_BA); }
+	bool  Use_Type (void)             { return (type == USE_AB || type == USE_BA); }
+	bool  Dir_Type (void)             { return (type == DIR_ID || type == USE_ID); }
+	bool  Link_Type (void)            { return (type == LINK_ID || type == LINK_AB || type == LINK_BA || Use_Type ()); }
 	int   Link_ID (void)              { return (abs (id)); }
-	int   Link_Dir (void)             { return (id < 0 || type == LINK_BA || type == USE_BA); }
+	bool  Link_Dir (void)             { return (id < 0 || type == LINK_BA || type == USE_BA); }
 
 	bool  Access_Type (void)          { return (type == ACCESS_ID || type == ACCESS_AB || type == ACCESS_BA); }
 	int   Access_ID (void)            { return (abs (id)); }
@@ -56,6 +58,9 @@ public:
 
 	void  Clear (void)                { memset (this, '\0', sizeof (*this)); }
 	
+	bool  Internal_IDs (void);
+	bool  External_IDs (void);
+
 	int            id;
 	char           type;
 	char           mode;
@@ -65,7 +70,7 @@ public:
 	int            imped;
 };
 
-typedef vector <Plan_Leg>                 Plan_Leg_Array;
+typedef Vector <Plan_Leg>                 Plan_Leg_Array;
 typedef Plan_Leg_Array::iterator          Plan_Leg_Itr;
 typedef Plan_Leg_Array::reverse_iterator  Plan_Leg_RItr;
 
@@ -130,7 +135,7 @@ public:
 
 	void     Clear_Plan (void)
 	{
-		method = problem = 0; depart = arrive = activity = 0; Zero_Totals (); clear ();
+		method = problem = 0; depart = arrive = activity = 0; Zero_Totals (); Free ();
 	}
 	void     Clear (void)
 	{
@@ -140,6 +145,9 @@ public:
 
 	Time_Index Get_Time_Index (void)        { return (Time_Index (depart, Household (), Person ())); }
 	void Get_Time_Index (Time_Index &index) { index.Set (depart, Household (), Person ()); }
+
+	bool Internal_IDs (void);
+	bool External_IDs (void);
 
 private:
 	Dtime          depart;
@@ -163,7 +171,7 @@ typedef Plan_Data *               Plan_Ptr;
 //	Plan_Array class definition
 //---------------------------------------------------------
 
-class SYSLIB_API Plan_Array : public Trip_Partition, public vector <Plan_Data> 
+class SYSLIB_API Plan_Array : public Trip_Partition, public Vector <Plan_Data> 
 {
 public:
 	Plan_Array (void) { }
@@ -174,7 +182,7 @@ typedef Plan_Array::iterator      Plan_Itr;
 //	Plan_Ptr_Array class definition
 //---------------------------------------------------------
 
-class SYSLIB_API Plan_Ptr_Array : public Trip_Partition, public vector <Plan_Ptr> 
+class SYSLIB_API Plan_Ptr_Array : public Trip_Partition, public Vector <Plan_Ptr> 
 {
 public:
 	Plan_Ptr_Array (void) { }

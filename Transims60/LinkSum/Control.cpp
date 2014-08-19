@@ -11,7 +11,7 @@
 void LinkSum::Program_Control (void)
 {
 	int i, field, ngroup;
-	bool binary, delay_flag;
+	bool binary;
 	String key, token;
 
 	Location_File *location_file;
@@ -19,15 +19,13 @@ void LinkSum::Program_Control (void)
 	Doubles dbl;
 	Doubles_Itr itr;
 
-	delay_flag = false;
-
 	//---- set the equivalence flags ----
 
 	Zone_Equiv_Flag (Check_Control_Key (NEW_GROUP_TRAVEL_FILE));
 
 	group_select = Set_Control_Flag (SELECT_BY_LINK_GROUP);
 	Link_Equiv_Flag (group_select || Report_Flag (LINK_GROUP) || Report_Flag (TRAVEL_TIME) || 
-		Report_Flag (GROUP_REPORT) || Report_Flag (GROUP_DETAIL) || Check_Control_Key (NEW_GROUP_PERFORMANCE_FILE));
+		Report_Flag (GROUP_REPORT) || Report_Flag (GROUP_SUMMARY) || Check_Control_Key (NEW_GROUP_SUMMARY_FILE));
 
 	//---- open network files ----
 
@@ -35,9 +33,7 @@ void LinkSum::Program_Control (void)
 
 	Read_Select_Keys ();
 
-	delay_flag = System_File_Flag (PERFORMANCE);
-
-	if (First_Report () > 0 && !delay_flag) goto delay_error;
+	turn_flag = System_File_Flag (TURN_DELAY);
 	
 	Print (2, String ("%s Control Keys:") % Program ());	
 
@@ -61,14 +57,44 @@ void LinkSum::Program_Control (void)
 	cap_factor = (double) sum_periods.Range_Length () / (Dtime (1, HOURS) * num_inc);
 	if (cap_factor <= 0.0) cap_factor = 1.0;
 
-	//---- get minimum flow ----
+	//---- get minimum volume ----
 	
-	minimum_flow = Get_Control_Double (MINIMUM_LINK_FLOW);
+	minimum_volume = Get_Control_Double (MINIMUM_LINK_VOLUME);
 
 	//---- get the select by link group flag ----
 
 	group_select = Get_Control_Flag (SELECT_BY_LINK_GROUP);
 	if (group_select || select_subarea || select_facilities) select_flag = true;
+
+	//---- turning movement data ----
+
+	if (turn_flag) {
+
+		//---- open the compare turn delays file ----
+	
+		key = Get_Control_String (COMPARE_TURN_DELAY_FILE);
+
+		if (!key.empty ()) {
+			turn_compare_file.File_Type ("Compare Turn Delay File");
+			Print (1);
+
+			if (Check_Control_Key (COMPARE_TURN_DELAY_FORMAT)) {
+				turn_compare_file.Dbase_Format (Get_Control_String (COMPARE_TURN_DELAY_FORMAT));
+			}
+			turn_compare_file.Open (Project_Filename (key));
+			turn_compare_flag = true;
+		}
+
+		//---- select turn nodes----
+	
+		key = exe->Get_Control_Text (TURN_NODE_RANGE);
+
+		if (!key.empty () && !key.Equals ("ALL")) {
+			if (!turn_range.Add_Ranges (key)) {
+				exe->Error ("Adding Turn Node Ranges");
+			}
+		}
+	}
 
 	//---- create link activity file ----
 
@@ -165,8 +191,6 @@ void LinkSum::Program_Control (void)
 	ngroup = Highest_Control_Group (NEW_LINK_DIRECTION_FILE, 0);
 
 	if (ngroup > 0) {
-		if (!delay_flag) goto delay_error;
-
 		Dir_Group group, *group_ptr;
 
 		//---- process each group ----
@@ -208,8 +232,6 @@ void LinkSum::Program_Control (void)
 	ngroup = Highest_Control_Group (NEW_LINK_DATA_FILE, 0);
 
 	if (ngroup > 0) {
-		if (!delay_flag) goto delay_error;
-
 		Data_Group group, *group_ptr;
 
 		//---- process each group ----
@@ -244,70 +266,42 @@ void LinkSum::Program_Control (void)
 		}
 	}
 
-	//---- performance data file ----
+	//---- data summary file ----
 
-	key = Get_Control_String (NEW_PERFORMANCE_DATA_FILE);
+	key = Get_Control_String (NEW_DATA_SUMMARY_FILE);
 
 	if (!key.empty ()) {
 		Print (1);
-		detail_file.File_Type ("New Performance Data File");
+		summary_file.File_Type ("New Data Summary File");
 
-		if (Check_Control_Key (NEW_PERFORMANCE_DATA_FORMAT)) {
-			detail_file.Dbase_Format (Get_Control_String (NEW_PERFORMANCE_DATA_FORMAT));
+		if (Check_Control_Key (NEW_DATA_SUMMARY_FORMAT)) {
+			summary_file.Dbase_Format (Get_Control_String (NEW_DATA_SUMMARY_FORMAT));
 		}
-		detail_file.Add_Field ("MEASURE", DB_STRING, 40);
-		detail_file.Add_Field ("VALUE", DB_DOUBLE, 12.2);
-		if (compare_flag) detail_file.Add_Field ("COMPARE", DB_DOUBLE, 12.2);
+		summary_file.Add_Field ("MEASURE", DB_STRING, 40);
+		summary_file.Add_Field ("VALUE", DB_DOUBLE, 12.2);
+		if (compare_flag) summary_file.Add_Field ("COMPARE", DB_DOUBLE, 12.2);
 
-		detail_file.Create (Project_Filename (key));
-		detail_flag = true;
+		summary_file.Create (Project_Filename (key));
+		summary_flag = true;
 	}
 
-	//---- group performance file ----
+	//---- group summary file ----
 
-	key = Get_Control_String (NEW_GROUP_PERFORMANCE_FILE);
+	key = Get_Control_String (NEW_GROUP_SUMMARY_FILE);
 
 	if (!key.empty ()) {
 		Print (1);
-		group_perf_file.File_Type ("New Group Performance File");
+		group_sum_file.File_Type ("New Group Summary File");
 
-		if (Check_Control_Key (NEW_GROUP_PERFORMANCE_FORMAT)) {
-			group_perf_file.Dbase_Format (Get_Control_String (NEW_GROUP_PERFORMANCE_FORMAT));
+		if (Check_Control_Key (NEW_GROUP_SUMMARY_FORMAT)) {
+			group_sum_file.Dbase_Format (Get_Control_String (NEW_GROUP_SUMMARY_FORMAT));
 		}
-		group_perf_file.Add_Field ("MEASURE", DB_STRING, 40);
-		group_perf_file.Add_Field ("VALUE", DB_DOUBLE, 12.2);
-		if (compare_flag) group_perf_file.Add_Field ("COMPARE", DB_DOUBLE, 12.2);
+		group_sum_file.Add_Field ("MEASURE", DB_STRING, 40);
+		group_sum_file.Add_Field ("VALUE", DB_DOUBLE, 12.2);
+		if (compare_flag) group_sum_file.Add_Field ("COMPARE", DB_DOUBLE, 12.2);
 
-		group_perf_file.Create (Project_Filename (key));
-		group_perf_flag = true;
-	}
-
-	//---- turn volume file ----
-
-	key = Get_Control_String (NEW_TURN_VOLUME_FILE);
-
-	if (!key.empty ()) {
-		if (!System_File_Flag (CONNECTION)) {
-			Error ("A Connection File is Required for Turn Volume Processing");
-		}
-		Print (1);
-		turn_vol_file.File_Type ("New Turn Volume File");
-
-		if (Check_Control_Key (NEW_TURN_VOLUME_FORMAT)) {
-			detail_file.Dbase_Format (Get_Control_String (NEW_TURN_VOLUME_FORMAT));
-		}
-		turn_vol_file.Create (Project_Filename (key));
-		turn_vol_flag = true;
-	
-		//---- select turn nodes----
-	
-		key = exe->Get_Control_Text (TURN_NODE_RANGE);
-
-		if (!key.empty () && !key.Equals ("ALL")) {
-			if (!turn_range.Add_Ranges (key)) {
-				exe->Error ("Adding Turn Node Ranges");
-			}
-		}
+		group_sum_file.Create (Project_Filename (key));
+		group_sum_flag = true;
 	}
 
 	//---- read report types ----
@@ -337,10 +331,4 @@ void LinkSum::Program_Control (void)
 	for (itr = sum_bin.begin (); itr != sum_bin.end (); itr++) {
 		itr->assign (NUM_SUM_BINS, 0.0);
 	}
-	return;
-
-	//---- error message ----
-
-delay_error:
-	Error ("A Link Delay File is Required");
 } 

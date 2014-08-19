@@ -183,35 +183,37 @@ coord_error:
 
 Snapshot_Output::~Snapshot_Output ()
 {
-	if (sim->Master ()) {
-		if (compress && time_range.In_Range (sim->time_step) && time_range.At_Increment (sim->time_step)) {
-			if (!file->Write_Index (sim->time_step, num_records)) {
-				sim->Error ("Writing Snapshot Index File");
-			}
-		}
+	//End_Output ();
+
+	if (file != 0) {
+		file->Close ();
 	}
 }
 
 //---------------------------------------------------------
-//	Output_Check
+//	Write_Check
 //---------------------------------------------------------
 
-bool Snapshot_Output::Output_Check (void)
+void Snapshot_Output::Write_Check (void)
 {
-	if (sim->time_step <= sim->Model_Start_Time ()) return (false);
+	if (sim->time_step <= sim->Model_Start_Time ()) return;
 
 	bool first = true;
 	Int_Itr int_itr;
 
-	if (size_flag) return (false);
+	if (size_flag) return;
+
 	if (time_range.In_Range (sim->time_step) && time_range.At_Increment (sim->time_step)) {
 
-		int dir_index, offset, speed, lane, traveler, idx;
+		int i, dir_index, offset, speed, lane, cell, cells, traveler, idx, veh;
+		bool multi_cell;
 
-		Dir_Itr dir_itr;
+		Dir_Data *dir_ptr;
 		Link_Data *link_ptr;
-		Sim_Dir_Ptr sim_dir_ptr;
+		Sim_Dir_Itr sim_dir_itr;
 		Sim_Travel_Ptr sim_travel_ptr;
+		Sim_Plan_Ptr sim_plan_ptr;
+		Sim_Veh_Ptr sim_veh_ptr;
 
 		if (first) first = false;
 
@@ -227,56 +229,82 @@ bool Snapshot_Output::Output_Check (void)
 
 		//---- process each link ----
 
-		for (dir_index = 0, dir_itr = sim->dir_array.begin (); dir_itr != sim->dir_array.end (); dir_itr++, dir_index++) {
-			link_ptr = &sim->link_array [dir_itr->Link ()];
+		for (dir_index = 0, sim_dir_itr = sim->sim_dir_array.begin (); sim_dir_itr != sim->sim_dir_array.end (); sim_dir_itr++, dir_index++) {
+			if (sim_dir_itr->Method () == NO_SIMULATION) continue;
+
+			if (!subarea_range.empty ()) {
+				if (!subarea_range.In_Range (sim_dir_itr->Subarea ())) continue;
+			}
+			dir_ptr = &sim->dir_array [dir_index];
+			link_ptr = &sim->link_array [dir_ptr->Link ()];
 
 			if (!link_range.empty () && !link_range.In_Range (link_ptr->Link ())) continue;
 
-			sim_dir_ptr = &sim->sim_dir_array [dir_index];
-
-			if (!subarea_range.empty ()) {
-				if (!subarea_range.In_Range (sim_dir_ptr->Subarea ())) continue;
-			}
-				
 			//---- process each cell ----
 
-			for (idx=0, int_itr = sim_dir_ptr->begin (); int_itr != sim_dir_ptr->end (); int_itr++, idx++) {
-
+			for (idx=0, int_itr = sim_dir_itr->begin (); int_itr != sim_dir_itr->end (); int_itr++, idx++) {
 				traveler = abs (*int_itr);
-
 				if (traveler < 2) continue;
 
-				offset = sim_dir_ptr->Cell (idx) * sim->param.cell_size;
-				if (offset > link_ptr->Length ()) offset = link_ptr->Length ();
-
-				lane = sim_dir_ptr->Lane (idx);
+				multi_cell = (*int_itr < 0);
+				if (!cell_flag && multi_cell) continue;
 
 				//---- process each vehicle on the lane ----
 
 				sim_travel_ptr = &sim->sim_travel_array [traveler];
 
+				sim_plan_ptr = sim_travel_ptr->Get_Plan ();
+				if (sim_plan_ptr == 0) continue;
+
 				file->Household (sim_travel_ptr->Household ());
-				file->Vehicle (sim_travel_ptr->sim_plan_ptr->Vehicle ());
+				file->Vehicle (sim_plan_ptr->Vehicle ());
 				file->Time (sim->time_step);
 
-				speed = sim_travel_ptr->Speed (); // * sim->param.cell_size;	
+				speed = sim_travel_ptr->Speed ();	
 
 				file->Speed (UnRound (speed));
 
-				Veh_Type_Data *type_ptr = &sim->veh_type_array [sim_travel_ptr->sim_plan_ptr->Veh_Type ()];
+				Veh_Type_Data *type_ptr = &sim->veh_type_array [sim_plan_ptr->Veh_Type ()];
 
 				file->Type (type_ptr->Type ());
 				file->Passengers (sim_travel_ptr->Passengers ());
+
+				//---- get the vehicle data ----
+
+				veh = sim_travel_ptr->Vehicle ();
+
+				sim_veh_ptr = &sim->sim_veh_array [veh];
+				offset = sim_veh_ptr->offset;
+
+				lane = sim_dir_itr->Lane (idx);
+				file->Cell (0);
+
+				if (multi_cell) {
+					cell = sim_dir_itr->Cell (idx);
+					cells = type_ptr->Cells ();
+
+					for (i=1, veh++; i < cells; i++, veh++) { 
+						sim_veh_ptr = &sim->sim_veh_array [veh];
+
+						if (sim_veh_ptr->lane != lane) continue;
+						offset = sim_veh_ptr->offset;
+						if (offset / sim->param.cell_size == cell) {
+							file->Cell (i);
+							break;
+						}
+					}
+				}
+				if (offset > link_ptr->Length ()) offset = link_ptr->Length ();	
 
 				if (file->Status_Flag ()) {
 					file->Wait (Resolve (sim_travel_ptr->Wait ()));
 					file->Time_Diff (0);
 					//file->User (sim_veh_ptr->Priority ());
 
-					Dtime schedule = sim_travel_ptr->Schedule ();
-					Sim_Leg_Itr leg_itr = sim_travel_ptr->sim_plan_ptr->begin ();
+					Dtime schedule = sim_plan_ptr->Schedule ();
+					Sim_Leg_Ptr leg_ptr = sim_plan_ptr->Get_Leg ();
 
-					schedule += leg_itr->Time () * offset / link_ptr->Length ();
+					schedule += leg_ptr->Time () * offset / link_ptr->Length ();
 					schedule = sim->time_step - schedule;
 
 					file->Time_Diff (DTOI (schedule.Seconds ()));
@@ -288,7 +316,7 @@ bool Snapshot_Output::Output_Check (void)
 					file->Link (link_ptr->Link ());
 
 					if (file->LinkDir_Type () == LINK_DIR) {
-						file->Dir (dir_itr->Dir ());
+						file->Dir (dir_ptr->Dir ());
 					}
 				}
 
@@ -298,7 +326,7 @@ bool Snapshot_Output::Output_Check (void)
 					int ax, ay, bx, by;
 					Node_Data *node_ptr;
 
-					if (dir_itr->Dir () == 0) {
+					if (dir_ptr->Dir () == 0) {
 						node_ptr = &sim->node_array [link_ptr->Bnode ()];
 						bx = node_ptr->X ();
 						by = node_ptr->Y ();
@@ -320,8 +348,6 @@ bool Snapshot_Output::Output_Check (void)
 					if (coord_flag) {
 						if (ax < x1 || ax > x2 ||
 							ay < y1 || ay > y2) {
-									
-							if (!cell_flag) break;
 							continue;
 						}
 					}
@@ -335,28 +361,27 @@ bool Snapshot_Output::Output_Check (void)
 					if (file->LinkDir_Type () == LINK_NODE) {
 						file->Dir (node_ptr->Node ());
 					}
-
-					//---- save the cell ----
-
-					if (compress) {
-						file->Lane (lane);
-						file->Offset (Resolve (offset));
-					} else {
-						lane = sim->Make_Lane_ID (&(*dir_itr), lane);
-
-						file->Cell (0);
-						file->Lane (lane);
-						file->Offset (UnRound (offset));
-					}
-					if (sim->Master ()) {
-						if (!file->Write ()) {
-							sim->Error ("Writing Snapshot Output File");
-						}
-					} else {
-						data.Add_Data (file->Record ());
-					}
-					num_records++;
 				}
+
+				//---- save the cell ----
+
+				if (compress) {
+					file->Lane (lane);
+					file->Offset (Resolve (offset));
+				} else {
+					lane = sim->Make_Lane_ID (dir_ptr, lane);
+
+					file->Lane (lane);
+					file->Offset (UnRound (offset));
+				}
+				if (sim->Master ()) {
+					if (!file->Write ()) {
+						sim->Error ("Writing Snapshot Output File");
+					}
+				} else {
+					data.Add_Data (file->Record ());
+				}
+				num_records++;
 
 				//---- check the file size ----
 
@@ -380,6 +405,20 @@ bool Snapshot_Output::Output_Check (void)
 			sim->Error ("Writing Snapshot Index File");
 		}
 	}
-	return (true);
 }
 
+//---------------------------------------------------------
+//	End_Output
+//---------------------------------------------------------
+
+void Snapshot_Output::End_Output ()
+{
+	if (sim->Master ()) {
+		if (compress && time_range.In_Range (sim->time_step) && time_range.At_Increment (sim->time_step)) {
+			if (!file->Write_Index (sim->time_step, num_records)) {
+				sim->Error ("Writing Snapshot Index File");
+			}
+			compress = false;
+		}
+	}
+}

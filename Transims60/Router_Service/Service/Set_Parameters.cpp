@@ -8,7 +8,7 @@
 //	Set_Parameters
 //---------------------------------------------------------
 
-void Router_Service::Set_Parameters (Path_Parameters &p, int type)
+void Router_Service::Set_Parameters (Path_Parameters &p, int type, int veh_type)
 {
 	if (type < 0) return;
 
@@ -54,4 +54,32 @@ void Router_Service::Set_Parameters (Path_Parameters &p, int type)
 	if (p.walk_pen == 0 || p.walk_fac == 0.0) p.walk_pen = p.max_walk;
 	if (p.bike_pen == 0 || p.bike_fac == 0.0) p.bike_pen = p.max_bike;
 	if (p.wait_pen == 0 || p.wait_fac == 0.0) p.wait_pen = p.max_wait;
+
+	//---- vehicle type data ----
+
+	p.veh_type = veh_type;
+
+	if (p.veh_type < 0) {
+		p.grade_flag = false;
+		p.op_cost_rate = 0.0;
+		p.use = CAR;
+		p.pce = 1.0;
+		p.occupancy = 1.0;
+		p.veh_type_ptr = 0;
+	} else {
+		p.veh_type_ptr = &veh_type_array [p.veh_type];
+
+		p.use = p.veh_type_ptr->Use ();
+		p.op_cost_rate = UnRound (p.veh_type_ptr->Op_Cost ());
+
+		if (Metric_Flag ()) {
+			p.op_cost_rate /= 1000.0;
+		} else {
+			p.op_cost_rate /= MILETOFEET;
+		}
+		p.grade_flag = p.grade_flag && p.veh_type_ptr->Grade_Flag ();
+		p.pce = UnRound (p.veh_type_ptr->PCE ());
+		p.occupancy = p.veh_type_ptr->Occupancy () / 100.0;
+		if (p.occupancy <= 0.0) p.occupancy = 1.0;
+	}
 }

@@ -40,6 +40,7 @@ void TripPrep::Execute (void)
 
 			program.Print_Commands (false);
 		}
+		Show_Message (1);
 		Header_Number (0);
 	}
 

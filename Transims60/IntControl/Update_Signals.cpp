@@ -28,8 +28,8 @@ void IntControl::Update_Signals (void)
 	Signal_Time_Itr time_itr;
 	Phasing_Itr phasing_itr;
 	Movement_Itr move_itr;
-	Flow_Time_Array *array_ptr;
-	Flow_Time_Data *flow_ptr;
+	Turn_Period *period_ptr;
+	Turn_Data *turn_ptr;
 	Connect_Data *connect_ptr;
 	Dir_Data *dir_ptr;
 	Timing_Itr timing_itr;
@@ -164,9 +164,9 @@ void IntControl::Update_Signals (void)
 
 					if (method == VOLUME_SPLITS || method == UPDATE_SPLITS) {
 						for (p=p1; p <= p2; p++) {
-							array_ptr = &turn_delay_array [p];
-							flow_ptr = &array_ptr->at (move_itr->Connection ());
-							rate += flow_ptr->Flow ();
+							period_ptr = turn_period_array.Period_Ptr (p);
+							turn_ptr = period_ptr->Data_Ptr (move_itr->Connection ());
+							rate += turn_ptr->Turn ();
 						}
 					} else if (method == CAPACITY_SPLITS) {
 						dir_ptr = &dir_array [connect_ptr->Dir_Index ()];

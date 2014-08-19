@@ -12,6 +12,7 @@ Path_Builder::Path_Builder (Router_Service *exe) : Static_Service ()
 {
 	Initialize (exe);
 }
+
 #ifdef THREADS
 
 Path_Builder::Path_Builder (Plan_Queue *queue, Router_Service *exe) : Static_Service ()
@@ -40,6 +41,45 @@ Path_Builder::Path_Builder (Skim_Queue *queue, Router_Service *exe) : Static_Ser
 }
 
 //---------------------------------------------------------
+//	thread operator
+//---------------------------------------------------------
+
+void Path_Builder::operator()()
+{
+	int number = 0;
+
+	if (param.one_to_many) {
+		One_To_Many *skim_ptr;
+
+		for (;;) {
+			skim_ptr = skim_queue->Get_Work (number);
+			if (skim_ptr == 0) break;
+
+			if (!Skim_Build (skim_ptr)) break;
+
+			if (!skim_queue->Put_Result (skim_ptr, number)) break;
+		}
+	} else {
+		Plan_Ptr_Array *array_ptr;
+
+		if (update_time_flag) {
+			Update_Times ();
+		} else if (zero_flows_flag) {
+			Zero_Flows ();
+		}
+		for (;;) {
+			array_ptr = plan_queue->Get_Work (number);
+			if (array_ptr == 0) break;
+
+			if (!Array_Processing (array_ptr)) break;
+
+			if (!plan_queue->Put_Result (array_ptr, number)) break;
+		}
+		Save_Skim_Gap ();
+	}
+}
+
+//---------------------------------------------------------
 //	Save_Flows
 //---------------------------------------------------------
 
@@ -48,36 +88,73 @@ void Path_Builder::Save_Flows (void)
 	MAIN_LOCK
 	int index, period;
 
-	Flow_Time_Period_Itr period_itr;
-	Flow_Time_Array *period_ptr;
-	Flow_Time_Itr data_itr;
-	Flow_Time_Data *data_ptr;
+	Perf_Period_Itr period_itr;
+	Perf_Period *period_ptr;
+	Perf_Itr perf_itr;
+	Perf_Data *perf_ptr;
 
-	for (period=0, period_itr = link_delay_array.begin (); period_itr != link_delay_array.end (); period_itr++, period++) {
-		period_ptr = &exe->link_delay_array [period];
+	for (period=0, period_itr = perf_period_array_ptr->begin (); period_itr != perf_period_array_ptr->end (); period_itr++, period++) {
+		period_ptr = &exe->perf_period_array [period];
 
-		for (index=0, data_itr = period_itr->begin (); data_itr != period_itr->end (); data_itr++, index++) {
-			if (data_itr->Flow () > 0.0) {
-				data_ptr = &period_ptr->at (index);
-				data_ptr->Add_Flow (data_itr->Flow ());
-				data_itr->Flow (0);
+		for (index=0, perf_itr = period_itr->begin (); perf_itr != period_itr->end (); perf_itr++, index++) {
+			if (perf_itr->Volume () > 0.0) {
+				perf_ptr = period_ptr->Data_Ptr (index);
+				perf_ptr->Add_Flows (&(*perf_itr));
+				perf_itr->Clear_Flows ();
 			}
 		}
 	}
-	if (param.turn_flow_flag) {
-		for (period=0, period_itr = turn_delay_array.begin (); period_itr != turn_delay_array.end (); period_itr++, period++) {
-			period_ptr = &exe->turn_delay_array [period];
 
-			for (index=0, data_itr = period_itr->begin (); data_itr != period_itr->end (); data_itr++, index++) {
-				if (data_itr->Flow () > 0.0) {
-					data_ptr = &period_ptr->at (index);
-					data_ptr->Add_Flow (data_itr->Flow ());
-					data_itr->Flow (0);
+	if (param.turn_flow_flag) {
+		Turn_Period_Itr period_itr;
+		Turn_Period *period_ptr;
+		Turn_Itr turn_itr;
+		Turn_Data *turn_ptr;
+
+		for (period=0, period_itr = turn_period_array_ptr->begin (); period_itr != turn_period_array_ptr->end (); period_itr++, period++) {
+			period_ptr = &exe->turn_period_array [period];
+
+			for (index=0, turn_itr = period_itr->begin (); turn_itr != period_itr->end (); turn_itr++, index++) {
+				if (turn_itr->Turn () > 0.0) {
+					turn_ptr = period_ptr->Data_Ptr (index);
+					turn_ptr->Add_Turn (turn_itr->Turn ());
+					turn_itr->Turn (0);
 				}
 			}
 		}
 	}
 	END_LOCK
+}
+
+//---------------------------------------------------------
+//	Update_Times
+//---------------------------------------------------------
+
+void Path_Builder::Update_Times (void)
+{
+	int index, period;
+
+	Perf_Period_Itr period_itr;
+	Perf_Period *period_ptr;
+	Perf_Itr perf_itr;
+	Perf_Data *perf_ptr;
+
+	for (period=0, period_itr = perf_period_array_ptr->begin (); period_itr != perf_period_array_ptr->end (); period_itr++, period++) {
+		period_ptr = &exe->perf_period_array [period];
+
+		for (index=0, perf_itr = period_itr->begin (); perf_itr != period_itr->end (); perf_itr++, index++) {
+			perf_ptr = period_ptr->Data_Ptr (index);
+			perf_itr->Time (perf_ptr->Time ());
+			if (zero_flows_flag) {
+				perf_itr->Clear_Flows ();
+			}
+		}
+	}
+	if (zero_flows_flag && param.turn_flow_flag) {
+		turn_period_array_ptr->Zero_Turns ();
+	}
+	zero_flows_flag = false;
+	update_time_flag = false;
 }
 #endif
 
@@ -87,13 +164,18 @@ void Path_Builder::Save_Flows (void)
 
 void Path_Builder::Initialize (Router_Service *_exe)
 {
+	perf_period_array_ptr = 0;
+	turn_period_array_ptr = 0;
+
 	if (_exe == 0) {
 		initialized = false;
 		return;
 	}
 	exe = _exe;
+
 	initialized = plan_flag = forward_flag = true;
 	reroute_flag = link_to_flag = node_to_flag = stop_to_flag = false;
+	zero_flows_flag = update_time_flag = false;
 
 	if (exe->Service_Level () < ROUTER_SERVICE) {
 		exe->Error ("Path Building Requires Router Services");
@@ -103,9 +185,7 @@ void Path_Builder::Initialize (Router_Service *_exe)
 	time_limit = min_time_limit = 0;
 	data_ptr = 0;
 	parking_duration = 0;
-	op_cost_rate = 0.0;
-	grade_flag = false;
-	veh_type_ptr = 0;
+	param.op_cost_rate = 0.0;
 	parking_lot = -1;
 
 	mode_path_flag [WALK_MODE] = exe->walk_path_flag;
@@ -125,28 +205,53 @@ void Path_Builder::Initialize (Router_Service *_exe)
 
 	near_offset = Round (Internal_Units (10.0, FEET));	
 
-	veh_type_flag = exe->System_Data_Flag (VEHICLE_TYPE);
-
 	exe->Set_Parameters (param);
 	plan_flag = !param.one_to_many;
 
+	Reset_Skim_Gap ();
+
 	if (param.flow_flag) {
 		if (exe->Num_Threads () < 2) {
-			link_flow_ptr = &exe->link_delay_array;
-			turn_flow_ptr = &exe->turn_delay_array;
+			perf_period_array_ptr = &exe->perf_period_array;
+			turn_period_array_ptr = &exe->turn_period_array;
 		} else {
 #ifdef THREADS
-			link_flow_ptr = &link_delay_array;
-			turn_flow_ptr = &turn_delay_array;
-
-			link_flow_ptr->Replicate (exe->link_delay_array);
+			perf_period_array_ptr = &perf_period_array;
+			perf_period_array.Replicate (exe->perf_period_array);
 
 			if (param.turn_flow_flag) {
-				turn_flow_ptr->Replicate (exe->turn_delay_array);
+				turn_period_array_ptr = &turn_period_array;
+				turn_period_array.Replicate (exe->turn_period_array);
 			}
 #endif
 		}
 	}
+}
+
+//---------------------------------------------------------
+//	Zero_Flows
+//---------------------------------------------------------
+
+void Path_Builder::Zero_Flows (void)
+{
+	perf_period_array_ptr->Zero_Flows ();
+
+	if (param.turn_flow_flag) {
+		turn_period_array_ptr->Zero_Turns ();
+	}
+	zero_flows_flag = false;
+}
+
+//---------------------------------------------------------
+//	Save_Skim_Gap
+//---------------------------------------------------------
+
+void Path_Builder::Save_Skim_Gap (void)
+{
+	MAIN_LOCK
+	exe->skim_gap += skim_gap;
+	exe->skim_time += skim_time;
+	END_LOCK
 }
 
 //---------------------------------------------------------

@@ -41,7 +41,7 @@ void PlanTrips::Read_Plan (void)
 		while (plan_file->Read_Plan (plan)) {
 			Show_Progress ();
 
-			plan.Get_Trip_Index (trip_index);
+			plan.Get_Index (trip_index);
 			num_trips++;
 
 			if (trip_flag) {

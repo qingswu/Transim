@@ -5,8 +5,6 @@
 #ifndef DATA_PACK_HPP
 #define DATA_PACK_HPP
 
-#include "APIDefs.hpp"
-#include "TypeDefs.hpp"
 #include "Data_Buffer.hpp"
 
 #include <vector>
@@ -23,6 +21,11 @@ class Vector : public vector <Type>
 public:
 	Vector (void) {}
 
+	void Free (void) 
+	{
+		vector <Type> temp;
+		swap (temp);
+	}
 	bool Pack (Data_Buffer &data, bool type_flag = false)
 	{
 		size_t num = vector <Type>::size ();
@@ -73,6 +76,11 @@ class Deque : public deque <Type>
 public:
 	Deque (void) {}
 
+	void Free (void) 
+	{
+		deque <Type> temp;
+		swap (temp);
+	}
 	bool Pack (Data_Buffer &data)
 	{
 		size_t num = deque <Type>::size ();
@@ -100,47 +108,5 @@ public:
 		return (false);
 	}
 };
-
-//---------------------------------------------------------
-//	Packed_Integers
-//---------------------------------------------------------
-
-class Packed_Integers : public Integers
-{
-public:
-	Packed_Integers (void) {}
-
-	bool Pack (Data_Buffer &data)
-	{
-		size_t num = size ();
-		if (data.Add_Data (&num, sizeof (num))) {
-			if (num == 0) return (true);
-			num *= sizeof (int);
-			return (data.Add_Data (&at (0), num));
-		}
-		return (false);
-	}
-	bool UnPack (Data_Buffer &data)
-	{
-		size_t num;
-		if (data.Get_Data (&num, sizeof (num))) {
-			assign (num, 0);
-			num *= sizeof (int);
-			return (data.Get_Data (&at (0), num));
-		}
-		return (false);
-	}
-};
-
-//---------------------------------------------------------
-//	Packed_Ints_Array
-//---------------------------------------------------------
-
-class Packed_Ints_Array : public Vector <Packed_Integers>
-{
-public:
-	Packed_Ints_Array (void) {}
-};
-typedef Packed_Ints_Array::iterator  PInts_Itr;
 
 #endif

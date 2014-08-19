@@ -20,8 +20,9 @@ public:
 	Snapshot_Output (int num);
 	~Snapshot_Output (void);
 
-	bool Output_Check (void);
+	void Write_Check (void);
 
+	void End_Output (void);
 private:
 
 	Snapshot_File *file;

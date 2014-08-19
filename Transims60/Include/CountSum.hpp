@@ -11,8 +11,8 @@
 #include "Db_Header.hpp"
 #include "TypeDefs.hpp"
 #include "List_Data.hpp"
-#include "Flow_Time_Data.hpp"
 #include "Link_Data_File.hpp"
+#include "Volume_Array.hpp"
 
 //---------------------------------------------------------
 //	CountSum - execution class definition
@@ -50,7 +50,7 @@ private:
 		AVERAGE, MINIMUM, MAXIMUM
 	};
 
-	String link_delay_name, link_delay_ext, link_data_name, link_data_ext;
+	String perf_name, perf_ext, link_data_name, link_data_ext;
 	int num_records;
 
 	bool script_flag, data_flag, link_data_flag, day_flag, link_map_flag, new_map_flag, method_flag, min_max_flag;
@@ -72,9 +72,8 @@ private:
 	Db_Header detector_file, signal_node_file, signal_map_file, link_map_file, new_map_file;
 	List_Array node_list;
 	Link_Data_File link_data_file, *min_data_file, *max_data_file;
-	Link_Delay_File *min_delay_file, *max_delay_file;
 
-	Flow_Time_Period_Array  count_day_array;
+	Vol_Spd_Period_Array  count_day_array;
 
 	Int_Map id_map;
 
@@ -121,8 +120,8 @@ private:
 
 	Str_ID day_map;
 
-	typedef vector <Flow_Time_Period_Array *> Count_Days;
-	typedef Count_Days::iterator              Count_Days_Itr;
+	typedef vector <Vol_Spd_Period_Array *> Count_Days;
+	typedef Count_Days::iterator            Count_Days_Itr;
 
 	Count_Days count_days;
 
@@ -165,7 +164,6 @@ private:
 	void Node_List (void);
 	void Read_Data (void);
 	void Combine_Data (Processing_Methods method = AVERAGE, int day=-1);
-	void Write_Link_Data (Link_Data_File &file, Flow_Time_Period_Array &link_delay_array);
 	void Write_Link_Map (void);
 };
 #endif

@@ -10,14 +10,14 @@
 
 bool Path_Builder::Array_Processing (Plan_Ptr_Array *array_ptr)
 {
-	Plan_Data *plan_ptr, *prev_ptr;
+	Plan_Ptr plan_ptr, prev_ptr;
 	Plan_Ptr_Itr itr;
 	int last_person, last_tour, last_time;
 	bool duration_flag, problem_flag, first;
 	Dtime minute;
 
 	duration_flag = problem_flag = false;
-	last_person = last_tour = last_time = -1;
+	last_person = last_tour = last_time = parking_lot = -1;
 	minute.Minutes (1.0);
 
 	//---- process each trip in the household ----
@@ -34,7 +34,7 @@ bool Path_Builder::Array_Processing (Plan_Ptr_Array *array_ptr)
 				plan_ptr->Constraint () != FIXED_TIME &&
 				plan_ptr->Constraint () != START_TIME)) {
 
-				if (plan_ptr->Method () == COPY_PATH || plan_ptr->Method () == PATH_FLOWS) {
+				if (plan_ptr->Method () == COPY_PLAN || plan_ptr->Method () == PATH_FLOWS) {
 					plan_ptr->Arrive (plan_ptr->Arrive () - plan_ptr->Depart () + last_time);
 				}
 				if (!exe->param.ignore_time) {
@@ -53,6 +53,7 @@ bool Path_Builder::Array_Processing (Plan_Ptr_Array *array_ptr)
 		} else {
 			last_person = plan_ptr->Person ();
 			last_tour = plan_ptr->Tour ();
+			parking_lot = -1;
 			first = true;
 		}
 
@@ -62,7 +63,7 @@ bool Path_Builder::Array_Processing (Plan_Ptr_Array *array_ptr)
 			case BUILD_PATH:
 				if (!Plan_Build (plan_ptr)) return (false);
 				break;
-			case RESKIM_PATH:
+			case UPDATE_PLAN:
 				if (!Plan_Update (plan_ptr)) return (false);
 				break;
 			case REROUTE_PATH:
@@ -71,7 +72,10 @@ bool Path_Builder::Array_Processing (Plan_Ptr_Array *array_ptr)
 			case PATH_FLOWS:
 				if (!Plan_Flow (plan_ptr)) return (false);
 				break;
-			case COPY_PATH:
+			case RESKIM_PLAN:
+				if (!Plan_Reskim (plan_ptr)) return (false);
+				break;
+			case COPY_PLAN:
 			default:
 				break;
 		}

@@ -21,7 +21,7 @@ bool PathSkim::Save_Skims (One_To_Many *skim_ptr)
 		delete skim_ptr;
 		return (true);
 	}
-	int org, des;
+	int org, des, loc;
 	Skim_Data *data_ptr;
 	Many_Itr many_itr;
 	Dtime time;
@@ -35,10 +35,11 @@ bool PathSkim::Save_Skims (One_To_Many *skim_ptr)
 			des = skim_file->Des_Index (skim_ptr->Zone ());
 		}
 	} else {
+		loc = location_array [skim_ptr->Location ()].Location ();
 		if (forward_flag) {
-			org = skim_file->Org_Index (skim_ptr->Location ());
+			org = skim_file->Org_Index (loc);
 		} else {
-			des = skim_file->Des_Index (skim_ptr->Location ());
+			des = skim_file->Des_Index (loc);
 		}
 	}
 	for (many_itr = skim_ptr->begin (); many_itr != skim_ptr->end (); many_itr++) {
@@ -55,10 +56,11 @@ bool PathSkim::Save_Skims (One_To_Many *skim_ptr)
 				org = skim_file->Org_Index (many_itr->Zone ());
 			}
 		} else {
+			loc = location_array [many_itr->Location ()].Location ();
 			if (forward_flag) {
-				des = skim_file->Des_Index (many_itr->Location ());
+				des = skim_file->Des_Index (loc);
 			} else {
-				org = skim_file->Org_Index (many_itr->Location ());
+				org = skim_file->Org_Index (loc);
 			}
 		}
 		if (org < 0 || des < 0) continue;

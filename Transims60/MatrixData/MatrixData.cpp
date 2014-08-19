@@ -11,7 +11,7 @@
 MatrixData::MatrixData (void) : Data_Service (), Select_Service ()
 {
 	Program ("MatrixData");
-	Version (3);
+	Version (4);
 	Title ("Matrix Data Processing");
 
 	int file_service_keys [] = {

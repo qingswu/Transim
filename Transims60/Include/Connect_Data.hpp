@@ -22,6 +22,7 @@ public:
 
 	int  Dir_Index (void)                 { return (dir_index); }
 	int  To_Index (void)                  { return (to_index); }
+	int  Node (void)                      { return (node); }
 	int  Low_Lane (void)                  { return (low_lane); }
 	int  High_Lane (void)                 { return (high_lane); }
 	int  To_Low_Lane (void)               { return (to_low); }
@@ -37,6 +38,7 @@ public:
 
 	void Dir_Index (int value)            { dir_index = value; }
 	void To_Index (int value)             { to_index = value; }
+	void Node (int value)                 { node = value; }
 	void Low_Lane (int value)             { low_lane = (char) value; }
 	void High_Lane (int value)            { high_lane = (char) value; }
 	void To_Low_Lane (int value)          { to_low = (char) value; }
@@ -53,12 +55,13 @@ public:
 	
 	void Clear (void)
 	{
-		dir_index = to_index = 0; low_lane = high_lane = to_low = to_high = type = control = 0;
+		dir_index = to_index = node = 0; low_lane = high_lane = to_low = to_high = type = control = 0;
 		penalty = speed = capacity = 0; next_to = next_from = -1; Notes_Data::Clear ();
 	}
 private:
 	int        dir_index;
 	int        to_index;
+	int        node;
 	char       low_lane;
 	char       high_lane;
 	char       to_low;

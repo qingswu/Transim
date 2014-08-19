@@ -7,10 +7,9 @@
 
 #include "Data_Service.hpp"
 #include "Db_Header.hpp"
-#include "Flow_Time_Data.hpp"
 #include "Link_Data_File.hpp"
 #include "Link_Dir_File.hpp"
-#include "Turn_Vol_File.hpp"
+#include "Volume_Array.hpp"
 #include "TypeDefs.hpp"
 
 //---------------------------------------------------------
@@ -38,16 +37,18 @@ private:
 		LINK_GROUP, GROUP_DETAILS, TURN_MOVEMENT, TURN_LOS, ZONE_EQUIV, LINK_EQUIV,
 		LINE_GROUP, STOP_GROUP, BOARD_GROUP, ALIGHT_GROUP, LINE_EQUIV, STOP_EQUIV};
 
-	bool delay_flag, link_flag, turn_flag, output_flag, zone_flag, method, line_flag, stop_flag, vc_flag;
+	bool delay_flag, turn_delay_flag;
+	bool link_flag, turn_flag, output_flag, zone_flag, method, line_flag, stop_flag, vc_flag;
 	double factor, hours;
 
 	Db_Header zone_file, line_count_file, stop_count_file;
-	Link_Data_File count_file, volume_file, output_file;
+
+	Link_Data_File count_file, volume_file,  output_file;
 	Link_Direction_File vol_cnt_file;
-	Turn_Vol_File turn_count, turn_volume;
+	Turn_Delay_File turn_count, turn_volume;
 	
-	Flow_Time_Period_Array  link_count_array;
-	Flow_Time_Period_Array  turn_count_array;
+	Volume_Array  link_count_array, link_volume_array;
+	Turn_Period_Array  turn_count_array;
 
 	String stats_format;
 	String header1, header2;
@@ -96,9 +97,6 @@ private:
 	Integers node_zone;
 
 	//---- methods ----
-
-	void Read_Flow (Link_Data_File *file, bool type);
-	void Read_Turn (Turn_Vol_File *file, bool type);
 
 	void Write_Volume (void);
 	void Write_Volume_Count (void);

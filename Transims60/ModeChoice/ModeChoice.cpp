@@ -11,7 +11,7 @@
 ModeChoice::ModeChoice (void) : Execution_Service (), Select_Service ()
 {
 	Program ("ModeChoice");
-	Version (4);
+	Version (5);
 	Title ("Mode Choice Processing");
 	
 	int select_service_keys [] = {

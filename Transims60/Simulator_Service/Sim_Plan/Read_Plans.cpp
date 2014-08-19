@@ -17,12 +17,6 @@ bool Sim_Plan_Step::Read_Plans (void)
 	Plan_Data *plan_ptr;
 	Time_Index *time_ptr;
 
-#ifdef THREADS
-	if (num_threads > 1) {
-		plan_queue.Start_Work ();
-	}
-#endif
-
 	while (stat) {
 		if (first_num < 0) {
 			stat = false;
@@ -55,9 +49,8 @@ bool Sim_Plan_Step::Read_Plans (void)
 
 #ifdef THREADS
 		if (num_threads > 1) {
-			Plan_Data *work_plan = new Plan_Data ();
-			*work_plan = *plan_ptr;
-			plan_queue.Put_Work (work_plan);
+			plan_queue.Put_Work (plan_ptr);
+			plan_set [first_num] = plan_ptr = new Plan_Data ();
 		} else {
 			Sim_Plan_Result ((*sim_plan_process)->Plan_Processing (plan_ptr));
 		}
@@ -100,11 +93,6 @@ bool Sim_Plan_Step::Read_Plans (void)
 			time_ptr->Set (MAX_INTEGER, 0, 0);
 		}
 	}
-#ifdef THREADS
-	if (num_threads > 1) {
-		plan_queue.Complete_Work ();
-	}
-#endif
 
 	//---- aggregate the plan file statistics ----
 

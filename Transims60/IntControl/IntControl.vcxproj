@@ -329,7 +329,6 @@
     <ClCompile Include="Read_Deletes.cpp" />
     <ClCompile Include="Read_Sign.cpp" />
     <ClCompile Include="Read_Signal.cpp" />
-    <ClCompile Include="Read_Turn.cpp" />
     <ClCompile Include="Update_Signals.cpp" />
   </ItemGroup>
   <ItemGroup>

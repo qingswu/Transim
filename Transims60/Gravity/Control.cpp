@@ -14,9 +14,8 @@ void Gravity::Program_Control (void)
 {
 	int i, j, num, num2;
 	double size, low, high;
-	String key, range;
+	String key, range, format;
 	Zone_File *zone_file;
-	Format_Type format;
 	Dbls_Array dbls_array, *dbls_ptr;
 	Doubles range_rec, *range_ptr; 
 
@@ -49,16 +48,15 @@ void Gravity::Program_Control (void)
 
 	format = Db_Header::Def_Format (key);
 
-	if (format == UNFORMATED) {
+	if (format.empty ()) {
 		if (Check_Control_Key (SKIM_FORMAT)) {
-			format = Format_Code (Get_Control_String (SKIM_FORMAT));
+			format = Get_Control_String (SKIM_FORMAT);
 		}
 	}
-	skim_file = TDF_Matrix (format);
+	skim_file = TDF_Matrix (READ, format);
 
 	skim_file->File_Type ("Skim File");
 	skim_file->File_ID ("Skim");
-	skim_file->Dbase_Format (format);
 
 	skim_file->Open (key);
 
@@ -88,16 +86,15 @@ void Gravity::Program_Control (void)
 
 		format = Db_Header::Def_Format (key);
 
-		if (format == UNFORMATED) {
+		if (format.empty ()) {
 			if (Check_Control_Key (TRIP_TABLE_FORMAT)) {
-				format = Format_Code (Get_Control_String (TRIP_TABLE_FORMAT));
+				format = Get_Control_String (TRIP_TABLE_FORMAT);
 			}
 		}
-		trip_file = TDF_Matrix (format);
+		trip_file = TDF_Matrix (READ, format);
 
 		trip_file->File_Type ("Trip Table_File");
 		trip_file->File_ID ("Trip");
-		trip_file->Dbase_Format (format);
 		trip_flag = true;
 
 		trip_file->Open (key);
@@ -121,14 +118,13 @@ void Gravity::Program_Control (void)
 	if (!key.empty ()) {
 
 		if (Check_Control_Key (NEW_TRIP_TABLE_FORMAT)) {
-			format = Format_Code (Get_Control_String (NEW_TRIP_TABLE_FORMAT));
+			format = Get_Control_String (NEW_TRIP_TABLE_FORMAT);
 		}
-		new_file = TDF_Matrix (format);
+		new_file = TDF_Matrix (CREATE, format);
 
 		new_file->File_Type ("New Trip Table File");
 		new_file->File_ID ("NewTrip");
 		new_file->Filename (Project_Filename (key));
-		new_file->Dbase_Format (format);
 		new_file->Num_Org (skim_file->Num_Org ());
 		new_file->Num_Des (skim_file->Num_Des ());
 		new_file->Copy_Periods (*skim_file);

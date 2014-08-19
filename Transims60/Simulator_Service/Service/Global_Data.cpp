@@ -11,10 +11,9 @@
 void Simulator_Service::Global_Data (void)
 {
 	int i, j, k, n, use_code, dir, index, in_off, out_off, bnode, lane, min_lane, max_lane;
-	int method, transfer, change, record;
+	int transfer, change, record, subarea;
 	
 	int length, offset, *list, c0, c1, bear1, bear2, next, max_cell;
-	double factor;
 	bool flag;
 
 	Dtime hour = Dtime (1, HOURS);
@@ -38,7 +37,9 @@ void Simulator_Service::Global_Data (void)
 	Sim_Connection sim_con_rec;
 	Sim_Signal_Data sim_signal_rec;
 	Int2_Key mpi_key;
-
+	Int_Map_Itr map_itr;
+	Int_Itr period_itr;
+	Integers subarea_method, node_link, link_list;
 
 	//---- set the vehicle cell size ----
 
@@ -58,16 +59,26 @@ void Simulator_Service::Global_Data (void)
 	}
 	param.half_cell = param.cell_size / 2;
 
+	for (type_itr = veh_type_array.begin (); type_itr != veh_type_array.end (); type_itr++) {
+		type_itr->Cells (MAX (((type_itr->Length () + param.half_cell) / param.cell_size), 1));
+	}
+
 	//---- create transit vehicles -----
 
 	if (param.transit_flag) {
 		Transit_Vehicles ();
 	} else if (num_travelers > 0) {
+		Sim_Veh_Data veh_data;
 
 		//---- reserve memory ----
 
 		sim_travel_array.reserve (num_travelers);
 		sim_veh_array.reserve (2 * num_travelers);
+
+		//---- insert two blank vehicle cells to avoid numbering conflicts ----
+
+		sim_veh_array.push_back (veh_data);
+		sim_veh_array.push_back (veh_data);
 	}
 
 	//---- convert the distance/speed parameters to cells ----
@@ -86,6 +97,26 @@ void Simulator_Service::Global_Data (void)
 
 	node_link.assign (sim->node_array.size (), -1);
 	link_list.assign (sim->dir_array.size (), -1);
+
+	//---- identify maximum subarea detail ----
+
+	subarea_method.assign (max_subarea + 1, 0);
+
+	for (map_itr = subarea_map.begin (); map_itr != subarea_map.end (); map_itr++) {
+		subarea = map_itr->first;
+
+		for (index=0; index < sim_periods.Num_Periods (); index++) {
+			if (subarea_method [subarea] < period_subarea_method [index] [subarea]) {
+				subarea_method [subarea] = period_subarea_method [index] [subarea];
+			}
+		}
+	}
+
+	//---- initialize the node method ----
+
+	for (node_itr = node_array.begin (); node_itr != node_array.end (); node_itr++) {
+		node_itr->Method (subarea_method [node_itr->Subarea ()]);
+	}
 
 	//---- initialize sim_dir_data ----
 
@@ -117,9 +148,7 @@ void Simulator_Service::Global_Data (void)
 			link_list [index] = *list;
 			*list = index;
 
-			node_ptr = &node_array [link_itr->Anode ()];
-			method = param.subarea_method.Best (node_ptr->Subarea ());
-			node_ptr->Method (method);
+			node_ptr = &node_array [bnode];
 
 			dir_ptr = &dir_array [index];
 
@@ -141,7 +170,10 @@ void Simulator_Service::Global_Data (void)
 			sim_dir_ptr->Setback (out_off);
 			sim_dir_ptr->Lanes (dir_ptr->Lanes () + dir_ptr->Left () + dir_ptr->Right ());
 			sim_dir_ptr->Max_Cell (max_cell);
-			sim_dir_ptr->Method (method);
+			sim_dir_ptr->In_Cell (MIN (((in_off + param.cell_size - 1) / param.cell_size), max_cell));
+			sim_dir_ptr->Out_Cell (MAX (MIN (((length - out_off) / param.cell_size), max_cell), 0));
+			sim_dir_ptr->Max_Flow (Round ((double) dir_ptr->Capacity () / hour));
+			sim_dir_ptr->Method (node_ptr->Method ());
 			sim_dir_ptr->Subarea (node_ptr->Subarea ());
 
 			sim_dir_ptr->Use_Type (LIMIT);
@@ -152,69 +184,13 @@ void Simulator_Service::Global_Data (void)
 			sim_dir_ptr->Max_Traveler (0);
 			sim_dir_ptr->First_Use (-1);
 
+			//---- skip unsimulated links ----
+				
+			if (subarea_method [sim_dir_ptr->Subarea ()] == NO_SIMULATION) continue;
+
+			//---- allocate lane cells ----
+
 			sim_dir_ptr->Make_Cells ();
-
-			sim_dir_ptr->In_Cell (MIN (((in_off + param.cell_size - 1) / param.cell_size), max_cell));
-			sim_dir_ptr->Out_Cell (MAX (MIN (((length - out_off) / param.cell_size), max_cell), 0));
-
-			//sim_dir_ptr->Max_Flow (DTOI ((dir_ptr->Capacity () * param.step_size * 100.0) / (hour * dir_ptr->Lanes ())));
-			//sim_dir_ptr->Density ((int) (length * 3600.0 * dir_ptr->Capacity () / (dir_ptr->Lanes () * dir_ptr->Speed ()) + 0.5));
-			//sim_dir_ptr->Max_Move (MAX (DTOI ((double) length * param.step_size / dir_ptr->Time0 ()), 1));
-
-			//capacity = MAX (Round ((length + param.half_cell) / param.cell_size), 1);
-
-			//---- initialize the lane data and capacity ----
-
-			//if (sim_dir_ptr->Method () == MACROSCOPIC) {
-			//	lanes = (dir_ptr->First_Lane_Use () >= 0) ? 2 : 1;
-			//	sim_dir_ptr->assign (lanes, sim_lane_data);
-			//} else if (sim_dir_ptr->Method () == MESOSCOPIC) {
-			//	sim_dir_ptr->assign (sim_dir_ptr->Lanes (), sim_lane_data);
-			//}
-
-			//---- apply method specific processing ----
-
-			if (sim_dir_ptr->Method () == NO_SIMULATION) {
-				No_Sim_Flag (true);
-
-			} else if (sim_dir_ptr->Method () == MACROSCOPIC) {
-				//sim_lane_ptr = sim_dir_ptr->Lane (0);
-				//sim_lane_ptr->Capacity (dir_ptr->Lanes () * capacity);
-				//sim_lane_ptr->Low_Lane (min_lane);
-				//sim_lane_ptr->High_Lane (max_lane);
-
-			} else if (sim_dir_ptr->Method () == MESOSCOPIC) {
-
-				//---- initialize the connection array ----
-
-				for (index = dir_ptr->First_Connect (); index >= 0; index = connect_ptr->Next_Index ()) {
-					connect_ptr = &connect_array [index];
-					sim_con_ptr = &sim_connection [index];
-
-					Lane_Map (connect_ptr, *sim_con_ptr);
-				}
-
-				//---- set the thru link and lane for each entry lane ----
-
-				for (index = dir_ptr->First_Connect_From (); index >= 0; index = connect_ptr->Next_From ()) {
-					connect_ptr = &connect_array [index];
-					
-					app_ptr = &dir_array [connect_ptr->Dir_Index ()];
-					if ((link_array [app_ptr->Link ()].Use () & use_code) == 0) continue;
-
-					Lane_Map (connect_ptr, lane_map);
-
-					for (lane_itr = lane_map.begin (); lane_itr != lane_map.end (); lane_itr++) {
-						if (lane_itr->In_Thru () && lane_itr->Out_Thru ()) {
-							//sim_lane_ptr = sim_dir_ptr->Lane (lane_itr->Out_Lane ());
-							//if (sim_lane_ptr->Thru_Link () < 0) {
-							//	sim_lane_ptr->Thru_Lane (lane_itr->In_Lane ());
-							//	sim_lane_ptr->Thru_Link (connect_ptr->Dir_Index ());
-							//}
-						}
-					}
-				}
-			}
 
 			//---- initialize the pocket lanes and access restrictions ----
 
@@ -235,15 +211,12 @@ void Simulator_Service::Global_Data (void)
 				if (pocket_ptr->Type () == LEFT_TURN || pocket_ptr->Type () == RIGHT_TURN) {
 					k = length;
 					j = MIN (pocket_ptr->Offset (), offset);
-					factor = param.turn_factor;
 				} else if (pocket_ptr->Type () == LEFT_MERGE || pocket_ptr->Type () == RIGHT_MERGE) {
 					j = 0;
 					k = MIN (pocket_ptr->Length (), length);
-					factor = param.merge_factor;
 				} else {
 					j = pocket_ptr->Offset ();
 					k = MIN ((pocket_ptr->Offset () + pocket_ptr->Length ()), length);
-					factor = param.other_factor;
 				}
 				if (j < 0) j = 0;
 
@@ -262,15 +235,45 @@ void Simulator_Service::Global_Data (void)
 					}
 				}
 			}
+			if (sim_dir_ptr->Method () == MACROSCOPIC) continue;
+
+			//---- initialize the connection array ----
+
+			for (index = dir_ptr->First_Connect (); index >= 0; index = connect_ptr->Next_Index ()) {
+				connect_ptr = &connect_array [index];
+				sim_con_ptr = &sim_connection [index];
+
+				Lane_Map (connect_ptr, *sim_con_ptr);
+			}
+
+			//---- set the thru link and lane for each entry lane ----
+
+			for (index = dir_ptr->First_Connect_From (); index >= 0; index = connect_ptr->Next_From ()) {
+				connect_ptr = &connect_array [index];
+					
+				app_ptr = &dir_array [connect_ptr->Dir_Index ()];
+				if ((link_array [app_ptr->Link ()].Use () & use_code) == 0) continue;
+
+				Lane_Map (connect_ptr, lane_map);
+
+				for (lane_itr = lane_map.begin (); lane_itr != lane_map.end (); lane_itr++) {
+					if (lane_itr->In_Thru () && lane_itr->Out_Thru ()) {
+						lane = lane_itr->Out_Lane ();
+
+						if (sim_dir_ptr->Thru_Link (lane) == 0) {
+							sim_dir_ptr->Thru_Link (lane, connect_ptr->Dir_Index ());
+							sim_dir_ptr->Thru_Lane (lane, lane_itr->In_Lane ());
+						}
+					}
+				}
+			}
 
 			//---- initialize the traffic controls ----
-
-			node_ptr = &node_array [bnode];
 
 			for (index = dir_ptr->First_Connect (); index >= 0; index = connect_ptr->Next_Index ()) {
 				connect_ptr = &connect_array [index];
 
-				if (node_ptr->Method () == NO_SIMULATION || node_ptr->Method () == MACROSCOPIC) {
+				if (subarea_method [node_ptr->Subarea ()] <= MACROSCOPIC) {
 					connect_ptr->Control (UNCONTROLLED);
 				} else if (node_ptr->Control () < 0) {
 					if (dir_ptr->Sign () == STOP_SIGN || dir_ptr->Sign () == ALL_STOP) {
@@ -321,6 +324,8 @@ void Simulator_Service::Global_Data (void)
 
 			sim_dir_ptr = &sim_dir_array [index];
 
+			if (subarea_method [sim_dir_ptr->Subarea ()] == NO_SIMULATION) continue;
+
 			c0 /= param.cell_size;
 			min_lane = sim_dir_ptr->Lanes ();
 			max_lane = 0;
@@ -357,7 +362,7 @@ void Simulator_Service::Global_Data (void)
 	//---- identify conflict links ----
 
 	for (bnode = 0, node_itr = node_array.begin (); node_itr != node_array.end (); node_itr++, bnode++) {
-		if (node_itr->Control () == -1) continue;
+		if (node_itr->Control () == -1 || subarea_method [node_itr->Subarea ()] <= MACROSCOPIC) continue;
 
 		flag = (node_itr->Control () >= 0);		//---- signal flag ----
 

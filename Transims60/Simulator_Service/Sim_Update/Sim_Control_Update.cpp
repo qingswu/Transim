@@ -30,11 +30,15 @@ bool Sim_Control_Update::Update_Check (void)
 
 	//---- check the update times ----
 
+	if (sim->max_method <= MACROSCOPIC) {
+		timing_update_time = signal_update_time = sim->end_period;
+		return (true);
+	}
 	signal_update_flag = (signal_update_time <= sim->time_step);
-	if (signal_update_flag) signal_update_time = MAX_INTEGER;
+	if (signal_update_flag) signal_update_time = sim->end_period;
 
 	timing_update_flag = (timing_update_time <= sim->time_step);
-	if (timing_update_flag) timing_update_time = MAX_INTEGER;
+	if (timing_update_flag) timing_update_time = sim->end_period;
 
 	//---- check each signal ----
 
@@ -44,7 +48,7 @@ bool Sim_Control_Update::Update_Check (void)
 		//---- update signal timing and phasing plans ----
 
 		if (signal_update_flag) {
-			if (sim->time_step < signal_itr->End_Time () && signal_itr->End_Time () < MAX_INTEGER) {
+			if (sim->time_step < signal_itr->End_Time () && signal_itr->Status () > 0) {
 				if (signal_itr->Check_Time () < signal_update_time) {
 					signal_update_time = signal_itr->Check_Time ();
 				}

@@ -183,8 +183,8 @@ void Data_Service::Read_Lane_Uses (void)
 
 					//----- set flow index for lane groups ----
 
-					if (Lane_Use_Flows () && dir_itr->Flow_Index () < 0) {
-						dir_itr->Flow_Index (size + Add_Lane_Use_Flows ());
+					if (Lane_Use_Flows () && dir_itr->Use_Index () < 0) {
+						dir_itr->Use_Index (size + Add_Lane_Use_Flows ());
 						lane_use_flow_index.push_back (index);
 					}
 
@@ -254,6 +254,8 @@ bool Data_Service::Get_Lane_Use_Data (Lane_Use_File &file, Lane_Use_Data &lane_u
 	//---- check/convert the link number and direction ----
 
 	link = file.Link ();
+	if (link <= 0) return (false);
+
 	dir = file.Dir ();
 	offset = Round (file.Offset ());
 

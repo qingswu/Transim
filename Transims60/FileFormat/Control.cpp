@@ -13,14 +13,13 @@
 void FileFormat::Program_Control (void)
 {
 	int i, j, num, num_fld, field, num_org, num_des, tables;
-	String key, name, buf;
+	String key, name, buf, format;
 	Strings strings;
 	Str_Itr str_itr;
 	Integers decimals;
 	Data_Group data_rec, *data_ptr;
 	Matrix_Group matrix_rec, *matrix_ptr;
 	Field_Type type = DB_INTEGER;
-	Format_Type format;
 	Db_Field *fld_ptr;
 	Units_Type units;
 	double size;
@@ -255,15 +254,14 @@ void FileFormat::Program_Control (void)
 
 			format = Db_Header::Def_Format (key);
 
-			if (format == UNFORMATED) {
+			if (format.empty ()) {
 				if (Check_Control_Key (MATRIX_FORMAT, i)) {
-					name = Get_Control_String (MATRIX_FORMAT, i);
+					format = Get_Control_String (MATRIX_FORMAT, i);
 				} else {
-					name = Get_Default_Text (MATRIX_FORMAT);
+					format = Get_Default_Text (MATRIX_FORMAT);
 				}
-				format = Format_Code (name);
 			}
-			matrix_ptr->matrix = TDF_Matrix (format);
+			matrix_ptr->matrix = TDF_Matrix (READ, format);
 
 			if (num > 1) {
 				matrix_ptr->matrix->File_Type (String ("Matrix File #%d") % i);
@@ -272,8 +270,6 @@ void FileFormat::Program_Control (void)
 				matrix_ptr->matrix->File_Type ("Matrix File");
 				matrix_ptr->matrix->File_ID ("Matrix");
 			}
-			matrix_ptr->matrix->Dbase_Format (format);
-
 			matrix_ptr->matrix->Open (key);
 
 			num_org = matrix_ptr->matrix->Num_Org ();
@@ -291,9 +287,9 @@ void FileFormat::Program_Control (void)
 			}
 
 			if (Check_Control_Key (NEW_MATRIX_FORMAT, i)) {
-				format = Format_Code (Get_Control_String (NEW_MATRIX_FORMAT, i));
+				format = Get_Control_String (NEW_MATRIX_FORMAT, i);
 			}
-			matrix_ptr->new_matrix = TDF_Matrix (format);
+			matrix_ptr->new_matrix = TDF_Matrix (CREATE, format);
 
 			if (num > 1) {
 				matrix_ptr->new_matrix->File_Type (String ("New Matrix File #%d") % i);
@@ -303,7 +299,6 @@ void FileFormat::Program_Control (void)
 				matrix_ptr->new_matrix->File_ID ("NewMatrix");
 			}
 			matrix_ptr->new_matrix->Filename (Project_Filename (key));
-			matrix_ptr->new_matrix->Dbase_Format (format);
 
 			//---- select tables ----
 

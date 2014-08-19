@@ -14,14 +14,13 @@ void ModeChoice::Program_Control (void)
 {
 	int i, num, id, nest, table;
 	double value, size, nesting;
-	String key, text;
+	String key, text, format;
 	Strings strings;
 	Str_Itr str_itr;
 	Str_ID_Itr id_itr;
 	Str_ID_Stat id_stat;
 	Db_Mat_Ptr matrix_ptr = 0;
 	Integers access_modes, nest_modes, zero_tab;
-	Format_Type format;
 
 	Execution_Service::Program_Control ();
 
@@ -34,19 +33,17 @@ void ModeChoice::Program_Control (void)
 
 	format = Db_Header::Def_Format (key);
 
-	if (format == UNFORMATED) {
+	if (format.empty ()) {
 		if (Check_Control_Key (TRIP_FORMAT)) {
-			text = Get_Control_String (TRIP_FORMAT);
+			format = Get_Control_String (TRIP_FORMAT);
 		} else {
-			text = Get_Default_Text (TRIP_FORMAT);
+			format = Get_Default_Text (TRIP_FORMAT);
 		}
-		format = Format_Code (text);
 	}
-	trip_file = TDF_Matrix (format);
+	trip_file = TDF_Matrix (READ, format);
 
 	trip_file->File_Type ("Trip File");
 	trip_file->File_ID ("Trip");
-	trip_file->Dbase_Format (format);
 
 	trip_file->Open (key);
 
@@ -79,14 +76,13 @@ void ModeChoice::Program_Control (void)
 	key = Get_Control_String (NEW_TRIP_FILE);
 
 	if (Check_Control_Key (NEW_TRIP_FORMAT)) {
-		format = Format_Code (Get_Control_String (NEW_TRIP_FORMAT));
+		format = Get_Control_String (NEW_TRIP_FORMAT);
 	}
-	new_file = TDF_Matrix (format);
+	new_file = TDF_Matrix (CREATE, format);
 
 	new_file->File_Type ("New Trip File");
 	new_file->File_ID ("NewTrip");
 	new_file->Filename (Project_Filename (key));
-	new_file->Dbase_Format (format);
 	new_file->Copy_OD_Map (trip_file);
 
 	size = sizeof (double) + (trip_file->Table_Field (0)->Decimal () + 2) / 10.0;
@@ -129,18 +125,17 @@ void ModeChoice::Program_Control (void)
 
 		format = Db_Header::Def_Format (key);
 
-		if (format == UNFORMATED) {
+		if (format.empty ()) {
 			if (Check_Control_Key (SKIM_FORMAT, i)) {
-				format = Format_Code (Get_Control_String (SKIM_FORMAT, i));
+				format = Get_Control_String (SKIM_FORMAT, i);
 			} else {
-				format = trip_file->Dbase_Format ();
+				format = Data_Format (trip_file->Dbase_Format (), trip_file->Model_Format ());
 			}
 		}
-		matrix_ptr = TDF_Matrix (format);
+		matrix_ptr = TDF_Matrix (READ, format);
 
 		matrix_ptr->File_Type (String ("Skim File #%d") % i);
 		matrix_ptr->File_ID (String ("Skim%d") % i);
-		matrix_ptr->Dbase_Format (format);
 
 		matrix_ptr->Open (key);
 

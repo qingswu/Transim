@@ -615,10 +615,16 @@ void NewFormat::Plan_Processing::Travel_Plans (int part)
 			plan_rec.Add_Walk (time);
 		} else if (drive_flag) {
 			plan_rec.Add_Drive (time);
-			plan_rec.Vehicle (exe->Fix_Vehicle_ID (old_plan->Vehicle ()));
+
+			Veh_ID_Map_Itr veh_itr = exe->vehicle40_map.find (old_plan->Vehicle ());
+			if (veh_itr == exe->vehicle40_map.end ()) {
+				plan_rec.Vehicle (0);
+			} else {
+				plan_rec.Vehicle (veh_itr->second.Vehicle ());
+			}
 			plan_rec.Veh_Type (0);
 
-			if (exe->vehicle_flag && plan_rec.Vehicle () > 0) {
+			if (plan_rec.Vehicle () > 0) {
 				Vehicle_Index veh_index (plan_rec.Household (), plan_rec.Vehicle ());
 				Vehicle_Map_Itr map_itr = exe->vehicle_type.find (veh_index);
 				if (map_itr != exe->vehicle_type.end ()) {

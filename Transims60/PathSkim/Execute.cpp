@@ -10,6 +10,8 @@
 
 void PathSkim::Execute (void)
 {
+	int index;
+
 	//---- read the network data ----
 
 	Router_Service::Execute ();
@@ -42,18 +44,18 @@ void PathSkim::Execute (void)
 		Show_Message (2, "Building the Location List -- Record");
 		Set_Progress ();
 
-		for (loc_itr = location_array.begin (); loc_itr != location_array.end (); loc_itr++) {
+		for (index=0, loc_itr = location_array.begin (); loc_itr != location_array.end (); loc_itr++, index++) {
 			Show_Progress ();
 
 			if (loc_itr->Zone () < 0) continue;
 			loc = loc_itr->Location ();
 
 			if (!select_org || org_range.In_Range (loc)) {
-				org_loc.push_back (loc);
+				org_loc.push_back (index);
 				if (skim_flag) skim_file->Add_Org (loc);
 			}
 			if (!select_des || des_range.In_Range (loc)) {
-				des_loc.push_back (loc);
+				des_loc.push_back (index);
 				if (skim_flag) skim_file->Add_Des (loc);
 			}
 		}
@@ -78,12 +80,12 @@ void PathSkim::Execute (void)
 		New_Zone_Locations ();
 	}
 
-	//---- build link delay arrays ----
+	//---- build performance arrays ----
 
-	if (System_File_Flag (NEW_LINK_DELAY)) {
-		if (!System_File_Flag (LINK_DELAY)) {
-			Build_Flow_Time_Arrays ();
-		} else if (Turn_Updates () && turn_delay_array.size () == 0) {
+	if (System_File_Flag (NEW_PERFORMANCE)) {
+		if (!System_File_Flag (PERFORMANCE)) {
+			Build_Perf_Arrays ();
+		} else if (Turn_Updates () && turn_period_array.size () == 0) {
 			Build_Turn_Arrays ();
 		}
 	}
@@ -100,15 +102,15 @@ void PathSkim::Execute (void)
 		Flow_Skims ();
 	}
 
-	//---- output link delays ----
+	//---- output performance ----
 
 	if (Flow_Updates () || Time_Updates ()) {
-		if (System_File_Flag (NEW_LINK_DELAY)) {
+		if (System_File_Flag (NEW_PERFORMANCE)) {
 			if (Time_Updates ()) {
 				Update_Travel_Times ();
 			}
 			Show_Message (1);
-			Write_Link_Delays ();
+			Write_Performance ();
 		}
 	}
 

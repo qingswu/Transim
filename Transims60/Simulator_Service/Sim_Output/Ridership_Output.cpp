@@ -80,12 +80,14 @@ Ridership_Output::Ridership_Output (int num) : Sim_Output_Data ()
 }
 
 //---------------------------------------------------------
-//	Output_Check
+//	Ridership_Output destructor
 //---------------------------------------------------------
 
-bool Ridership_Output::Output_Check (void)
+Ridership_Output::~Ridership_Output ()
 {
-	return (true);
+	if (file != 0) {
+		file->Close ();
+	}
 }
 
 //---------------------------------------------------------

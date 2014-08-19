@@ -27,8 +27,8 @@ public:
 
 	enum Select_Service_Keys { 
 		SELECT_HOUSEHOLDS = SELECT_SERVICE_OFFSET, SELECT_MODES, SELECT_PURPOSES, 
-		SELECT_TIME_OF_DAY, SELECT_START_TIMES, SELECT_END_TIMES, SELECT_ORIGINS, 
-		SELECT_DESTINATIONS, SELECT_TRAVELER_TYPES, SELECT_FACILITY_TYPES, 
+		SELECT_PRIORITIES, SELECT_TIME_OF_DAY, SELECT_START_TIMES, SELECT_END_TIMES, 
+		SELECT_ORIGINS, SELECT_DESTINATIONS, SELECT_TRAVELER_TYPES, SELECT_FACILITY_TYPES, 
 		SELECT_PARKING_LOTS, SELECT_VC_RATIOS, SELECT_TIME_RATIOS, SELECT_TRANSIT_MODES, 
 		SELECT_VEHICLE_TYPES, SELECT_PROBLEM_TYPES, SELECT_LINKS, SELECT_NODES, 
 		SELECT_STOPS, SELECT_ROUTES, SELECT_SUBAREA_POLYGON, SELECT_ORIGIN_ZONES, 
@@ -55,11 +55,11 @@ protected:
 	bool select_origins, select_destinations, select_org_zones, select_des_zones, select_links, select_nodes;
 	bool select_vehicles, select_problems, select_subarea, percent_flag, time_diff_flag, cost_diff_flag;
 	bool select_mode [MAX_MODE], select_facility [EXTERNAL+1], select_modes, select_facilities;
-	bool select_transit [ANY_TRANSIT], select_transit_modes;
+	bool select_transit [ANY_TRANSIT], select_transit_modes, select_priorities, select_priority [CRITICAL+1];
 	bool select_stops, select_routes, select_time_of_day, select_parking, select_vc, select_ratio;
 	bool delete_mode [MAX_MODE], delete_modes, delete_travelers, delete_households, delete_flag;
-	Dtime min_time_diff, max_time_diff;
-	int min_cost_diff, max_cost_diff;
+	Dtime min_time_diff, max_time_diff, max_min_time_diff;
+	int min_cost_diff, max_cost_diff, max_min_cost_diff;
 	double select_percent, max_percent_select, percent_time_diff, percent_cost_diff, vc_ratio, time_ratio;;
 
 	Data_Range hhold_range, purpose_range, traveler_range, vehicle_range, problem_range, stop_range, route_range;

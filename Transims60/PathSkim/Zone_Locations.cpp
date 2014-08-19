@@ -10,7 +10,7 @@
 
 void PathSkim::Zone_Locations (void)
 {
-	int loc, zone, num_zone;
+	int index, loc, zone, num_zone;
 
 	Ints_Map all_org, all_des;
 	Ints_Map_Itr map_itr;
@@ -39,7 +39,7 @@ void PathSkim::Zone_Locations (void)
 
 	//---- process the location data ----
 
-	for (loc_itr = location_array.begin (); loc_itr != location_array.end (); loc_itr++) {
+	for (index=0, loc_itr = location_array.begin (); loc_itr != location_array.end (); loc_itr++, index++) {
 		Show_Progress ();
 		if (zone_flag && loc_itr->Zone () >= 0) {
 			zone_ptr = &zone_array [loc_itr->Zone ()];
@@ -53,13 +53,13 @@ void PathSkim::Zone_Locations (void)
 		if (!sel_org_zone || org_zone_range.In_Range (zone)) {
 			if (!select_org || org_range.In_Range (loc)) {
 				loc_stat = all_org.insert (Ints_Map_Data (zone, locations));
-				loc_stat.first->second.push_back (loc);
+				loc_stat.first->second.push_back (index);
 			}
 		}
 		if (!sel_des_zone || des_zone_range.In_Range (zone)) {
 			if (!select_des || des_range.In_Range (loc)) {
 				loc_stat = all_des.insert (Ints_Map_Data (zone, locations));
-				loc_stat.first->second.push_back (loc);
+				loc_stat.first->second.push_back (index);
 			}
 		}
 	}
@@ -70,18 +70,18 @@ void PathSkim::Zone_Locations (void)
 			int_ptr = &(map_itr->second);
 
 			for (int_itr = int_ptr->begin (); int_itr != int_ptr->end (); int_itr++) {
-				loc = *int_itr;
+				loc = location_array [*int_itr].Location ();
 
 				if (!sel_org_zone || org_zone_range.In_Range (zone)) {
 					if (!select_org || org_range.In_Range (loc)) {
 						loc_stat = all_org.insert (Ints_Map_Data (zone, locations));
-						loc_stat.first->second.push_back (loc);
+						loc_stat.first->second.push_back (*int_itr);
 					}
 				}
 				if (!sel_des_zone || des_zone_range.In_Range (zone)) {
 					if (!select_des || des_range.In_Range (loc)) {
 						loc_stat = all_des.insert (Ints_Map_Data (zone, locations));
-						loc_stat.first->second.push_back (loc);
+						loc_stat.first->second.push_back (*int_itr);
 					}
 				}
 			}

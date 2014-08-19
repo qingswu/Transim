@@ -345,6 +345,7 @@
     <ClCompile Include="Path_Builder\Plan_Build.cpp" />
     <ClCompile Include="Path_Builder\Plan_Flow.cpp" />
     <ClCompile Include="Path_Builder\Plan_ReRoute.cpp" />
+    <ClCompile Include="Path_Builder\Plan_Reskim.cpp" />
     <ClCompile Include="Path_Builder\Plan_Update.cpp" />
     <ClCompile Include="Path_Builder\Save_Skims.cpp" />
     <ClCompile Include="Path_Builder\Skim_Build.cpp" />

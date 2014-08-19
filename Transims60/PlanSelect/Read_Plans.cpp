@@ -19,8 +19,9 @@ void PlanSelect::Plan_Processing::Read_Plans (int part)
 
 	Plan_Data plan;
 	Plan_Leg_Itr leg_itr;
-	Flow_Time_Array *link_delay_ptr, *turn_delay_ptr;
-	Flow_Time_Data *flow_ptr;
+	Perf_Period *perf_period_ptr;
+	Turn_Period *turn_period_ptr;
+	Perf_Data *perf_ptr;
 	Link_Data *link_ptr;
 	Int_Map_Itr map_itr;
 	Int2_Map_Itr map2_itr;
@@ -112,7 +113,7 @@ void PlanSelect::Plan_Processing::Read_Plans (int part)
 		
 		//---- check the deletion records ----
 		
-		plan.Get_Trip_Index (trip_index);
+		plan.Get_Index (trip_index);
 
 		if (exe->delete_flag && exe->delete_map.Best (trip_index) != exe->delete_map.end ()) continue;
 		if (exe->delete_households && exe->hhold_delete.In_Range (plan.Household ())) continue;
@@ -146,9 +147,9 @@ void PlanSelect::Plan_Processing::Read_Plans (int part)
 
 				if (leg_itr->Mode () == DRIVE_MODE && leg_itr->Link_Type ()) {
 
-					link_delay_ptr = exe->link_delay_array.Period_Ptr (skim);
+					perf_period_ptr = exe->perf_period_array.Period_Ptr (skim);
 
-					if (link_delay_ptr > 0) {
+					if (perf_period_ptr > 0) {
 						index = leg_itr->Link_ID ();
 						map_itr = exe->link_map.find (index);
 
@@ -170,7 +171,7 @@ void PlanSelect::Plan_Processing::Read_Plans (int part)
 							if (leg_itr->ID () < 0 || leg_itr->Type () == LINK_BA || leg_itr->Type () == USE_BA) {
 								flow_index = index = link_ptr->BA_Dir ();
 								if (leg_itr->Type () == USE_BA && exe->Lane_Use_Flows ()) {
-									flow_index = exe->dir_array [index].Flow_Index ();
+									flow_index = exe->dir_array [index].Use_Index ();
 									if (flow_index >= 0) {
 										group = 1;
 									} else {
@@ -180,7 +181,7 @@ void PlanSelect::Plan_Processing::Read_Plans (int part)
 							} else {
 								flow_index = index = link_ptr->AB_Dir ();
 								if (leg_itr->Type () == USE_AB && exe->Lane_Use_Flows ()) {
-									flow_index = exe->dir_array [index].Flow_Index ();
+									flow_index = exe->dir_array [index].Use_Index ();
 									if (flow_index >= 0) {
 										group = 1;
 									} else {
@@ -188,8 +189,8 @@ void PlanSelect::Plan_Processing::Read_Plans (int part)
 									}
 								}
 							}
-							flow_ptr = link_delay_ptr->Data_Ptr (flow_index);
-							ttime = flow_ptr->Time ();
+							perf_ptr = perf_period_ptr->Data_Ptr (flow_index);
+							ttime = perf_ptr->Time ();
 
 							//---- check the vc ratio ----
 
@@ -209,7 +210,7 @@ void PlanSelect::Plan_Processing::Read_Plans (int part)
 										if (period_ptr->Periods () == 0) break;
 									}
 								}
-								ratio = flow_factor * flow_ptr->Flow () / cap;
+								ratio = flow_factor * perf_ptr->Volume () / cap;
 								if (ratio >= exe->vc_ratio) {
 									vc_flag = true;
 								}
@@ -249,8 +250,8 @@ void PlanSelect::Plan_Processing::Read_Plans (int part)
 								map2_itr = exe->connect_map.find (Int2_Key (dir_index, index));
 
 								if (map2_itr != exe->connect_map.end ()) {
-									turn_delay_ptr = exe->turn_delay_array.Period_Ptr (skim);
-									ttime += turn_delay_ptr->Time (map2_itr->second);
+									turn_period_ptr = exe->turn_period_array.Period_Ptr (skim);
+									ttime += turn_period_ptr->Time (map2_itr->second);
 									if (ttime < 1) ttime = 1;
 								}
 							}

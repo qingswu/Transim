@@ -62,13 +62,17 @@ Static_Service::Code_Text Static_Service::drive_side_codes [] = {
 Static_Service::Code_Text  Static_Service::units_codes [] = {
 	//---- converted units ----
 	{ NO_UNITS, "NO" }, { SECONDS, "SECONDS" }, { MINUTES, "MINUTES" }, { HOURS, "HOURS" }, 
+	{ SECONDS, "SECOND" }, { MINUTES, "MINUTE" }, { HOURS, "HOUR" }, 
 	{ HOUR_CLOCK, "HOUR_CLOCK" }, { DAY_TIME, "DAY_TIME" }, { DAY_TIME, "24_HOUR_CLOCK" },
 	{ TIME_CODE, "TIME_CODE" }, { FPS, "FPS" }, { MPS, "MPS" }, { MPH, "MPH" }, { KPH, "KPH" },
 	{ FEET, "FEET" }, { METERS, "METERS" }, { MILES, "MILES" }, { KILOMETERS, "KILOMETERS" },  
 	{ DEGREES, "DEGREES" },  { MILLION_DEG, "MILLION_DEGREES" }, { MILLION_DEG, "MILLION DEGREES" }, 
 	{ FPS2, "FPS/S" }, { MPS2, "MPS/S" }, { MPHPS, "MPH/S" }, { KPHPS, "KPH/S" }, 
-	{ SPP, "SECONDS/PERSON" }, { RATIO, "RATIO" }, { STOPPED, "STOPPED_FLOW" }, 
-	{ LANE_KM, "FLOW/LANE-KM" }, { LANE_MILE, "FLOW/LANE-MILE" }, 
+	{ SPP, "SECONDS/PERSON" }, { RATIO, "RATIO" }, { STOPPED, "STOPPED_PCE" }, { STOPPED, "STOPPED_FLOW" },
+	{ LANE_KM, "PCE/HR/LANE-KM" }, { LANE_MILE, "PCE/HR/LANE-MILE" }, 
+	{ LANE_KM, "FLOW/HR/LANE-KM" }, { LANE_MILE, "FLOW/HR/LANE-MILE" }, 
+	{ LANE_KM, "PCE/LANE-KM" }, { LANE_MILE, "PCE/LANE-MILE" }, 
+	{ LANE_KM, "FLOW/LANE-KM" }, { LANE_MILE, "FLOW/LANE-MILE" },
 	{ IMP_METER, "IMPEDANCE/METER" }, { IMP_METER, "UNITS/METER" },
 	{ IMP_FOOT, "IMPEDANCE/FOOT" }, { IMP_FOOT, "UNITS/FOOT" },
 	{ CENT_KM, "CENTS/KILOMETER" }, { CENT_KM, "CENTS/KM" },
@@ -97,6 +101,7 @@ Static_Service::Code_Text  Static_Service::units_codes [] = {
 	{ LOADING_CODE, "PROCESSING_RATE" }, { RELATE_CODE, "RELATE_TYPE" }, { GENDER_CODE, "GENDER_TYPE" }, 
 	{ BOOL_CODE, "TRUE/FALSE" }, { MODE_CODE, "MODE_TYPE" }, { CONSTRAINT_CODE, "CONSTRAINT_TYPE" }, 
 	{ PRIORITY_CODE, "PRIORITY_TYPE" }, { PROBLEM_CODE, "PROBLEM_TYPE" }, { EVENT_CODE, "EVENT_TYPE" },
+	{ TRAVEL_CODE, "TRAVEL_TYPE" },
 	{ 0, 0 }
 };
 
@@ -316,8 +321,8 @@ Static_Service::Code_Text  Static_Service::system_file_codes [] = {
 	{ DETECTOR, "Detector" }, { TRANSIT_STOP, "Transit Stop" }, { TRANSIT_FARE, "Transit Fare" }, 
 	{ TRANSIT_ROUTE, "Transit Route" }, { TRANSIT_SCHEDULE, "Transit Schedule" }, 
 	{ TRANSIT_DRIVER,"Transit Driver" }, { ROUTE_NODES,"Route Nodes" }, 
-	{ SELECTION, "Selection" }, { HOUSEHOLD, "Household" }, { LINK_DELAY, "Link Delay" },
-	{ PERFORMANCE, "Performance" }, { RIDERSHIP,  "Ridership" }, { VEHICLE_TYPE, "Vehicle Type" }, 
+	{ SELECTION, "Selection" }, { HOUSEHOLD, "Household" }, { PERFORMANCE, "Performance" }, 
+	{ TURN_DELAY, "Turn Delay" }, { RIDERSHIP,  "Ridership" }, { VEHICLE_TYPE, "Vehicle Type" }, 
 	{ TRIP, "Trip" }, { PROBLEM, "Problem" }, { PLAN, "Plan" }, { SKIM, "Skim" }, 
 	{ EVENT, "Event" }, { 0, 0 }
 };
@@ -346,6 +351,16 @@ Static_Service::Code_Text  Static_Service::problem_codes [] = {
 	{ TRACE_PROBLEM, "Path Tracing" }, { PARK_USE_PROBLEM, "Parking Restriction" }, { 0, 0 }
 };
 
+//---- simulation type codes ----
+
+Static_Service::Code_Text  Static_Service::simulation_codes [] = {
+	{ NO_SIMULATION, "NO_SIMULATION" }, { MACROSCOPIC, "MACROSCOPIC" }, { MESOSCOPIC, "MESOSCOPIC" }, { MICROSCOPIC, "MICROSCOPIC" }, 
+	{ NO_SIMULATION, "NO_SIM" }, { MACROSCOPIC, "MACRO" }, { MESOSCOPIC, "MESO" }, { MICROSCOPIC, "MICRO" }, 
+	{ NO_SIMULATION, "NOSIM" }, { MACROSCOPIC, "MAC" }, { MESOSCOPIC, "MES" }, { MICROSCOPIC, "MIC" }, 
+	{ NO_SIMULATION, "NO" }, { MACROSCOPIC, "MA" }, { MESOSCOPIC, "ME" }, { MICROSCOPIC, "MI" }, 
+	{ NO_SIMULATION, "0" }, { MACROSCOPIC, "1" }, { MESOSCOPIC, "2" }, { MICROSCOPIC, "3" }, { 0, 0 } 
+};
+
 //---- event type codes ----
 
 Static_Service::Code_Text  Static_Service::event_codes [] = {
@@ -358,6 +373,16 @@ Static_Service::Code_Text  Static_Service::event_codes [] = {
 	{ TRANSIT_WAIT_EVENT, "START_WAITING" }, { TRANSIT_ON_EVENT, "TRANSIT_ON" }, { TRANSIT_OFF_EVENT, "TRANSIT_OFF" },
 	{ TRANSIT_WAIT_EVENT, "WAITING" }, { TRANSIT_ON_EVENT, "BOARDING" }, { TRANSIT_OFF_EVENT, "ALIGHTING" },
 	{ VEH_LOST_EVENT, "LOST_VEHICLE" }, { 0, 0 } 
+};
+
+//---- travel type codes ----
+
+Static_Service::Code_Text  Static_Service::travel_codes [] = {
+	{ NOT_ACTIVE, "NOT_ACTIVE" }, { OFF_NET_START, "OFF_NET_START" }, { OFF_NET_MOVE, "OFF_NET_MOVE" },
+	{ OFF_NET_LOAD, "OFF_NET_LOAD" }, { OFF_NET_DRIVE, "OFF_NET_DRIVE" }, { OFF_NET_PARK, "OFF_NET_PARK" }, 
+	{ OFF_NET_END, "OFF_NET_END" }, { OFF_ON_LOAD, "OFF_ON_LOAD" }, { OFF_ON_DRIVE, "OFF_ON_DRIVE" },
+	{ ON_OFF_PARK, "ON_OFF_PARK" }, { ON_OFF_DRIVE, "ON_OFF_DRIVE" }, { ON_NET_DRIVE, "ON_NET_DRIVE" },
+	{ 0, 0 } 
 };
 
 //---- constraint type codes ----
@@ -409,17 +434,19 @@ Static_Service::Code_Text  Static_Service::flow_codes [] = {
 //---- performance type codes ----
 
 Static_Service::Code_Text  Static_Service::performance_codes [] = {
-	{ FLOW_DATA, "FLOW" }, { TTIME_DATA, "TRAVEL_TIME" }, { VC_DATA, "VC_RATIO" }, { RATIO_DATA,"TIME_RATIO" }, 
-	{ SPEED_DATA, "SPEED" }, { DELAY_DATA, "DELAY" }, { DENSITY_DATA, "DENSITY" }, { MAX_DENSITY_DATA, "MAX_DENSITY" }, 
-	{ QUEUE_DATA, "QUEUE" }, { MAX_QUEUE_DATA, "MAX_QUEUE" }, { FAILURE_DATA, "CYCLE_FAILURE" }, 
-	{ VMT_DATA, "VMT" }, { VHT_DATA, "VHT" }, { VHD_DATA, "VHD" }, 
-	{ CONG_TIME_DATA, "CONGESTED_TIME" }, { CONG_VMT_DATA, "CONGESTED_VMT" }, { CONG_VHT_DATA, "CONGESTED_VHT" }, 
-	{ FLOW_DATA, "VOLUME" }, { DENSITY_DATA, "AVG_DENSITY" }, { DENSITY_DATA, "AVERAGE_DENSITY" }, 
+	{ TTIME_DATA, "TRAVEL_TIME" }, { PERSON_DATA, "PERSONS" }, { VOLUME_DATA, "VOLUME" },
+	{ ENTER_DATA, "ENTER" }, { EXIT_DATA, "EXIT" }, { FLOW_DATA, "FLOW" }, 
+	{ SPEED_DATA, "SPEED" }, { RATIO_DATA,"TIME_RATIO" }, { DELAY_DATA, "DELAY" }, 
+	{ DENSITY_DATA, "DENSITY" }, { MAX_DENSITY_DATA, "MAX_DENSITY" }, { QUEUE_DATA, "QUEUE" }, 
+	{ MAX_QUEUE_DATA, "MAX_QUEUE" }, { FAILURE_DATA, "CYCLE_FAILURE" },	{ VC_DATA, "VC_RATIO" },
+	{ VMT_DATA, "VMT" }, { VHT_DATA, "VHT" }, { VHD_DATA, "VHD" }, { CONG_TIME_DATA, "CONGESTED_TIME" }, 
+	{ CONG_VMT_DATA, "CONGESTED_VMT" }, { CONG_VHT_DATA, "CONGESTED_VHT" }, 
+	{ PMT_DATA, "PMT" }, { PHT_DATA, "PHT" }, { PHD_DATA, "PHD" }, { CONG_PMT_DATA, "CONGESTED_PMT" }, 
+	{ CONG_PHT_DATA, "CONGESTED_PHT" }, { DENSITY_DATA, "AVG_DENSITY" }, { DENSITY_DATA, "AVERAGE_DENSITY" }, 
 	{ MAX_DENSITY_DATA, "MAXIMUM_DENSITY" }, { QUEUE_DATA, "AVG_QUEUE" }, { QUEUE_DATA, "AVERAGE_QUEUE" }, 
-	{ MAX_QUEUE_DATA, "MAXIMUM_QUEUE" }, { VMT_DATA, "VKT" }, { VMT_DATA, "PMT" }, { VMT_DATA, "PKT" }, 
-	{ VHT_DATA, "PHT" }, { VHD_DATA, "PHD" }, { VHT_DATA, "VEH_HOURS" }, { VHD_DATA, "VEH_DELAY" },	
-	{ VHT_DATA, "PERSON_HOURS" }, { VHD_DATA, "PERSON_DELAY" },	
-	{ VMT_DATA, "VEH_MI" }, { VMT_DATA, "VEH_KM" }, { VMT_DATA, "PERSON_MI" }, { VMT_DATA, "PERSON_KM" }, 
+	{ MAX_QUEUE_DATA, "MAXIMUM_QUEUE" }, { VMT_DATA, "VKT" }, { PMT_DATA, "PKT" }, { VHT_DATA, "VEH_HOURS" }, 
+	{ VHD_DATA, "VEH_DELAY" }, { PHT_DATA, "PERSON_HOURS" }, { PHD_DATA, "PERSON_DELAY" },	
+	{ VMT_DATA, "VEH_MI" }, { VMT_DATA, "VEH_KM" }, { PMT_DATA, "PERSON_MI" }, { PMT_DATA, "PERSON_KM" }, 
 	{ VMT_DATA, "VEH_MILES" }, { VMT_DATA, "VEH_KILOMETERS" },  { 0, 0 }
 };
 
@@ -438,15 +465,16 @@ Static_Service::Code_Text  Static_Service::rate_codes [] = {
 
 Static_Service::Code_Text  Static_Service::equation_codes [] = {
 	{ BPR, "BPR" }, { BPR_PLUS, "BPR_PLUS" }, { EXP, "EXPONENTIAL" }, { CONICAL, "CONICAL" },
-	{ AKCELIK, "AKCELIK" }, { CONSTANT, "CONSTANT"}, { BPR_PLUS, "BPR+" }, { EXP, "EXP" }, 
-	{ CONICAL, "CON" }, { 0 , 0 }
+	{ AKCELIK, "AKCELIK" }, { FLOW_DENSITY, "FLOW_DENSITY" }, { CONSTANT, "CONSTANT" }, 
+	{ BPR_PLUS, "BPR+" }, { EXP, "EXP" }, { CONICAL, "CON" }, { FLOW_DENSITY, "DENSITY" }, 
+	{ FLOW_DENSITY, "FLOW-DENSITY" }, { 0 , 0 }
 };
 
 //---- function type codes ----
 
 Static_Service::Code_Text  Static_Service::function_codes [] = {
 	{ LINEAR, "LINEAR" }, { LOGIT, "LOGIT" }, { EXPONENTIAL, "EXPONENTIAL" }, 
-	{ LOGARITHMIC, "LOGARITHMICL" }, { POLYNOMIAL, "POLYNOMIAL" }, { POWER, "POWER" }, 
+	{ LOGARITHMIC, "LOGARITHMIC" }, { POLYNOMIAL, "POLYNOMIAL" }, { POWER, "POWER" }, 
 	{ GAMMA, "GAMMA" }, { MAX_LOGIT, "MAX_LOGIT" }, { LINEAR, "LINE" }, { EXPONENTIAL, "EXP" }, 
 	{ LOGARITHMIC, "LOG" }, { POLYNOMIAL, "POLY" }, { POWER, "POW" }, { MAX_LOGIT, "MLOGIT" } , 
 	{ MAX_LOGIT, "LOGIT2" } , { 0 , 0 }
@@ -498,6 +526,14 @@ Static_Service::Code_Text  Static_Service::combine_codes [] = {
 	{ REPLACE_AVERAGE, "REPLACE_OR_AVERAGE" }, { ADD_FLOWS, "ADD_FLOWS" }, { REPLACE_LINKS, "REPLACE" }, 
 	{ SIMPLE_LINK_AVG, "AVERAGE" }, { WEIGHTED_LINK_AVG, "WEIGHTED" }, { ADD_FLOWS, "ADD" }, 
 	{ SIMPLE_LINK_AVG, "SIMPLE" }, { REPLACE_AVERAGE, "REPLACE_AVERAGE" }, { 0, 0 }
+};
+
+//---- router method type codes ----
+
+Static_Service::Code_Text  Static_Service::router_method_codes [] = {
+	{ TRAVEL_PLANS, "TRAVEL_PLANS" }, { LINK_FLOWS, "LINK_FLOWS" }, { DUE_PLANS, "DYNAMIC_USER_EQUILIBRIUM" }, 
+	{ DTA_FLOWS, "DYNAMIC_TRAFFIC_ASSIGNMENT" }, { TRAVEL_PLANS, "PLANS" }, { LINK_FLOWS, "FLOWS" },
+	{ DUE_PLANS, "DUE_PLANS" }, { DUE_PLANS, "DUE" }, { DTA_FLOWS, "DTA_FLOWS" }, { DTA_FLOWS, "DTA" }, { 0, 0 }
 };
 
 //---- selection method type codes ----
@@ -944,12 +980,15 @@ Use_Type Static_Service::Transit_Use_Map (Transit_Type code)
 //	Performance_Units_Map
 //---------------------------------------------------------
 
-Units_Type Static_Service::Performance_Units_Map (Performance_Type code, Units_Type flow_type)
+Units_Type Static_Service::Performance_Units_Map (Performance_Type code)
 {
 	switch (code) {
+		case VOLUME_DATA:
+		case ENTER_DATA:
+		case EXIT_DATA:
 		case FLOW_DATA:
 		case FAILURE_DATA:
-			return (flow_type);
+			return (PCE);
 		case TTIME_DATA:
 		case DELAY_DATA:
 			return (SECONDS);
@@ -957,41 +996,31 @@ Units_Type Static_Service::Performance_Units_Map (Performance_Type code, Units_T
 		case RATIO_DATA:
 			return (RATIO);
 		case SPEED_DATA:
-			return (KPH);
+			return (MPH);
 		case DENSITY_DATA:
 		case MAX_DENSITY_DATA:
-			return (LANE_KM);
+			return (LANE_MILE);
 		case QUEUE_DATA:
 		case MAX_QUEUE_DATA:
 			return (STOPPED);
 		case VMT_DATA:
 		case CONG_VMT_DATA:
-			if (flow_type == VEHICLES) {
-				return (VKT);
-			} else if (flow_type == PERSONS) {
-				return (PKT);
-			} else {
-				return (EKT);
-			}
+			return (EMT);
 		case VHT_DATA:
 		case CONG_VHT_DATA:
-			if (flow_type == VEHICLES) {
-				return (VHT);
-			} else if (flow_type == PERSONS) {
-				return (PHT);
-			} else {
-				return (EHT);
-			}
+			return (EHT);
 		case VHD_DATA:
-			if (flow_type == VEHICLES) {
-				return (VHD);
-			} else if (flow_type == PERSONS) {
-				return (PHD);
-			} else {
-				return (EHD);
-			}
+			return (EHD);
 		case CONG_TIME_DATA:
 			return (PERCENT);
+		case PMT_DATA:
+		case CONG_PMT_DATA:
+			return (PMT);
+		case PHT_DATA:
+		case CONG_PHT_DATA:
+			return (PHT);
+		case PHD_DATA:
+			return (PHD);
 		default:
 			return (NO_UNITS);
 			break;

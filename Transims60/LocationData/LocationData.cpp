@@ -11,14 +11,14 @@
 LocationData::LocationData (void) : Data_Service ()
 {
 	Program ("LocationData");
-	Version (1);
+	Version (2);
 	Title ("Activity Location Data Processor");
 
 	System_File_Type required_files [] = {
 		NODE, LINK, LOCATION, NEW_LOCATION, END_FILE
 	};
 	System_File_Type optional_files [] = {
-		SHAPE, ZONE, ACCESS_LINK, TRANSIT_STOP, TRANSIT_ROUTE, TRANSIT_SCHEDULE, END_FILE
+		SHAPE, ZONE, ACCESS_LINK, PARKING, TRANSIT_STOP, TRANSIT_ROUTE, TRANSIT_SCHEDULE, END_FILE
 	};
 	int file_service_keys [] = {
 		NOTES_AND_NAME_FIELDS, 0

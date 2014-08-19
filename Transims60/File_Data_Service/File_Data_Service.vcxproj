@@ -37,16 +37,19 @@
   <ItemGroup>
     <ClCompile Include="Data\Attribute_Data.cpp" />
     <ClCompile Include="Data\Event_Data.cpp" />
-    <ClCompile Include="Data\Flow_Time_Data.cpp" />
     <ClCompile Include="Data\Line_Data.cpp" />
     <ClCompile Include="Data\Performance_Data.cpp" />
+    <ClCompile Include="Data\Plan_Data.cpp" />
     <ClCompile Include="Data\Selection_Data.cpp" />
     <ClCompile Include="Data\Skim_Data.cpp" />
     <ClCompile Include="Data\Time_Index.cpp" />
     <ClCompile Include="Data\Tour_Sort.cpp" />
     <ClCompile Include="Data\Transfer_Data.cpp" />
     <ClCompile Include="Data\Traveler_Data.cpp" />
+    <ClCompile Include="Data\Trip_Data.cpp" />
     <ClCompile Include="Data\Trip_Index.cpp" />
+    <ClCompile Include="Data\Turn_Delay_Data.cpp" />
+    <ClCompile Include="Data\Volume_Array.cpp" />
     <ClCompile Include="Data\Zone_Location.cpp" />
     <ClCompile Include="Files\Access_File.cpp" />
     <ClCompile Include="Files\Activity_File.cpp" />
@@ -62,7 +65,6 @@
     <ClCompile Include="Files\Lane_Use_File.cpp" />
     <ClCompile Include="Files\Line_File.cpp" />
     <ClCompile Include="Files\Link_Data_File.cpp" />
-    <ClCompile Include="Files\Link_Delay_File.cpp" />
     <ClCompile Include="Files\Link_Dir_File.cpp" />
     <ClCompile Include="Files\Link_File.cpp" />
     <ClCompile Include="Files\Link_Use_File.cpp" />
@@ -70,6 +72,7 @@
     <ClCompile Include="Files\Matrix_File.cpp" />
     <ClCompile Include="Files\Node_File.cpp" />
     <ClCompile Include="Files\Occupancy_File.cpp" />
+    <ClCompile Include="Files\Old_Delay_File.cpp" />
     <ClCompile Include="Files\Old_Plan_File.cpp" />
     <ClCompile Include="Files\Parking_File.cpp" />
     <ClCompile Include="Files\Performance_File.cpp" />
@@ -95,8 +98,8 @@
     <ClCompile Include="Files\Traveler_File.cpp" />
     <ClCompile Include="Files\Travel_Time_File.cpp" />
     <ClCompile Include="Files\Trip_File.cpp" />
+    <ClCompile Include="Files\Turn_Delay_File.cpp" />
     <ClCompile Include="Files\Turn_Pen_File.cpp" />
-    <ClCompile Include="Files\Turn_Vol_File.cpp" />
     <ClCompile Include="Files\Vehicle_File.cpp" />
     <ClCompile Include="Files\Veh_Type_File.cpp" />
     <ClCompile Include="Files\Zone_File.cpp" />
@@ -110,7 +113,7 @@
     <ClCompile Include="Read\Read_Lane_Uses.cpp" />
     <ClCompile Include="Read\Read_Lines.cpp" />
     <ClCompile Include="Read\Read_Links.cpp" />
-    <ClCompile Include="Read\Read_Link_Delays.cpp" />
+    <ClCompile Include="Read\Read_Link_Data.cpp" />
     <ClCompile Include="Read\Read_Locations.cpp" />
     <ClCompile Include="Read\Read_Nodes.cpp" />
     <ClCompile Include="Read\Read_Parking_Lots.cpp" />
@@ -131,6 +134,7 @@
     <ClCompile Include="Read\Read_Timing_Plans.cpp" />
     <ClCompile Include="Read\Read_Travelers.cpp" />
     <ClCompile Include="Read\Read_Trips.cpp" />
+    <ClCompile Include="Read\Read_Turn_Delays.cpp" />
     <ClCompile Include="Read\Read_Turn_Pens.cpp" />
     <ClCompile Include="Read\Read_Veh_Types.cpp" />
     <ClCompile Include="Read\Read_Zones.cpp" />
@@ -150,7 +154,7 @@
     <ClCompile Include="Write\Write_Lane_Uses.cpp" />
     <ClCompile Include="Write\Write_Lines.cpp" />
     <ClCompile Include="Write\Write_Links.cpp" />
-    <ClCompile Include="Write\Write_Link_Delays.cpp" />
+    <ClCompile Include="Write\Write_Link_Data.cpp" />
     <ClCompile Include="Write\Write_Locations.cpp" />
     <ClCompile Include="Write\Write_Nodes.cpp" />
     <ClCompile Include="Write\Write_Parking_Lots.cpp" />
@@ -171,6 +175,7 @@
     <ClCompile Include="Write\Write_Timing_Plans.cpp" />
     <ClCompile Include="Write\Write_Travelers.cpp" />
     <ClCompile Include="Write\Write_Trips.cpp" />
+    <ClCompile Include="Write\Write_Turn_Delays.cpp" />
     <ClCompile Include="Write\Write_Turn_Pens.cpp" />
     <ClCompile Include="Write\Write_Veh_Types.cpp" />
     <ClCompile Include="Write\Write_Zones.cpp" />
@@ -200,7 +205,6 @@
     <ClInclude Include="..\Include\Fare_Data.hpp" />
     <ClInclude Include="..\Include\Fare_File.hpp" />
     <ClInclude Include="..\Include\File_Service.hpp" />
-    <ClInclude Include="..\Include\Flow_Time_Data.hpp" />
     <ClInclude Include="..\Include\Flow_Time_Service.hpp" />
     <ClInclude Include="..\Include\Household_Data.hpp" />
     <ClInclude Include="..\Include\Household_File.hpp" />
@@ -211,8 +215,6 @@
     <ClInclude Include="..\Include\Line_File.hpp" />
     <ClInclude Include="..\Include\Link_Data.hpp" />
     <ClInclude Include="..\Include\Link_Data_File.hpp" />
-    <ClInclude Include="..\Include\Link_Delay_Data.hpp" />
-    <ClInclude Include="..\Include\Link_Delay_File.hpp" />
     <ClInclude Include="..\Include\Link_Dir_Data.hpp" />
     <ClInclude Include="..\Include\Link_Dir_File.hpp" />
     <ClInclude Include="..\Include\Link_File.hpp" />
@@ -227,6 +229,7 @@
     <ClInclude Include="..\Include\Node_File.hpp" />
     <ClInclude Include="..\Include\Notes_Data.hpp" />
     <ClInclude Include="..\Include\Occupancy_File.hpp" />
+    <ClInclude Include="..\Include\Old_Delay_File.hpp" />
     <ClInclude Include="..\Include\Old_Plan_File.hpp" />
     <ClInclude Include="..\Include\Parking_Data.hpp" />
     <ClInclude Include="..\Include\Parking_File.hpp" />
@@ -273,18 +276,18 @@
     <ClInclude Include="..\Include\Transfer_Data.hpp" />
     <ClInclude Include="..\Include\Traveler_Data.hpp" />
     <ClInclude Include="..\Include\Traveler_File.hpp" />
-    <ClInclude Include="..\Include\Travel_Time_File.hpp" />
     <ClInclude Include="..\Include\Trip_Data.hpp" />
     <ClInclude Include="..\Include\Trip_File.hpp" />
     <ClInclude Include="..\Include\Trip_Index.hpp" />
+    <ClInclude Include="..\Include\Turn_Delay_Data.hpp" />
+    <ClInclude Include="..\Include\Turn_Delay_File.hpp" />
     <ClInclude Include="..\Include\Turn_Pen_Data.hpp" />
     <ClInclude Include="..\Include\Turn_Pen_File.hpp" />
-    <ClInclude Include="..\Include\Turn_Vol_Data.hpp" />
-    <ClInclude Include="..\Include\Turn_Vol_File.hpp" />
     <ClInclude Include="..\Include\Vehicle_File.hpp" />
     <ClInclude Include="..\Include\Vehicle_Index.hpp" />
     <ClInclude Include="..\Include\Veh_Type_Data.hpp" />
     <ClInclude Include="..\Include\Veh_Type_File.hpp" />
+    <ClInclude Include="..\Include\Volume_Array.hpp" />
     <ClInclude Include="..\Include\ZoneData.hpp" />
     <ClInclude Include="..\Include\Zone_Data.hpp" />
     <ClInclude Include="..\Include\Zone_File.hpp" />
@@ -387,6 +390,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Bin|Win32'">
     <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='BinThreads|Win32'">
     <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\</OutDir>
@@ -399,6 +403,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='BinThreads|x64'">
     <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -420,7 +425,8 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_MSC_EXTENSIONS;THREADS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\Include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -475,6 +481,7 @@
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableParallelCodeGeneration>false</EnableParallelCodeGeneration>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -541,6 +548,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

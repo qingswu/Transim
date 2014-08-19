@@ -9,9 +9,7 @@
 #include "Dtime.hpp"
 #include "Trip_Index.hpp"
 #include "Time_Index.hpp"
-
-#include <vector>
-using namespace std;
+#include "Data_Pack.hpp"
 
 //---------------------------------------------------------
 //	Trip_Data class definition
@@ -39,6 +37,7 @@ public:
 	int   Veh_Type (void)            { return (veh_type); }
 	int   Type (void)                { return (type); }
 	int   Partition (void)           { return (partition); }
+	int   Index (void)               { return (index); }
 
 	void  Household (int value)      { hhold = value; }
 	void  Person (int value)         { person = (short) value; }
@@ -53,22 +52,26 @@ public:
 	void  Mode (int value)           { mode = (char) value; }
 	void  Constraint (int value)     { constraint = (char) value; }
 	void  Priority (int value)       { priority = (char) value; }
-	void  Vehicle (int value)        { vehicle = (short) value; }
-	void  Veh_Type (int value)       { veh_type = (short) value; }
-	void  Type (int value)           { type = (short) value; }
-	void  Partition (int value)      { partition = (short) value; }
+	void  Vehicle (int value)        { vehicle = (char) value; }
+	void  Veh_Type (int value)       { veh_type = (char) value; }
+	void  Type (int value)           { type = (char) value; }
+	void  Partition (int value)      { partition = (char) value; }
+	void  Index (int value)          { index = value; }
 
 	Trip_Index Get_Trip_Index (void) { return (Trip_Index (hhold, person, tour, trip)); }
 	Time_Index Get_Time_Index (void) { return (Time_Index (start, hhold, person)); }
 
-	void Get_Trip_Index (Trip_Index &index) { index.Set (hhold, person, tour, trip); }
-	void Get_Time_Index (Time_Index &index) { index.Set (start, hhold, person); }
+	void Get_Index (Trip_Index &index) { index.Set (hhold, person, tour, trip); }
+	void Get_Index (Time_Index &index) { index.Set (start, hhold, person); }
+
+	bool Internal_IDs (void);
+	bool External_IDs (void);
 
 	void  Clear (void)
 	{
-		hhold = origin = destination = 0; 
+		hhold = origin = destination = index = 0; person = 0;
 		tour = trip = purpose = mode = constraint = priority = 0;
-		person = vehicle = veh_type = type = partition = 0; 
+		vehicle = veh_type = type = partition = 0; 
 		start = end_time = duration = 0;
 	}
 private:
@@ -85,10 +88,11 @@ private:
 	char  mode;
 	char  constraint;
 	char  priority;
-	short vehicle;
-	short veh_type;
-	short type;
-	short partition;
+	char  vehicle;
+	char  veh_type;
+	char  type;
+	char  partition;
+	int   index;
 };
 
 typedef Trip_Data *               Trip_Ptr;
@@ -114,7 +118,7 @@ private:
 //	Trip_Array class definition
 //---------------------------------------------------------
 
-class SYSLIB_API Trip_Array : public Trip_Partition, public vector <Trip_Data> 
+class SYSLIB_API Trip_Array : public Trip_Partition, public Vector <Trip_Data> 
 {
 public:
 	Trip_Array (void) { }
@@ -125,7 +129,7 @@ typedef Trip_Array::iterator      Trip_Itr;
 //	Trip_Ptr_Array class definition
 //---------------------------------------------------------
 
-class SYSLIB_API Trip_Ptr_Array : public Trip_Partition, public vector <Trip_Ptr> 
+class SYSLIB_API Trip_Ptr_Array : public Trip_Partition, public Vector <Trip_Ptr> 
 {
 public:
 	Trip_Ptr_Array (void) { }

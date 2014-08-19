@@ -21,7 +21,8 @@ PlanSum::PlanSum (void) : Data_Service (), Select_Service (), Flow_Time_Service 
 	System_File_Type optional_files [] = {
 		NODE, LINK, ZONE, CONNECTION, LANE_USE, LOCATION, PARKING, ACCESS_LINK, 
 		TRANSIT_STOP, TRANSIT_ROUTE, TRANSIT_SCHEDULE, TRANSIT_DRIVER, 
-		SELECTION, VEHICLE_TYPE, LINK_DELAY, NEW_LINK_DELAY, NEW_RIDERSHIP, END_FILE
+		SELECTION, VEHICLE_TYPE, PERFORMANCE, TURN_DELAY, NEW_PERFORMANCE, NEW_TURN_DELAY, 
+		NEW_RIDERSHIP, END_FILE
 	};
 	int file_service_keys [] = {
 		NOTES_AND_NAME_FIELDS, SAVE_LANE_USE_FLOWS, ZONE_EQUIVALENCE_FILE, 
@@ -37,7 +38,7 @@ PlanSum::PlanSum (void) : Data_Service (), Select_Service (), Flow_Time_Service 
 	};
 	int flow_time_service_keys [] = {
 		UPDATE_FLOW_RATES, CLEAR_INPUT_FLOW_RATES, UPDATE_TURNING_MOVEMENTS, UPDATE_TRAVEL_TIMES, 
-		LINK_DELAY_FLOW_FACTOR, EQUATION_PARAMETERS, 0
+		LINK_FLOW_FACTOR, EQUATION_PARAMETERS, 0
 	};
 	Control_Key keys [] = { //--- code, key, level, status, type, default, range, help ----
 		{ NEW_TRIP_TIME_FILE, "NEW_TRIP_TIME_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },

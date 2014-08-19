@@ -11,7 +11,7 @@
 void ArcPlan::Read_Plan (void)
 {
 	Dtime time;
-	int link, dir, index, distance, cost, imped, num_leg, count, acc, type, prev_stop;
+	int link, dir, index, distance, cost, imped, num_leg, count, acc, type, prev_stop, id;
 	int org_field, start_field, des_field, ttime_field, distance_field, num_leg_fld;	
 	int leg_mode_fld, leg_id_fld, leg_time_fld, leg_dist_fld, leg_cost_fld, leg_imp_fld;
 	double offset, length, off, side, near_offset;
@@ -22,7 +22,6 @@ void ArcPlan::Read_Plan (void)
 	Select_Map_Itr sel_itr;
 	Location_Data *loc_ptr;
 	Parking_Data *parking_ptr;
-	Location_Data *location_ptr;
 	Line_Data *line_ptr;
 	Stop_Data *stop_ptr;
 	Driver_Itr driver_itr;
@@ -80,12 +79,20 @@ void ArcPlan::Read_Plan (void)
 		if (select_destinations && !des_range.In_Range (plan.Destination ())) continue;
 		
 		if (select_org_zones) {
-			loc_ptr = &location_array [plan.Origin ()];
-			if (!org_zone_range.In_Range (loc_ptr->Zone ())) continue;
+			int_itr = location_map.find (plan.Origin ());
+
+			if (int_itr != location_map.end ()) {
+				loc_ptr = &location_array [int_itr->second];
+				if (!org_zone_range.In_Range (loc_ptr->Zone ())) continue;
+			}
 		}
 		if (select_des_zones) {
-			loc_ptr = &location_array [plan.Destination ()];
-			if (!des_zone_range.In_Range (loc_ptr->Zone ())) continue;
+			int_itr = location_map.find (plan.Destination ());
+
+			if (int_itr != location_map.end ()) {
+				loc_ptr = &location_array [int_itr->second];
+				if (!des_zone_range.In_Range (loc_ptr->Zone ())) continue;
+			}
 		}
 
 		//---- check the problem map ----
@@ -156,8 +163,8 @@ void ArcPlan::Read_Plan (void)
 					int_itr = location_map.find (plan.Origin ());
 
 					if (int_itr != location_map.end ()) {
-						location_ptr = &location_array [int_itr->second];
-						offset = UnRound (location_ptr->Offset ());
+						loc_ptr = &location_array [int_itr->second];
+						offset = UnRound (loc_ptr->Offset ());
 					}
 				}
 
@@ -180,12 +187,12 @@ void ArcPlan::Read_Plan (void)
 							int_itr = location_map.find (leg_itr->ID ());
 
 							if (int_itr != location_map.end ()) {
-								location_ptr = &location_array [int_itr->second];
+								loc_ptr = &location_array [int_itr->second];
 
-								if (location_ptr->Dir () == dir) {
-									length = UnRound (location_ptr->Offset ());
+								if (loc_ptr->Dir () == dir) {
+									length = UnRound (loc_ptr->Offset ());
 								} else {
-									length = UnRound (link_ptr->Length () - location_ptr->Offset ());
+									length = UnRound (link_ptr->Length () - loc_ptr->Offset ());
 								}
 								if (offset > -1) length -= offset;
 
@@ -484,10 +491,10 @@ void ArcPlan::Read_Plan (void)
 							} else if (prev_itr->Type () == LOCATION_ID) {
 								int_itr = location_map.find (prev_itr->ID ());
 								if (int_itr != location_map.end ()) {
-									location_ptr = &location_array [int_itr->second];
+									loc_ptr = &location_array [int_itr->second];
 
-									if (location_ptr->Dir () != dir) {
-										offset = UnRound (link_ptr->Length () - location_ptr->Offset ());
+									if (loc_ptr->Dir () != dir) {
+										offset = UnRound (link_ptr->Length () - loc_ptr->Offset ());
 									}
 								}
 							} else if (prev_itr->Type () == STOP_ID) {
@@ -633,29 +640,41 @@ void ArcPlan::Read_Plan (void)
 								off = length = UnRound (stop_ptr->Offset ());
 
 								if (abs ((int) (length - offset)) > near_offset) {
-									if (prev_itr->Type () == LOCATION_ID) {
-										if (length > offset) {
-											dir = 0;
-										} else {
-											dir = 1;
+									dir = -1;
+
+									if (prev_itr->Type () == LOCATION_ID || prev_itr == leg_itr) {
+										id = (prev_itr == leg_itr) ? plan.Origin () : prev_itr->ID ();
+										int_itr = location_map.find (id);
+										if (int_itr != location_map.end ()) {
+											loc_ptr = &location_array [int_itr->second];
+											if (stop_ptr->Link () == loc_ptr->Link ()) {
+												if (length > offset) {
+													dir = 0;
+												} else {
+													dir = 1;
+												}
+											}
 										}
 									} else if (prev_itr->Link_Type ()) {
 										dir = prev_itr->Link_Dir ();
-									} else {
+									} else if (prev_itr->Type () != STOP_ID) {
 										dir = stop_ptr->Dir ();
 									}
-									if (link_ptr->AB_Dir () >= 0 && link_ptr->BA_Dir () >= 0) {
-										side = link_offset;
-									} else {
-										side = 0.0;
+									if (dir >= 0) {
+										if (link_ptr->AB_Dir () >= 0 && link_ptr->BA_Dir () >= 0) {
+											side = link_offset;
+										} else {
+											side = 0.0;
+										}
+
+										if (offset > -1) length -= offset;
+
+										Link_Shape (link_ptr, dir, points, offset, length, side);
+
+										arcview_plan.insert (arcview_plan.end (), points.begin (), points.end ());
+
+										if (arrow_flag) Add_Arrow (arcview_plan);
 									}
-									if (offset > -1) length -= offset;
-
-									Link_Shape (link_ptr, dir, points, offset, length, side);
-
-									arcview_plan.insert (arcview_plan.end (), points.begin (), points.end ());
-
-									if (arrow_flag) Add_Arrow (arcview_plan);	
 								}
 								offset = off;
 							}
@@ -746,10 +765,10 @@ void ArcPlan::Read_Plan (void)
 							type = access_ptr->To_Type ();
 						}
 						if (type == LOCATION_ID) {
-							location_ptr = &location_array [index];
-							pt_itr = location_pt.find (location_ptr->Location ());
+							loc_ptr = &location_array [index];
+							pt_itr = location_pt.find (loc_ptr->Location ());
 							point = pt_itr->second;
-							offset = UnRound (location_ptr->Offset ());
+							offset = UnRound (loc_ptr->Offset ());
 						} else if (type == PARKING_ID) {
 							parking_ptr = &parking_array [index];
 							pt_itr = parking_pt.find (parking_ptr->Parking ());

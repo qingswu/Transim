@@ -10,7 +10,7 @@
 
 void Data_Service::Read_Plans (void)
 {
-	int i, part, num, count, num_rec, part_num, first;
+	int i, part, num, count, num_rec, part_num, first, index;
 	bool keep_flag;
 
 	Plan_File *file = (Plan_File *) System_File_Handle (PLAN);
@@ -21,7 +21,8 @@ void Data_Service::Read_Plans (void)
 	Time_Map_Stat time_stat;
 	Plan_Data plan_rec;
 
-	count = num_rec = first = 0;
+	count = num_rec = first = index = 0;
+
 	Initialize_Plans (*file);
 
 	//---- check the partition number ----
@@ -58,23 +59,33 @@ void Data_Service::Read_Plans (void)
 			keep_flag = Get_Plan_Data (*file, plan_rec, part_num);
 
 			num = file->Num_Nest ();
-			if (num > 0) plan_rec.reserve (num);
+			if (num > 0 && keep_flag) plan_rec.reserve (num);
 
 			for (i=1; i <= num; i++) {
 				if (!file->Read (true)) {
-					Error (String ("Number of Nested Records for Plan %d") % file->Household ());
+					if (plan_rec.Household () == 0) {
+						file->Get_Index (trip_index);
+					} else {
+						plan_rec.Get_Index (trip_index);
+					}
+					Error (String ("Number of Nested Records for Plan %d-%d-%d-%d") % trip_index.Household () %
+						trip_index.Person () % trip_index.Tour () % trip_index.Trip ());
 				}
 				Show_Progress ();
 
-				Get_Plan_Data (*file, plan_rec, part_num);
+				if (keep_flag) {
+					Get_Plan_Data (*file, plan_rec, part_num);
+				}
 			}
 			if (keep_flag) {
-				plan_rec.Tour (MAX (plan_rec.Tour (), 1));
+				if (!plan_rec.Internal_IDs ()) continue;
+
+				plan_rec.Index ((int) plan_array.size ());
 
 				if (Trip_Sort () == TRAVELER_SORT) {
-					plan_rec.Get_Trip_Index (trip_index);
+					plan_rec.Get_Index (trip_index);
 
-					trip_stat = plan_trip_map.insert (Trip_Map_Data (trip_index, (int) plan_array.size ()));
+					trip_stat = plan_trip_map.insert (Trip_Map_Data (trip_index, plan_rec.Index ()));
 
 					if (!trip_stat.second) {
 						Warning (String ("Duplicate Plan Index = %d-%d-%d-%d") % 
@@ -82,9 +93,9 @@ void Data_Service::Read_Plans (void)
 						keep_flag = false;
 					}
 				} else if (Trip_Sort () == TIME_SORT) {
-					plan_rec.Get_Time_Index (time_index);
+					plan_rec.Get_Index (time_index);
 
-					time_stat = plan_time_map.insert (Time_Map_Data (time_index, (int) plan_array.size ()));
+					time_stat = plan_time_map.insert (Time_Map_Data (time_index, plan_rec.Index ()));
 
 					if (!time_stat.second) {
 						Warning (String ("Duplicate Plan Index = %s-%d-%d") % 

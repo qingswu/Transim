@@ -315,7 +315,6 @@
     <ClCompile Include="Read_Link_Points.cpp" />
     <ClCompile Include="Read_Points.cpp" />
     <ClCompile Include="Read_Signal_Map.cpp" />
-    <ClCompile Include="Write_Link_Data.cpp" />
     <ClCompile Include="Write_Link_Map.cpp" />
   </ItemGroup>
   <ItemGroup>

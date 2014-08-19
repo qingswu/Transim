@@ -18,22 +18,29 @@
 //	TDF_Matrix
 //---------------------------------------------------------
 
-Db_Matrix * TDF_Matrix (Format_Type format = TRANSIMS)
+Db_Matrix * TDF_Matrix (Access_Type access, Format_Type file_format, Format_Type model_format = TRANSIMS)
 {
-	if (format == TPPLUS || format == TRANPLAN) {
+	if (model_format == TPPLUS || model_format == TRANPLAN) {
 #ifdef TPPLIB
-		return (new TPPlus_Matrix ());
+		return (new TPPlus_Matrix (access));
 #else
 		exe->Error ("Cube Matrix Processing is Disabled");
 #endif
-	} else if (format == TRANSCAD) {
+	} else if (model_format == TRANSCAD) {
 #ifdef TCADLIB
-		return (new TransCAD_Matrix ());
+		return (new TransCAD_Matrix (access));
 #else
 		exe->Error ("TransCAD Matrix Processing is Disabled");
 #endif
 	} 
-	return (new Db_Matrix ());
+	return (new Db_Matrix (access, file_format));
 }
 
+Db_Matrix * TDF_Matrix (Access_Type access, string format)
+{
+	Format_Type model_format, file_format;
+	Db_Matrix::Data_Format (format, file_format, model_format);
+
+	return (TDF_Matrix (access, file_format, model_format));
+}
 #endif

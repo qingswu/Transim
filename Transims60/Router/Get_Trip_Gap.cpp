@@ -17,14 +17,14 @@ double Router::Get_Trip_Gap (void)
 	bool report_flag, gap_flag;
 
 	Trip_Gap_Map_Itr itr;
-	Gap_Data gap_data;
+	Gap_Sum gap_sum;
 	Doubles period_diff, period_sum;
 	
 	num = 0;
 	sum_diff = total = gap = 0.0;
 
 	report_flag = Report_Flag (TRIP_GAP);
-	memset (&gap_data, '\0', sizeof (gap_data));
+	memset (&gap_sum, '\0', sizeof (gap_sum));
 
 	gap_flag = (trip_gap_flag || report_flag);
 
@@ -35,41 +35,69 @@ double Router::Get_Trip_Gap (void)
 	}
 
 	//---- process each trip ----
-	
-	if (part_processor.Thread_Flag ()) {
-		parts = Num_Partitions ();
-	} else {
-		parts = 1;
-	}
-	for (i=0; i < parts; i++) {
-		Trip_Gap_Map *trip_gap_map_ptr;
 
-		if (part_processor.Thread_Flag ()) {
-			trip_gap_map_ptr = trip_gap_map_array [i];
-		} else {
-			trip_gap_map_ptr = &trip_gap_map;
-		}
-		for (itr = trip_gap_map_ptr->begin (); itr != trip_gap_map_ptr->end (); itr++) {
-			diff = abs (itr->second.current - itr->second.previous);
-			imp = itr->second.current;
-			sum_diff += diff;
-			total += imp;
+	if (plan_memory_flag) {
+		Gap_Data_Itr gap_itr;
 
-			itr->second.previous = itr->second.current;
-			itr->second.current = 0;
+		for (gap_itr = gap_data_array.begin (); gap_itr != gap_data_array.end (); gap_itr++) {
+
+			total += imp = gap_itr->current;
+			sum_diff += diff = abs (imp - gap_itr->previous);
+
+			gap_itr->previous = gap_itr->current;
+			gap_itr->current = 0;
 
 			if (report_flag) {
-				gap_data.count++;
-				gap_data.diff += diff;
-				gap_data.diff_sq += diff * diff;
-				gap_data.total += imp;
+				gap_sum.count++;
+				gap_sum.abs_diff += diff;
+				gap_sum.diff_sq += diff * diff;
+				gap_sum.current += imp;
 			}
 			if (gap_flag) {
-				period = sum_periods.Period (itr->second.time);
+				period = sum_periods.Period (gap_itr->time);
 
 				if (period >= 0) {
 					period_diff [period] += diff;
 					period_sum [period] += imp;
+				}
+			}
+		}
+
+	} else {
+
+		if (part_processor.Thread_Flag ()) {
+			parts = Num_Partitions ();
+		} else {
+			parts = 1;
+		}
+		for (i=0; i < parts; i++) {
+			Trip_Gap_Map *trip_gap_map_ptr;
+
+			if (part_processor.Thread_Flag ()) {
+				trip_gap_map_ptr = trip_gap_map_array [i];
+			} else {
+				trip_gap_map_ptr = &trip_gap_map;
+			}
+			for (itr = trip_gap_map_ptr->begin (); itr != trip_gap_map_ptr->end (); itr++) {
+				total += imp = itr->second.current;
+				sum_diff += diff = abs (imp - itr->second.previous);
+
+				itr->second.previous = itr->second.current;
+				itr->second.current = 0;
+
+				if (report_flag) {
+					gap_sum.count++;
+					gap_sum.abs_diff += diff;
+					gap_sum.diff_sq += diff * diff;
+					gap_sum.current += imp;
+				}
+				if (gap_flag) {
+					period = sum_periods.Period (itr->second.time);
+
+					if (period >= 0) {
+						period_diff [period] += diff;
+						period_sum [period] += imp;
+					}
 				}
 			}
 		}
@@ -134,13 +162,13 @@ double Router::Get_Trip_Gap (void)
 				} else {
 					diff = 0.0;
 				}
-				if (report_flag && diff > gap_data.max_gap) gap_data.max_gap = diff;
+				if (report_flag && diff > gap_sum.max_gap) gap_sum.max_gap = diff;
 				if (trip_gap_flag) trip_gap_file.File () << "\t" << diff;
 			}
 			if (trip_gap_flag) trip_gap_file.File () << "\t" << gap << endl;
 
 			if (report_flag) {
-				trip_gap_array.push_back (gap_data);
+				trip_gap_array.push_back (gap_sum);
 			}
 		}
 #ifdef MPI_EXE

@@ -16,7 +16,7 @@ void PlanSum::Program_Control (void)
 	link_flag = report_flag = false;
 
 	if (!Set_Control_Flag (UPDATE_FLOW_RATES) && !Set_Control_Flag (UPDATE_TRAVEL_TIMES)) {
-		System_File_False (NEW_LINK_DELAY);
+		System_File_False (NEW_PERFORMANCE);
 	}
 
 	//---- initialize the MPI thread range ----
@@ -58,20 +58,13 @@ void PlanSum::Program_Control (void)
 
 	zone_file_flag = System_File_Flag (ZONE);
 	select_flag = System_File_Flag (SELECTION);
-	new_delay_flag = System_File_Flag (NEW_LINK_DELAY);
+	new_delay_flag = System_File_Flag (NEW_PERFORMANCE);
 
-	if (System_File_Flag (LINK_DELAY)) {
+	if (System_File_Flag (PERFORMANCE)) {
 		link_flag = true;
-		Link_Delay_File *file = (Link_Delay_File *) System_File_Handle (LINK_DELAY);
-		turn_flag = file->Turn_Flag ();
 	}
-	if (new_delay_flag) {
-		link_flag = true;
-		Link_Delay_File *file = (Link_Delay_File *) System_File_Handle (NEW_LINK_DELAY);
-		turn_flag = file->Turn_Flag ();
-	} else {
-		turn_flag = System_File_Flag (CONNECTION);
-	}
+	turn_flag = System_File_Flag (CONNECTION);
+
 	Print (2, String ("%s Control Keys:") % Program ());
 
 	//---- new trip time file ----

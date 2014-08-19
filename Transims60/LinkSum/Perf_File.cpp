@@ -83,7 +83,7 @@ void LinkSum::Perf_Detail_File (void)
 			dir_ptr = &dir_array [index];
 			flow_index = dir_ptr->Flow_Index ();
 
-			base_time = dir_ptr->Time0 ();
+			base_time = dir_ptr->Time0 ().Seconds ();
 			if (base_time <= 0.0) continue;
 
 			tod_list = dir_ptr->First_Lane_Use ();
@@ -113,7 +113,7 @@ void LinkSum::Perf_Detail_File (void)
 				}
 				perf_data = period_itr->Total_Link_Perf (index, flow_index);
 
-				loaded_time = perf_data.Time ();
+				loaded_time = perf_data.Time ().Seconds ();
 				flow = perf_data.Flow ();
 
 				sum_bin [j] [LINKS] += 1;

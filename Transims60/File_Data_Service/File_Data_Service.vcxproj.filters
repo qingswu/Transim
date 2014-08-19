@@ -78,9 +78,6 @@
     <ClCompile Include="Write\Write_Lines.cpp">
       <Filter>Write</Filter>
     </ClCompile>
-    <ClCompile Include="Write\Write_Link_Delays.cpp">
-      <Filter>Write</Filter>
-    </ClCompile>
     <ClCompile Include="Write\Write_Links.cpp">
       <Filter>Write</Filter>
     </ClCompile>
@@ -178,9 +175,6 @@
       <Filter>Read</Filter>
     </ClCompile>
     <ClCompile Include="Read\Read_Lines.cpp">
-      <Filter>Read</Filter>
-    </ClCompile>
-    <ClCompile Include="Read\Read_Link_Delays.cpp">
       <Filter>Read</Filter>
     </ClCompile>
     <ClCompile Include="Read\Read_Links.cpp">
@@ -294,9 +288,6 @@
     <ClCompile Include="Files\Link_Data_File.cpp">
       <Filter>Files\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Files\Link_Delay_File.cpp">
-      <Filter>Files\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Files\Link_Dir_File.cpp">
       <Filter>Files\Source Files</Filter>
     </ClCompile>
@@ -393,9 +384,6 @@
     <ClCompile Include="Files\Turn_Pen_File.cpp">
       <Filter>Files\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Files\Turn_Vol_File.cpp">
-      <Filter>Files\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Files\Veh_Type_File.cpp">
       <Filter>Files\Source Files</Filter>
     </ClCompile>
@@ -406,9 +394,6 @@
       <Filter>Data\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Data\Event_Data.cpp">
-      <Filter>Data\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Data\Flow_Time_Data.cpp">
       <Filter>Data\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Data\Line_Data.cpp">
@@ -452,6 +437,36 @@
     </ClCompile>
     <ClCompile Include="Files\Link_Use_File.cpp">
       <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Trip_Data.cpp">
+      <Filter>Data\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Plan_Data.cpp">
+      <Filter>Data\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Turn_Delay_Data.cpp">
+      <Filter>Data\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Turn_Delay_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Turn_Delays.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Turn_Delays.cpp">
+      <Filter>Write</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Old_Delay_File.cpp">
+      <Filter>Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Volume_Array.cpp">
+      <Filter>Data\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Read\Read_Link_Data.cpp">
+      <Filter>Read</Filter>
+    </ClCompile>
+    <ClCompile Include="Write\Write_Link_Data.cpp">
+      <Filter>Write</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -504,9 +519,6 @@
       <Filter>Files\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\Link_Data_File.hpp">
-      <Filter>Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Link_Delay_File.hpp">
       <Filter>Files\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\Link_Dir_File.hpp">
@@ -599,9 +611,6 @@
     <ClInclude Include="..\Include\Turn_Pen_File.hpp">
       <Filter>Files\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\Turn_Vol_File.hpp">
-      <Filter>Files\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Include\Veh_Type_File.hpp">
       <Filter>Files\Header Files</Filter>
     </ClInclude>
@@ -635,9 +644,6 @@
     <ClInclude Include="..\Include\Fare_Data.hpp">
       <Filter>Data\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\Flow_Time_Data.hpp">
-      <Filter>Data\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Include\Household_Data.hpp">
       <Filter>Data\Header Files</Filter>
     </ClInclude>
@@ -648,9 +654,6 @@
       <Filter>Data\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\Link_Data.hpp">
-      <Filter>Data\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Link_Delay_Data.hpp">
       <Filter>Data\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\Link_Dir_Data.hpp">
@@ -743,9 +746,6 @@
     <ClInclude Include="..\Include\Turn_Pen_Data.hpp">
       <Filter>Data\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\Turn_Vol_Data.hpp">
-      <Filter>Data\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Include\Veh_Type_Data.hpp">
       <Filter>Data\Header Files</Filter>
     </ClInclude>
@@ -794,8 +794,17 @@
     <ClInclude Include="..\Include\Approach_Link_Data.hpp">
       <Filter>Data\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\Travel_Time_File.hpp">
+    <ClInclude Include="..\Include\Turn_Delay_Data.hpp">
+      <Filter>Data\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Turn_Delay_File.hpp">
       <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Old_Delay_File.hpp">
+      <Filter>Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Volume_Array.hpp">
+      <Filter>Data\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

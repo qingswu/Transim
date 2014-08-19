@@ -52,11 +52,13 @@ void Data_Service::Read_Trips (void)
 			trip_rec.Clear ();
 
 			if (Get_Trip_Data (*file, trip_rec, part_num)) {
-				trip_rec.Get_Trip_Index (trip_index);
+				trip_rec.Internal_IDs ();
+				trip_rec.Get_Index (trip_index);
+				trip_rec.Index ((int) trip_array.size ());
 
 				//---- process the record ----
 
-				map_stat = trip_map.insert (Trip_Map_Data (trip_index, (int) trip_array.size ()));
+				map_stat = trip_map.insert (Trip_Map_Data (trip_index, trip_rec.Index ()));
 
 				if (!map_stat.second) {
 					Warning (String ("Duplicate Trip Record = %d-%d-%d-%d") % 
@@ -114,75 +116,13 @@ void Data_Service::Initialize_Trips (Trip_File &file)
 
 bool Data_Service::Get_Trip_Data (Trip_File &file, Trip_Data &trip_rec, int partition)
 {
-	int hhold, lvalue;
-	Int_Map_Itr map_itr;
+	file.Get_Data (trip_rec);
 
 	//---- check the household id ----
 
-	hhold = file.Household ();
-	if (hhold < 1) return (false);
+	if (trip_rec.Household () < 1) return (false);
 
-	trip_rec.Household (hhold);
+	if (trip_rec.Partition () < partition) trip_rec.Partition (partition);
 
-	trip_rec.Person (file.Person ());
-	trip_rec.Tour (MAX (file.Tour (), 1));
-	trip_rec.Trip (file.Trip ());
-
-	trip_rec.Start (file.Start ());
-	trip_rec.End (file.End ());
-
-	//---- convert the origin ----
-
-	lvalue = file.Origin ();
-
-	map_itr = location_map.find (lvalue);
-
-	if (map_itr == location_map.end ()) {
-		Warning (String ("Trip %d Origin %d was Not Found") % Progress_Count () % lvalue);
-		return (false);
-	}
-	trip_rec.Origin (map_itr->second);
-
-	//---- convert the destination ----
-
-	lvalue = file.Destination ();
-
-	map_itr = location_map.find (lvalue);
-
-	if (map_itr == location_map.end ()) {
-		Warning (String ("Trip %d Destination %d was Not Found") % Progress_Count () % lvalue);
-		return (false);
-	}
-	trip_rec.Destination (map_itr->second);
-
-	lvalue = file.Vehicle ();
-
-	if (file.Version () <= 40) {
-		lvalue = Fix_Vehicle_ID (lvalue);
-	}
-	trip_rec.Vehicle (lvalue);
-	trip_rec.Veh_Type (file.Veh_Type ());
-
-	if (trip_rec.Veh_Type () > 0) {
-		map_itr = veh_type_map.find (trip_rec.Veh_Type ());
-
-		if (map_itr == veh_type_map.end ()) {
-			Warning (String ("Trip %d Type %d was Not Found") % 
-				Progress_Count () % trip_rec.Veh_Type ());
-			trip_rec.Veh_Type (0);
-		} else {
-			trip_rec.Veh_Type (map_itr->second);
-		}
-	}
-	if (file.Version () <= 40) {
-		trip_rec.Mode (Trip_Mode_Map (file.Mode ()));
-	} else {
-		trip_rec.Mode (file.Mode ());
-	}
-	trip_rec.Purpose (file.Purpose ());
-	trip_rec.Constraint (file.Constraint ());
-	trip_rec.Priority (file.Priority ());
-	trip_rec.Type (file.Type ());
-	trip_rec.Partition (MAX (file.Partition (), partition));
 	return (true);
 }

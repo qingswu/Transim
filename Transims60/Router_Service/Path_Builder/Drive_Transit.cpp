@@ -33,7 +33,6 @@ int Path_Builder::Drive_Transit_Plan (int lot)
 		from_ptr = &trip_des;
 		to_ptr = &trip_org;
 	}
-	parking_lot = -1;
 	Initialize_Transit ();
 
 	//---- outbound trips (drive to transit) ----
@@ -87,7 +86,7 @@ int Path_Builder::Drive_Transit_Plan (int lot)
 
 		//---- identify the destination parking lots ----
 
-		if (!Destination_Parking (to_ptr, &to_array, lot)) return (ACCESS_PROBLEM);
+		if (!Destination_Parking (to_ptr, &to_array, -1)) return (ACCESS_PROBLEM);
 
 		//---- build the path between the origin and destination parking lots ----
 		

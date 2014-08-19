@@ -37,8 +37,8 @@
 #include "Route_Nodes_Data.hpp"
 #include "Selection_Data.hpp"
 #include "Household_Data.hpp"
-#include "Link_Delay_Data.hpp"
 #include "Performance_Data.hpp"
+#include "Turn_Delay_Data.hpp"
 #include "Ridership_Data.hpp"
 #include "Veh_Type_Data.hpp"
 #include "Trip_Data.hpp"
@@ -53,6 +53,9 @@
 #include "Trip_Index.hpp"
 #include "Time_Index.hpp"
 #include "Vehicle_Index.hpp"
+
+#include "Link_Data_File.hpp"
+#include "Volume_Array.hpp"
 
 //---------------------------------------------------------
 //	Data_Service - system data class definition
@@ -89,6 +92,8 @@ public:
 	Line_Array          line_array;
 	Route_Nodes_Array   route_nodes_array;
 	Household_Array     hhold_array;
+	Perf_Period_Array   perf_period_array;
+	Turn_Period_Array   turn_period_array;
 	Veh_Type_Array      veh_type_array;
 	Trip_Array          trip_array;
 	Problem_Array       problem_array;
@@ -96,13 +101,7 @@ public:
 	Event_Array         event_array;
 	Traveler_Array		traveler_array;
 
-	Flow_Time_Period_Array  link_delay_array;
-	Flow_Time_Period_Array  turn_delay_array;
-
-	Link_Perf_Period_Array  link_perf_array;
-	Flow_Time_Period_Array  turn_perf_array;
-
-	Integers                lane_use_flow_index;
+	Integers            lane_use_flow_index;
 
 	//---- data indices ----
 
@@ -126,14 +125,15 @@ public:
 	Int_Map       hhold_map;
 	Person_Map    person_map;
 	Int_Map       veh_type_map;
-	Vehicle_Map   vehicle_map;
 	Trip_Map      trip_map;
 	Trip_Map      plan_trip_map;
 	Time_Map      plan_time_map;
-	Timing40_Map  timing40_map;
-	Int2_Map      vehtype40_map;
 	Event_Map     event_map;
 	Traveler_Map  traveler_map;
+	Vehicle_Map   vehicle_map;
+
+	Timing40_Map  timing40_map;
+	Int2_Map      vehtype40_map;
 
 	int  Num_Fare_Zones (void)          { return (num_fare_zone); }
 
@@ -173,8 +173,8 @@ public:
 	Trip_Sort_Type Trip_Sort (void)     { return (trip_sort); }
 	void Trip_Sort (Trip_Sort_Type t)   { trip_sort = t; }
 	
-	bool Person_Map_Flag (void)        { return (person_map_flag); }
-	void Person_Map_Flag (bool flag)   { person_map_flag = flag; }
+	bool Person_Map_Flag (void)         { return (person_map_flag); }
+	void Person_Map_Flag (bool flag)    { person_map_flag = flag; }
 
 	double turn_shape_setback;
 
@@ -205,13 +205,12 @@ public:
 	virtual void Write_Selections (void);
 	virtual void Write_Households (void);
 
-	virtual void Write_Link_Delays (bool fill_flag = false);
-	virtual void Write_Link_Delays (Link_Delay_File &file, Flow_Time_Period_Array &link, bool fill_flag = false);
-	virtual void Write_Link_Delays (Link_Delay_File &file, Flow_Time_Period_Array &link, Flow_Time_Period_Array &turn, bool fill_flag = false);
-
 	virtual void Write_Performance (bool fill_flag = false);
-	virtual void Write_Performance (Performance_File &file, Link_Perf_Period_Array &link, bool fill_flag = false);
-	virtual void Write_Performance (Performance_File &file, Link_Perf_Period_Array &link, Flow_Time_Period_Array &turn, bool fill_flag = false);
+	virtual void Write_Performance (Performance_File &file, Perf_Period_Array &data, bool fill_flag = false);
+	virtual void Write_Performance (Vol_Spd_Period_Array &data, bool fill_flag = false);
+
+	virtual void Write_Turn_Delays (bool fill_flag = false);
+	virtual void Write_Turn_Delays (Turn_Delay_File &file, Turn_Period_Array &data, bool fill_flag = false);
 
 	virtual void Write_Ridership (void);
 	virtual void Write_Veh_Types (void);
@@ -221,6 +220,9 @@ public:
 	virtual void Write_Skims (int period = -1);
 	virtual void Write_Events (void);
 	virtual void Write_Travelers (void);
+
+	virtual void Write_Link_Data (Link_Data_File &file, Volume_Array &data, bool fill_flag = false);
+	virtual void Write_Link_Data (Link_Data_File &file, Vol_Spd_Period_Array &data, bool vol_flag = true, bool fill_flag = false);
 
 	//---- data processing methods ----
 
@@ -248,8 +250,8 @@ public:
 	virtual int Put_Route_Nodes_Data (Route_Nodes_File &file, Route_Header &data);
 	virtual int Put_Selection_Data (Selection_File &file, Trip_Index &index, Select_Data &data);
 	virtual int Put_Household_Data (Household_File &file, Household_Data &data);
-	virtual int Put_Link_Delay_Data (Link_Delay_File &file, Link_Delay_Data &data);
 	virtual int Put_Performance_Data (Performance_File &file, Performance_Data &data);
+	virtual int Put_Turn_Delay_Data (Turn_Delay_File &file, Turn_Delay_Data &data);
 	virtual int Put_Ridership_Data (Ridership_File &file, Line_Data &data);
 	virtual int Put_Veh_Type_Data (Veh_Type_File &file, Veh_Type_Data &data);
 	virtual int Put_Trip_Data (Trip_File &file, Trip_Data &data);
@@ -296,8 +298,8 @@ protected:
 	virtual bool Get_Route_Nodes_Data (Route_Nodes_File &file, Route_Header &data);
 	virtual bool Get_Selection_Data (Selection_File &file, Selection_Data &data, int partition = 0);
 	virtual bool Get_Household_Data (Household_File &file, Household_Data &data, int partition = 0);
-	virtual bool Get_Link_Delay_Data (Link_Delay_File &file, Link_Delay_Data &data);
 	virtual bool Get_Performance_Data (Performance_File &file, Performance_Data &data);
+	virtual bool Get_Turn_Delay_Data (Turn_Delay_File &file, Turn_Delay_Data &data);
 	virtual bool Get_Ridership_Data (Ridership_File &file, Ridership_Data &data);
 	virtual bool Get_Veh_Type_Data (Veh_Type_File &file, Veh_Type_Data &data);
 	virtual bool Get_Trip_Data (Trip_File &file, Trip_Data &data, int partition = 0);
@@ -333,8 +335,8 @@ protected:
 	virtual void Initialize_Route_Nodes (Route_Nodes_File &file);
 	virtual void Initialize_Selections (Selection_File &file);
 	virtual void Initialize_Households (Household_File &file);
-	virtual void Initialize_Link_Delays (Link_Delay_File &file, Flow_Time_Period_Array &link, Flow_Time_Period_Array &turn);
-	virtual void Initialize_Performance (Performance_File &file, Link_Perf_Period_Array &link, Flow_Time_Period_Array &turn);
+	virtual void Initialize_Performance (Performance_File &file, Perf_Period_Array &data);
+	virtual void Initialize_Turn_Delays (Turn_Delay_File &file, Turn_Period_Array &data);
 	virtual void Initialize_Ridership (Ridership_File &file);
 	virtual void Initialize_Veh_Types (Veh_Type_File &file);
 	virtual void Initialize_Trips (Trip_File &file);
@@ -371,7 +373,6 @@ protected:
 	void Bearing_Offset (int value)     { bearing_offset = value; }
 	void Link_Bearings (Link_Data &link_rec, int &bearing_in, int &bearing_out);
 
-	int  Fix_Vehicle_ID (int id)        { return ((id > 9) ? ((id % 10) + 1) : id); }
 	int  VehType40_Map (int type, int sub);
 
 	//---- read methods ----
@@ -400,8 +401,8 @@ protected:
 	virtual void Read_Route_Nodes (void);
 	virtual void Read_Selections (void);
 	virtual void Read_Households (void);
-	virtual void Read_Link_Delays (Link_Delay_File &file, Flow_Time_Period_Array &link, Flow_Time_Period_Array &turn);
-	virtual void Read_Performance (Performance_File &file, Link_Perf_Period_Array &link, Flow_Time_Period_Array &turn);
+	virtual void Read_Performance (Performance_File &file, Perf_Period_Array &data);
+	virtual void Read_Turn_Delays (Turn_Delay_File &file, Turn_Period_Array &data);
 	virtual void Read_Ridership (void);
 	virtual void Read_Veh_Types (void);
 	virtual void Read_Trips (void);
@@ -410,6 +411,9 @@ protected:
 	virtual void Read_Skims (void);
 	virtual void Read_Events (void);
 	virtual void Read_Travelers (void);
+
+	virtual void Read_Link_Data (Link_Data_File &file, Volume_Array &data);
+	virtual void Read_Performance (Performance_File &file, Volume_Array &data);
 
 private:
 

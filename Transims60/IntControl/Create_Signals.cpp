@@ -27,8 +27,8 @@ void IntControl::Create_Signals (void)
 	Signal_Itr signal_itr;
 	Signal_Time_Itr time_itr;
 	Signal_Time_Data time_rec;
-	Flow_Time_Array *array_ptr;
-	Flow_Time_Data *flow_ptr;
+	Turn_Period *period_ptr;
+	Turn_Data *turn_ptr;
 	Connect_Data *connect_ptr;
 	Dir_Data *dir_ptr, *dir2_ptr;
 	Link_Data *link_ptr;
@@ -261,7 +261,7 @@ void IntControl::Create_Signals (void)
 
 			method = group_ptr->method.Best (p);
 			if (method == VOLUME_SPLITS || method == UPDATE_SPLITS) {
-				if (!turn_flag && !delay_flag) method = CAPACITY_SPLITS;
+				if (!delay_flag) method = CAPACITY_SPLITS;
 			}
 			pocket_factor = group_ptr->pocket_factor.Best (p);
 			shared_factor = group_ptr->shared_factor.Best (p);
@@ -310,9 +310,9 @@ void IntControl::Create_Signals (void)
 
 					if (method == VOLUME_SPLITS || method == UPDATE_SPLITS) {
 						for (p=p1; p <= p2; p++) {
-							array_ptr = &turn_delay_array [p];
-							flow_ptr = &array_ptr->at (index);
-							rate += flow_ptr->Flow ();
+							period_ptr = turn_period_array.Period_Ptr (p);
+							turn_ptr = period_ptr->Data_Ptr (index);
+							rate += turn_ptr->Turn ();
 						}
 					} else if (method == CAPACITY_SPLITS) {
 						rate = capacity;

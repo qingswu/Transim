@@ -87,4 +87,12 @@ void PlanPrep::Program_Control (void)
 	if (Trip_Sort () == TRAVELER_SORT || Trip_Sort () == TIME_SORT) {
 		sort_size = Get_Control_Integer (MAXIMUM_SORT_SIZE);
 	}
+
+	//---- repair plan legs ----
+
+	repair_flag = Get_Control_Flag (REPAIR_PLAN_LEGS);
+
+	if (repair_flag && !System_File_Flag (LINK)) {
+		Error ("A Link File is needed to Repair Plan Legs");
+	}
 }

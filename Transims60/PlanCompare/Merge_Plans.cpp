@@ -56,9 +56,9 @@ void PlanCompare::Plan_Output::Merge_Plans (int part)
 
 	if (compare_file->Read_Plan (compare_plan)) {
 		if (time_sort) {
-			compare_plan.Get_Time_Index (time_index);
+			compare_plan.Get_Index (time_index);
 		} else {
-			compare_plan.Get_Trip_Index (trip_index);
+			compare_plan.Get_Index (trip_index);
 		}
 	} else if (time_sort) {
 		time_index.Start (MAX_INTEGER);
@@ -90,7 +90,7 @@ void PlanCompare::Plan_Output::Merge_Plans (int part)
 		
 		//---- check the selection records ----
 
-		plan.Get_Trip_Index (trip_rec);
+		plan.Get_Index (trip_rec);
 
 		if (exe->select_flag) {
 			sel_itr = exe->select_map.Best (trip_rec);
@@ -133,9 +133,9 @@ void PlanCompare::Plan_Output::Merge_Plans (int part)
 			}
 			if (compare_file->Read_Plan (compare_plan)) {
 				if (time_sort) {
-					compare_plan.Get_Time_Index (time_index);
+					compare_plan.Get_Index (time_index);
 				} else {
-					compare_plan.Get_Trip_Index (trip_index);
+					compare_plan.Get_Index (trip_index);
 				}
 			} else if (time_sort) {
 				time_index.Start (MAX_INTEGER);

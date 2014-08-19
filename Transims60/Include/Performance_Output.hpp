@@ -2,8 +2,8 @@
 //	Performance_Output.hpp - Output Interface Class
 //*********************************************************
 
-#ifndef Performance_OUTPUT_HPP
-#define Performance_OUTPUT_HPP
+#ifndef PERFORMANCE_OUTPUT_HPP
+#define PERFORMANCE_OUTPUT_HPP
 
 #include "Sim_Output_Data.hpp"
 #include "Data_Range.hpp"
@@ -19,10 +19,11 @@ class SYSLIB_API Performance_Output : public Sim_Output_Data
 {
 public:
 	Performance_Output (int num);
+	~Performance_Output (void);
 
-	bool Output_Check (void);
+	void Write_Check (void);
 
-	void Summarize (Travel_Step &step);
+	void Output_Check (Travel_Step &step);
 
 private:
 
@@ -30,16 +31,16 @@ private:
 	Data_Range  link_range;
 	Data_Range  subarea_range;
 	Data_Range  veh_types;
-	Link_Perf_Array  link_perf;
-	Flow_Time_Array  turn_perf;
+	Perf_Period  perf_period;
 	int   x1, y1, x2, y2;        //---- rounded ----
 	bool  data_flag;
 	bool  flow_flag;
 	bool  turn_flag;
 	bool  coord_flag;
+	bool  first_step;
 
 	void Write_Summary (void);
-	void Cycle_Failure (Dtime step, int dir_index, int vehicles, int persons, int veh_type);
+	void Cycle_Failure (Dtime step, int dir_index, int vehicles, int veh_type);
 
 };
 #endif

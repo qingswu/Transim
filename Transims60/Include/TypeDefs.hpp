@@ -23,17 +23,18 @@
 #include "String.hpp"
 #include "Buffer.hpp"
 #include "Dtime.hpp"
+#include "Data_Pack.hpp"
 
 //---- array of strings ----
 
-typedef vector <String>              Strings;
+typedef Vector <String>              Strings;
 typedef Strings::iterator            Str_Itr;
 typedef Strings::reverse_iterator    Str_RItr;
 typedef Strings::pointer             Str_Ptr;
 
 //---- array of string arrays ----
 
-typedef vector <Strings>             Strs_Array;
+typedef Vector <Strings>             Strs_Array;
 typedef Strs_Array::iterator         Strs_Itr;
 typedef Strs_Array::reverse_iterator Strs_RItr;
 typedef Strs_Array::pointer          Strs_Ptr;
@@ -55,140 +56,147 @@ typedef pair <Str_ID_Itr, bool>      Str_ID_Stat;
 
 //---- array of bool ----
 
-typedef vector <bool>                Bools;
+typedef Vector <bool>                Bools;
 typedef Bools::iterator              Bool_Itr;
 typedef Bools::reverse_iterator      Bool_RItr;
 typedef Bools::pointer               Bool_Ptr;
 
 //---- array of char ----
 
-typedef vector <char>                Chars;
+typedef Vector <char>                Chars;
 typedef Chars::iterator              Char_Itr;
 typedef Chars::reverse_iterator      Char_RItr;
 typedef Chars::pointer               Char_Ptr;
 
 //---- array of doubles ----
 
-typedef vector <double>              Doubles;
+typedef Vector <double>              Doubles;
 typedef Doubles::iterator            Dbl_Itr;
 typedef Doubles::reverse_iterator    Dbl_RItr;	
 typedef Doubles::pointer             Dbl_Ptr;
 
+//---- an integer sorted array of doubles ----
+
+typedef map <int, Doubles>           Dbls_Map;
+typedef pair <int, Doubles>          Dbls_Map_Data;
+typedef Dbls_Map::iterator           Dbls_Map_Itr;
+typedef pair <Dbls_Map_Itr, bool>    Dbls_Map_Stat;
+
 //---- array of double arrays ----
 
-typedef vector <Doubles>             Dbls_Array;
+typedef Vector <Doubles>             Dbls_Array;
 typedef Dbls_Array::iterator         Dbls_Itr;
 typedef Dbls_Array::reverse_iterator Dbls_RItr;
 typedef Dbls_Array::pointer          Dbls_Ptr;
 
 //---- 3 dimensional double array ----
 
-typedef vector <Dbls_Array>          Dbl3_Array;
+typedef Vector <Dbls_Array>          Dbl3_Array;
 typedef Dbl3_Array::iterator         Dbl3_Itr;
 typedef Dbl3_Array::reverse_iterator Dbl3_RItr;
 typedef Dbl3_Array::pointer          Dbl3_Ptr;
 
 //---- 4 dimensional double array ----
 
-typedef vector <Dbl3_Array>          Dbl4_Array;
+typedef Vector <Dbl3_Array>          Dbl4_Array;
 typedef Dbl4_Array::iterator         Dbl4_Itr;
 typedef Dbl4_Array::reverse_iterator Dbl4_RItr;
 typedef Dbl4_Array::pointer          Dbl4_Ptr;
 
 //---- array of floats ----
 
-typedef vector <float>               Floats;
+typedef Vector <float>               Floats;
 typedef Floats::iterator             Flt_Itr;
 typedef Floats::reverse_iterator     Flt_RItr;	
 typedef Floats::pointer              Flt_Ptr;
 
 //---- array of float arrays ----
 
-typedef vector <Floats>              Flts_Array;
+typedef Vector <Floats>              Flts_Array;
 typedef Flts_Array::iterator         Flts_Itr;
 typedef Flts_Array::reverse_iterator Flts_RItr;
 typedef Flts_Array::pointer          Flts_Ptr;
 
 //---- 3 dimensional float array ----
 
-typedef vector <Flts_Array>          Flt3_Array;
+typedef Vector <Flts_Array>          Flt3_Array;
 typedef Flt3_Array::iterator         Flt3_Itr;
 typedef Flt3_Array::reverse_iterator Flt3_RItr;
 typedef Flt3_Array::pointer          Flt3_Ptr;
 
 //---- 4 dimensional float array ----
 
-typedef vector <Flt3_Array>          Flt4_Array;
+typedef Vector <Flt3_Array>          Flt4_Array;
 typedef Flt4_Array::iterator         Flt4_Itr;
 typedef Flt4_Array::reverse_iterator Flt4_RItr;
 typedef Flt4_Array::pointer          Flt4_Ptr;
 
 //---- array of unsigned ----
 
-typedef vector <unsigned>            Unsigns;
+typedef Vector <unsigned>            Unsigns;
 typedef Unsigns::iterator            UInt_Itr;
 typedef Unsigns::reverse_iterator    UInt_RItr;
 typedef Unsigns::pointer             UInt_Ptr;
 
 //---- array of integers ----
 
-typedef vector <int>                 Integers;
+typedef Vector <int>                 Integers;
 typedef Integers::iterator           Int_Itr;
 typedef Integers::reverse_iterator   Int_RItr;
 typedef Integers::pointer            Int_Ptr;
 
 //---- array of integer arrays ----
 
-typedef vector <Integers>            Ints_Array;
+typedef Vector <Integers>            Ints_Array;
 typedef Ints_Array::iterator         Ints_Itr;
 typedef Ints_Array::reverse_iterator Ints_RItr;
 typedef Ints_Array::pointer          Ints_Ptr;
 
 //---- 3 dimensional integer array ----
 
-typedef vector <Ints_Array>          Int3_Array;
+typedef Vector <Ints_Array>          Int3_Array;
 typedef Int3_Array::iterator         Int3_Itr;
 typedef Int3_Array::reverse_iterator Int3_RItr;
 typedef Int3_Array::pointer          Int3_Ptr;
 
 //---- 4 dimensional integer array ----
 
-typedef vector <Int3_Array>          Int4_Array;
+typedef Vector <Int3_Array>          Int4_Array;
 typedef Int4_Array::iterator         Int4_Itr;
 typedef Int4_Array::reverse_iterator Int4_RItr;
 typedef Int4_Array::pointer          Int4_Ptr;
 
 //---- array of shorts ----
 
-typedef vector <short>               Shorts;
+typedef Vector <short>               Shorts;
 typedef Shorts::iterator             Sht_Itr;
 typedef Shorts::reverse_iterator     Sht_RItr;
 typedef Shorts::pointer              Sht_Ptr;
 
 //---- array of shorts arrays ----
 
-typedef vector <Shorts>              Shts_Array;
+typedef Vector <Shorts>              Shts_Array;
 typedef Shts_Array::iterator         Shts_Itr;
 typedef Shts_Array::reverse_iterator Shts_RItr;
 typedef Shts_Array::pointer          Shts_Ptr;
 
 //---- 3 dimensional short array ----
 
-typedef vector <Shts_Array>          Sht3_Array;
+typedef Vector <Shts_Array>          Sht3_Array;
 typedef Sht3_Array::iterator         Sht3_Itr;
 typedef Sht3_Array::reverse_iterator Sht3_RItr;
 typedef Sht3_Array::pointer          Sht3_Ptr;
 
 //---- 4 dimensional short array ----
 
-typedef vector <Sht3_Array>          Sht4_Array;
+typedef Vector <Sht3_Array>          Sht4_Array;
 typedef Sht4_Array::iterator         Sht4_Itr;
 typedef Sht4_Array::reverse_iterator Sht4_RItr;
 typedef Sht4_Array::pointer          Sht4_Ptr;
 
 //---- integer queue ----
 
-typedef deque <int>                  Int_Queue;
+typedef Deque <int>                  Int_Queue;
 typedef Int_Queue::iterator          Int_Que_Itr;
 typedef Int_Queue::reverse_iterator  Int_Que_RItr;
 typedef Int_Queue::pointer           Int_Que_Ptr;
@@ -196,14 +204,14 @@ typedef Int_Queue::pointer           Int_Que_Ptr;
 //---- array of Int2_Keys ----
 
 typedef pair <int, int>              Int2_Key;
-typedef vector <Int2_Key>            Int2_Array;
+typedef Vector <Int2_Key>            Int2_Array;
 typedef Int2_Array::iterator         Int2_Itr;
 typedef Int2_Array::reverse_iterator Int2_RItr;
 typedef Int2_Array::pointer          Int2_Ptr;
 
 //---- array of Int2 arrays ----
 
-typedef vector <Int2_Array>          Int2s_Array;
+typedef Vector <Int2_Array>          Int2s_Array;
 typedef Int2s_Array::iterator        Int2s_Itr;
 typedef Int2s_Array::pointer         Int2s_Ptr;
 
@@ -296,7 +304,7 @@ typedef NInt_Map::reverse_iterator   NInt_Map_RItr;
 
 //---- array of buffers ----
 
-typedef vector <Buffer>              Buffers;
+typedef Vector <Buffer>              Buffers;
 typedef Buffers::iterator            Buf_Itr;
 typedef Buffers::reverse_iterator    Buf_RItr;
 typedef Buffers::pointer             Buf_Ptr;
@@ -311,11 +319,10 @@ typedef pair <Buf_Map_Itr, bool>     Buf_Map_Stat;
 
 //---- array of Dtimes ----
 
-typedef vector <Dtime>               Dtimes;
+typedef Vector <Dtime>               Dtimes;
 typedef Dtimes::iterator             Dtime_Itr;
 typedef Dtimes::reverse_iterator     Dtime_RItr;
 typedef Dtimes::pointer              Dtime_Ptr;
-
 
 //----	XY_Point -----
 
@@ -347,21 +354,21 @@ struct XYZ {
 
 //---- array of XY points ----
 
-typedef vector <XY_Point>            XY_Points;
+typedef Vector <XY_Point>            XY_Points;
 typedef XY_Points::iterator          XY_Itr;
 typedef XY_Points::reverse_iterator  XY_RItr;
 typedef XY_Points::pointer           XY_Ptr;
 
 //---- array of XYZ points ----
 
-typedef vector <XYZ_Point>           Points;
+typedef Vector <XYZ_Point>           Points;
 typedef Points::iterator             Points_Itr;
 typedef Points::reverse_iterator     Points_RItr;
 typedef Points::pointer              Points_Ptr;
 
 //---- array of XYZ points ----
 
-typedef vector <XYZ>                 XYZ_Array;
+typedef Vector <XYZ>                 XYZ_Array;
 typedef XYZ_Array::iterator          XYZ_Itr;
 typedef XYZ_Array::reverse_iterator  XYZ_RItr;
 typedef XYZ_Array::pointer           XYZ_Ptr;
@@ -400,7 +407,7 @@ typedef pair <Points_Map_Itr, bool>  Points_Map_Stat;
 
 //---- an array of Points data ----
 
-typedef vector <Points>              Points_Array;
+typedef Vector <Points>              Points_Array;
 typedef Points_Array::iterator       Points_Array_Itr;
 typedef Points_Array::pointer        Points_Array_Ptr;
 

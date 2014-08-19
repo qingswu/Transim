@@ -21,20 +21,21 @@ public:
 
 	void operator()();
 
-	void Put_Work (int index);
-	int  Get_Work (void);
+	void Put (int index);
+	int  Get (void);
 	void Finished (void);
 
-	void End_of_Work (void);
+	void Start_Work (void);
 	void Complete_Work (void);
-
+	void End_of_Work (void);
 	void Exit_Queue (void);
+
 	void Clear (void);
 	bool Max_Records (int max_rec);
 
 private:
-	bool exit_flag, end_flag, finish_flag;
-	int *queue, num_records, max_records, first, last, num_in, num_out;
+	bool end_flag, finish_flag;
+	int *queue, num_records, num_active, max_records, first, last;
 
 	condition_variable  work_full, work_empty, exit_wait, end_wait, data_wait;
 	mutex  work_mutex;

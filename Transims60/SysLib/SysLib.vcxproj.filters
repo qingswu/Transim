@@ -207,6 +207,12 @@
     <ClInclude Include="..\Include\Functions.hpp">
       <Filter>Utility\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Include\Gap_Data.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Memory_Pool.hpp">
+      <Filter>Utility\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dbfile\Arcview_File.cpp">

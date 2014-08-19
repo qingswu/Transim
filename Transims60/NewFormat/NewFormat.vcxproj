@@ -368,7 +368,6 @@
   <ItemGroup>
     <ClCompile Include="Check_Phasing_Plans.cpp" />
     <ClCompile Include="Control.cpp" />
-    <ClCompile Include="Create_Performance.cpp" />
     <ClCompile Include="Execute.cpp" />
     <ClCompile Include="Get_Location_Data.cpp" />
     <ClCompile Include="Get_Router_Nodes_Data.cpp" />
@@ -379,6 +378,7 @@
     <ClCompile Include="NewFormat.cpp" />
     <ClCompile Include="Plan_Processing.cpp" />
     <ClCompile Include="Read_Activity.cpp" />
+    <ClCompile Include="Read_Delay.cpp" />
     <ClCompile Include="Read_Persons.cpp" />
     <ClCompile Include="Read_Routes.cpp" />
     <ClCompile Include="Read_Snapshots.cpp" />

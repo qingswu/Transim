@@ -34,53 +34,34 @@ class SYSLIB_API Path_Builder : Static_Service
 public:
 
 	Path_Builder (Router_Service *exe = 0);
-
 #ifdef THREADS
-
 	Path_Builder (Plan_Queue *plan_queue, Router_Service *exe);
 	Path_Builder (Skim_Queue *skim_queue, Router_Service *exe);
 
 	Plan_Queue *plan_queue;
 	Skim_Queue *skim_queue;
-	Flow_Time_Period_Array link_delay_array;
-	Flow_Time_Period_Array turn_delay_array;
+	
+	Perf_Period_Array perf_period_array;
+	Turn_Period_Array turn_period_array;
 
 	//---- thread interface ----
 
-	void operator()()
-	{
-		int number = 0;
-
-		if (param.one_to_many) {
-			One_To_Many *skim_ptr;
-
-			for (;;) {
-				skim_ptr = skim_queue->Get_Work (number);
-				if (skim_ptr == 0) break;
-
-				if (!Skim_Build (skim_ptr)) break;
-
-				if (!skim_queue->Put_Result (skim_ptr, number)) break;
-			}
-		} else {
-			Plan_Ptr_Array *array_ptr;
-
-			for (;;) {
-				array_ptr = plan_queue->Get_Work (number);
-				if (array_ptr == 0) break;
-
-				if (!Array_Processing (array_ptr)) break;
-
-				if (!plan_queue->Put_Result (array_ptr, number)) break;
-			}
-		}
-	}
+	void operator()();
 	void Save_Flows (void);
+	void Update_Times (void);
 #endif
 
 	void Initialize (Router_Service *exe);
 	bool Array_Processing (Plan_Ptr_Array *array_ptr);
 	bool Skim_Build (One_To_Many *data_ptr);
+
+	void Zero_Flows (bool flag)    { zero_flows_flag = flag; }
+	void Zero_Flows (void);
+
+	void Update_Times (bool flag)  { update_time_flag = flag; }
+
+	void Reset_Skim_Gap (void)     { skim_gap = skim_time = 0.0; }
+	void Save_Skim_Gap (void);
 
 private:
 	unsigned max_imp, imp_diff;
@@ -88,22 +69,24 @@ private:
 	bool time_flag, dist_flag, length_flag, zero_flag, wait_time_flag, use_flag, local_acc_flag, access_flag;
 	bool transfer_flag, reset_veh_flag, mode_path_flag [MAX_MODE], flow_flag, walk_acc_flag, park_flag;
 	bool walk_flag, bike_flag, wait_flag, rail_bias_flag, bus_bias_flag, turn_flag, random_flag;
+	bool zero_flows_flag, update_time_flag;
 
 	Dtime time_limit, min_time_limit, parking_duration;
-	double op_cost_rate, pce;
 
-	bool initialized, forward_flag, plan_flag, veh_type_flag, grade_flag;
+	double skim_gap, skim_time;
+
+	bool initialized, forward_flag, plan_flag;
 	bool walk_path_flag, bike_path_flag, transit_path_flag, access_link_flag, reroute_flag;
 
 	Path_Parameters param;
-	Veh_Type_Data *veh_type_ptr;
 
 	Plan_Data *plan_ptr;
 	Plan_Data plan;
 	Plan_Leg_Array leg_array;
 	Plan_Leg_Array *leg_ptr;
 
-	Flow_Time_Period_Array *link_flow_ptr, *turn_flow_ptr;
+	Perf_Period_Array *perf_period_array_ptr;
+	Turn_Period_Array *turn_period_array_ptr;
 
 	One_To_Many *data_ptr;
 
@@ -121,10 +104,11 @@ private:
 	Transit_Sort transit_sort;
 	Int_Heap imp_sort;
 
-	bool Plan_Build (Plan_Data *plan_ptr);
-	bool Plan_Update (Plan_Data *plan_ptr);
-	bool Plan_ReRoute (Plan_Data *plan_ptr);
-	bool Plan_Flow (Plan_Data *plan_ptr);
+	bool Plan_Build (Plan_Ptr plan_ptr);
+	bool Plan_Update (Plan_Ptr plan_ptr);
+	bool Plan_ReRoute (Plan_Ptr plan_ptr);
+	bool Plan_Flow (Plan_Ptr plan_ptr);
+	bool Plan_Reskim (Plan_Ptr plan_ptr);
 
 	int  Build_Path (int lot = 0);
 
@@ -165,7 +149,7 @@ private:
 	bool Add_Leg (int mode, int type, int index, int dir = 0, int imped = 0, int time = 0, int len = 0, int cost = 0, int path = 0);
 	int  Save_Skims (void);
 
-	bool Best_Lane_Use (int index, Dtime time, Dtime &ttime, Dtime &delay, int &cost, int &group);
+	bool Best_Lane_Use (int index, Dtime time, double len_factor, Dtime &ttime, Dtime &delay, int &cost, int &group);
 
 	Router_Service *exe;
 };

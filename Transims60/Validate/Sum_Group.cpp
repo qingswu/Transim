@@ -12,16 +12,15 @@
 
 void Validate::Sum_Group (int group, Link_Data *link_ptr, int dir)
 {
-	int i, j, num, flow_index;
+	int i, j, num, use_index;
 	double volume, count, capacity, error, vc;
 	bool flag;
 
 	Dir_Data *dir_ptr;
-	Flow_Time_Array *array_ptr;
-	Flow_Time_Data flow_data;
 	Group_Data *data, data_rec;
 	Group_Map_Itr map_itr;
 	Group_Map_Stat map_stat;
+	Vol_Period_Ptr vol_ptr;
 
 	if (group == 0) return;
 	
@@ -32,9 +31,8 @@ void Validate::Sum_Group (int group, Link_Data *link_ptr, int dir)
 	if (num > (int) link_count_array.size ()) num = (int) link_count_array.size ();
 
 	for (i=0; i < num; i++) {
-		array_ptr = &link_count_array [i];
-		flow_data = array_ptr->Total_Flow_Time (dir);
-		count += flow_data.Flow ();
+		vol_ptr = link_count_array.Period_Ptr (i);
+		count += vol_ptr->at (dir);
 	}
 	if (count == 0) return;
 
@@ -54,21 +52,19 @@ void Validate::Sum_Group (int group, Link_Data *link_ptr, int dir)
 		data->index = group;
 	}
 	dir_ptr = &dir_array [dir];
-	flow_index = dir_ptr->Flow_Index ();
+	use_index = dir_ptr->Use_Index ();
 
 	//---- process each period ----
 
 	for (i=0; i < num; i++) {
-		array_ptr = &link_count_array [i];
-
-		flow_data = array_ptr->Total_Flow_Time (dir, flow_index);
-		count = flow_data.Flow ();
-
-		array_ptr = &link_delay_array [i];
-
-		flow_data = array_ptr->Total_Flow_Time (dir, flow_index);
-		volume = flow_data.Flow ();
-
+		count = link_count_array.Volume (i, dir);
+		if (use_index > 0) {
+			count += link_count_array.Volume (i, use_index);
+		}
+		volume = link_volume_array.Volume (i, dir);
+		if (use_index > 0) {
+			volume += link_volume_array.Volume (i, use_index);
+		}
 		error = fabs (volume - count);
 
 		if (flag) {

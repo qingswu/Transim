@@ -14,7 +14,7 @@ void TransitAccess::Program_Control (void)
 {
 	int i, num, value, max_value;
 	double factor;
-	String key;
+	String key, format;
 	Strings ranges;
 	String_List field_list;
 	Str_Itr str_itr;
@@ -24,7 +24,6 @@ void TransitAccess::Program_Control (void)
 	Mode_Group mode_group, *mode_ptr;
 	Data_Range data_range, *range_ptr;
 	Data_Range_Itr range_itr;
-	Format_Type type;
 	
 	Execution_Service::Program_Control ();
 	
@@ -385,18 +384,17 @@ void TransitAccess::Program_Control (void)
 
 		key = Project_Filename (key);
 
-		type = Db_Header::Def_Format (key);
+		format = Db_Header::Def_Format (key);
 
-		if (type == UNFORMATED) {
+		if (format.empty ()) {
 			if (Check_Control_Key (SKIM_FORMAT, i)) {
-				type = Format_Code (Get_Control_String (SKIM_FORMAT, i));
+				format = Get_Control_String (SKIM_FORMAT, i);
 			}
 		}
-		matrix_ptr = TDF_Matrix (type);
+		matrix_ptr = TDF_Matrix (READ, format);
 
 		matrix_ptr->File_Type (String ("Skim File #%d") % i);
 		matrix_ptr->File_ID (String ("Skim%d") % i);
-		matrix_ptr->Dbase_Format (type);
 
 		matrix_ptr->Open (key);
 

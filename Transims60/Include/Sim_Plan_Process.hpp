@@ -14,7 +14,7 @@
 #ifdef THREADS
 #include "Ordered_Work.hpp"
 
-typedef Ordered_Work <Plan_Data, Sim_Travel_Data> Plan_Queue;
+typedef Ordered_Work <Plan_Data, Sim_Trip_Data> Plan_Queue;
 #endif
 
 //---------------------------------------------------------
@@ -24,26 +24,27 @@ typedef Ordered_Work <Plan_Data, Sim_Travel_Data> Plan_Queue;
 class SYSLIB_API Sim_Plan_Process : Static_Service
 {
 public:
-	Sim_Plan_Process (void);
+	Sim_Plan_Process ();
 
 #ifdef THREADS
-	Sim_Plan_Process (Plan_Queue &queue);
+	Sim_Plan_Process (Plan_Queue *queue, int id = 0);
 
 	Plan_Queue *plan_queue;
 
 	void operator()();
 #endif
-	void Initialize (void);
 
-	Sim_Travel_Ptr Plan_Processing (Plan_Data *plan_ptr);
+	Sim_Trip_Ptr Plan_Processing (Plan_Data *plan_ptr);
 
+	int  ID (void)                      { return (id); }
+	int  Leg_Pool (void)                { return (leg_pool); }
 	int  Num_Plans (void)               { return (num_plans); }
 
 	void Reset_Counters (void)          { num_plans = 0; }
 
 private:
-	int num_plans;
+	int id, leg_pool, num_plans;
 
-	bool Best_Lanes (Sim_Travel_Ptr sim_travel_ptr);
+	bool Best_Lanes (Sim_Trip_Ptr sim_trip, Integers &leg_list);
 };
 #endif

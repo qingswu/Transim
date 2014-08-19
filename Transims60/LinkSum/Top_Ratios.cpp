@@ -12,17 +12,16 @@
 
 void LinkSum::Top_100_Ratios (int type)
 {
-	int i, j, k, anode, bnode, an, bn, min_ratio, ratio, tod_list, lanes, lane;
-	int load, base, cap, capacity, tim, vol, time0, len, index, flow_index;
-	double flow;
+	int i, j, k, anode, bnode, an, bn, min_ratio, ratio;
+	int base, load, index, use_index;
 	Dtime low, high, tod;
 
 	Link_Itr link_itr;
 	Dir_Data *dir_ptr;
-	Link_Perf_Period_Itr period_itr;
-	Link_Perf_Array *period_ptr;
-	Flow_Time_Data flow_data;
-	Lane_Use_Period *use_ptr;
+	Perf_Period_Itr period_itr;
+	Perf_Period *period_ptr;
+	Perf_Data perf_data;
+	Performance_Data data;
 
 	//---- Top 100 Ratio Report Data ----
 
@@ -69,86 +68,63 @@ void LinkSum::Top_100_Ratios (int type)
 			}
 			if (index < 0) continue;
 			dir_ptr = &dir_array [index];
-
-			len = link_itr->Length ();
-
-			lanes = dir_ptr->Lanes ();
-			if (lanes < 1) lanes = 1;
-
-			tod_list = dir_ptr->First_Lane_Use ();
-			flow_index = dir_ptr->Flow_Index ();
-
-			time0 = dir_ptr->Time0 ();
-			if (time0 == 0) continue;
-
-			capacity = cap = DTOI (dir_ptr->Capacity () * cap_factor);
+			use_index = dir_ptr->Use_Index ();
 
 			//---- scan each time period ----
 
-			for (j=0, period_itr = link_perf_array.begin (); period_itr != link_perf_array.end (); period_itr++, j++) {
-				flow_data = period_itr->Total_Flow_Time (index, flow_index);
+			for (j=0, period_itr = perf_period_array.begin (); period_itr != perf_period_array.end (); period_itr++, j++) {
 
-				flow = flow_data.Flow ();
-				if (flow < minimum_flow) continue;
+				perf_data = period_itr->Total_Performance (index, use_index);
 
-				tim = flow_data.Time ();
-				vol = DTOI (flow);
+				if (perf_data.Volume () < minimum_volume) continue;
+
+				sum_periods.Period_Range (j, low, high);
+
+				data.Start (low);
+				data.End (high);
+
+				data.Get_Data (&perf_data, dir_ptr, &(*link_itr));
+
+				ratio = 0;
 
 				switch (type) {
 					case TOP_SPEED:
-						if (tim == 0) continue;
-						base = (len * 10 + time0 / 2) / time0;
-						load = (len * 10 + tim / 2) / tim;
-						ratio = ((base - load) * 1000 + base / 2) / base;
+						if (dir_ptr->Time0 () <= 0) continue;
+						base = DTOI ((double) link_itr->Length () / dir_ptr->Time0 ());
+						load = data.Speed ();
 						break;
 					case TOP_TIME_RATIO:
-						base = time0;
-						load = tim;
-						ratio = (load * 1000 + base / 2) / base;
+						base = dir_ptr->Time0 ();
+						load = data.Time ();
+						ratio = data.Time_Ratio () * 1000;
 						break;
 					case TOP_VC_RATIO:
-						if (tod_list >= 0) {
-							sum_periods.Period_Range (j, low, high);
-
-							tod = (low + high + 1) / 2;
-							cap = capacity;
-							k = tod_list;
-
-							for (use_ptr = &use_period_array [k]; ; use_ptr = &use_period_array [++k]) {
-								if (use_ptr->Start () <= tod && tod < use_ptr->End ()) {
-									lane = use_ptr->Lanes0 () + use_ptr->Lanes1 ();
-									cap = capacity * lane / lanes;
-									break;
-								}
-								if (use_ptr->Periods () == 0) break;
-							}
-						}
-						base = cap;
-						if (base == 0) continue;
-						load = vol;
-						ratio = (load * 1000 + base / 2) / base;
+						if (data.VC_Ratio () <= 0) continue;
+						base = DTOI (data.Volume () / data.VC_Ratio ());
+						load = DTOI (data.Volume ());
+						ratio = DTOI (data.VC_Ratio () * 1000);
 						break;
 					case TOP_TIME_CHANGE:
-						period_ptr = &compare_link_array [j];
+						period_ptr = &compare_perf_array [j];
 
-						flow_data = period_ptr->Total_Flow_Time (index, flow_index);
-						if (flow_data.Flow () < minimum_flow) continue;
-						base = flow_data.Time ();
+						perf_data = period_ptr->Total_Performance (index, use_index);
+						if (perf_data.Volume () < minimum_volume) continue;
+						base = perf_data.Time ();
 						if (base == 0) continue;
-						load = tim;
-						ratio = ((load - base) * 1000 + base / 2) / base;
+						load = data.Time ();
 						break;
 					case TOP_VOL_CHANGE:
-						period_ptr = &compare_link_array [j];
-
-						flow_data = period_ptr->Total_Flow_Time (index, flow_index);
-						base = DTOI (flow_data.Flow ());
-						if (base < minimum_flow) continue;
-						load = vol;
-						ratio = ((load - base) * 1000 + base / 2) / base;
+						period_ptr = &compare_perf_array [j];
+						perf_data = period_ptr->Total_Performance (index, use_index);
+						base = DTOI (perf_data.Volume ());
+						if (base < minimum_volume) continue;
+						load = DTOI (data.Volume ());
 						break;
-				} 
-				
+				}
+
+				if (ratio == 0 && base > 0) {
+					ratio = ((load - base) * 1000 + base / 2) / base;
+				}
 				if (ratio > min_ratio) {
 					ptr = ratios;
 
@@ -189,7 +165,7 @@ void LinkSum::Top_100_Ratios (int type)
 		Print (1, String ("%10ld%10ld%10ld  %12.12s   ") % ptr->link % ptr->from % ptr->to % 
 			sum_periods.Range_Format (ptr->period));
 
-		if (type == TOP_VC_RATIO) {
+		if (type == TOP_VC_RATIO || type == TOP_TIME_RATIO) {
 			Print (0, String ("%7d  %7d   %5.2lf") % ptr->base % ptr->load % (ptr->ratio / 1000.0));
 		} else if (type == TOP_VOL_CHANGE) {
 			Print (0, String ("%7d  %7d   %5.1lf") % ptr->base % ptr->load % (ptr->ratio / 10.0));
@@ -223,7 +199,7 @@ void LinkSum::Top_100_Speed_Header (void)
 void LinkSum::Top_100_Travel_Time_Header (void)
 {
 	Print (1, "Top 100 Travel Time Ratios");
-	Print (2, "      Link      From   To-Node   Time-of-Day      Base   Loaded  Percent");
+	Print (2, "      Link      From   To-Node   Time-of-Day      Base   Loaded    Ratio");
 	Print (1);
 }
 

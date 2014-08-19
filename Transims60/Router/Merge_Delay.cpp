@@ -13,24 +13,27 @@
 double Router::Merge_Delay (double factor, bool zero_flag)
 {
 	int period, record, gap_period, last_period, first_period;
-	Dtime time, merge_time;
 	double flow, merge_flow, factor1, gap, vht, diff, merge_vht, diff_vht, sum_vht;
 	double period_diff, period_sum;
 	bool report_flag;
 
-	Flow_Time_Itr record_itr;
-	Flow_Time_Data *record_ptr, *new_ptr;
-	Flow_Time_Period_Itr period_itr;
-	Flow_Time_Array *period_ptr, *delay_ptr;
-	Gap_Data gap_data;
+	Perf_Itr perf_itr;
+	Perf_Data *perf_ptr;
+	Perf_Period_Itr period_itr;
+	Perf_Period *period_ptr;
+	Turn_Itr turn_itr;
+	Turn_Data *turn_ptr;
+	Turn_Period_Itr turn_period_itr;
+	Turn_Period *turn_period_ptr;
+	Gap_Sum gap_sum;
 
 	gap = diff_vht = sum_vht = period_diff = period_sum = 0.0;
 	
 	report_flag = Report_Flag (LINK_GAP);
-	memset (&gap_data, '\0', sizeof (gap_data));
+	memset (&gap_sum, '\0', sizeof (gap_sum));
 
 	if (reroute_flag) {
-		first_period = link_delay_array.periods->Period (reroute_time);
+		first_period = perf_period_array.periods->Period (reroute_time);
 	} else {
 		first_period = 0;
 	}
@@ -38,148 +41,69 @@ double Router::Merge_Delay (double factor, bool zero_flag)
 	//---- factor the volume data ----
 
 	if (factor != 0.0) {
-		factor1 = factor + 1.0;
 
 		//---- process each time period ----
 
-		for (period=0, period_itr = link_delay_array.begin (); period_itr != link_delay_array.end (); period_itr++, period++) {
+		for (period=0, period_itr = perf_period_array.begin (); period_itr != perf_period_array.end (); period_itr++, period++) {
 			if (period < first_period) continue;
 
 			//---- process each link direction ----
 
-			period_ptr = &old_link_array [period];
+			period_ptr = &old_perf_period_array [period];
 
-			for (record=0, record_itr = period_itr->begin (); record_itr != period_itr->end (); record_itr++, record++) {
+			for (record=0, perf_itr = period_itr->begin (); perf_itr != period_itr->end (); perf_itr++, record++) {
 			
-				record_ptr = period_ptr->Data_Ptr (record);
-
-				flow = record_itr->Flow ();
-				merge_flow = record_ptr->Flow ();
+				perf_ptr = period_ptr->Data_Ptr (record);
 
 				if (first_iteration) {
-					if (!System_File_Flag (LINK_DELAY)) {
-						merge_flow = flow;
-					} else if (dat->Clear_Flow_Flag ()) {
-						merge_flow = flow;
+					if (!System_File_Flag (PERFORMANCE) || dat->Clear_Flow_Flag ()) {
+						perf_itr->Set_Flows (perf_ptr);
 					}
+				} else {
+					perf_itr->Weight_Flows (perf_ptr, factor);
 				}
-				flow = (merge_flow * factor + flow) / factor1;
-
-				record_itr->Flow (flow);
 			}
 		}
 
 		//---- factor the turning movements ----
 
 		if (Turn_Flows ()) {
+			factor1 = factor + 1.0;
 
-			for (period=0, period_itr = turn_delay_array.begin (); period_itr != turn_delay_array.end (); period_itr++, period++) {
+			for (period=0, turn_period_itr = turn_period_array.begin (); turn_period_itr != turn_period_array.end (); turn_period_itr++, period++) {
 				if (period < first_period) continue;
 
-				period_ptr = &old_turn_array [period];
+				turn_period_ptr = &old_turn_period_array [period];
 
 				//---- process each turn ----
 
-				for (record=0, record_itr = period_itr->begin (); record_itr != period_itr->end (); record_itr++, record++) {
+				for (record=0, turn_itr = turn_period_itr->begin (); turn_itr != turn_period_itr->end (); turn_itr++, record++) {
 				
-					record_ptr = period_ptr->Data_Ptr (record);
+					turn_ptr = turn_period_ptr->Data_Ptr (record);
 
-					flow = record_itr->Flow ();
-					merge_flow = record_ptr->Flow ();
+					flow = turn_itr->Turn ();
+					merge_flow = turn_ptr->Turn ();
 
 					if (first_iteration) {
-						if (!System_File_Flag (LINK_DELAY)) {
-							merge_flow = flow;
-						} else if (dat->Clear_Flow_Flag ()) {
+						if (!System_File_Flag (TURN_DELAY) || dat->Clear_Flow_Flag ()) {
 							merge_flow = flow;
 						}
 					}
 					flow = (merge_flow * factor + flow) / factor1;
 
-					record_ptr->Flow (flow);
+					turn_ptr->Turn (flow);
 
-					if (zero_flag) record_itr->Flow (0.0);
+					if (zero_flag) turn_itr->Turn (0.0);
 				}
 			}
 		}
-
-		//---- update the travel time ----
-
-		Update_Travel_Times (1, reroute_time);
-
-		//---- factor the link persons ----
-
-		if (link_person_flag) {
-			for (period=0, period_itr = link_person_array.begin (); period_itr != link_person_array.end (); period_itr++, period++) {
-				if (period < first_period) continue;
-
-				period_ptr = &old_person_array [period];
-				delay_ptr = &link_delay_array [period];
-
-				//---- process each turn ----
-
-				for (record=0, record_itr = period_itr->begin (); record_itr != period_itr->end (); record_itr++, record++) {
-				
-					record_ptr = period_ptr->Data_Ptr (record);
-					new_ptr = delay_ptr->Data_Ptr (record);
-
-					flow = record_itr->Flow ();					
-					merge_flow = record_ptr->Flow ();
-
-					if (first_iteration) {
-						if (!old_person_flag) {
-							merge_flow = flow;
-						} else if (dat->Clear_Flow_Flag ()) {
-							merge_flow = flow;
-						}
-					}
-					flow = (merge_flow * factor + flow) / factor1;
-
-					record_ptr->Flow (flow);
-
-					if (zero_flag) record_itr->Flow (0.0);
-					record_itr->Time (new_ptr->Time ());
-				}
-			}				
-		}
-
-		//---- factor the link vehicles ----
-
-		if (link_vehicle_flag) {
-			for (period=0, period_itr = link_vehicle_array.begin (); period_itr != link_vehicle_array.end (); period_itr++, period++) {
-				if (period < first_period) continue;
-
-				period_ptr = &old_vehicle_array [period];
-				delay_ptr = &link_delay_array [period];
-
-				//---- process each turn ----
-
-				for (record=0, record_itr = period_itr->begin (); record_itr != period_itr->end (); record_itr++, record++) {
-				
-					record_ptr = period_ptr->Data_Ptr (record);
-					new_ptr = delay_ptr->Data_Ptr (record);
-
-					flow = record_itr->Flow ();					
-					merge_flow = record_ptr->Flow ();
-
-					if (first_iteration) {
-						if (!old_vehicle_flag) {
-							merge_flow = flow;
-						} else if (dat->Clear_Flow_Flag ()) {
-							merge_flow = flow;
-						}
-					}
-					flow = (merge_flow * factor + flow) / factor1;
-
-					record_ptr->Flow (flow);
-
-					if (zero_flag) record_itr->Flow (0.0);
-					record_itr->Time (new_ptr->Time ());
-				}
-			}				
-		}
 	}
 
+	//---- update the travel time ----
+
+	Update_Travel_Times (1, reroute_time);
+	num_time_updates++;
+	
 	//---- calculate the link gap ----
 	
 	if (link_gap_flag || link_gap > 0.0 || report_flag) {
@@ -187,12 +111,12 @@ double Router::Merge_Delay (double factor, bool zero_flag)
 
 		//---- process each time period ----
 
-		for (period=0, period_itr = link_delay_array.begin (); period_itr != link_delay_array.end (); period_itr++, period++) {
+		for (period=0, period_itr = perf_period_array.begin (); period_itr != perf_period_array.end (); period_itr++, period++) {
 			if (period < first_period) continue;
 
 			//---- check for a new summary time period ----
 
-			gap_period = sum_periods.Period (link_delay_array.periods->Period_Time (period));
+			gap_period = sum_periods.Period (perf_period_array.periods->Period_Time (period));
 
 			if (gap_period != last_period) {
 				diff_vht += period_diff;
@@ -207,7 +131,7 @@ double Router::Merge_Delay (double factor, bool zero_flag)
 						gap = 0.0;
 					}
 					if (link_gap_flag) link_gap_file.File () << "\t" << gap;
-					if (report_flag && gap > gap_data.max_gap) gap_data.max_gap = gap;
+					if (report_flag && gap > gap_sum.max_gap) gap_sum.max_gap = gap;
 				}
 				period_diff = period_sum = 0.0;
 				last_period = gap_period;
@@ -215,34 +139,26 @@ double Router::Merge_Delay (double factor, bool zero_flag)
 
 			//---- process each link direction ----
 
-			period_ptr = &old_link_array [period];
+			period_ptr = &old_perf_period_array [period];
 
-			for (record=0, record_itr = period_itr->begin (); record_itr != period_itr->end (); record_itr++, record++) {
+			for (record=0, perf_itr = period_itr->begin (); perf_itr != period_itr->end (); perf_itr++, record++) {
 			
-				record_ptr = period_ptr->Data_Ptr (record);
+				perf_ptr = period_ptr->Data_Ptr (record);
 
-				flow = record_itr->Flow ();
-				time = record_itr->Time ();
-	
-				merge_flow = record_ptr->Flow ();
-				merge_time = record_ptr->Time ();
-
-				vht = flow * time;
-				merge_vht = merge_flow * merge_time;
+				vht = perf_itr->Veh_Time ();
+				merge_vht = perf_ptr->Veh_Time ();
 				diff = fabs (vht - merge_vht);
 				period_diff += diff;
 				period_sum += vht;
 
 				if (report_flag) {
-					gap_data.count++;
-					gap_data.diff += diff;
-					gap_data.diff_sq += diff * diff;
-					gap_data.total += vht;
+					gap_sum.count++;
+					gap_sum.abs_diff += diff;
+					gap_sum.diff_sq += diff * diff;
+					gap_sum.current += vht;
 				}
-				if (zero_flag) record_itr->Flow (0);
-
-				record_ptr->Flow (flow);
-				record_ptr->Time (time);
+				*perf_ptr = *perf_itr;
+				if (zero_flag) perf_itr->Clear_Flows ();
 			}
 		}
 	
@@ -260,12 +176,12 @@ double Router::Merge_Delay (double factor, bool zero_flag)
 				gap = 0.0;
 			}
 			if (link_gap_flag) link_gap_file.File () << "\t" << gap;
-			if (report_flag && gap > gap_data.max_gap) gap_data.max_gap = gap;
+			if (report_flag && gap > gap_sum.max_gap) gap_sum.max_gap = gap;
 		}
 
 	} else {
 
-		old_link_array.Copy_Flow_Data (link_delay_array, zero_flag);
+		old_perf_period_array.Copy_Flow_Data (perf_period_array, zero_flag);
 	}
 	
 	//---- overall gap ----
@@ -281,7 +197,7 @@ double Router::Merge_Delay (double factor, bool zero_flag)
 		link_gap_file.File () << "\t" << gap << endl;
 	}
 	if (report_flag) {
-		link_gap_array.push_back (gap_data);
+		link_gap_array.push_back (gap_sum);
 	}
 	return (gap);
 }

@@ -38,12 +38,6 @@
     <ClCompile Include="Link_Stats.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Read_Flow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Read_Turn.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Stop_Stats.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

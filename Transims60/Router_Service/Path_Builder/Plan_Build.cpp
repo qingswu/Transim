@@ -10,12 +10,9 @@
 
 bool Path_Builder::Plan_Build (Plan_Data *plan_data)
 {
-	int veh_id, lot, stat;
+	int stat;
 	
 	Trip_End trip_end;	
-	Int_Map_Itr map_itr;
-	Vehicle_Index veh_index;
-	Vehicle_Map_Itr veh_itr;
 
 	if (plan_data == 0) {
 		cout << "\tPlan Pointer is Zero" << endl;
@@ -35,7 +32,7 @@ bool Path_Builder::Plan_Build (Plan_Data *plan_data)
 
 	//---- set the traveler parameters ----
 
-	exe->Set_Parameters (param, plan_ptr->Type ());
+	exe->Set_Parameters (param, plan_ptr->Type (), plan_ptr->Veh_Type ());
 
 	param.mode = (Mode_Type) plan_ptr->Mode (),
 	parking_duration = plan_ptr->Duration ();
@@ -50,14 +47,8 @@ bool Path_Builder::Plan_Build (Plan_Data *plan_data)
 
 	//---- set the origin ----
 
-	map_itr = exe->location_map.find (plan_ptr->Origin ());
-
-	if (map_itr == exe->location_map.end ()) {
-		plan_ptr->Problem (LOCATION_PROBLEM);
-		return (true);
-	}
 	trip_end.Type (LOCATION_ID);
-	trip_end.Index (map_itr->second);
+	trip_end.Index (plan_ptr->Origin ());
 
 	if (plan_ptr->Depart () > 0) {
 		trip_end.Time (plan_ptr->Depart ());
@@ -68,14 +59,8 @@ bool Path_Builder::Plan_Build (Plan_Data *plan_data)
 
 	//---- set the destination ----
 
-	map_itr = exe->location_map.find (plan_ptr->Destination ());
-
-	if (map_itr == exe->location_map.end ()) {
-		plan_ptr->Problem (LOCATION_PROBLEM);
-		return (true);
-	}
 	trip_end.Type (LOCATION_ID); 
-	trip_end.Index (map_itr->second);
+	trip_end.Index (plan_ptr->Destination ());
 
 	if (plan_ptr->Arrive () > 0) {
 		trip_end.Time (plan_ptr->Arrive ());
@@ -84,46 +69,9 @@ bool Path_Builder::Plan_Build (Plan_Data *plan_data)
 	}
 	trip_des.push_back (trip_end);
 
-	//---- get the vehicle record ----
-
-	veh_id = plan_ptr->Vehicle ();
-	lot = -1;
-	pce = 1.0;
-
-	if (veh_id <= 0 || !veh_type_flag) {
-		grade_flag = false;
-		op_cost_rate = 0.0;
-		param.use = CAR;
-		param.veh_type = -1;
-	} else {
-		map_itr = exe->veh_type_map.find (plan_ptr->Veh_Type ());
-
-		if (map_itr != exe->veh_type_map.end ()) {
-			param.veh_type = map_itr->second;
-			veh_type_ptr = &exe->veh_type_array [param.veh_type];
-
-			param.use = veh_type_ptr->Use ();
-			op_cost_rate = UnRound (veh_type_ptr->Op_Cost ());
-
-			if (Metric_Flag ()) {
-				op_cost_rate /= 1000.0;
-			} else {
-				op_cost_rate /= MILETOFEET;
-			}
-			grade_flag = param.grade_flag && veh_type_ptr->Grade_Flag ();
-			pce = UnRound (veh_type_ptr->PCE ());
-		} else {
-			param.veh_type = -1;
-			grade_flag = false;
-			op_cost_rate = 0.0;
-			param.use = CAR;
-			exe->Warning (String ("Vehicle Type %d was Not Found") % plan_ptr->Veh_Type ());
-		}
-	}
-
 	//---- build the path -----
 
-	stat = Build_Path (lot);
+	stat = Build_Path (parking_lot);
 
 	if (stat < 0) return (false);
 

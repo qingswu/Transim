@@ -11,16 +11,17 @@
 void LinkSum::Group_Time_Report (void)
 {
 	int i, j, num, lnk, dir, link, hour, minute, second, time, time0, ttime;
-	int in_link, in_link_dir, out_link_dir, base_time, connect_index, flow_index;
+	int in_link, in_link_dir, out_link_dir, base_time, connect_index, use_index;
     String label;
 	bool connect_flag;
 	Dtime low, high;
 
 	Link_Data *link_ptr;
 	Dir_Data *dir_ptr;
-	Link_Perf_Array *period_ptr;
-	Flow_Time_Array *turn_period_ptr;
-	Flow_Time_Data flow_data, *turn_ptr;
+	Perf_Period *period_ptr;
+	Perf_Data perf_data;
+	Turn_Period *turn_period_ptr;
+	Turn_Data *turn_ptr;
 	Doubles group_data;
 	Int_Set *group;
 	Int_Set_Itr itr;
@@ -30,7 +31,7 @@ void LinkSum::Group_Time_Report (void)
 	Show_Message ("Creating the Travel Time Report -- Record");
 	Set_Progress ();
 
-	connect_flag = System_Data_Flag (CONNECTION) && (turn_perf_array.size () > 0);
+	connect_flag = System_Data_Flag (CONNECTION) && (turn_period_array.size () > 0);
 
 	//---- calculate group travel time ----
 
@@ -77,7 +78,7 @@ void LinkSum::Group_Time_Report (void)
 
 			dir_ptr = &dir_array [dir];
 
-			flow_index = dir_ptr->Flow_Index ();
+			use_index = dir_ptr->Use_Index ();
 			
 			time0 = dir_ptr->Time0 ();
 			time = 0;
@@ -111,15 +112,15 @@ void LinkSum::Group_Time_Report (void)
 				second = low + group_data [j] + 1;
 
 				if (connect_index >= 0) {
-					turn_period_ptr = turn_perf_array.Period_Ptr (second);
+					turn_period_ptr = turn_period_array.Period_Ptr (second);
 					turn_ptr = turn_period_ptr->Data_Ptr (connect_index);
 					ttime = turn_ptr->Time ();
 					group_data [j] += ttime;
 					second += ttime;
 				}
-				period_ptr = link_perf_array.Period_Ptr (second);
-				flow_data = period_ptr->Total_Flow_Time (dir, flow_index);
-				time = flow_data.Time ();
+				period_ptr = perf_period_array.Period_Ptr (second);
+				perf_data = period_ptr->Total_Performance (dir, use_index);
+				time = perf_data.Time ();
 				group_data [j] += ((time > 0) ? time : time0);
 			}
 		}

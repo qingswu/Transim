@@ -28,7 +28,7 @@ void PlanPrep::Plan_Processing::Trip_Write (void)
 		merge_ptr = new Plan_Data ();
 
 		if (merge_file->Read_Plan (*merge_ptr)) {
-			merge_ptr->Get_Trip_Index (trip_index);
+			merge_ptr->Get_Index (trip_index);
 		} else {
 			trip_index.Set (MAX_INTEGER);
 		}
@@ -77,7 +77,7 @@ void PlanPrep::Plan_Processing::Trip_Write (void)
 					new_plan_file->Write_Plan (*merge_ptr);
 				}
 				if (merge_file->Read_Plan (*merge_ptr)) {
-					merge_ptr->Get_Trip_Index (trip_index);
+					merge_ptr->Get_Index (trip_index);
 
 					if (trip_index < last_trip) {
 						MAIN_LOCK

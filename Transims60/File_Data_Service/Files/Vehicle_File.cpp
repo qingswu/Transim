@@ -58,9 +58,7 @@ bool Vehicle_File::Create_Fields (void)
 	Add_Field ("VEHICLE", DB_INTEGER, 4);
 	Add_Field ("PARKING", DB_INTEGER, 10);
 	Add_Field ("TYPE", DB_INTEGER, 4, VEH_TYPE);
-	//if (exe->Notes_Name_Flag ()) {
-	//	Add_Field ("NOTES", DB_STRING, STRING_FIELD_SIZE);
-	//}
+
 	return (Set_Field_Numbers ());
 }
 
@@ -81,7 +79,6 @@ bool Vehicle_File::Set_Field_Numbers (void)
 	if (vehicle < 0 || hhold < 0 || parking < 0 || type < 0) return (false);
 
 	partition = Optional_Field (PARTITION_FIELD_NAMES);
-	//Notes_Field (Optional_Field ("NOTES"));
 
 	//---- Version 4.0 compatibility ----
 

@@ -22,11 +22,9 @@ void PlanSelect::Program_Control (void)
 
 	Read_Select_Keys ();
 
-	delay_flag = System_File_Flag (LINK_DELAY);
-	if (delay_flag) {
-		Link_Delay_File *file = (Link_Delay_File *) System_File_Handle (LINK_DELAY);
-		turn_flag = file->Turn_Flag ();
-	}
+	delay_flag = System_File_Flag (PERFORMANCE);
+	turn_flag = System_File_Flag (TURN_DELAY);
+
 	plan_file = (Plan_File *) System_File_Handle (PLAN);
 	if (!plan_file->Part_Flag ()) Num_Threads (1);
 

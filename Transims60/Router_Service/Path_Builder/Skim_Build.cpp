@@ -36,43 +36,11 @@ bool Path_Builder::Skim_Build (One_To_Many *data)
 
 	//---- set the traveler parameters ----
 
-	exe->Set_Parameters (param, data_ptr->Type ());
+	exe->Set_Parameters (param, data_ptr->Type (), data_ptr->Veh_Type ());
 
 	param.mode = (Mode_Type) data_ptr->Mode ();
 	param.use = (Use_Type) data_ptr->Use ();
-	param.veh_type = data_ptr->Veh_Type ();
-	pce = 1.0;
 
-	if (!veh_type_flag || param.veh_type <= 0) {
-		grade_flag = false;
-		op_cost_rate = 0.0;
-		param.veh_type = -1;
-	} else {
-		map_itr = exe->veh_type_map.find (param.veh_type);
-
-		if (map_itr != exe->veh_type_map.end ()) {
-			param.veh_type = map_itr->second;
-			veh_type_ptr = &exe->veh_type_array [param.veh_type];
-
-			if (param.use == CAR) {
-				param.use = veh_type_ptr->Use ();
-			}
-			op_cost_rate = UnRound (veh_type_ptr->Op_Cost ());
-
-			if (Metric_Flag ()) {
-				op_cost_rate /= 1000.0;
-			} else {
-				op_cost_rate /= MILETOFEET;
-			}
-			grade_flag = param.grade_flag && veh_type_ptr->Grade_Flag ();
-			pce = UnRound (veh_type_ptr->PCE ());
-		} else {
-			exe->Warning (String ("Vehicle Type %d was Not Found") % param.veh_type);
-			grade_flag = false;
-			op_cost_rate = 0.0;
-			param.veh_type = -1;
-		}
-	}
 	parking_duration = 0;
 	plan_flag = false;
 	forward_flag = (data_ptr->Direction () != END_TIME);
@@ -95,20 +63,13 @@ bool Path_Builder::Skim_Build (One_To_Many *data)
 
 	//---- set the from record ----
 
-	map_itr = exe->location_map.find (data_ptr->Location ());
-
-	if (map_itr == exe->location_map.end ()) {
-		exe->Warning (String ("Location %d was Not Found") % data_ptr->Location ());
-		data_ptr->Problem (LOCATION_PROBLEM);
-		return (true);
-	}
-	loc_ptr = &exe->location_array [map_itr->second];
-
-	trip_end.Index (map_itr->second);
+	trip_end.Type (LOCATION_ID);
+	trip_end.Index (data_ptr->Location ());
 	trip_end.Time (data_ptr->Time ());
 
 	from_ptr->push_back (trip_end);
 
+	loc_ptr = &exe->location_array [trip_end.Index ()];
 	path_end.Clear ();
 
 	path_end.Trip_End (0);
@@ -134,18 +95,11 @@ bool Path_Builder::Skim_Build (One_To_Many *data)
 			trip_end.Index (-1);
 
 		} else {
-			map_itr = exe->location_map.find (many_itr->Location ());
+			trip_end.Type (LOCATION_ID);
+			trip_end.Index (many_itr->Location ());
 
-			if (map_itr == exe->location_map.end ()) {
-				exe->Warning (String ("Location %d was Not Found") % many_itr->Location ());
-				many_itr->Problem (LOCATION_PROBLEM);
-
-				trip_end.Index (-1);
-
-			} else {
-				loc_ptr = &exe->location_array [map_itr->second];
-
-				trip_end.Index (map_itr->second);
+			if (trip_end.Index () >= 0) {
+				loc_ptr = &exe->location_array [trip_end.Index ()];
 
 				path_end.Clear ();
 				path_end.Trip_End (index);

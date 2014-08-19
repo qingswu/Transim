@@ -197,13 +197,14 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_MSC_EXTENSIONS;THREADS</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>..\Include</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -317,7 +318,9 @@
     <ClInclude Include="..\Include\Bin_Heap.hpp" />
     <ClInclude Include="..\Include\Bounded_Queue.hpp" />
     <ClInclude Include="..\Include\Functions.hpp" />
+    <ClInclude Include="..\Include\Gap_Data.hpp" />
     <ClInclude Include="..\Include\IPF_Data.hpp" />
+    <ClInclude Include="..\Include\Memory_Pool.hpp" />
     <ClInclude Include="..\Include\TDF_Matrix.hpp" />
     <ClInclude Include="..\Include\Threads.hpp" />
     <ClInclude Include="..\Include\Arcview_File.hpp" />

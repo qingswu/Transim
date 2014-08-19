@@ -17,8 +17,6 @@ void Validate::Write_Volume (void)
 	Link_Data *link_ptr;
 	Int_Map_Itr itr;
 	Node_Data *node_ptr;
-	Flow_Time_Array *array_ptr;
-	Flow_Time_Data *flow_ptr;
 
 	nvol = 0;
 
@@ -29,7 +27,7 @@ void Validate::Write_Volume (void)
 
 	output_file.Copy_Periods (sum_periods);
 	output_file.Num_Decimals (0);
-	output_file.Data_Units (Performance_Units_Map (FLOW_DATA));
+	output_file.Data_Units (Performance_Units_Map (VOLUME_DATA));
 
 	if (!output_file.Create_Fields ()) {
 		Error ("Creating New Volume Fields");
@@ -55,10 +53,7 @@ void Validate::Write_Volume (void)
 
 		if (dir_index >= 0) {
 			for (i=0; i < num; i++) {
-				array_ptr = &link_delay_array [i];
-				flow_ptr = &array_ptr->at (dir_index);
-
-				volume = flow_ptr->Flow ();
+				volume = link_volume_array.Volume (i, dir_index);
 
 				if (volume > 0) {
 					output_file.Data_AB (i, volume);
@@ -73,10 +68,7 @@ void Validate::Write_Volume (void)
 
 		if (dir_index >= 0) {
 			for (i=0; i < num; i++) {
-				array_ptr = &link_delay_array [i];
-				flow_ptr = &array_ptr->at (dir_index);
-
-				volume = flow_ptr->Flow ();
+				volume = link_volume_array.Volume (i, dir_index);
 
 				if (volume > 0) {
 					output_file.Data_BA (i, volume);

@@ -51,14 +51,14 @@ public:
 	int    Start_Execution (int commands, char *command []);
 	int    Start_Execution (Strings keys);
 
-	bool   Vehicle_Flag (void)               { return (vehicle_flag); }
-	void   Vehicle_Flag (bool flag)          { vehicle_flag = flag; }
-
 	int    Num_Threads (void)                { return (num_threads); }
 	void   Num_Threads (int value)           { num_threads = MAX (value, 1); }
 
 	int    Sub_Threads (void)                { return (sub_threads); }
 	void   Sub_Threads (int value)           { sub_threads = MAX (value, 1); }
+
+	bool   Memory_Flag (void)                { return (memory_flag); }
+	void   Memory_Flag (bool flag)           { memory_flag = flag; }
 
 	void   Notes_Name_Flag (bool flag)       { notes_flag = flag; }
 	bool   Notes_Name_Flag (void)            { return (notes_flag); }
@@ -104,7 +104,7 @@ private:
 	String project_directory;
 
 	int num_threads, sub_threads, service_level, random_seed;
-	bool thread_flag, mpi_flag, vehicle_flag;
+	bool thread_flag, mpi_flag, memory_flag;
 
 	String filename;
 	Dtime start_time, end_time;

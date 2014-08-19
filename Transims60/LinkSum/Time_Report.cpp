@@ -10,17 +10,17 @@
 
 void LinkSum::Travel_Time_Report (void)
 {
-	int i, j, k, k1, bin, percent, max_lanes, lanes, tod_list, index, flow_index;
-	int percentile [NUM_PERCENTILES], base_time, loaded_time;
-	double total, sum, lane_miles, len;
-	Dtime low, high, tod;
+	int i, j, k, k1, bin, percent, index, use_index;
+	int percentile [NUM_PERCENTILES];
+	double total, sum;
+	Dtime low, high;
 
 	Link_Itr link_itr;
 	Dir_Data *dir_ptr;
-	Link_Perf_Period_Itr period_itr;
-	Flow_Time_Data flow_data;
-	Lane_Use_Period *use_ptr;
+	Perf_Period_Itr period_itr;
+	Perf_Data perf_data;
 	Doubles_Itr itr;
+	Performance_Data data;
 
 	Show_Message ("Creating the Travel Time Distribution -- Record");
 	Set_Progress ();
@@ -37,8 +37,6 @@ void LinkSum::Travel_Time_Report (void)
 		Show_Progress ();
 
 		if (select_flag && link_itr->Use () == 0) continue;
-		
-		len = UnRound (link_itr->Length ());
 
 		for (i=0; i < 2; i++) {
 			if (i) {
@@ -50,50 +48,26 @@ void LinkSum::Travel_Time_Report (void)
 			}
 			if (index < 0) continue;
 			dir_ptr = &dir_array [index];
-
-			base_time = dir_ptr->Time0 ();
-			if (base_time <= 0.0) continue;
-
-			tod_list = dir_ptr->First_Lane_Use ();
-			flow_index = dir_ptr->Flow_Index ();
-
-			lanes = dir_ptr->Lanes ();
-			if (lanes < 1) lanes = 1;
-			max_lanes = lanes;
+			use_index = dir_ptr->Use_Index ();
 
 			//---- process each time period ----
 
-			for (j=0, period_itr = link_perf_array.begin (); period_itr != link_perf_array.end (); period_itr++, j++) {
-				flow_data = period_itr->Total_Flow_Time (index, flow_index);
+			for (j=0, period_itr = perf_period_array.begin (); period_itr != perf_period_array.end (); period_itr++, j++) {
+				sum_periods.Period_Range (j, low, high);
 
-				loaded_time = flow_data.Time ();
+				data.Start (low);
+				data.End (high);
 
-				if (tod_list >= 0) {
+				perf_data = period_itr->Total_Performance (index, use_index);
 
-					//---- get the time period ----
+				data.Get_Data (&perf_data, dir_ptr, &(*link_itr));
 
-					sum_periods.Period_Range (j, low, high);
-					tod = (low + high + 1) / 2;
-
-					lanes = max_lanes;
-					k = tod_list;
-
-					for (use_ptr = &use_period_array [k]; ; use_ptr = &use_period_array [++k]) {
-						if (use_ptr->Start () <= tod && tod < use_ptr->End ()) {
-							lanes = use_ptr->Lanes0 () + use_ptr->Lanes1 ();
-							break;
-						}
-						if (use_ptr->Periods () == 0) break;
-					}
-				}
-				bin = loaded_time * RESOLUTION / base_time;
+				bin = DTOI (data.Time_Ratio () * RESOLUTION);
 
 				if (bin < 0 || bin >= NUM_SUM_BINS) bin = NUM_SUM_BINS - 1;
-				
-				lane_miles = lanes * len;
 
-				sum_bin [j] [bin] += lane_miles;
-				sum_bin [num_inc] [bin] += lane_miles;
+				sum_bin [j] [bin] += data.Lane_Len ();
+				sum_bin [num_inc] [bin] += data.Lane_Len ();
 			}
 		}
 	}

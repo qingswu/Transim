@@ -59,7 +59,7 @@ void TripPrep::Trip_Processing::Temp_Time_Write (int part)
 		time_ptr = time_rec_set [num];
 
 		if (stat) {
-			trip_ptr->Get_Time_Index (*time_ptr);
+			trip_ptr->Get_Index (*time_ptr);
 		} else {
 			time_ptr->Set (MAX_INTEGER, 0, 0);
 		}
@@ -77,7 +77,7 @@ void TripPrep::Trip_Processing::Temp_Time_Write (int part)
 		merge_ptr = new Trip_Data ();
 
 		if (merge_file->Read_Trip (*merge_ptr)) {
-			merge_ptr->Get_Time_Index (time_index);
+			merge_ptr->Get_Index (time_index);
 		} else {
 			time_index.Set (MAX_INTEGER, 0, 0);
 		}
@@ -129,7 +129,7 @@ void TripPrep::Trip_Processing::Temp_Time_Write (int part)
 			time_ptr = time_rec_set [num];
 
 			if (stat) {
-				trip_ptr->Get_Time_Index (*time_ptr);
+				trip_ptr->Get_Index (*time_ptr);
 			} else {
 				time_ptr->Set (MAX_INTEGER, 0, 0);
 			}
@@ -165,7 +165,7 @@ void TripPrep::Trip_Processing::Temp_Time_Write (int part)
 					}
 				}
 				if (merge_file->Read_Trip (*merge_ptr)) {
-					merge_ptr->Get_Time_Index (time_index);
+					merge_ptr->Get_Index (time_index);
 
 					if (time_index < last_time) {
 						MAIN_LOCK

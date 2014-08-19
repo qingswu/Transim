@@ -10,32 +10,43 @@
 
 void Simulator_Service::Program_Control (void)
 {
-	int i;
+	int i, j, num, type, num_periods;
 	String key;
+	Strings strings;
+	Str_Itr str_itr;
 	Double_List list;
 	Dbl_Itr dbl_itr;
+	Simulation_Group group;
+	Sim_Group_Itr group_itr;
+	bool method_flag [MICROSCOPIC + 1];
+	Dtime step;
 
 	//---- set / check the signal files ----
 
-	if (Check_Control_Key (MESOSCOPIC_SUBAREAS) || Check_Control_Key (MICROSCOPIC_SUBAREAS)) {
+	num = Highest_Control_Group (GROUP_PERIOD_METHODS, 0);
+
+	if (num == 0) {
 		param.control_flag = true;
-		key = Get_Control_String (MESOSCOPIC_SUBAREAS);
-		if (key.Equals ("NONE")) {
-			key = Get_Control_String (MICROSCOPIC_SUBAREAS);
-			if (key.Equals ("NONE")) {
-				param.control_flag = false;
-			}
-		}
-	} else if (Check_Control_Key (UNSIMULATED_SUBAREAS) || Check_Control_Key (MACROSCOPIC_SUBAREAS)) {
+	} else {
 		param.control_flag = false;
-		key = Get_Control_String (MACROSCOPIC_SUBAREAS);
-		if (key.Equals ("NONE")) {
-			key = Get_Control_String (UNSIMULATED_SUBAREAS);
-			if (key.Equals ("NONE")) {
-				param.control_flag = true;
+
+		for (i=1; i <= num; i++) {
+			if (!Check_Control_Key (GROUP_PERIOD_METHODS, i)) continue;
+
+			key = Get_Control_String (GROUP_PERIOD_METHODS, i);
+			key.Parse (strings);
+
+			for (str_itr = strings.begin (); str_itr != strings.end (); str_itr++) {
+				type = Simulation_Code (*str_itr);
+				if (type == MESOSCOPIC || type == MICROSCOPIC) {
+					param.control_flag = true;
+					break;
+				}
 			}
+			if (param.control_flag) break;
 		}
 	}
+
 	if (param.control_flag) {
 		if (!System_Control_Check (SIGNAL) || !System_Control_Check (TIMING_PLAN) || !System_Control_Check (PHASING_PLAN)) {
 			Warning ("Signal, Timing Plan, and Phasing Plan files are Required for Signal Processing");
@@ -90,11 +101,109 @@ void Simulator_Service::Program_Control (void)
 	}
 	time_step = param.start_time_step;
 
+	//---- simulation time breaks ----
+
+	key = Get_Control_Text (SIMULATION_TIME_BREAKS);
+
+	if (!key.empty ()) {
+		sim_periods.Add_Breaks (key);
+	} else {
+		sim_periods.Add_Breaks ("NONE");
+	}
+	num_periods = sim_periods.Num_Periods ();
+	if (num_periods == 0) num_periods = 1;
+
+	Print (1, "Number of Simulation Time Periods = ") << sim_periods.Num_Periods ();
+
+	//---- process the simulation groups ----
+
+	num = MAX (Highest_Control_Group (GROUP_PERIOD_METHODS, 0), 
+				Highest_Control_Group (SIMULATION_GROUP_SUBAREAS, 0));
+
+	memset (method_flag, false, sizeof (method_flag));
+
+	if (num == 0) {
+		group.group = 0;
+		group.methods.assign (1, MESOSCOPIC);
+		group.subareas.Add_Ranges ("ALL");
+		method_flag [MESOSCOPIC] = true;
+
+		sim_group_array.push_back (group);
+
+		Print (2, "Mesoscopic Simulation for All Subareas and Time Periods");
+
+	} else {
+
+		for (i=1; i <= num; i++) {
+			if (!Check_Control_Key (GROUP_PERIOD_METHODS, i) && 
+				!Check_Control_Key (SIMULATION_GROUP_SUBAREAS, i)) continue;
+
+			Print (1);
+			group.group = i;
+			group.methods.assign (num_periods, NO_SIMULATION);
+
+			//---- group subareas ----
+
+			key = Get_Control_Text (SIMULATION_GROUP_SUBAREAS, i);
+
+			group.subareas.Add_Ranges (key);
+
+			//---- period methods ----
+
+			key = Get_Control_Text (GROUP_PERIOD_METHODS, i);
+
+			if (!key.empty ()) {
+				key.Parse (strings);
+				type = NO_SIMULATION;
+
+				for (j=0, str_itr = strings.begin (); str_itr != strings.end (); str_itr++, j++) {
+					type = Simulation_Code (*str_itr);
+					group.methods [j] = type;
+					method_flag [type] = true;
+				}
+				for (; j < num_periods; j++) {
+					group.methods [j] = type;
+				}
+			} else {
+				for (j=0; j < num_periods; j++) {
+					group.methods [j] = MESOSCOPIC;
+				}
+				method_flag [MESOSCOPIC] = true;
+			}
+			sim_group_array.push_back (group);
+		}
+	}
+
 	//---- time steps per second ----
 
-	Print (1);
-	param.step_size = Get_Control_Time (TIME_STEPS);
-	two_step = 2 * param.step_size;
+	if (Check_Control_Key (UNSIMULATED_TIME_STEPS) || Check_Control_Key (MACROSCOPIC_TIME_STEPS) ||
+		Check_Control_Key (MESOSCOPIC_TIME_STEPS) || Check_Control_Key (MICROSCOPIC_TIME_STEPS)) {
+		Print (1);
+	}
+	if (method_flag [NO_SIMULATION]) {
+		method_time_step [NO_SIMULATION] = Get_Control_Time (UNSIMULATED_TIME_STEPS);
+	}
+	if (method_flag [MACROSCOPIC]) {
+		method_time_step [MACROSCOPIC] = Get_Control_Time (MACROSCOPIC_TIME_STEPS);
+	}
+	if (method_flag [MESOSCOPIC]) {
+		method_time_step [MESOSCOPIC] = Get_Control_Time (MESOSCOPIC_TIME_STEPS);
+	}
+	if (method_flag [MICROSCOPIC]) {
+		method_time_step [MICROSCOPIC] = Get_Control_Time (MICROSCOPIC_TIME_STEPS);
+	}
+	period_step_size.assign (num_periods, Dtime (900, SECONDS));
+
+	for (group_itr = sim_group_array.begin (); group_itr != sim_group_array.end (); group_itr++) {
+		for (j=0; j < num_periods; j++) {
+			step = method_time_step [group_itr->methods [j]];
+
+			if (step < period_step_size [j]) {
+				period_step_size [j] = step;
+			}
+		}
+	}
+	param.step_size = period_step_size [0];
 
 	//---- get the cell size ----
 
@@ -267,76 +376,6 @@ void Simulator_Service::Program_Control (void)
 
 	param.print_problems = Get_Control_Flag (PRINT_PROBLEM_MESSAGES);
 
-	//---- simulation methods ----
-
-	Print (1);
-
-	if (Check_Control_Key (UNSIMULATED_SUBAREAS) || 
-		Check_Control_Key (MACROSCOPIC_SUBAREAS) || 
-		Check_Control_Key (MICROSCOPIC_SUBAREAS)) {
-
-		//---- unsimulated subareas ----
-
-		key = Get_Control_Text (UNSIMULATED_SUBAREAS);
-
-		if (!key.empty ()) {
-			no_range.Add_Ranges (key);
-		}
-
-		//---- macroscopic subareas ----
-
-		key = Get_Control_Text (MACROSCOPIC_SUBAREAS);
-
-		if (!key.empty ()) {
-			macro_range.Add_Ranges (key);
-		}
-
-		//---- mesoscopic subareas ----
-
-		key = Get_Control_Text (MESOSCOPIC_SUBAREAS);
-
-		if (!key.empty () && Check_Control_Key (MESOSCOPIC_SUBAREAS)) {
-			meso_range.Add_Ranges (key);
-		}
-
-		//---- microscopic subareas ----
-
-		key = Get_Control_Text (MICROSCOPIC_SUBAREAS);
-
-		if (!key.empty ()) {
-			micro_range.Add_Ranges (key);
-		}
-
-		//---- check the subarea definitions ----
-
-		if (no_range.size () == 0 && macro_range.size () == 0 && meso_range.size () == 0 && micro_range.size () == 0) {
-			meso_range.Add_Ranges ("ALL");
-		}
-
-	} else {
-
-		//---- default subareas ----
-
-		key = sim->Get_Control_Text (MESOSCOPIC_SUBAREAS);
-
-		if (!key.empty ()) {
-			meso_range.Add_Ranges (key);
-		}
-	}
-
-	//---- macroscopic capacity factors ----
-
-	if (macro_range.size () > 0) {
-		if (Check_Control_Key (TURN_POCKET_FACTOR) || 
-			Check_Control_Key (MERGE_POCKET_FACTOR) || 
-			Check_Control_Key (OTHER_POCKET_FACTOR)) {
-			Print (1);
-		}
-		param.turn_factor = Get_Control_Double (TURN_POCKET_FACTOR);
-		param.merge_factor = Get_Control_Double (MERGE_POCKET_FACTOR);
-		param.other_factor = Get_Control_Double (OTHER_POCKET_FACTOR);
-	}
-
 	//---- estimated number of travelers -----
 
 	Print (1);
@@ -344,6 +383,5 @@ void Simulator_Service::Program_Control (void)
 
 	//---- read the control keys ----
 
-	problem_output.Read_Control ();
 	sim_output_step.Read_Controls ();
 }

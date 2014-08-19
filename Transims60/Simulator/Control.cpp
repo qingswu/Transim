@@ -18,7 +18,7 @@ void Simulator::Program_Control (void)
 		System_File_False (PLAN);
 
 		if (System_File_Flag (NEW_PROBLEM)) {
-			problem_output.Output_Flag (true);
+			//problem_output.Output_Flag (true);
 			System_File_False (NEW_PROBLEM);
 		}
 	}

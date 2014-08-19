@@ -35,16 +35,19 @@ bool Sim_Control_Update::Traffic_Control (int index, Sim_Signal_Itr signal_itr)
 
 	//---- check the subarea status ----
 
-	if (signal_itr->End_Time () == MAX_INTEGER) {
-		signal_itr->End_Time (MAX_INTEGER - 1);
+	flag = false;
 
-		for (int_itr = signal_ptr->nodes.begin (); int_itr != signal_ptr->nodes.end (); int_itr++) {
-			node_ptr = &sim->node_array [*int_itr];
+	for (int_itr = signal_ptr->nodes.begin (); int_itr != signal_ptr->nodes.end (); int_itr++) {
+		node_ptr = &sim->node_array [*int_itr];
 
-			if (node_ptr->Method () == NO_SIMULATION || node_ptr->Method () == MACROSCOPIC) {
-				return (true);
-			}
+		if (node_ptr->Method () == MESOSCOPIC || node_ptr->Method () == MICROSCOPIC) {
+			flag = true;
+			break;
 		}
+	}
+	if (!flag) {
+		signal_itr->End_Time (sim->end_period);
+		return (true);
 	}
 
 	//---- clear the previous controls ----
@@ -61,7 +64,7 @@ bool Sim_Control_Update::Traffic_Control (int index, Sim_Signal_Itr signal_itr)
 			connect_ptr->Control (RED_LIGHT);
 		}
 	}
-	signal_itr->clear ();	
+	signal_itr->Free ();	
 
 	//---- identify the time period ----
 	
@@ -70,6 +73,7 @@ bool Sim_Control_Update::Traffic_Control (int index, Sim_Signal_Itr signal_itr)
 
 		signal_itr->End_Time (time_itr->End ());
 		if (signal_itr->End_Time () < timing_update_time) timing_update_time = signal_itr->End_Time ();
+		signal_itr->Status (1);
 
 		for (timing = 0, timing_itr = signal_ptr->timing_plan.begin (); timing_itr != signal_ptr->timing_plan.end (); timing_itr++, timing++) {
 			if (timing_itr->Timing () != time_itr->Timing ()) continue;

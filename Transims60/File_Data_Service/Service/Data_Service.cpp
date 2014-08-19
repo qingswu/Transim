@@ -304,23 +304,23 @@ void Data_Service::Execute (void)
 
 	file = System_File (HOUSEHOLD);
 	if (file->flag && file->read) Read_Households ();
-	
-	//---- link delay ----
-
-	file = System_File (LINK_DELAY);
-	if (file->flag && file->read) {
-		Link_Delay_File *file = (Link_Delay_File *) System_File_Handle (LINK_DELAY);
-		Read_Link_Delays (*file, link_delay_array, turn_delay_array);
-	}
 
 	//---- performance ----
 
 	file = System_File (PERFORMANCE);
 	if (file->flag && file->read) {
 		Performance_File *file = (Performance_File *) System_File_Handle (PERFORMANCE);
-		Read_Performance (*file, link_perf_array, turn_perf_array);
+		Read_Performance (*file, perf_period_array);
 	}
-	
+
+	//---- turn_delay ----
+
+	file = System_File (TURN_DELAY);
+	if (file->flag && file->read) {
+		Turn_Delay_File *file = (Turn_Delay_File *) System_File_Handle (TURN_DELAY);
+		Read_Turn_Delays (*file, turn_period_array);
+	}
+
 	//---- ridership ----
 
 	file = System_File (RIDERSHIP);

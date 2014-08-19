@@ -10,11 +10,12 @@
 
 void Simulator::Execute (void)
 {
-	int count;
+	int i, count;
 	bool first, read_status;
+
 	Sim_Statistics *stats;
 
-	clock_t start, end, io_total, sim_total;
+	clock_t start, end, io_total, sim_total, update_total, travel_total, output_total, link_total;
 	
 	//---- read the network data ----
 
@@ -29,6 +30,8 @@ void Simulator::Execute (void)
 	Global_Data ();
 
 	time_step = param.start_time_step;
+	sim_period = sim_periods.Period (time_step) - 1;
+	end_period = 0;
 
 	//---- read the plan file ----
 
@@ -40,32 +43,48 @@ void Simulator::Execute (void)
 	if (!sim_plan_step.First_Plan ()) {
 		Error ("Reading Plan File");
 	}
+
 	Break_Check (3);
 	Print (2, "Simulation Started at Time ") << time_step.Time_String ();
 
 	read_status = first = true;
-	io_total = sim_total = 0;
+	io_total = sim_total = update_total = link_total = output_total = travel_total = 0;
 
 	//---- process each time step ----
 
 	for (; time_step <= param.end_time_step; time_step += param.step_size) {
+		if (time_step >= end_period) {
+			end_period = Set_Sim_Period ();
+		}
+		Step_Code (time_step);
 		io_flag = ((time_step % one_second) == 0);
-		Step_Flag (time_step);
+	
+		for (i=0; i <= MICROSCOPIC; i++) {
+			if (method_time_step [i] > 0) {
+				method_time_flag [i] = ((time_step % method_time_step [i]) == 0);
+			} else {
+				method_time_flag [i] = false;
+			}
+		}
 
 		//---- processing for each second ----
-
+//sim->debug = (time_step >= 216000); //252000); //216000);
+//if (sim->debug) Write (1, " step=") << time_step;
+//if (time_step >= 216000) Write (1, " step=") << time_step;
 		if (io_flag) {
 
 			//---- read plans and write output ----
 
 			start = clock ();
-
 			sim_update_step.Start_Processing ();
+		end = clock ();
+		update_total += (end - start);
+		start = clock ();
 
 			if (read_status) {
-				read_status = sim_plan_step.Read_Plans ();
+//if (sim->debug) Write (0, " read stat=") << read_status;
+				read_status = sim_plan_step.Start_Processing ();
 			}
-
 			end = clock ();
 			io_total += (end - start);
 
@@ -88,15 +107,23 @@ void Simulator::Execute (void)
 
 		start = clock ();
 		Active (false);
-
+//if (sim->debug) Write (0, " output");
 		sim_output_step.Start_Processing ();
-
+//if (sim->debug) Write (0, " travel");
+		end = clock ();
+		output_total += (end - start);
+		start = clock ();
 		sim_travel_step.Start_Processing ();
-
-		sim_node_step.Start_Processing ();
+//if (sim->debug) Write (0, " node");
+		end = clock ();
+		travel_total += (end - start);
+		start = clock ();
+		sim_link_step.Start_Processing ();
+		end = clock ();
+		link_total += (end - start);
 
 		MPI_Transfer (Active ());
-
+//if (sim->debug) Write (0, " active=") << Active ();
 		if (!read_status && !Active ()) break;
 
 		end = clock ();
@@ -109,13 +136,7 @@ void Simulator::Execute (void)
 	}
 	if (Master ()) End_Progress (time_step.Time_String ());
 
-	//Stop_Simulator ();
-
-	sim_update_step.Stop_Processing ();
-	sim_plan_step.Stop_Processing ();
-	sim_travel_step.Stop_Processing ();
-	sim_node_step.Stop_Processing ();
-	sim_output_step.Stop_Processing ();
+	stats = Stop_Simulation ();
 
 	MPI_Close ();
 
@@ -129,11 +150,16 @@ void Simulator::Execute (void)
 	Print (1, String ("Seconds Simulating Trips = %.1lf (%.1lf%%)") % 
 		((double) sim_total / CLOCKS_PER_SEC) % (100.0 * sim_total / end) % FINISH);
 
+
+	Write (2, String ("Seconds in IO Processing = %.1lf") % ((double) io_total / CLOCKS_PER_SEC));
+	Write (1, String ("Seconds in Update Processing = %.1lf") % ((double) update_total / CLOCKS_PER_SEC));
+	Write (1, String ("Seconds in Output Processing = %.1lf") % ((double) output_total / CLOCKS_PER_SEC));
+	Write (1, String ("Seconds in Travel Processing = %.1lf") % ((double) travel_total / CLOCKS_PER_SEC));
+	Write (1, String ("Seconds in Link Processing = %.1lf") % ((double) link_total / CLOCKS_PER_SEC));
+
 	//---- write summary statistics ----
 
 	plan_file->Print_Summary ();
-
-	stats = &Get_Statistics ();
 
 	Break_Check (4);
 	Write (2, "Number of Person Trips Processed = ") << stats->num_trips;
