@@ -28,7 +28,7 @@ using namespace std;
 //	void End_of_Work (void);
 //	void Exit_Queue (void);
 //
-//  int  Num_Records (void);
+//  int  Total_Records (void);
 //	bool Max_Records (int max_records);
 //---------------------------------------------------------
 
@@ -43,10 +43,10 @@ public:
 	//	Bounded_Queue constructor
 	//---------------------------------------------------------
 
-	Bounded_Queue (int _max_records = 200)
+	Bounded_Queue (int max_records = 200)
 	{
+		Max_Records (max_records);
 		Start_Work ();
-		Max_Records (_max_records);
 	}
 
 	//---------------------------------------------------------
@@ -91,21 +91,19 @@ public:
 			while (!end_flag && num_records == 0) {
 				work_empty.wait (lock);
 			}
-			if (num_records == 0) {
-				if (end_flag) {
-					end_wait.notify_one ();
-					return (false);
-				}
-				continue;
+			if (num_records > 0) {
+				num_records--;
+
+				data = type_array [first++];
+
+				if (first >= max_records) first = 0;
+
+				work_full.notify_one ();
+				return (true);
+			} else if (end_flag) {
+				end_wait.notify_one ();
+				return (false);
 			}
-			num_records--;
-
-			data = type_array [first++];
-
-			if (first >= max_records) first = 0;
-
-			work_full.notify_one ();
-			return (true);
 		}
 	}
 
@@ -117,7 +115,8 @@ public:
 	{
 		mutex_lock lock (work_mutex);
 
-		if (num_active > 0) num_active--;
+		num_active--;
+		total++;
 
 		if (finish_flag && num_active == 0) {
 			data_wait.notify_one ();
@@ -131,7 +130,7 @@ public:
 	void Start_Work (void)
 	{
 		end_flag = finish_flag = false;
-		num_records = num_active = first = last = 0;
+		num_records = num_active = first = last = total = 0;
 	}
 
 	//--------------------------------------------------------
@@ -145,6 +144,7 @@ public:
 		while (num_active > 0) {
 			finish_flag = true;
 			data_wait.wait (lock);
+			finish_flag = false;
 		}
 	}
 
@@ -174,12 +174,12 @@ public:
 	}
 
 	//---------------------------------------------------------
-	//	Num_Records
+	//	Total_Records
 	//---------------------------------------------------------
 
-	int Num_Records (void)
+	int Total_Records (void)
 	{
-		return (num_records);
+		return (total);
 	}
 
 	//---------------------------------------------------------
@@ -188,6 +188,8 @@ public:
 
 	bool Max_Records (int max_size)
 	{
+		mutex_lock lock (work_mutex);
+
 		type_array.resize (max_size);
 		max_records = (int) type_array.size ();
 		return (max_records > 0);
@@ -197,7 +199,7 @@ private:
 
 	//---- data ----
 
-	int num_records, num_active, max_records, first, last;
+	int num_records, num_active, max_records, first, last, total;
 	bool end_flag, finish_flag;
 
 	condition_variable  work_full, work_empty, exit_wait, end_wait, data_wait;

@@ -11,6 +11,7 @@
 #include "Data_Range.hpp"
 #include "Travel_Step.hpp"
 #include "Data_Buffer.hpp"
+#include "TypeDefs.hpp"
 
 //---------------------------------------------------------
 //	Turn_Delay_Output Class definition
@@ -26,20 +27,12 @@ public:
 
 	void Output_Check (Travel_Step &step);
 
-	typedef struct {
-		int node;
-		int dir_index;
-		int to_index;
-	} Sort_Key;
-
 private:
 
-	//---- data index ----
-	
-	typedef map <Sort_Key, int>       Turn_Map;
-	typedef pair <Sort_Key, int>      Turn_Map_Data;
-	typedef Turn_Map::iterator        Turn_Map_Itr;
-	typedef pair <Turn_Map_Itr, bool> Turn_Map_Stat;
+	typedef map <Int2_Key, Turn_Data>   Turn_Map;
+	typedef pair <Int2_Key, Turn_Data>  Turn_Map_Data;
+	typedef Turn_Map::iterator          Turn_Map_Itr;
+	typedef pair <Turn_Map_Itr, bool>   Turn_Map_Stat;
 
 	Turn_Delay_File *file;
 	int  filter;
@@ -51,7 +44,4 @@ private:
 	void Write_Turn (void);
 
 };
-	
-bool operator < (Turn_Delay_Output::Sort_Key left, Turn_Delay_Output::Sort_Key right);
-
 #endif

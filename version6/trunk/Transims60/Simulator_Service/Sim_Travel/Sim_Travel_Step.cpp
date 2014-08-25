@@ -38,8 +38,7 @@ void Sim_Travel_Step::Initialize (void)
 	sim_travel_process = new Sim_Travel_Process * [num_threads];
 
 	if (num_threads > 1) {
-		//travel_queue.Max_Records (200 + 20 * num_threads);
-		travel_queue.Max_Records (20);
+		travel_queue.Max_Records (200 + 20 * num_threads);
 
 		for (int i=0; i < num_threads; i++) {
 			sim_travel_process [i] = new Sim_Travel_Process (&travel_queue, i);
@@ -62,6 +61,9 @@ void Sim_Travel_Step::Start_Processing (void)
 #ifdef THREADS
 	if (num_threads > 1) {
 		int i;
+#ifdef CHECK
+		int count = 0;
+#endif
 		travel_queue.Start_Work ();
 
 		for (i=0, itr = sim->sim_travel_array.begin (); itr != sim->sim_travel_array.end (); itr++, i++) {
@@ -69,12 +71,20 @@ void Sim_Travel_Step::Start_Processing (void)
 				sim->Active (true);
 				if (itr->Next_Event () <= sim->time_step && itr->Status () <= OFF_NET_END) {
 					travel_queue.Put (i);
+#ifdef CHECK
+					count++;
+#endif
 				}
 			}
 		}
-//if (sim->time_step > 216000) sim->Write (1, " travel complete ");
+//if (sim->time_step > 0) sim->Write (0, " travel complete ");	// 216000
 		travel_queue.Complete_Work ();
-//if (sim->time_step > 216000) sim->Write (0, " OK ");
+//if (sim->time_step > 0) sim->Write (0, " OK ");
+#ifdef CHECK
+		if (count != travel_queue.Total_Records ()) {
+			sim->Write (1, String ("Travel Queue %d vs %d") % count % travel_queue.Total_Records ());
+		}
+#endif
 	} else {
 		for (itr = sim->sim_travel_array.begin (); itr != sim->sim_travel_array.end (); itr++) {
 			if (itr->Plan_Index () >= 0) {

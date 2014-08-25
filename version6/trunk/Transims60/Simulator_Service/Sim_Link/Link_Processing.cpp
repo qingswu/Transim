@@ -25,24 +25,26 @@ bool Sim_Link_Process::Link_Processing (int link)
 
 	max_exit = exit_count = 0;
 
+	step.Process_ID (ID ());
 	step.Dir_Index (link);
 	step.sim_dir_ptr = sim_dir_ptr = &sim->sim_dir_array [link];
 
 	//---- check the simulation method ----	
 
-	if (!sim->method_time_flag [sim_dir_ptr->Method ()]) return (false);
-//sim->Write (1, String ("lock=%d, id=%d ") % link % id);
-	sim->sim_dir_array.Lock (sim_dir_ptr, ID ());
-//sim->Write (1, String ("link=%d locked=%d ") % link % sim_dir_ptr->Lock ());
+	step_size = sim->method_time_step [sim_dir_ptr->Method ()];
+	if (step_size == 0) return (false);
+
 	//---- get the step number ----
 
 	step_number = sim->time_step;
-	step_size = sim->method_time_step [sim_dir_ptr->Method ()];
+
 	if (step_size > 0) {
 		step_number = step_number / step_size;
 	}
 
 	//---- check for loaded vehicles ----
+
+	sim->sim_dir_array.Lock (sim_dir_ptr, ID ());
 
 	if (sim_dir_ptr->Count () <= 0) goto load_check;
 
@@ -74,26 +76,31 @@ bool Sim_Link_Process::Link_Processing (int link)
 			traveler = sim_dir_ptr->Get (lane, cell);
 			if (traveler <= 0) continue;
 
-//sim->debug = (traveler == 766);
-//if (sim->debug) sim->Write (1, " index=") << link << " cell=" << lane << "-" << cell;
 			step.clear ();
 			step.Traveler (traveler);
 			step.sim_travel_ptr = sim_travel_ptr = &sim->sim_travel_array [traveler];
 
 			//---- check if the traveler has already been processed during this time step ----
 
-			if (sim_travel_ptr->Step_Code () == sim->Step_Code ()) {
-				continue;
-			}
-			step.Dir_Index (link);
-			step.sim_dir_ptr = sim_dir_ptr;
+			if (sim_travel_ptr->Step_Code () == sim->Step_Code ()) continue;
+
 			step.sim_plan_ptr = 0;
 			step.sim_veh_ptr = 0;
+
+			//---- data problem ----
+
+			if (sim_travel_ptr->Vehicle () < 0) {
+				step.Problem (PATH_PROBLEM);
+				sim->Output_Step (step);
+				continue;
+			}
 
 			//---- stop and wait for the event time ----
 
 			if (sim_travel_ptr->Next_Event () > sim->time_step) {
-//if (sim->debug) sim->Write (0, " next_event");
+				step.sim_veh_ptr = &sim->sim_veh_array [sim_travel_ptr->Vehicle ()];
+				step.push_back (*step.sim_veh_ptr);
+
 				sim_travel_ptr->Speed (0);
 				sim->Output_Step (step);
 				num_vehicles++;
@@ -103,7 +110,6 @@ bool Sim_Link_Process::Link_Processing (int link)
 			//---- check the wait time constraint ----
 
 			if (sim_travel_ptr->Wait () > sim->param.max_wait_time) {
-//if (sim->debug) sim->Write (0, " WAIT");
 				step.Problem (WAIT_PROBLEM);
 				sim->Output_Step (step);
 				continue;
@@ -113,8 +119,7 @@ bool Sim_Link_Process::Link_Processing (int link)
 
 			step.sim_plan_ptr = sim_plan_ptr =  sim_travel_ptr->Get_Plan ();
 
-			if (sim_plan_ptr == 0 || sim_travel_ptr->Vehicle () < 0) {
-//if (sim->debug) sim->Write (0, " path");
+			if (sim_plan_ptr == 0) {
 				step.Problem (PATH_PROBLEM);
 				sim->Output_Step (step);
 				continue;
@@ -125,7 +130,6 @@ bool Sim_Link_Process::Link_Processing (int link)
 			step.sim_veh_ptr = &sim->sim_veh_array [sim_travel_ptr->Vehicle ()];
 
 			if (step.sim_veh_ptr->link != link) {
-//if (sim->debug) sim->Write (0, " link");
 				step.Problem (PATH_PROBLEM);
 				sim->Output_Step (step);
 				continue;
@@ -136,23 +140,18 @@ bool Sim_Link_Process::Link_Processing (int link)
 			sim_leg_ptr = sim_plan_ptr->Get_Leg ();
 
 			if (sim_leg_ptr == 0) {
-//if (sim->debug) sim->Write (0, " next plan");
 				sim_travel_ptr->Next_Plan ();
 				continue;
 			}
-//if (sim->debug) sim->Write (0, " leg type=") << sim_leg_ptr->Type ();
 			if (sim_leg_ptr->Type () == STOP_ID) {
-//if (sim->debug) sim->Write (0, " LEAVE STOP");
 				if (!sim_plan_ptr->Next_Leg ()) {
 					step.sim_veh_ptr->Parked (true);
 					index = sim_dir_ptr->Index (step.sim_veh_ptr->lane, sim->Offset_Cell (step.sim_veh_ptr->offset));
-//if (sim->debug) sim->Write (0, " lane=") << step.sim_veh_ptr->lane << " cell=" << sim->Offset_Cell (step.sim_veh_ptr->offset) << " index=" << index;
-//if (sim->debug) sim->Write (1, " cell DIFF=") << sim_dir_ptr->Get (idx) << " travel=" << step.Traveler ();
+
 					sim_dir_ptr->Remove (index);
 					sim_travel_ptr->Next_Plan ();
 					sim_travel_ptr->Status (OFF_NET_END);
 					sim_travel_ptr->Next_Event (sim->param.end_time_step);
-//if (sim->debug) sim->Write (0, " PARK");
 					stats.num_run_end++;
 					continue;
 				}
@@ -161,15 +160,13 @@ bool Sim_Link_Process::Link_Processing (int link)
 			//---- check the arrival time constraint ----
 
 			if ((sim_plan_ptr->End () + sim->param.max_end_variance) < sim->time_step) {
-//if (sim->debug) sim->Write (1, " wait=") << sim_travel_ptr->Wait () << " max=" << sim->param.max_wait_time;
-//if (sim->debug) sim->Write (0, " arrive");
 				step.Problem (ARRIVAL_PROBLEM);
 				sim->Output_Step (step);
 				continue;
 			}
 
 			//---- try to move the vehicle ----
-//if (sim->debug) sim->Write (0, " move");
+
 			if (Move_Vehicle (step)) {
 				if (sim_dir_ptr->Method () == MACROSCOPIC) {
 					if (++exit_count >= max_exit) {
@@ -177,7 +174,9 @@ bool Sim_Link_Process::Link_Processing (int link)
 					}
 				}
 			}
-			num_vehicles++;	
+			if (sim_travel_ptr->Status () > OFF_NET_END) {
+				num_vehicles++;	
+			}
 		}
 
 		//---- priority load processing ----
@@ -191,6 +190,9 @@ bool Sim_Link_Process::Link_Processing (int link)
 					if (Load_Vehicle (*load_itr)) {
 						sim_dir_ptr->load_queue [i] = -1;
 						sim_dir_ptr->Load_Cell (-1);
+						if (sim_travel_ptr->Status () > OFF_NET_END) {
+							num_vehicles++;
+						}
 					}
 					break;
 				}
@@ -209,10 +211,11 @@ load_check:
 		for (load_itr = sim_dir_ptr->load_queue.begin (); load_itr != sim_dir_ptr->load_queue.end (); load_itr++) {
 			if (*load_itr < 0) continue;
 
+			sim_travel_ptr = &sim->sim_travel_array [*load_itr];
+
 			//---- try to load the vehicle onto the link ----
 
 			if (!Load_Vehicle (*load_itr)) {
-				sim_travel_ptr = &sim->sim_travel_array [*load_itr];
 				sim_travel_ptr->Add_Wait (step_size);
 
 				//---- check the load time constraint ----
@@ -221,6 +224,8 @@ load_check:
 					step.clear ();
 					step.Traveler (*load_itr);
 					step.sim_travel_ptr = sim_travel_ptr;
+					step.sim_plan_ptr = 0;
+					step.sim_veh_ptr = 0;
 
 					step.Problem (LOAD_PROBLEM);
 
@@ -229,14 +234,13 @@ load_check:
 					reload.push_back (*load_itr);
 					num_waiting++;			//---- number of vehicles still in the loading queue ----
 				}
-			} else {
+			} else if (sim_travel_ptr->Status () > OFF_NET_END) {
 				num_vehicles++;
 			}
 		}
 		sim_dir_ptr->load_queue.swap (reload);
 	}
-//sim->Write (1, String ("unlock=%d lock=%d id=%d ") % link % sim_dir_ptr->Lock () % id);
 	sim->sim_dir_array.UnLock (sim_dir_ptr, ID ());
-//sim->Write (1, String ("unlock=%d ") % link);
+
 	return (true);
 }

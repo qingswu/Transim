@@ -40,8 +40,8 @@ void Sim_Output_Step::Initialize (void)
 	output_queue.Max_Records (num_outputs);
 
 	num_threads = sim->Num_Threads ();
-	if (num_threads == 1) return;
 	if (num_threads > num_outputs) num_threads = num_outputs;
+	if (num_threads == 1) return;
 
 	sim_output_process = new Sim_Output_Process * [num_threads];
 
@@ -330,14 +330,14 @@ void Sim_Output_Step::Output_Problem (Problem_Data &problem)
 //	Event_Check
 //---------------------------------------------------------
 
-void Sim_Output_Step::Event_Check (Event_Type type, Travel_Step &step)
+void Sim_Output_Step::Event_Check (Travel_Step &step)
 {
 	Output_Itr itr;
 
 	for (itr = output_array.begin (); itr != output_array.end (); itr++) {
 		if ((*itr)->Type () == EVENT_OUTPUT_OFFSET) {
 			Event_Output *ptr = (Event_Output *) (*itr);
-			ptr->Event_Check (type, step);
+			ptr->Event_Check (step);
 		}
 	}
 }

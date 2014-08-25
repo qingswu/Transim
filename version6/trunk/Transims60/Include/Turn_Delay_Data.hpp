@@ -60,7 +60,7 @@ typedef Turn_Delay_Array::iterator  Turn_Delay_Itr;
 class SYSLIB_API Turn_Data
 {
 public:
-	Turn_Data (void)                    { Clear (); }
+	Turn_Data (void)                     { Clear (); }
 
 	double Turn (void)                   { return (turn); }
 	Dtime  Time (void)                   { return (time); }
@@ -84,17 +84,6 @@ public:
 	                                     { Average_Turn_Time (rec.Turn (), rec.Time (), weight); }
 
 	void   Clear (void)                  { turn = 0; time = 0; }
-
-#ifdef MAKE_MPI
-	bool Pack (Data_Buffer &data)
-	{
-		return (data.Add_Data (this, sizeof (*this)));
-	}
-	bool UnPack (Data_Buffer &data)
-	{
-		return (data.Get_Data (this, sizeof (*this)));
-	}
-#endif
 
 private:
 	float turn;

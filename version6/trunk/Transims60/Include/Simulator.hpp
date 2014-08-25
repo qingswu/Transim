@@ -33,10 +33,5 @@ private:
 	int lane_change_levels, max_vehicles;
 	
 	Plan_File *plan_file;
-
-	void MPI_Setup (void);
-	bool MPI_Distribute (bool status);
-	bool MPI_Transfer (bool status);
-	void MPI_Close (void);
 };
 #endif

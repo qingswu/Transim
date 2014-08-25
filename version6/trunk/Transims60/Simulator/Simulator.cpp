@@ -11,7 +11,7 @@
 Simulator::Simulator (void) : Simulator_Service ()
 {
 	Program ("Simulator");
-	Version (0);
+	Version (1);
 	Title ("Simulate Travel Plans");
 
 	System_File_Type required_files [] = {
@@ -39,9 +39,6 @@ Simulator::Simulator (void) : Simulator_Service ()
 	Key_List (msim_keys);
 	Report_List (reports);
 
-#ifdef MPI_EXE
-	Enable_MPI (true);
-#endif
 	io_flag = false;
 
 	lane_change_levels = 10;

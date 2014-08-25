@@ -101,21 +101,59 @@ Turn_Delay_Output::~Turn_Delay_Output ()
 void Turn_Delay_Output::Write_Check (void)
 {
 	if (sim->time_step <= sim->Model_Start_Time ()) return;
+	
+	if (!time_range.In_Range (sim->time_step)) return;
 
-	if (time_range.In_Range (sim->time_step)) {
-		if (!data_flag) {
+	if (!data_flag) {
 
-			//---- initialize the data ----
+		//---- initialize the data ----	
 
-			data_flag = true;
-		} else {
+		int dir_index, index, node;
 
-			//---- check the output time increment ----
+		Dir_Itr dir_itr;
+		Link_Data *link_ptr;
+		Node_Data *node_ptr;
+		Connect_Data *connect_ptr;
+		Int2_Key key;
+		Turn_Map_Stat map_stat;
+		Turn_Data turn_data;
 
-			if (time_range.At_Increment (sim->time_step)) {
-				if (sim->Master ()) {
-					Write_Turn ();
-				}
+		for (dir_index = 0, dir_itr = sim->dir_array.begin (); dir_itr != sim->dir_array.end (); dir_itr++, dir_index++) {
+			link_ptr = &sim->link_array [dir_itr->Link ()];
+
+			if (dir_itr->Dir () == 1) {
+				node = link_ptr->Anode ();
+			} else {
+				node = link_ptr->Bnode ();
+			}
+			node_ptr = &sim->node_array [node];
+
+			if (!subarea_range.empty ()) {
+				if (!subarea_range.In_Range (node_ptr->Subarea ())) continue;
+			}
+			node = node_ptr->Node ();
+	
+			if (!node_range.empty ()) {
+				if (!node_range.In_Range (node)) continue;
+			}
+			key.first = dir_index;
+
+			for (index = dir_itr->First_Connect (); index >= 0; index = connect_ptr->Next_Index ()) {
+				connect_ptr = &sim->connect_array [index];
+
+				key.second = connect_ptr->To_Index ();
+
+				turn_map.insert (Turn_Map_Data (key, turn_data));
+			}
+		}
+		data_flag = true;
+	} else {
+
+		//---- check the output time increment ----
+
+		if (time_range.At_Increment (sim->time_step)) {
+			if (sim->Master ()) {
+				Write_Turn ();
 			}
 		}
 	}
@@ -127,50 +165,26 @@ void Turn_Delay_Output::Write_Check (void)
 
 void Turn_Delay_Output::Output_Check (Travel_Step &step)
 {
-	if (step.size () < 1) return;
-					
-	int dir_index = step.Dir_Index ();
-	int to_index = (--step.end ())->link;
+	if (!data_flag || step.size () < 2 || !time_range.In_Range (sim->time_step)) return;
 
-	if (dir_index == to_index || dir_index < 0 || to_index < 0) return;
+	Sim_Veh_Data in_veh, out_veh;
 
-	int node = 0;
+	in_veh = step.front ();
+	out_veh = step.back ();
 
-	Node_Data *node_ptr = 0;
-	Sort_Key key;
-	Turn_Map_Stat map_stat;
+	if (in_veh.link == out_veh.link) return;
 
-	if (!time_range.In_Range (sim->time_step)) return;
+	Int2_Key key;
+	Turn_Map_Itr map_itr;
 
-	if (node == 0) {
-		Dir_Data *dir_ptr = &dat->dir_array [dir_index];
-		Link_Data *link_ptr = &dat->link_array [dir_ptr->Link ()];
+	key.first = in_veh.link;
+	key.second = out_veh.link;
 
-		if (dir_ptr->Dir () == 1) {
-			node = link_ptr->Anode ();
-		} else {
-			node = link_ptr->Bnode ();
-		}
-		node_ptr = &dat->node_array [node];
-		node = node_ptr->Node ();
+	map_itr = turn_map.find (key);
+
+	if (map_itr != turn_map.end ()) {
+		map_itr->second.Add_Turn (1);
 	}
-	if (!node_range.empty ()) {
-		if (!node_range.In_Range (node)) return;
-	}
-	if (!subarea_range.empty ()) {
-		if (!subarea_range.In_Range (node_ptr->Subarea ())) return;
-	}
-	key.node = node;
-	key.dir_index = dir_index;
-	key.to_index = to_index;
-
-MAIN_LOCK
-	map_stat = turn_map.insert (Turn_Map_Data (key, 1));
-
-	if (!map_stat.second) {
-		map_stat.first->second++;
-	}
-END_LOCK
 }
 
 //---------------------------------------------------------
@@ -184,20 +198,29 @@ void Turn_Delay_Output::Write_Turn (void)
 	Turn_Map_Itr map_itr;
 	Dir_Data *dir_ptr;
 	Link_Data *link_ptr;
+	Node_Data *node_ptr;
 
-	last_dir = last_to = link = to_link = -1;
+	last_dir = last_to = link = to_link = node = -1;
 
 	for (map_itr = turn_map.begin (); map_itr != turn_map.end (); map_itr++) {
-		if (map_itr->second >= filter) {
-			node = map_itr->first.node;
-			dir_index = map_itr->first.dir_index;
-			to_index = map_itr->first.to_index;
+		if (map_itr->second.Turn () >= filter) {
+
+			dir_index = map_itr->first.first;
+			to_index = map_itr->first.second;
 
 			if (dir_index != last_dir) {
 				dir_ptr = &dat->dir_array [dir_index];
 				link_ptr = &dat->link_array [dir_ptr->Link ()];
 				link = link_ptr->Link ();
 				last_dir = dir_index;
+
+				if (dir_ptr->Dir () == 1) {
+					node = link_ptr->Anode ();
+				} else {
+					node = link_ptr->Bnode ();
+				}
+				node_ptr = &sim->node_array [node];
+				node = node_ptr->Node ();
 			}
 			if (to_index != last_to) {
 				dir_ptr = &dat->dir_array [to_index];
@@ -212,24 +235,13 @@ void Turn_Delay_Output::Write_Turn (void)
 			file->Start (sim->time_step - time_range.Increment ());
 			file->End (sim->time_step);
 
-			file->Turn (map_itr->second);
+			file->Turn (map_itr->second.Turn ());
+			file->Time (map_itr->second.Time ());
 
 			if (!file->Write ()) {
-				sim->Error ("Writing Turn Volume File");
+				sim->Error ("Writing Turn Delay File");
 			}
 		}
-		map_itr->second = 0;
+		map_itr->second.Clear ();
 	}
-}
-
-bool operator < (Turn_Delay_Output::Sort_Key left, Turn_Delay_Output::Sort_Key right)
-{
-	if (left.node < right.node) return (true);
-	if (left.node == right.node) {
-		if (left.dir_index < right.dir_index) return (true);
-		if (left.dir_index == right.dir_index) {
-			if (left.to_index < right.to_index) return (true);
-		}
-	}
-	return (false); 
 }

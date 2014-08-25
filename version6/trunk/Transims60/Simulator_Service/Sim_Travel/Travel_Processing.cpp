@@ -30,6 +30,7 @@ void Sim_Travel_Process::Travel_Processing (Sim_Travel_Ptr sim_travel_ptr)
 		return;
 	}
 
+	step.Process_ID (ID ());
 	step.Traveler (sim_travel_ptr->Traveler ());
 	step.sim_travel_ptr = sim_travel_ptr;
 
@@ -67,42 +68,11 @@ void Sim_Travel_Process::Travel_Processing (Sim_Travel_Ptr sim_travel_ptr)
 
 				//---- output start event ----
 
-				sim->sim_output_step.Event_Check (TRIP_START_EVENT, step);
+				step.Event_Type (TRIP_START_EVENT);
+				sim->sim_output_step.Event_Check (step);
 			}
 
 		} else {
-
-			if (sim_travel_ptr->Status () <= OFF_NET_END) {
-				sim_leg_ptr = sim_plan_ptr->Get_Leg ();
-
-				if (sim_leg_ptr != 0) {
-
-					if (sim_leg_ptr->Type () == STOP_ID) {
-						if (sim_leg_ptr->Mode () == TRANSIT_MODE) {
-							stats.num_transit++;
-						}
-					} else if (sim_leg_ptr->Type () == PARKING_ID) {
-
-					} else if (sim_leg_ptr->Type () == DIR_ID) {
-						sim_veh.Location (sim_leg_ptr->Index (), 0, 0);
-						step.assign (1, sim_veh);
-
-						step.Dir_Index (sim_leg_ptr->Index ());
-#ifdef CHECK
-						if (sim_leg_ptr->Type () != DIR_ID) sim->Error (String ("Sim_Travel_Process::Travel_Processing: Leg Type=%d") % sim_leg_ptr->Type ());
-						if (step.Dir_Index () < 0 || (int) sim->sim_dir_array.size () <= step.Dir_Index ()) sim->Error ("Sim_Travel_Process::Travel_Processing: Dir_Index");
-#endif
-						step.sim_dir_ptr = &sim->sim_dir_array [sim_leg_ptr->Index ()];
-
-						sim_veh.offset = step.sim_dir_ptr->Length ();
-						step.push_back (sim_veh);
-
-						step.Time (sim_leg_ptr->Time ());
-
-						sim->Output_Step (step);
-					} 
-				}
-			}
 			sim_plan_ptr->Next_Leg ();
 		}
 
@@ -120,7 +90,8 @@ void Sim_Travel_Process::Travel_Processing (Sim_Travel_Ptr sim_travel_ptr)
 
 				//---- output end event ----
 
-				sim->sim_output_step.Event_Check (TRIP_END_EVENT, step);
+				step.Event_Type (TRIP_END_EVENT);
+				sim->sim_output_step.Event_Check (step);
 			}
 			sim->Output_Step (step);
 			continue;
@@ -214,7 +185,8 @@ void Sim_Travel_Process::Travel_Processing (Sim_Travel_Ptr sim_travel_ptr)
 						if (sim_travel_ptr->Status () == OFF_NET_START)	stats.num_run_start++;
 					} else {
 						stats.num_veh_start++;
-						sim->sim_output_step.Event_Check (VEH_START_EVENT, step);
+						step.Event_Type (VEH_START_EVENT);
+						sim->sim_output_step.Event_Check (step);
 					}
 					sim_travel_ptr->Status (OFF_NET_LOAD);
 
@@ -253,7 +225,8 @@ void Sim_Travel_Process::Travel_Processing (Sim_Travel_Ptr sim_travel_ptr)
 
 					//---- output vehicle end event ----
 
-					sim->sim_output_step.Event_Check (VEH_END_EVENT, step);
+					step.Event_Type (VEH_END_EVENT);
+					sim->sim_output_step.Event_Check (step);
 					sim_plan_ptr->Next_Leg ();
 				} else {
 					sim_travel_ptr->Next_Plan ();

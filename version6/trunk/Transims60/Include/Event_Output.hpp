@@ -20,7 +20,7 @@ public:
 	Event_Output (int num);
 	~Event_Output (void);
 
-	void Event_Check (Event_Type type, Travel_Step &step);
+	void Event_Check (Travel_Step &step);
 
 private:
 

@@ -321,7 +321,6 @@
     <ClCompile Include="Write_Contour.cpp" />
     <ClCompile Include="Write_Group.cpp" />
     <ClCompile Include="Write_Parking.cpp" />
-    <ClCompile Include="Write_Route.cpp" />
     <ClCompile Include="Write_Stops.cpp" />
   </ItemGroup>
   <ItemGroup>

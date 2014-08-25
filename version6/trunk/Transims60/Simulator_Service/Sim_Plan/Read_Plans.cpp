@@ -36,7 +36,7 @@ bool Sim_Plan_Step::Read_Plans (void)
 			break;
 		}
 		if (plan_ptr->Depart () < time) {
-			sim->Error ("Plans are Not Time Sorted");
+			sim->Error (String ("Plans are Not Time Sorted (%s < %s)") % plan_ptr->Depart ().Time_String () % time.Time_String ());
 			return (false);
 		}
 

@@ -26,7 +26,7 @@ public:
 	Dtime  End (void)                 { return (Get_Time (end)); }
 	int    Lane (void)                { return (Get_Integer (lane)); }
 	double Offset (void)              { return (Get_Double (offset)); }
-	int    Occupancy (void)           { return (Get_Integer (occupancy)); }
+	double Occupancy (void)           { return (Get_Double (occupancy)); }
 
 	void   Link (int value)           { Put_Field (link, value); }
 	void   Dir (int value)            { Put_Field (dir, value); }
@@ -34,17 +34,20 @@ public:
 	void   End (Dtime value)          { Put_Field (end, value); }
 	void   Lane (int value)           { Put_Field (lane, value); }
 	void   Offset (double value)      { Put_Field (offset, value); }
-	void   Occupancy (int value)      { Put_Field (occupancy, value); }
+	void   Occupancy (double value)   { Put_Field (occupancy, value); }
 
 	virtual bool Create_Fields (void);
 	
-	int  Link_Field (void)			{ return (link); }
-	int  Dir_Field (void)			{ return (dir); }
-	int  Start_Field (void)			{ return (start); }
-	int  End_Field (void)			{ return (end); }
-	int  Lane_Field (void)			{ return (lane); }
-	int  Offset_Field (void)		{ return (offset); }
-	int  Occupancy_Field (void)		{ return (occupancy); }
+	int  Link_Field (void)            { return (link); }
+	int  Dir_Field (void)             { return (dir); }
+	int  Start_Field (void)           { return (start); }
+	int  End_Field (void)             { return (end); }
+	int  Lane_Field (void)            { return (lane); }
+	int  Offset_Field (void)          { return (offset); }
+	int  Occupancy_Field (void)       { return (occupancy); }
+
+	bool Max_Flag (void)              { return (max_flag); }
+	void Max_Flag (bool flag)         { max_flag = flag; }
 
 protected:
 	virtual bool Set_Field_Numbers (void);
@@ -53,6 +56,7 @@ private:
 	void Setup (void);
 
 	int link, dir, start, end, lane, offset, occupancy;
+	bool max_flag;
 };
 
 #endif

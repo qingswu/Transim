@@ -78,6 +78,7 @@ Sim_Trip_Ptr Sim_Plan_Process::Plan_Processing (Plan_Data *plan_ptr)
 	sim_plan_ptr->Start (plan_ptr->Depart ());
 	sim_plan_ptr->End (plan_ptr->Arrive ());
 	sim_plan_ptr->Activity (plan_ptr->Activity ());
+	sim_plan_ptr->Schedule (sim_plan_ptr->Start ());
 
 	//---- convert the origin ----
 

@@ -46,9 +46,10 @@ Occupancy_Output::Occupancy_Output (int num) : Sim_Output_Data ()
 
 	//---- create the file ----
 
-	if (sim->Master ()) {
-		file->Create ();
-	}
+	max_flag = sim->Set_Control_Flag (Sim_Output_Step::NEW_OCCUPANCY_MAX_FLAG, num);
+
+	file->Max_Flag (max_flag);
+	file->Create ();
 
 	//---- print the time format ----
 
@@ -114,8 +115,8 @@ Occupancy_Output::Occupancy_Output (int num) : Sim_Output_Data ()
 
 	//---- print the max flag ----
 
-	max_flag = sim->Get_Control_Flag (Sim_Output_Step::NEW_OCCUPANCY_MAX_FLAG, num);
-	if (!max_flag) total_flag = true;
+	sim->Get_Control_Flag (Sim_Output_Step::NEW_OCCUPANCY_MAX_FLAG, num);
+
 	return;
 
 coord_error:
@@ -208,12 +209,7 @@ void Occupancy_Output::Write_Check (void)
 		//---- check the output time increment ----
 
 		if (time_range.At_Increment (sim->time_step)) {
-#ifdef MPI_EXE
-			MPI_Processing (output);
-#endif
-			if (sim->Master ()) {
-				Write_Summary ();
-			}
+			Write_Summary ();
 		}
 	}
 
@@ -238,12 +234,16 @@ void Occupancy_Output::Write_Check (void)
 				sum = 0;
 
 				for (sim_itr = sim_dir_ptr->begin (); sim_itr != sim_dir_ptr->end (); sim_itr++) {
-					if (abs (*sim_itr) >= 2) sum++;
+					if (*sim_itr >= 1) sum++;
 				}
 				if (sum <= total) continue;
 			}
 			for (occ_itr = dir_itr->begin (), sim_itr = sim_dir_ptr->begin (); occ_itr != dir_itr->end (); occ_itr++, sim_itr++) {
-				*occ_itr = (abs (*sim_itr) >= 2);
+				if (*sim_itr >= 1) {
+					*occ_itr = *sim_itr;
+				} else {
+					*occ_itr = 0;
+				}
 			}
 		}
 	}
@@ -255,149 +255,90 @@ void Occupancy_Output::Write_Check (void)
 
 void Occupancy_Output::Output_Check (Travel_Step &step)
 {
-	if (!total_flag || step.Traveler () < 0) return;
+	if (max_flag || step.Traveler () < 0 || step.size () == 0 || !data_flag) return;
 	
-	int dir, last_dir, offset, cell, cells, occupancy;
-	bool skip;
+	int dir_index, cell, index;
+	bool skip, first;
 
+	Sim_Dir_Data *sim_dir_ptr;
 	Sim_Veh_Itr sim_veh_itr;
 	Integers *ints_ptr = 0;
 
 	//---- sum the data ----
 
 	if (!time_range.In_Range (sim->time_step)) return;
-	
-	cells = (int) step.size ();
-	if (cells == 0) return;
 
-	occupancy = DTOI ((double) sim->param.step_size / cells);		//????????? needs work ???????????
-	if (occupancy < 1) occupancy = 1;
+	//---- movement size ----
 
-	//---- stopped or one-cell vehicles ----
+	int step_size = sim->param.step_size;
 
-	if (step.veh_type_ptr->PCE () == 1) {
-		last_dir = -1;
-		skip = false;
+	if (step.sim_dir_ptr != 0) {
+		step_size = sim->method_time_step [step.sim_dir_ptr->Method ()];
+	}
+	if (step.size () > 1) {
+		step_size = (int) ((step_size + step.size () / 2) / (step.size () - 1));
+		if (step_size < 1) step_size = 1;
+	}
 
-		//---- process each cell position ----
+	//---- output traveler record ----
 
-		for (sim_veh_itr = step.begin (); sim_veh_itr != step.end (); sim_veh_itr++) {
+	dir_index = -1;
+	skip = false;
+	first = (step.size () > 1);
+	sim_dir_ptr = 0;
 
-			dir = sim_veh_itr->link;
-			offset = sim_veh_itr->offset;
+	for (sim_veh_itr = step.begin (); sim_veh_itr != step.end (); sim_veh_itr++, first = false) {
+		if (dir_index != sim_veh_itr->link) {
+			skip = false;
 
-			cell = offset / sim->param.cell_size;
+			//---- check the link selection criteria ----
 
-			if (dir < 0 || sim_veh_itr->Parked ()) continue;
+			if (!link_range.empty () || coord_flag) {
+				Dir_Data *dir_ptr = &sim->dir_array [sim_veh_itr->link];
+				Link_Data *link_ptr = &sim->link_array [dir_ptr->Link ()];
 
-			if (dir != last_dir) {
-				last_dir = dir;
-				skip = false;
+				if (!link_range.empty ()) {
+					if (!link_range.In_Range (link_ptr->Link ())) skip = true;
+				}
+				if (!skip && coord_flag) {
+					Node_Data *node_ptr;
 
-				//---- check the link selection criteria ----
+					node_ptr = &sim->node_array [link_ptr->Anode ()];
+					if (node_ptr->X () < x1 || node_ptr->X () > x2 ||
+						node_ptr->Y () < y1 || node_ptr->Y () > y2) {
 
-				if (!link_range.empty () || coord_flag) {
-					Dir_Data *dir_ptr = &sim->dir_array [dir];
-					Link_Data *link_ptr = &sim->link_array [dir_ptr->Link ()];
+						node_ptr = &sim->node_array [link_ptr->Bnode ()];
 
-					if (!link_range.empty ()) {
-						if (!link_range.In_Range (link_ptr->Link ())) skip = true;
-					}
-					if (!skip && coord_flag) {
-						Node_Data *node_ptr;
-
-						node_ptr = &sim->node_array [link_ptr->Anode ()];
 						if (node_ptr->X () < x1 || node_ptr->X () > x2 ||
 							node_ptr->Y () < y1 || node_ptr->Y () > y2) {
-
-							node_ptr = &sim->node_array [link_ptr->Bnode ()];
-
-							if (node_ptr->X () < x1 || node_ptr->X () > x2 ||
-								node_ptr->Y () < y1 || node_ptr->Y () > y2) {
-								skip = true;
-							}
+							skip = true;
 						}
-					}
-				}
-				if (!skip) {
-					ints_ptr = &occ_array [dir];
-
-					//---- allocate memory ----
-
-					if (ints_ptr->size () == 0) {
-						Sim_Dir_Data *sim_dir_ptr = &sim->sim_dir_array [dir];
-
-						ints_ptr->assign (sim_dir_ptr->size (), 0);
 					}
 				}
 			}
 			if (!skip) {
+				ints_ptr = &occ_array [sim_veh_itr->link];
+				sim_dir_ptr = &sim->sim_dir_array [sim_veh_itr->link];
 
-				//---- increment the occupancy counters ----
+				//---- allocate memory ----
 
-				ints_ptr->at (cell)++;
-			}
-		}
-	} else {
-
-		//---- multi-cell vehicle movement ----
-
-		skip = false;
-		last_dir = -1;
-
-		for (sim_veh_itr = step.begin (); sim_veh_itr != step.end (); sim_veh_itr++) {
-			dir = sim_veh_itr->link;
-			offset = sim_veh_itr->offset;
-			cell = offset / sim->param.cell_size;
-
-			if (dir < 0 || sim_veh_itr->Parked ()) continue;
-
-			if (dir != last_dir) {
-				skip = false;
-				last_dir = dir;
-
-				if (!link_range.empty () || coord_flag) {
-					Dir_Data *dir_ptr = &sim->dir_array [dir];
-					Link_Data *link_ptr = &sim->link_array [dir_ptr->Link ()];
-
-					if (!link_range.empty ()) {
-						if (!link_range.In_Range (link_ptr->Link ())) skip = true;
-					}
-					if (!skip && coord_flag) {
-						Node_Data *node_ptr;
-
-						node_ptr = &sim->node_array [link_ptr->Anode ()];
-						if (node_ptr->X () < x1 || node_ptr->X () > x2 ||
-							node_ptr->Y () < y1 || node_ptr->Y () > y2) {
-
-							node_ptr = &sim->node_array [link_ptr->Bnode ()];
-
-							if (node_ptr->X () < x1 || node_ptr->X () > x2 ||
-								node_ptr->Y () < y1 || node_ptr->Y () > y2) {
-								skip = true;
-							}
-						}
-					}
-				}
-				if (!skip) {
-					ints_ptr = &occ_array [dir];
-
-					//---- allocate memory ----
-
-					if (ints_ptr->size () == 0) {
-						Sim_Dir_Data *sim_dir_ptr = &sim->sim_dir_array [dir];
-
+				if (ints_ptr->size () == 0) {
+					if (sim_dir_ptr->size () > 0) {
 						ints_ptr->assign (sim_dir_ptr->size (), 0);
+					} else {
+						skip = true;
 					}
 				}
 			}
-			if (!skip) {
-
-				//---- increment the occupancy counters ----
-
-				ints_ptr->at (cell) += occupancy;
-			}
+			dir_index = sim_veh_itr->link;
 		}
+		if (skip || first) continue;
+
+		cell = sim->Offset_Cell (sim_veh_itr->offset);
+
+		index = sim_dir_ptr->Index (sim_veh_itr->lane, cell);
+
+		ints_ptr->at (index) += step_size;
 	}
 }
 
@@ -407,7 +348,8 @@ void Occupancy_Output::Output_Check (Travel_Step &step)
 
 void Occupancy_Output::Write_Summary (void)
 {
-	int index, idx, offset, lane, cell, occupancy;
+	int index, idx, offset, lane, cell;
+	double occupancy;
 
 	Ints_Itr ints_itr;
 	Int_Itr int_itr;
@@ -442,9 +384,11 @@ void Occupancy_Output::Write_Summary (void)
 
 			file->Lane (sim->Make_Lane_ID (dir_ptr, lane));
 
-			occupancy = *int_itr;
-			if (!max_flag) occupancy = sim->Resolve (occupancy);
-
+			if (max_flag) {
+				occupancy = *int_itr;
+			} else {
+				occupancy = Dtime (*int_itr).Seconds ();
+			}
 			offset = (cell + 1) * sim->param.cell_size;
 			if (offset > link_ptr->Length ()) offset = link_ptr->Length ();
 

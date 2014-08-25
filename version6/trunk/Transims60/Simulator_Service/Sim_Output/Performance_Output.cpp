@@ -204,13 +204,13 @@ void Performance_Output::Write_Check (void)
 
 void Performance_Output::Output_Check (Travel_Step &step)
 {
-	if (step.Traveler () < 0 || !time_range.In_Range (sim->time_step)) return;
+	if (step.Traveler () < 0 || !time_range.In_Range (sim->time_step) || step.size () < 1) return;
 
 	int dir_index, cell, cells, offset;
-	double pce, persons, vmt;
-	Dtime vht;
+	double pce, persons, vmt, vht;
 	bool skip, stop_flag;
 
+	Sim_Dir_Ptr sim_dir_ptr;
 	Sim_Veh_Itr sim_veh_itr;
 	Sim_Leg_Itr leg_itr;
 	Perf_Data *perf_ptr;
@@ -220,6 +220,10 @@ void Performance_Output::Output_Check (Travel_Step &step)
 	if (step.sim_plan_ptr == 0) {
 		step.sim_plan_ptr = step.sim_travel_ptr->Get_Plan ();
 	}
+#ifdef CHECK
+	if (step.sim_plan_ptr == 0) sim->Error ("Performance_Output::Output_Check: sim_plan_ptr");
+#endif
+
 	if (step.veh_type_ptr == 0) {
 		step.veh_type_ptr = &sim->veh_type_array [step.sim_plan_ptr->Veh_Type ()];
 	}
@@ -231,17 +235,18 @@ void Performance_Output::Output_Check (Travel_Step &step)
 	}
 	persons = 1.0 + step.sim_travel_ptr->Passengers ();
 
-	//---- movement size ----
-
-	if (step.Time () == 0) {
-		if (step.size () > 0) {
-			Sim_Dir_Ptr sim_dir_ptr = &sim->sim_dir_array [step [0].link];
-			step.Time (sim->method_time_step [sim_dir_ptr->Method ()]);
-		} else {
-			step.Time (sim->param.step_size);
-		}
+	if (step.sim_dir_ptr == 0) {
+		step.sim_dir_ptr = &sim->sim_dir_array [step [0].link];
 	}
-	vht = step.Time () * pce;
+	sim_dir_ptr = step.sim_dir_ptr;
+
+	vht = sim->method_time_step [sim_dir_ptr->Method ()];
+//
+//#ifdef CHECK
+//		if (step.Time () < sim->param.step_size)  sim->Error (String ("Performance Output::Output_Check: VHT=%lf") % vht);
+//#endif
+
+	vht *= pce;
 	cells = (int) step.size ();
 	if (cells > 1) vht = vht / (cells - 1);
 
@@ -265,62 +270,65 @@ void Performance_Output::Output_Check (Travel_Step &step)
 				offset = 0;
 			}
 			dir_index = sim_veh_itr->link;
-			skip = true;
+			sim_dir_ptr = &sim->sim_dir_array [dir_index];
+			skip = false;
 
-			if (dir_index >= 0) {
-				skip = false;
+			if (!link_range.empty () || coord_flag) {
+				Dir_Data *dir_ptr = &sim->dir_array [dir_index];
+				Link_Data *link_ptr = &sim->link_array [dir_ptr->Link ()];
 
-				if (!link_range.empty () || coord_flag) {
-					Dir_Data *dir_ptr = &sim->dir_array [dir_index];
-					Link_Data *link_ptr = &sim->link_array [dir_ptr->Link ()];
+				if (!link_range.empty ()) {
+					if (!link_range.In_Range (link_ptr->Link ())) skip = true;
+				}
+				if (!skip && coord_flag) {
+					Node_Data *node_ptr;
 
-					if (!link_range.empty ()) {
-						if (!link_range.In_Range (link_ptr->Link ())) skip = true;
-					}
-					if (!skip && coord_flag) {
-						Node_Data *node_ptr;
+					node_ptr = &sim->node_array [link_ptr->Anode ()];
+					if (node_ptr->X () < x1 || node_ptr->X () > x2 ||
+						node_ptr->Y () < y1 || node_ptr->Y () > y2) {
 
-						node_ptr = &sim->node_array [link_ptr->Anode ()];
+						node_ptr = &sim->node_array [link_ptr->Bnode ()];
+
 						if (node_ptr->X () < x1 || node_ptr->X () > x2 ||
 							node_ptr->Y () < y1 || node_ptr->Y () > y2) {
-
-							node_ptr = &sim->node_array [link_ptr->Bnode ()];
-
-							if (node_ptr->X () < x1 || node_ptr->X () > x2 ||
-								node_ptr->Y () < y1 || node_ptr->Y () > y2) {
-								skip = true;
-							}
+							skip = true;
 						}
 					}
 				}
-				if (!skip && !subarea_range.empty ()) {
-					Sim_Dir_Ptr sim_dir_ptr = &sim->sim_dir_array [dir_index];
-
-					if (!subarea_range.In_Range (sim_dir_ptr->Subarea ())) skip = true;
+			}
+			if (!skip && !subarea_range.empty ()) {
+				if (!subarea_range.In_Range (sim_dir_ptr->Subarea ())) skip = true;
+			}
+			if (!skip) {
+#ifdef CHECK
+				if (sim_dir_ptr->Lock () != step.Process_ID ())  sim->Error (String ("Performance Output::Output_Check: Link Lock=%d vs %d time_step=%d, traveler=%d") % sim_dir_ptr->Lock () % step.Process_ID () % sim->time_step % step.Traveler ());
+#endif
+				perf_ptr = &perf_period [dir_index];
+				if (cell > 0) {
+					perf_ptr->Add_Enter (pce);
 				}
-				if (!skip) {
-					perf_ptr = &perf_period [dir_index];
-					if (cell > 0) {
-						perf_ptr->Add_Enter (pce);
-					}
-					if (first_step || cell > 0 || stop_flag) {
-						perf_ptr->Add_Persons (persons);
-						perf_ptr->Add_Volume (pce);
-						perf_ptr->Add_Occupancy (pce);
-					}
+				if (first_step || cell > 0 || stop_flag) {
+					perf_ptr->Add_Persons (persons);
+					perf_ptr->Add_Volume (pce);
+					perf_ptr->Add_Occupancy (pce);
 				}
 			}
 		}
 		if (!skip && perf_ptr > 0 && (cell > 0 || stop_flag)) {
-			vmt = (sim_veh_itr->offset - offset) * pce;
-
-			perf_ptr->Add_Veh_Dist (vmt);
-			perf_ptr->Add_Veh_Time (vht);
-
-			if (step.Speed () == 0) {
+			if (stop_flag) {
+				perf_ptr->Add_Veh_Time (vht);
 				perf_ptr->Add_Stop_Count (pce);
+			} else {
+				vmt = (sim_veh_itr->offset - offset) * pce;
+
+				perf_ptr->Add_Veh_Dist (vmt);
+				perf_ptr->Add_Veh_Time (vht);
+
+				if (step.Speed () == 0) {
+					perf_ptr->Add_Stop_Count (pce);
+				}
+				offset = sim_veh_itr->offset;
 			}
-			offset = sim_veh_itr->offset;
 		}
 	}
 }
