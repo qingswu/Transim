@@ -44,7 +44,7 @@ public:
 
 	void Output_Problem (Problem_Data &problem);
 
-	void Event_Check (Event_Type type, Travel_Step &travel);
+	void Event_Check (Travel_Step &travel);
 
 protected:
 	enum Snaptshot_Keys { 

@@ -3,6 +3,7 @@
 //*********************************************************
 
 #include "Sim_Dir_Data.hpp"
+#include "Simulator_Service.hpp"
 
 //---------------------------------------------------------
 //	Lock
@@ -10,10 +11,15 @@
 
 void Sim_Dir_Array::Lock (Sim_Dir_Ptr ptr, int id)
 {
-	if (id > 0 && ptr->Lock () == id) return;
-
 #ifdef THREADS
 	mutex_lock lock (lock_mutex);
+
+	if (id > 0 && ptr->Lock () == id) {
+#ifdef CHECK
+		sim->Error ("Sim_Dir_Array::Lock: Already Locked");
+#endif
+		return;
+	}
 
 	while (ptr->Lock () != 0) {
 		lock_wait.wait (lock);
@@ -28,10 +34,18 @@ void Sim_Dir_Array::Lock (Sim_Dir_Ptr ptr, int id)
 
 void Sim_Dir_Array::UnLock (Sim_Dir_Ptr ptr, int id)
 {
-	if (id > 0 && ptr->Lock () != id) return;
-	ptr->Lock (0);
-
 #ifdef THREADS
-	lock_wait.notify_all ();
+	mutex_lock lock (lock_mutex);
+
+	if (id > 0 && ptr->Lock () != id) {
+#ifdef CHECK
+		sim->Error ("Sim_Dir_Array::UnLock: Not Owned");
 #endif
+		return;
+	}
+	lock_wait.notify_all ();
+#else
+	id = 0;
+#endif
+	ptr->Lock (0);
 }

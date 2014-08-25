@@ -36,7 +36,6 @@ private:
 	bool data_flag;
 	bool coord_flag;
 	bool max_flag;
-	bool total_flag;
 	
 	void Write_Summary (void);
 };

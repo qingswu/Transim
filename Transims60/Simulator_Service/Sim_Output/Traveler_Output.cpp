@@ -172,11 +172,10 @@ Traveler_Output::~Traveler_Output ()
 
 void Traveler_Output::Output_Check (Travel_Step &step)
 {
-	if (step.Traveler () < 0 || !time_range.In_Range (sim->time_step) || step.size () == 0) return;
+	if (step.Traveler () < 0 || !time_range.In_Range (sim->time_step) || step.size () < 1) return;
 
 	Traveler_Data data;
-
-	data.Time (sim->time_step);
+	Sim_Veh_Itr sim_veh_itr;
 
 	//---- check the mode ----
 
@@ -191,6 +190,8 @@ void Traveler_Output::Output_Check (Travel_Step &step)
 
 	data.Household (step.sim_travel_ptr->Household ());
 	data.Person (step.sim_travel_ptr->Person ());
+	data.Tour (sim_plan_ptr->Tour ());
+	data.Trip (sim_plan_ptr->Trip ());
 
 	if (!hhold_range.empty ()) {
 		int index = hhold_range.In_Index (data.Household ());
@@ -244,19 +245,60 @@ void Traveler_Output::Output_Check (Travel_Step &step)
 		}
 	}
 
-	//---- output traveler record ----
+	//---- stopped vehicle -----
 
-	data.Tour (sim_plan_ptr->Tour ());
-	data.Trip (sim_plan_ptr->Trip ());
-	data.Distance ((int) step.size () * sim->param.cell_size);
-	data.Speed (step.Speed ());
+	if (step.size () == 1) {
+		sim_veh_itr = step.begin (); 
 
-	if (step.sim_veh_ptr != 0) {
-		data.Lane (step.sim_veh_ptr->lane);
-		data.Offset (step.sim_veh_ptr->offset);
+		data.Distance (0);
+		data.Time (sim->time_step);
+		data.Speed (0);
+
+		data.Dir_Index (sim_veh_itr->link);
+		data.Lane (sim_veh_itr->lane);
+		data.Offset (sim_veh_itr->offset);
+
+		file->Lock ();
+		sim->Put_Traveler_Data (*file, data);
+		file->UnLock ();
+		return;
 	}
-	
+
+	//---- movement size ----
+
+	double step_size = sim->param.step_size;
+
+	if (step.sim_dir_ptr != 0) {
+		step_size = sim->method_time_step [step.sim_dir_ptr->Method ()];
+	}
+	double time = sim->time_step - step_size;
+
+	step_size /= (step.size () - 1);
+
+	//---- output movement increments ----
+
+	int dir_index = -1;
+	int offset = 0;
+
 	file->Lock ();
-	sim->Put_Traveler_Data (*file, data);
+
+	for (sim_veh_itr = step.begin (); sim_veh_itr != step.end (); sim_veh_itr++, time += step_size) {
+		if (dir_index >= 0) {
+			if (dir_index != sim_veh_itr->link) {
+				offset = 0;
+			}
+			data.Distance (sim_veh_itr->offset - offset);
+			data.Time ((Dtime) time);
+			data.Speed (data.Distance () / step_size);
+
+			data.Dir_Index (sim_veh_itr->link);
+			data.Lane (sim_veh_itr->lane);
+			data.Offset (sim_veh_itr->offset);
+
+			sim->Put_Traveler_Data (*file, data);
+		}
+		dir_index = sim_veh_itr->link;
+		offset = sim_veh_itr->offset;
+	}
 	file->UnLock ();
 }

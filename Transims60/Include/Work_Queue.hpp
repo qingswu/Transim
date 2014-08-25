@@ -32,10 +32,11 @@ public:
 
 	void Clear (void);
 	bool Max_Records (int max_rec);
+	int  Total_Records (void)             { return (total); }
 
 private:
 	bool end_flag, finish_flag;
-	int *queue, num_records, num_active, max_records, first, last;
+	int *queue, num_records, num_active, max_records, first, last, total;
 
 	condition_variable  work_full, work_empty, exit_wait, end_wait, data_wait;
 	mutex  work_mutex;

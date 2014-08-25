@@ -72,6 +72,9 @@ void Sim_Link_Step::Start_Processing (void)
 	if (num_threads > 1) {
 		Threads threads;
 		Sim_Dir_Ptr sim_dir_ptr;
+#ifdef CHECK
+		int count = 0;
+#endif
 
 		link_queue.Start_Work ();
 
@@ -80,10 +83,17 @@ void Sim_Link_Step::Start_Processing (void)
 			if (!sim->method_time_flag [sim_dir_ptr->Method ()]) continue;
 			if (sim_dir_ptr->Count () > 0 || sim_dir_ptr->load_queue.size () > 0) {
 				link_queue.Put (*itr);
+#ifdef CHECK
+				count++;
+#endif
 			}
 		}
 		link_queue.Complete_Work ();
-
+#ifdef CHECK
+		if (count != link_queue.Total_Records ()) {
+			sim->Write (1, String ("Link Queue %d vs %d") % count % link_queue.Total_Records ());
+		}
+#endif
 		//---- sum the counters ----
 
 		num_vehicles = num_waiting = 0;
@@ -111,6 +121,30 @@ void Sim_Link_Step::Start_Processing (void)
 	}
 	num_vehicles = sim_link_process.Num_Vehicles ();
 	num_waiting = sim_link_process.Num_Waiting ();
+
+	if (num_vehicles > 0 || num_waiting > 0) {
+		Int_Itr int_itr;
+		int count_veh, count_wait;
+		count_veh = count_wait = 0;
+
+		for (itr = link_list.begin (); itr != link_list.end (); itr++) {
+			Sim_Dir_Ptr sim_dir_ptr = &sim->sim_dir_array [*itr];
+			int count = 0;
+
+			for (int_itr = sim_dir_ptr->begin (); int_itr != sim_dir_ptr->end (); int_itr++) {
+				if (*int_itr > 0) count++;
+			}
+			if (count != sim_dir_ptr->Count ()) {
+				sim->Write (1, " step=") << sim->time_step << " link=" << *itr << " count=" << count << " vs " << sim_dir_ptr->Count ();
+			}
+			count_veh += count;
+
+			count_wait += (int) sim_dir_ptr->load_queue.size ();
+		}
+		if (num_vehicles != count_veh || num_waiting != count_wait) {
+			sim->Write (1, " step=") << sim->time_step << " veh=" << count_veh << " vs " << num_vehicles << " wait=" << count_wait << " vs " << num_waiting;
+		}
+	}
 	sim_link_process.Reset_Counters ();
 #endif
 	if (num_vehicles > 0 || num_waiting > 0) sim->Active (true);

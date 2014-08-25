@@ -30,10 +30,10 @@ bool Sim_Link_Process::Load_Vehicle (int traveler)
 
 	//---- build the travel step ----
 
+	step.Process_ID (ID ());
 	step.Traveler (traveler);
 	sim_travel_ptr = &sim->sim_travel_array [traveler];
-//sim->debug = (traveler == 766);
-//if (sim->debug) sim->Write (1, " Load");
+
 	sim_plan_ptr = sim_travel_ptr->Get_Plan ();
 	if (sim_plan_ptr == 0) return (false);
 
@@ -54,9 +54,8 @@ bool Sim_Link_Process::Load_Vehicle (int traveler)
 	if (next_leg->Type () != DIR_ID) goto access_problem;
 
 	dir_index = next_leg->Index ();
-//if (sim->debug) sim->Write (0, " dir=") << dir_index;
-	step.sim_dir_ptr = sim_dir_ptr = &sim->sim_dir_array [dir_index];
 	step.Dir_Index (dir_index);
+	step.sim_dir_ptr = sim_dir_ptr = &sim->sim_dir_array [dir_index];
 
 	//---- locate the load point ----
 
@@ -174,7 +173,7 @@ bool Sim_Link_Process::Load_Vehicle (int traveler)
 	step.sim_veh_ptr = sim_veh_ptr = &sim->sim_veh_array [sim_travel_ptr->Vehicle ()];
 
 	sim_veh_ptr->Location (dir_index, lane, offset);
-//if (sim->debug) sim->Write (0, " vehloc=") << dir_index << "-" << lane << "-" << offset;
+
 	step.push_back (*sim_veh_ptr);
 
 	if (bound_flag) {
@@ -189,7 +188,7 @@ bool Sim_Link_Process::Load_Vehicle (int traveler)
 	sim_travel_ptr->Step_Code (sim->Step_Code ());
 
 	sim_dir_ptr->Add (lane, cell, traveler);
-//if (sim->debug) sim->Write (0, " cell=") << cell;
+
 	//---- record the load event ----
 
 	if (!type_flag) {
@@ -197,20 +196,20 @@ bool Sim_Link_Process::Load_Vehicle (int traveler)
 
 		if (sim_travel_ptr->Person () == 0) {
 			stats.num_run_start++;
-//sim->Write (1, " load bus");
 		} else {
 			stats.num_veh_start++;
-//if (sim->debug) sim->Write (0, " start");
+
 			//---- output vehicle start event ----
 
-			sim->sim_output_step.Event_Check (VEH_START_EVENT, step);
+			step.Event_Type (VEH_START_EVENT);
+			sim->sim_output_step.Event_Check (step);
 		}
 	}
 	sim_travel_ptr->Next_Event (time);
 	step.sim_travel_ptr->Status (ON_NET_DRIVE);
 
 	//---- try to move forward ---
-//if (sim->debug) sim->Write (0, " move");
+
 	Move_Vehicle (step);
 
 	return (true);

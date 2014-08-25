@@ -15,15 +15,11 @@ void Simulator::Execute (void)
 
 	Sim_Statistics *stats;
 
-	clock_t start, end, io_total, sim_total, update_total, travel_total, output_total, link_total;
+	clock_t start, input_total, update_total, travel_total, output_total, link_total;
 	
 	//---- read the network data ----
 
 	Simulator_Service::Execute ();
-
-	//---- initialize the MPI partition range ----
-
-	MPI_Setup ();
 
 	//---- initialize the global data structures ----
 
@@ -35,7 +31,7 @@ void Simulator::Execute (void)
 
 	//---- read the plan file ----
 
-	if (Master ()) Show_Message ("Initializing the First Time Step -- Plan");
+	Show_Message ("Initializing the First Time Step -- Plan");
 	Set_Progress ();
 		
 	//---- create simulation partitions ---
@@ -48,11 +44,17 @@ void Simulator::Execute (void)
 	Print (2, "Simulation Started at Time ") << time_step.Time_String ();
 
 	read_status = first = true;
-	io_total = sim_total = update_total = link_total = output_total = travel_total = 0;
+	input_total = update_total = link_total = output_total = travel_total = 0;
+
+	End_Progress ();
+	Show_Message ("Processing Time of Day");
+	Set_Progress ();
 
 	//---- process each time step ----
 
 	for (; time_step <= param.end_time_step; time_step += param.step_size) {
+		Show_Progress (time_step.Time_String ())
+
 		if (time_step >= end_period) {
 			end_period = Set_Sim_Period ();
 		}
@@ -68,66 +70,46 @@ void Simulator::Execute (void)
 		}
 
 		//---- processing for each second ----
-//sim->debug = (time_step >= 216000); //252000); //216000);
-//if (sim->debug) Write (1, " step=") << time_step;
-//if (time_step >= 216000) Write (1, " step=") << time_step;
+
 		if (io_flag) {
 
-			//---- read plans and write output ----
+			//---- check for output ----
+
+			start = clock ();
+			sim_output_step.Start_Processing ();
+			output_total += (clock () - start);
+
+			//---- update the network ----
 
 			start = clock ();
 			sim_update_step.Start_Processing ();
-		end = clock ();
-		update_total += (end - start);
-		start = clock ();
+			update_total += (clock () - start);
+
+			//---- read plans ----
 
 			if (read_status) {
-//if (sim->debug) Write (0, " read stat=") << read_status;
+				start = clock ();
 				read_status = sim_plan_step.Start_Processing ();
+				input_total += (clock () - start);
 			}
-			end = clock ();
-			io_total += (end - start);
 
-			if (Master ()) {
-				if (first) {
-					End_Progress ();
-					Show_Message ("Processing Time of Day");
-					Set_Progress ();
-					first = false;
-				}
-				Show_Progress (time_step.Time_String ());
-			}
+;
 		}
+		Active (false);
 
-		//---- distributed plans to MPI machines ----
+		//---- process the travelers ----
 
-		read_status = MPI_Distribute (read_status);
+		start = clock ();
+		sim_travel_step.Start_Processing ();
+		travel_total += (clock () - start);
 
 		//---- process the network traffic ----
 
 		start = clock ();
-		Active (false);
-//if (sim->debug) Write (0, " output");
-		sim_output_step.Start_Processing ();
-//if (sim->debug) Write (0, " travel");
-		end = clock ();
-		output_total += (end - start);
-		start = clock ();
-		sim_travel_step.Start_Processing ();
-//if (sim->debug) Write (0, " node");
-		end = clock ();
-		travel_total += (end - start);
-		start = clock ();
 		sim_link_step.Start_Processing ();
-		end = clock ();
-		link_total += (end - start);
+		link_total += (clock () - start);
 
-		MPI_Transfer (Active ());
-//if (sim->debug) Write (0, " active=") << Active ();
 		if (!read_status && !Active ()) break;
-
-		end = clock ();
-		sim_total += (end - start);
 
 		if (Num_Vehicles () > max_vehicles) {
 			max_vehicles = Num_Vehicles ();
@@ -138,24 +120,21 @@ void Simulator::Execute (void)
 
 	stats = Stop_Simulation ();
 
-	MPI_Close ();
-
 	Print (1, "Simulation Ended at Time ") << time_step.Time_String ();
 
-	end = io_total + sim_total;
-	if (end == 0) end = 1;
+	start = input_total + output_total + update_total + travel_total + link_total;
+	if (start == 0) start = 1;
 
-	Print (2, String ("Seconds in IO Processing = %.1lf (%.1lf%%)") % 
-		((double) io_total / CLOCKS_PER_SEC) % (100.0 * io_total / end) % FINISH);
-	Print (1, String ("Seconds Simulating Trips = %.1lf (%.1lf%%)") % 
-		((double) sim_total / CLOCKS_PER_SEC) % (100.0 * sim_total / end) % FINISH);
-
-
-	Write (2, String ("Seconds in IO Processing = %.1lf") % ((double) io_total / CLOCKS_PER_SEC));
-	Write (1, String ("Seconds in Update Processing = %.1lf") % ((double) update_total / CLOCKS_PER_SEC));
-	Write (1, String ("Seconds in Output Processing = %.1lf") % ((double) output_total / CLOCKS_PER_SEC));
-	Write (1, String ("Seconds in Travel Processing = %.1lf") % ((double) travel_total / CLOCKS_PER_SEC));
-	Write (1, String ("Seconds in Link Processing = %.1lf") % ((double) link_total / CLOCKS_PER_SEC));
+	Write (2, String ("Seconds in Input Processing = %.1lf (%.1lf%%)") % 
+		((double) input_total / CLOCKS_PER_SEC) % (100.0 * input_total / start) % FINISH);
+	Write (1, String ("Seconds in Output Processing = %.1lf (%.1lf%%)") % 
+		((double) output_total / CLOCKS_PER_SEC) % (100.0 * output_total / start) % FINISH);
+	Write (1, String ("Seconds in Update Processing = %.1lf (%.1lf%%)") % 
+		((double) update_total / CLOCKS_PER_SEC) % (100.0 * update_total / start) % FINISH);
+	Write (1, String ("Seconds in Travel Processing = %.1lf (%.1lf%%)") % 
+		((double) travel_total / CLOCKS_PER_SEC) % (100.0 * travel_total / start) % FINISH);
+	Write (1, String ("Seconds in Link Processing = %.1lf (%.1lf%%)") % 
+		((double) link_total / CLOCKS_PER_SEC) % (100.0 * link_total / start) % FINISH);
 
 	//---- write summary statistics ----
 

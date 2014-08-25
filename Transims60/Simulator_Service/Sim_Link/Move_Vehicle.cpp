@@ -32,11 +32,18 @@ bool Sim_Link_Process::Move_Vehicle (Travel_Step &step)
 		step.sim_travel_ptr = &sim->sim_travel_array [step.Traveler ()];
 	}
 	sim_travel_ptr = step.sim_travel_ptr;
+#ifdef CHECK
+	if (sim_travel_ptr == 0) sim->Error ("Sim_Link_Process::Move_Vehicle: sim_travel_ptr");
+	if (sim_travel_ptr->Vehicle () < 0) sim->Error ("Sim_Link_Process::Move_Vehicle: Vehicle");
+#endif
 
 	if (step.sim_veh_ptr == 0) {
 		step.sim_veh_ptr = &sim->sim_veh_array [sim_travel_ptr->Vehicle ()];
 	}
 	sim_veh_ptr = step.sim_veh_ptr;
+#ifdef CHECK
+	if (sim_veh_ptr == 0) sim->Error ("Sim_Link_Process::Move_Vehicle: sim_veh_ptr");
+#endif
 
 	if (step.Dir_Index () < 0) {
 		step.Dir_Index (sim_veh_ptr->link);
@@ -51,20 +58,27 @@ bool Sim_Link_Process::Move_Vehicle (Travel_Step &step)
 		step.sim_dir_ptr = &sim->sim_dir_array [step.Dir_Index ()];
 	}
 	sim_dir_ptr = step.sim_dir_ptr;
+#ifdef CHECK
+	if (sim_dir_ptr == 0) sim->Error ("Sim_Link_Process::Move_Vehicle: sim_dir_ptr");
+#endif
 	step_size = sim->method_time_step [sim_dir_ptr->Method ()];
 
 	if (step.sim_plan_ptr == 0) {
 		step.sim_plan_ptr = sim_travel_ptr->Get_Plan ();
 	}
 	sim_plan_ptr = step.sim_plan_ptr;
+#ifdef CHECK
+	if (sim_plan_ptr == 0) sim->Error ("Sim_Link_Process::Move_Vehicle: sim_plan_ptr");
+	if (sim_plan_ptr->Veh_Type () < 0) sim->Error ("Sim_Link_Process::Move_Vehicle: Veh_Type");
+#endif
 
 	if (step.veh_type_ptr == 0) {
 		step.veh_type_ptr = &sim->veh_type_array [sim_plan_ptr->Veh_Type ()];
 	}
 	veh_type_ptr = step.veh_type_ptr;
-
-//sim->debug = (sim_travel_ptr->Traveler () == 71);
-//if (sim->debug) sim->Write (1, " Move step=") << sim->time_step << " link=" << dir_index;
+#ifdef CHECK
+	if (veh_type_ptr == 0) sim->Error ("Sim_Link_Process::Move_Vehicle: veh_type_ptr");
+#endif
 
 	//---- initialize the link limits ----
 
@@ -101,7 +115,7 @@ bool Sim_Link_Process::Move_Vehicle (Travel_Step &step)
 		return (false);
 	}
 	next_ptr = sim_plan_ptr->Get_Next (leg_ptr);
-//if (sim->debug) sim->Write (0, " leg=") << sim_plan_ptr->First_Leg () << " next=" << leg_ptr->Next_Record ();
+
 	if (next_ptr != 0) {
 		if (next_ptr->Type () == PARKING_ID) {
 			sim_park_ptr = &sim->sim_park_array [next_ptr->Index ()];
@@ -134,7 +148,6 @@ bool Sim_Link_Process::Move_Vehicle (Travel_Step &step)
 	l2 = leg_ptr->Out_Best_High ();
 
 	sim_dir_ptr->Remove (lane, cell);
-//if (sim->debug) sim->Write (0, " remove=") << dir_index << "-" << lane << "-" << cell;
 
 	//---- calculate the move limits ----
 
@@ -192,17 +205,15 @@ bool Sim_Link_Process::Move_Vehicle (Travel_Step &step)
 			if (next_ptr->Type () == PARKING_ID) {
 				sim_veh.Parked (true);
 				step.push_back (sim_veh);
-
 				sim_travel_ptr->Status (ON_OFF_PARK);
 				sim_travel_ptr->Next_Event (sim->time_step);
 				//stats.num_veh_end++;
 				break;
 			} else if (next_ptr->Type () == STOP_ID) {
-//if (sim->debug) sim->Write (0, " STOP");
+
 				//---- add dwell time ----
 
 				if (!sim_plan_ptr->Next_Leg ()) {
-//if (sim->debug) sim->Write (0, " PARK");
 					step.sim_veh_ptr->Parked (true);
 					sim_travel_ptr->Status (OFF_NET_END);
 					sim_travel_ptr->Next_Event (sim->param.end_time_step);
@@ -227,12 +238,8 @@ bool Sim_Link_Process::Move_Vehicle (Travel_Step &step)
 					exit_flag = true;
 					goto output;
 				}
-
-
-//int lock=new_dir_ptr->Lock ();
-//sim->Write (1, String ("new lock=%d, lock=%d, id=%d ") % new_index % lock % id);
 				sim->sim_dir_array.Lock (new_dir_ptr, ID ());
-//sim->Write (1, String ("link=%d locked=%d ") % new_index % new_dir_ptr->Lock ());
+
 				in_cell = new_dir_ptr->In_Cell ();
 				out_cell = new_dir_ptr->Out_Cell ();
 				max_cell = new_dir_ptr->Max_Cell ();
@@ -276,9 +283,9 @@ bool Sim_Link_Process::Move_Vehicle (Travel_Step &step)
 				}
 			}
 			if (!move_flag) {
-//sim->Write (1, String ("unlock=%d lock=%d id=%d") % new_index % new_dir_ptr->Lock () % id);
-				sim->sim_dir_array.UnLock (new_dir_ptr, ID ());
-//sim->Write (1, String ("unlock=%d") % new_index);
+				if (new_link) {
+					sim->sim_dir_array.UnLock (new_dir_ptr, ID ());
+				}
 				break;
 			}
 		}
@@ -288,22 +295,18 @@ bool Sim_Link_Process::Move_Vehicle (Travel_Step &step)
 		distance += move_size;
 		offset = new_offset;
 		next_leg_flag = new_link;
-		if (new_link) {
-//sim->Write (1, String ("unlock=%d lock=%d id=%d") % new_index % new_dir_ptr->Lock () % id);
-			sim->sim_dir_array.UnLock (new_dir_ptr, ID ());
-//sim->Write (1, String ("unlock=%d") % new_index);
-			exit_flag = true;
-		}
+		if (new_link) exit_flag = true;
+
 make_move:
 		sim_veh.Location (dir_index, lane, offset);
 		step.push_back (sim_veh);
-//if (sim->debug) sim->Write (0, " to=") << offset << " flag=" << next_leg_flag;
+
 		//---- move to the next leg ----
 
 		if (next_leg_flag) {
 
 			if (!sim_plan_ptr->Next_Leg ()) break;
-//if (sim->debug) sim->Write (0, " NEXT_LEG");
+
 			leg_ptr = sim_plan_ptr->Get_Leg ();
 			next_ptr = sim_plan_ptr->Get_Next (leg_ptr);
 
@@ -336,15 +339,15 @@ make_move:
 	if (!sim_veh.Parked ()) {
 		lane = sim_veh.lane;
 		cell = sim->Offset_Cell (sim_veh.offset);
-//if (sim->debug) sim->Write (0, " put=") << dir_index << "-" << lane << "-" << cell;
+
 		sim_dir_ptr->Add (lane, cell, step.Traveler ());
-//if (sim->debug) sim->Write (0, " result=") << sim_dir_ptr->Get (lane, cell);
 	}
 	sim_travel_ptr->Speed (DTOI (distance / sim->UnRound (step_size)));
-//if (sim->debug) sim->Write (0, " dist=") << distance << " speed=" << sim_travel_ptr->Speed ();
+
 output:
+
 	sim->Output_Step (step);
-//if (sim->debug) sim->Write (0, " speed=") << sim_travel_ptr->Speed () << " vs " << speed << " move=" << move;
+
 	if (sim_travel_ptr->Speed () == 0 && speed == 0) {
 		sim_travel_ptr->Add_Wait (step_size);
 	} else if (move) {

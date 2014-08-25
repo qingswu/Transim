@@ -44,9 +44,6 @@
     <ClCompile Include="Write_Parking.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Write_Route.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Write_Stops.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

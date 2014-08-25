@@ -84,7 +84,6 @@ private:
 	void Write_Stops (void);
 	void Write_Group (void);
 	void Write_Parking (void);
-	void Write_Route (void);
 };
 #endif
 

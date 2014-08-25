@@ -28,8 +28,9 @@ public:
 	int   Speed (void)            { return (speed); }
 	int   Delay (void)            { return (delay); }
 	int   Problem (void)          { return (problem); }
+	int   Event_Type (void)       { return (event_type); }
+	int   Process_ID (void)       { return (process_id); }
 	bool  Exit_Flag (void)        { return (exit_flag); }
-	Dtime Time (void)             { return (time); }
 
 	void  Traveler (int value)    { traveler = value; }
 	void  Dir_Index (int value)   { dir_index = value; }
@@ -38,8 +39,9 @@ public:
 	void  Speed (int value)       { speed = value; }
 	void  Delay (int value)       { delay = value; }
 	void  Problem (int value)     { problem = value; }
+	void  Event_Type (int value)  { event_type = value; }
+	void  Process_ID (int value)  { process_id = value; }
 	void  Exit_Flag (bool flag)   { exit_flag = flag; }
-	void  Time (Dtime value)      { time = value; }
 
 	Sim_Travel_Ptr   sim_travel_ptr;
 	Sim_Plan_Ptr     sim_plan_ptr;
@@ -49,9 +51,9 @@ public:
 
 	void  Clear (void)
 	{
-		traveler = dir_index = parking = stop = -1; speed = delay = problem = 0; 
-		sim_travel_ptr = 0; sim_plan_ptr = 0; sim_dir_ptr = 0; sim_veh_ptr = 0; veh_type_ptr = 0;
-		exit_flag = true; time = 0; 
+		traveler = dir_index = parking = stop = -1; speed = delay = problem = event_type = process_id = 0; 
+		sim_travel_ptr = 0; sim_plan_ptr = 0; sim_dir_ptr = 0; sim_veh_ptr = 0; veh_type_ptr = 0; 
+		exit_flag = true;  clear ();
 	}
 
 private:
@@ -62,7 +64,8 @@ private:
 	int   speed;
 	int   delay;
 	int   problem;
+	int   event_type;
+	int   process_id;
 	bool  exit_flag;
-	Dtime time;
 };
 #endif

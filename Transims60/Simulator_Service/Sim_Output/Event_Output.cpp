@@ -140,11 +140,17 @@ Event_Output::~Event_Output ()
 //	Event_Check
 //---------------------------------------------------------
 
-void Event_Output::Event_Check (Event_Type type, Travel_Step &step)
+void Event_Output::Event_Check (Travel_Step &step)
 {
-	if (type >= MAX_EVENT || !type_flag [type]) return;
+	if (step.Event_Type () >= MAX_EVENT || !type_flag [step.Event_Type ()]) return;
 	if (!time_range.In_Range (sim->time_step)) return;
 
+	if (step.sim_travel_ptr == 0) {
+		if (step.Traveler () < 0) return;
+		step.sim_travel_ptr = &sim->sim_travel_array [step.Traveler ()];
+	}
+	if (step.sim_travel_ptr == 0) return;
+		
 	if (step.sim_plan_ptr == 0) {
 		step.sim_plan_ptr = step.sim_travel_ptr->Get_Plan ();
 		if (step.sim_plan_ptr == 0) return;
@@ -156,35 +162,33 @@ void Event_Output::Event_Check (Event_Type type, Travel_Step &step)
 		int subarea = step.sim_dir_ptr->Subarea ();
 		if (!subarea_range.empty () && !subarea_range.In_Range (subarea)) return;
 	}
+	if (step.sim_veh_ptr == 0) {
+		if (step.sim_travel_ptr->Vehicle () >= 0) {
+			step.sim_veh_ptr = &sim->sim_veh_array [step.sim_travel_ptr->Vehicle ()];
+		}
+	}
 	Event_Data data;
 
+	data.Event (step.Event_Type ());
 	data.Household (step.sim_travel_ptr->Household ());
 	data.Person (step.sim_travel_ptr->Person ());
 	data.Tour (step.sim_plan_ptr->Tour ());
 	data.Trip (step.sim_plan_ptr->Trip ());
 	data.Mode (mode);
-	if (type == TRIP_START_EVENT) {
+	if (data.Event () == TRIP_START_EVENT) {
 		data.Schedule (step.sim_plan_ptr->Start ());
-	} else if (type == TRIP_END_EVENT) {
+	} else if (data.Event () == TRIP_END_EVENT) {
 		data.Schedule (step.sim_plan_ptr->End ());
-	} else if (type == VEH_START_EVENT) {
-		data.Schedule (step.sim_travel_ptr->Next_Event ().Round_Seconds ());
 	} else {
-		data.Schedule (step.sim_plan_ptr->Schedule ());
+		data.Schedule (step.sim_plan_ptr->Schedule ().Round_Seconds ());
 
-		if (step.sim_dir_ptr != 0) {
-			data.Dir_Index (step.Dir_Index ());
-
-			if (step.sim_veh_ptr != 0) {
-				data.Dir_Index (step.sim_veh_ptr->link);
-				data.Lane (step.sim_veh_ptr->lane);
-				data.Offset (step.sim_veh_ptr->offset);
-			}
+		if (step.sim_veh_ptr != 0) {
+			data.Dir_Index (step.sim_veh_ptr->link);
+			data.Lane (step.sim_veh_ptr->lane);
+			data.Offset (step.sim_veh_ptr->offset);
 		}
 	}
 	data.Actual (sim->time_step);
-	data.Event (type);
-
 	if (abs ((int) (data.Actual () - data.Schedule ())) < filter) return;
 
 	if (data.Dir_Index () >= 0) {
