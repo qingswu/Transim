@@ -15,7 +15,7 @@ void Simulator::Execute (void)
 
 	Sim_Statistics *stats;
 
-	clock_t start, input_total, update_total, travel_total, output_total, link_total;
+	clock_t start, input_total, update_total, travel_total, output_total, node_total;
 	
 	//---- read the network data ----
 
@@ -41,7 +41,7 @@ void Simulator::Execute (void)
 	Print (2, "Simulation Started at Time ") << time_step.Time_String ();
 
 	read_status = first = true;
-	input_total = update_total = link_total = output_total = travel_total = 0;
+	input_total = update_total = node_total = output_total = travel_total = 0;
 
 	Show_Message (2, "Processing Time of Day");
 	Set_Progress ();
@@ -102,8 +102,8 @@ void Simulator::Execute (void)
 		//---- process the network traffic ----
 
 		start = clock ();
-		sim_link_step.Start_Processing ();
-		link_total += (clock () - start);
+		sim_node_step.Start_Processing ();
+		node_total += (clock () - start);
 
 		if (Num_Vehicles () > max_vehicles) {
 			max_vehicles = Num_Vehicles ();
@@ -117,7 +117,7 @@ void Simulator::Execute (void)
 
 	Print (1, "Simulation Ended at Time ") << time_step.Time_String ();
 
-	start = input_total + output_total + update_total + travel_total + link_total;
+	start = input_total + output_total + update_total + travel_total + node_total;
 	if (start == 0) start = 1;
 
 	Break_Check (6);
@@ -129,8 +129,8 @@ void Simulator::Execute (void)
 		((double) update_total / CLOCKS_PER_SEC) % (100.0 * update_total / start) % FINISH);
 	Write (1, String ("Seconds in Travel Processing = %.1lf (%.1lf%%)") % 
 		((double) travel_total / CLOCKS_PER_SEC) % (100.0 * travel_total / start) % FINISH);
-	Write (1, String ("Seconds in Link Processing = %.1lf (%.1lf%%)") % 
-		((double) link_total / CLOCKS_PER_SEC) % (100.0 * link_total / start) % FINISH);
+	Write (1, String ("Seconds in Network Processing = %.1lf (%.1lf%%)") % 
+		((double) node_total / CLOCKS_PER_SEC) % (100.0 * node_total / start) % FINISH);
 
 	//---- write summary statistics ----
 

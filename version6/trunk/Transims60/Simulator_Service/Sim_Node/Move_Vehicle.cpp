@@ -2,14 +2,14 @@
 //	Move_Vehicle.cpp - adjust the vehicle position and references
 //*********************************************************
 
-#include "Sim_Link_Process.hpp"
+#include "Sim_Node_Process.hpp"
 #include "Simulator_Service.hpp"
 
 //---------------------------------------------------------
 //	Move_Vehicle
 //---------------------------------------------------------
 
-bool Sim_Link_Process::Move_Vehicle (Travel_Step &step)
+bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 {
 	int i, in_offset, out_offset, length, in_cell, out_cell, max_cell, speed, min_speed, max_speed, spd1, spd2, spd0;
 	int dir_index, new_index, index, move, offset, new_offset, move_size, cell, lane, max_move, lanes;
@@ -66,9 +66,6 @@ bool Sim_Link_Process::Move_Vehicle (Travel_Step &step)
 		step.sim_dir_ptr = &sim->sim_dir_array [step.Dir_Index ()];
 	}
 	sim_dir_ptr = step.sim_dir_ptr;
-
-bool debug = (dir_index == 50 && step.Traveler () == 25157);
-if (debug) sim->Write (1, "step=") << sim->time_step << " lane=" << lane << " cell=" << cell << " offset=" << offset;
 
 #ifdef CHECK
 	if (sim_dir_ptr == 0) sim->Error ("Sim_Link_Process::Move_Vehicle: sim_dir_ptr");
@@ -419,7 +416,7 @@ if (debug) sim->Write (1, "step=") << sim->time_step << " lane=" << lane << " ce
 		new_offset = offset + move_size;
 
 		cell = sim->Offset_Cell (new_offset);
-if (debug) sim->Write (0, " to=") << cell;
+
 		new_index = dir_index;		
 		new_dir_ptr = sim_dir_ptr;
 
@@ -492,7 +489,7 @@ if (debug) sim->Write (0, " to=") << cell;
 		move_flag = false;
 
 		for (l = low; l <= high; l++) {
-if (debug) sim->Write (0, "=") << new_dir_ptr->Get (l, cell);
+
 			if (Cell_Use (new_dir_ptr, l, cell, step)) {
 				lane = l;
 				move_flag = true;
@@ -501,7 +498,7 @@ if (debug) sim->Write (0, "=") << new_dir_ptr->Get (l, cell);
 		}
 		if (!move_flag) {
 			if (!new_link) {
-if (debug) sim->Write (0, " low=") << leg_ptr->Out_Best_Low () << " high=" << leg_ptr->Out_Best_High ();
+
 				//---- consider changing lanes ----
 
 				if (leg_ptr->Out_Best_Low () < lane) {

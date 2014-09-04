@@ -11,7 +11,7 @@
 Simulator::Simulator (void) : Simulator_Service ()
 {
 	Program ("Simulator");
-	Version (2);
+	Version (3);
 	Title ("Simulate Travel Plans");
 
 	System_File_Type required_files [] = {

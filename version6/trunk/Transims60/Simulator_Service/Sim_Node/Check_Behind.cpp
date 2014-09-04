@@ -2,7 +2,7 @@
 //	Check_Behind.cpp - check speed constraints from behind
 //*********************************************************
 
-#include "Sim_Link_Process.hpp"
+#include "Sim_Node_Process.hpp"
 #include "Sim_Connection.hpp"
 #include "Simulator_Service.hpp"
 
@@ -10,7 +10,7 @@
 //	Check_Behind
 //---------------------------------------------------------
 
-bool Sim_Link_Process::Check_Behind (Sim_Veh_Data veh_data, Travel_Step &step, int num_cells, bool use_flag)
+bool Sim_Node_Process::Check_Behind (Sim_Veh_Data veh_data, Travel_Step &step, int num_cells, bool use_flag)
 {
 	int dir_index, lane, offset, index, control, driver, cell, traveler;
 	int speed, gap, min_gap, max_gap, max_cells, min_step, max_step, min_cell;

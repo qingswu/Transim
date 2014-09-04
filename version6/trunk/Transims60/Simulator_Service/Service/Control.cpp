@@ -244,6 +244,10 @@ void Simulator_Service::Program_Control (void)
 
 	param.max_swap_diff = Round (Get_Control_Double (MAXIMUM_SPEED_DIFFERENCE));
 
+	//---- capacity factor ----
+
+	param.cap_factor = Round (Get_Control_Double (CAPACITY_FACTOR));
+
 	//---- enforce parking lanes -----
 
 	param.parking_lanes = Get_Control_Flag (ENFORCE_PARKING_LANES);

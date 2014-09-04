@@ -2,16 +2,16 @@
 //	Link_Processing.cpp - simulate directional links 
 //*********************************************************
 
-#include "Sim_Link_Process.hpp"
+#include "Sim_Node_Process.hpp"
 #include "Simulator_Service.hpp"
 
 //---------------------------------------------------------
 //	Link_Processing
 //---------------------------------------------------------
 
-bool Sim_Link_Process::Link_Processing (int link)
+bool Sim_Node_Process::Link_Processing (int link)
 {
-	int i, index, max_exit, exit_count, lane0, lane, cell, traveler, step_number, step_size, next_load;
+	int i, index, max_exit, exit_count, lane0, lane, cell, traveler, step_size, next_load;
 	double max_flow;
 	Dtime time;
 
@@ -32,15 +32,9 @@ bool Sim_Link_Process::Link_Processing (int link)
 	//---- check the simulation method ----	
 
 	step_size = sim->method_time_step [sim_dir_ptr->Method ()];
-	if (step_size == 0) return (false);
+	if (step_size <= 0) return (false);
 
-	//---- get the step number ----
-
-	step_number = sim->time_step;
-
-	if (step_size > 0) {
-		step_number = step_number / step_size;
-	}
+	lane0 = (sim->time_step / step_size) % sim_dir_ptr->Lanes ();
 
 	//---- check for loaded vehicles ----
 
@@ -62,7 +56,6 @@ bool Sim_Link_Process::Link_Processing (int link)
 		}
 		step.Exit_Flag (max_exit > 0);
 	}
-	lane0 = step_number % sim_dir_ptr->Lanes ();
 
 	//---- scan the link cells for vehicles ----
 

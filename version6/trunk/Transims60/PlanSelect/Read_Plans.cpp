@@ -84,6 +84,7 @@ void PlanSelect::Plan_Processing::Read_Plans (int part)
 		if (exe->select_purposes && !exe->purpose_range.In_Range (plan.Purpose ())) continue;
 		if (exe->select_vehicles && !exe->vehicle_range.In_Range (plan.Veh_Type ())) continue;
 		if (exe->select_travelers && !exe->traveler_range.In_Range (plan.Type ())) continue;
+		if (exe->select_priorities || !exe->select_priority [plan.Priority ()]) continue;
 		if (exe->select_start_times && !exe->start_range.In_Range (plan.Depart ())) continue;
 		if (exe->select_end_times && !exe->end_range.In_Range (plan.Arrive ())) continue;
 		if (exe->select_origins && !exe->org_range.In_Range (plan.Origin ())) continue;

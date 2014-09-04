@@ -26,7 +26,7 @@
 #include "Sim_Update_Step.hpp"
 #include "Sim_Plan_Step.hpp"
 #include "Sim_Travel_Step.hpp"
-#include "Sim_Link_Step.hpp"
+#include "Sim_Node_Step.hpp"
 #include "Sim_Output_Step.hpp"
 
 #include "Problem_Output.hpp"
@@ -55,8 +55,8 @@ class SYSLIB_API Simulator_Service : public Data_Service, public Select_Service
 	friend class Sim_Plan_Process;
 	friend class Sim_Travel_Step;
 	friend class Sim_Travel_Process;
-	friend class Sim_Link_Step;
-	friend class Sim_Link_Process;
+	friend class Sim_Node_Step;
+	friend class Sim_Node_Process;
 	friend class Sim_Output_Step;
 	friend class Sim_Output_Data;
 
@@ -90,7 +90,7 @@ protected:
 
 		CELL_SIZE, PLAN_FOLLOWING_DISTANCE, LOOK_AHEAD_DISTANCE, LOOK_AHEAD_LANE_FACTOR, 
 		LOOK_AHEAD_TIME_FACTOR, LOOK_AHEAD_VEHICLE_FACTOR, MAXIMUM_SWAPPING_SPEED, 
-		MAXIMUM_SPEED_DIFFERENCE, ENFORCE_PARKING_LANES, 
+		MAXIMUM_SPEED_DIFFERENCE, CAPACITY_FACTOR, ENFORCE_PARKING_LANES, 
 		DRIVER_REACTION_TIME, PERMISSION_PROBABILITY, SLOW_DOWN_PROBABILITY, SLOW_DOWN_PERCENTAGE, 
 		MAX_COMFORTABLE_SPEED, TRAVELER_TYPE_FACTORS, PRIORITY_LOADING_TIME, MAXIMUM_LOADING_TIME, 
 		PRIORITY_WAITING_TIME, MAXIMUM_WAITING_TIME, MAX_DEPARTURE_TIME_VARIANCE, 
@@ -177,7 +177,7 @@ protected:
 	Sim_Update_Step sim_update_step;
 	Sim_Plan_Step sim_plan_step;
 	Sim_Travel_Step sim_travel_step;
-	Sim_Link_Step sim_link_step;
+	Sim_Node_Step sim_node_step;
 	Sim_Output_Step sim_output_step;
 
 	Int2s_Array transfers;
@@ -195,6 +195,9 @@ private:
 	int num_travelers, step_code;
 	double avg_cell_per_veh;
 	bool active;
+
+	Integers node_link, link_list;
+
 	Sim_Statistics stats;
 };
 

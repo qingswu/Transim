@@ -46,7 +46,7 @@ bool Sim_Network_Update::Update_Check (void)
 		
 	rate_factor = sim->method_time_step [MACROSCOPIC];
 	if (rate_factor <= 0.0) rate_factor = Dtime (6, SECONDS);
-	rate_factor = rate_factor / Dtime (1, HOURS);
+	rate_factor = sim->param.cap_factor * rate_factor / Dtime (1, HOURS);
 
 	//---- initialize link dir data ----
 

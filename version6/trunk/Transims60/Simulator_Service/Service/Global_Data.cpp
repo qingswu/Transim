@@ -39,7 +39,7 @@ void Simulator_Service::Global_Data (void)
 	Int2_Key mpi_key;
 	Int_Map_Itr map_itr;
 	Int_Itr period_itr;
-	Integers subarea_method, node_link, link_list;
+	Integers subarea_method;
 
 	//---- set the vehicle cell size ----
 
@@ -143,7 +143,7 @@ void Simulator_Service::Global_Data (void)
 				out_off = link_itr->Boffset ();
 			}
 			if (index < 0) continue;
-//if (link_itr->Link () == 28 && dir==0) sim->Write (1, " index=") << index;
+
 			list = &node_link [bnode];
 			link_list [index] = *list;
 			*list = index;
@@ -172,7 +172,7 @@ void Simulator_Service::Global_Data (void)
 			sim_dir_ptr->Max_Cell (max_cell);
 			sim_dir_ptr->In_Cell (MIN (((in_off + param.cell_size - 1) / param.cell_size), max_cell));
 			sim_dir_ptr->Out_Cell (MAX (MIN (((length - out_off) / param.cell_size), max_cell), 0));
-			sim_dir_ptr->Max_Flow (Round ((double) dir_ptr->Capacity () / hour));
+			sim_dir_ptr->Max_Flow (Round (param.cap_factor * dir_ptr->Capacity () / hour));
 			sim_dir_ptr->Method (node_ptr->Method ());
 			sim_dir_ptr->Subarea (node_ptr->Subarea ());
 
