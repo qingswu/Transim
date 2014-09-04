@@ -284,19 +284,6 @@ void Router::Program_Control (void)
 			}
 		}
 
-		//---- output all records ----
-
-		full_flag = Get_Control_Flag (OUTPUT_ALL_RECORDS);
-
-		//---- preload transit vehicles ----
-
-		preload_flag = Get_Control_Flag (PRELOAD_TRANSIT_VEHICLES);
-
-		if (preload_flag && !System_File_Flag (NEW_PERFORMANCE)) {
-			Warning ("A New Performance File is required to Preload Transit Vehicles");
-			preload_flag = false;
-		}
-
 		//---- new link convergence file ----
 
 		key = Get_Control_String (NEW_LINK_CONVERGENCE_FILE);
@@ -331,21 +318,32 @@ void Router::Program_Control (void)
 			Error ("Dynamic Traffic Assignment Requires Multiple Iterations");
 		}
 		trip_gap_map_flag = plan_flag;
-
-		//---- output all records ----
-
-		full_flag = Get_Control_Flag (OUTPUT_ALL_RECORDS);
-
-		//---- preload transit vehicles ----
-
-		preload_flag = Get_Control_Flag (PRELOAD_TRANSIT_VEHICLES);
-
-		if (preload_flag && !System_File_Flag (NEW_PERFORMANCE)) {
-			Warning ("A New Performance File is required to Preload Transit Vehicles");
-			preload_flag = false;
-		}
-
 	}
+
+	//---- output all records ----
+
+	full_flag = Get_Control_Flag (OUTPUT_ALL_RECORDS);
+
+	//---- preload transit vehicles ----
+
+	preload_flag = Get_Control_Flag (PRELOAD_TRANSIT_VEHICLES);
+
+	if (preload_flag && 
+		(!System_File_Flag (TRANSIT_ROUTE) || !System_File_Flag (TRANSIT_STOP) || !System_File_Flag (TRANSIT_SCHEDULE) || !System_File_Flag (TRANSIT_DRIVER))) {
+
+		Warning ("Transit Network Files are required to Preload Transit Vehicles");
+		Show_Message (1);
+		preload_flag = false;
+	}
+	if (preload_flag && !System_File_Flag (NEW_PERFORMANCE)) {
+		Warning ("A New Performance File is required to Preload Transit Vehicles");
+		Show_Message (1);
+		preload_flag = false;
+	}
+
+	//---- list reports ----
+
+	List_Reports ();
 
 	//---- set the output link delay format ----
 

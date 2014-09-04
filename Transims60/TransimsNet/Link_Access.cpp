@@ -34,11 +34,15 @@ void TransimsNet::Link_Access (void)
 	Points point;
 	Points_Itr point_itr;
 
+	if (delete_link_flag && !update_link_flag) return;
+
 	Show_Message (String ("Creating Link Access Points -- Record"));
 	Set_Progress ();
 
 	for (link = 0, link_itr = link_array.begin (); link_itr != link_array.end (); link_itr++, link++) {
 		Show_Progress ();
+
+		if (update_link_flag && !update_link_range.In_Range (link_itr->Link ())) continue;
 
 		//---- apply the default link setback ----
 

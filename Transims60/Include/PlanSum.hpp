@@ -52,7 +52,7 @@ private:
 		TRIP_TIME, SUM_TRAVEL };
 
 	int max_rail;
-	bool select_flag, new_delay_flag, turn_flag, skim_flag, trip_flag, zone_flag, time_flag, travel_flag;
+	bool select_flag, new_perf_flag, turn_flag, skim_flag, trip_flag, zone_flag, time_flag, travel_flag;
 	bool volume_flag, passenger_flag, transfer_flag, rider_flag, xfer_flag, xfer_detail, line_xfer_flag;
 	bool access_flag, zone_file_flag, access_file_flag, diurnal_flag, on_off_flag, boarding_flag;
 	bool access_group_flag;

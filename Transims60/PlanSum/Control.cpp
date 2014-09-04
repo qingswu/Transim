@@ -15,9 +15,6 @@ void PlanSum::Program_Control (void)
 
 	link_flag = report_flag = false;
 
-	if (!Set_Control_Flag (UPDATE_FLOW_RATES) && !Set_Control_Flag (UPDATE_TRAVEL_TIMES)) {
-		System_File_False (NEW_PERFORMANCE);
-	}
 
 	//---- initialize the MPI thread range ----
 
@@ -58,7 +55,17 @@ void PlanSum::Program_Control (void)
 
 	zone_file_flag = System_File_Flag (ZONE);
 	select_flag = System_File_Flag (SELECTION);
-	new_delay_flag = System_File_Flag (NEW_PERFORMANCE);
+	new_perf_flag = System_File_Flag (NEW_PERFORMANCE);
+
+	if (new_perf_flag) {
+		if (!System_File_Flag (LINK) || !System_File_Flag (NODE)) {
+			Error ("A Link and Node File are Required for Performance Output");
+		}
+		if (!System_File_Flag (VEHICLE_TYPE)) {
+			Warning ("PCE and Occupancy Performance Data Require a Vehicle Type File");
+			Show_Message (1);
+		}
+	}
 
 	if (System_File_Flag (PERFORMANCE)) {
 		link_flag = true;
@@ -99,7 +106,7 @@ void PlanSum::Program_Control (void)
 			volume_file.Create_Fields ();
 			volume_file.Write_Header ();
 		}
-		volume_flag = new_delay_flag = link_flag = true;
+		volume_flag = new_perf_flag = link_flag = true;
 	}
 
 	//---- new access detail file ----
@@ -177,7 +184,7 @@ void PlanSum::Program_Control (void)
 	List_Reports ();
 
 	if (Report_Flag (TOP_100) || Report_Flag (VC_RATIO) || Report_Flag (LINK_GROUP)) {
-		new_delay_flag = link_flag = report_flag = true;
+		new_perf_flag = link_flag = report_flag = true;
 		cap_factor = (double) sum_periods.Range_Length () / (Dtime (1, HOURS) * sum_periods.Num_Periods ());
 	}
 	if (link_flag && (!System_File_Flag (LINK) || !System_File_Flag (NODE))) {

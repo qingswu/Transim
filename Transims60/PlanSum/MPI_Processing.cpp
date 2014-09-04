@@ -19,7 +19,7 @@ void PlanSum::MPI_Processing (void)
 	Flow_Time_Array link_flow_array, turn_flow_array;
 	Flow_Time_Period_Itr period_itr;
 
-	if (new_delay_flag) {
+	if (new_perf_flag) {
 		if (System_File_Flag (NEW_LINK_DELAY)) {
 			Link_Delay_File *new_file = (Link_Delay_File *) System_File_Base (NEW_LINK_DELAY);
 			extend_flag = (!new_file->Extend_Flag () && !new_file->Part_Flag ());

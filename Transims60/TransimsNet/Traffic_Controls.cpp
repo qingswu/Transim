@@ -28,6 +28,8 @@ void TransimsNet::Traffic_Controls (void)
 	List_Itr list_itr;
 	List_Data *next_list;
 
+	if (delete_node_flag && !update_node_flag) return;
+
 	Show_Message (String ("Creating Traffic Controls -- Record"));
 	Set_Progress ();
 
@@ -39,6 +41,7 @@ void TransimsNet::Traffic_Controls (void)
 		node_ptr = &node_array [node];
 
 		if (node_ptr->Control () != -1) continue;
+		if (update_node_flag && !update_node_range.In_Range (node_ptr->Node ())) continue;
 
 		memset (street, '\0', sizeof (street));
 		num_street = num_approach = num_one_way = num_thru = divided_index = divided_type = 0;

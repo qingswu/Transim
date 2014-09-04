@@ -12,15 +12,36 @@ void TransimsNet::Execute (void)
 {
 	Int_Map_Itr map_itr;
 
-	//---- read the update and delete files ----
+	//---- read update data ----
 
-	if (update_link_flag || update_node_flag || delete_link_flag || delete_node_flag) {
-		//Read_Files ();
+	if (node_data_flag) {
+		Read_Node_Data ();
+	}
+	if (zone_data_flag) {
+		Read_Zone_Data ();
+	}
+	if (link_data_flag) {
+		Read_Link_Data ();
 	}
 
 	//---- read the network ----
 
 	Data_Service::Execute ();
+
+	if (update_shape_flag) {
+		Read_Shape_Data ();
+	}
+	//---- insert new records ----
+
+	if (node_data_flag) {
+		Add_Node_Data ();
+	}
+	if (zone_data_flag) {
+		Add_Zone_Data ();
+	}
+	if (link_data_flag) {
+		Add_Link_Data ();
+	}
 
 	//---- set the record numbers ----
 
@@ -127,17 +148,20 @@ void TransimsNet::Execute (void)
 
 	Write (2, "Highest Zone Number = ") << Max_Zone_Number ();
 
-	if (update_flag || delete_flag) {
+	if (delete_flag) {
 		Break_Check (10);
 		Write (1);
-		if (xlink) Write (1, "Number of Deleted Link Records = ") << xlink;
 		if (xnode) Write (1, "Number of Deleted Node Records = ") << xnode;
-		if (xactivity) Write (1, "Number of Deleted Location Records = ") << xactivity;
+		if (xzone) Write (1, "Number of Deleted Zone Records = " ) << xzone;
+		if (xshape) Write (1, "Number of Deleted Shape Records = ") << xshape;
+		if (xlink) Write (1, "Number of Deleted Link Records = ") << xlink;
+		if (xlocation) Write (1, "Number of Deleted Location Records = ") << xlocation;
 		if (xparking) Write (1, "Number of Deleted Parking Lot Records = ") << xparking;
-		if (xprocess) Write (1, "Number of Deleted Access Link Records = ") << xprocess;
+		if (xaccess) Write (1, "Number of Deleted Access Link Records = ") << xaccess;
 		if (xpocket) Write (1, "Number of Deleted Pocket Lane Records = ") << xpocket;
 		if (xconnect) Write (1, "Number of Deleted Connection Records = ") << xconnect;
-		if (xuse) Write (1, " Number of Deleted Lane Use Records = ") << xuse;
+		if (xuse) Write (1, "Number of Deleted Lane Use Records = ") << xuse;
+		if (xturn) Write (1, "Number of Deleted Turn Penalty Records = ") << xturn;
 		if (xsign) Write (1, "Number of Deleted Sign Records = ") << xsign;
 		if (xsignal) Write (1, "Number of Deleted Signal Records = ") << xsignal;	
 	}
@@ -155,7 +179,7 @@ void TransimsNet::Execute (void)
 	}
 	Write (1, "Number of New Location Records = ") << ((int) location_array.size () - location_base);
 	Write (1, "Number of New Parking Lot Records = ") << ((int) parking_array.size () - parking_base);
-	Write (1, "Number of New Access Link Records = ") << nprocess;
+	Write (1, "Number of New Access Link Records = ") << naccess;
 	Write (1, "Number of New Pocket Lane Records = ") << npocket;
 	Write (1, "Number of New Connection Records = ") << nconnect;
 	if (nturn > 0) Write (1, "Number of New Turn Penalty Records = ") << nturn;

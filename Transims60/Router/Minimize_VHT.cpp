@@ -137,7 +137,7 @@ double Router::Minimize_VHT (double &factor, bool zero_flag)
 
 				perf_rec.Weight_Flows (old_ptr, factor1, new_ptr, factor);
 				perf_rec.Time (old_ptr->Time ());
-			
+		
 				//---- check for time of day restrictions ----
 
 				lanes0 = lanes;
@@ -169,6 +169,8 @@ double Router::Minimize_VHT (double &factor, bool zero_flag)
 						perf_rec.Update_Time (equation.Apply_Equation (type, time0, (perf_rec.Volume () * flow_fac), tod_cap, len));
 
 						vht += perf_rec.Veh_Time ();
+					} else {
+						perf_rec.Update_Time (time0);
 					}
 					if (last_flag) {
 						if (gap_flag) {
@@ -215,6 +217,8 @@ double Router::Minimize_VHT (double &factor, bool zero_flag)
 						perf_rec.Update_Time (equation.Apply_Equation (type, time0, (perf_rec.Volume () * flow_fac), tod_cap, len));
 
 						vht += perf_rec.Veh_Time ();
+					} else {
+						perf_rec.Update_Time (time0);
 					}
 					if (last_flag) {
 						if (gap_flag) {

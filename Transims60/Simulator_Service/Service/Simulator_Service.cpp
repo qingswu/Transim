@@ -15,8 +15,7 @@ Simulator_Service::Simulator_Service (void) : Data_Service (), Select_Service ()
 {
 	Service_Level (SIMULATOR_SERVICE);
 	max_subarea = num_vehicles = 0;
-	num_subareas = num_parts = num_sims = 1;
-	first_part = last_part = -1;
+	num_subareas = num_sims = 1;
 	max_method = 0;
 	end_period = MAX_INTEGER;
 	half_second = Dtime (0.5, SECONDS);

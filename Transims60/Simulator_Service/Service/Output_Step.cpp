@@ -162,7 +162,7 @@ bool Simulator_Service::Output_Step (Travel_Step &step)
 		if (traveler == step.Traveler ()) {
 			sim_dir_ptr->Remove (index);
 #ifdef CHECK
-		} else if (!sim_veh_ptr->Parked ()) {
+		} else if (!sim_veh_ptr->Parked () && traveler > 0 && step.sim_travel_ptr->Status () == ON_NET_DRIVE) {
 			sim->Error (String ("Simulator_Service::Output_Step: Traveler %d vs %d") % traveler % step.Traveler ());
 #endif
 		}
@@ -190,6 +190,7 @@ bool Simulator_Service::Output_Step (Travel_Step &step)
 	if (new_plan) {
 		sim_veh_ptr->Parked (true);
 		step.sim_travel_ptr->Vehicle (0);
+		step.sim_travel_ptr->Next_Load (-1);
 
 		step.sim_travel_ptr->Status (NOT_ACTIVE);
 		step.sim_travel_ptr->Next_Event (sim_plan_ptr->Activity ());
@@ -205,6 +206,8 @@ bool Simulator_Service::Output_Step (Travel_Step &step)
 	}
 	if (sim_veh_ptr->Parked ()) {
 		step.sim_travel_ptr->Status (OFF_NET_MOVE);
+	} else if (step.sim_travel_ptr->Status () == ON_OFF_DRIVE) {
+		step.sim_travel_ptr->Status (OFF_NET_DRIVE);
 	}
 	return (!sim_veh_ptr->Parked ());
 }

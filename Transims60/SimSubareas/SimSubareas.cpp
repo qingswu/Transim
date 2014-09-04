@@ -11,7 +11,7 @@
 SimSubareas::SimSubareas (void) : Data_Service ()
 {
 	Program ("SimSubareas");
-	Version (0);
+	Version (1);
 	Title ("Generate Geographic Subareas");
 
 	System_File_Type required_files [] = {
@@ -24,9 +24,10 @@ SimSubareas::SimSubareas (void) : Data_Service ()
 		NOTES_AND_NAME_FIELDS, 0
 	};
 	Control_Key keys [] = { //--- code, key, level, status, type, default, range, help ----
-		{ NUMBER_OF_SUBAREAS, "NUMBER_OF_SUBAREAS", LEVEL0, REQ_KEY, INT_KEY, "8", "1..1000", NO_HELP },
+		{ NUMBER_OF_SUBAREAS, "NUMBER_OF_SUBAREAS", LEVEL0, OPT_KEY, INT_KEY, "8", "1..1000", NO_HELP },
 		{ CENTER_NODE_NUMBER, "CENTER_NODE_NUMBER", LEVEL0, OPT_KEY, INT_KEY, "0", ">=0", NO_HELP },
 		{ SUBAREA_BOUNDARY_FILE, "SUBAREA_BOUNDARY_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
+		{ SUBAREA_DATA_FIELD, "SUBAREA_DATA_FIELD", LEVEL0, OPT_KEY, TEXT_KEY, "SUBAREA", "SUBAREA, ID, NUMBER, PARTITION, SUB", NO_HELP },
 		END_CONTROL
 	};
 	Required_System_Files (required_files);

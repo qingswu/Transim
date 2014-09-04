@@ -11,7 +11,7 @@
 Router::Router (void) : Router_Service (), Select_Service ()
 {
 	Program ("Router");
-	Version (37);
+	Version (39);
 	Title ("Network Path Building");
 
 	System_File_Type required_files [] = {
@@ -100,7 +100,7 @@ Router::Router (void) : Router_Service (), Select_Service ()
 	initial_priority = CRITICAL;
 
 	num_file_sets = 1;
-	total_records = num_time_updates = num_trip_parts = num_reroute = num_reskim = 0;
+	total_records = num_time_updates = num_trip_parts = num_reroute = num_reskim = num_update = num_build = 0;
 	trip_flag = plan_flag = new_plan_flag = problem_flag = false;
 
 	trip_file = 0;

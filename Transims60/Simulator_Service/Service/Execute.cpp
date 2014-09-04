@@ -50,9 +50,6 @@ void Simulator_Service::Execute (void)
 	if (Num_Subareas () > 1) {
 		Print (1);
 		Write (1, "Number of Subareas = ") << Num_Subareas ();
-		if (Num_Parts () != Num_Subareas ()) {
-			Write (1, "Number of Partitions = ") << Num_Parts ();
-		}
 	}
 
 	//---- define the period subarea methods ----

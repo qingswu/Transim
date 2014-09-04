@@ -188,7 +188,7 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 
 		for (per_itr = dat->perf_period_array.begin (); per_itr != dat->perf_period_array.end (); per_itr++, tod += period) {
 			if (tod < first_time) continue;
-			
+
 			//---- check for time of day restrictions ----
 
 			time = time0;

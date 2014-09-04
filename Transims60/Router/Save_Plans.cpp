@@ -27,7 +27,10 @@ bool Router::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 		new_ptr = *itr;
 		if (new_ptr == 0) continue;
 			
-		if (new_ptr->Method () == RESKIM_PLAN) continue;
+		if (new_ptr->Method () == RESKIM_PLAN) {
+			num_reskim++;
+			continue;
+		}
 		total_records++;
 
 		if (new_ptr->Problem () != 0) {
@@ -39,7 +42,9 @@ bool Router::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 			if (new_ptr->Method () == REROUTE_PATH) {
 				num_reroute++;
 			} else if (new_ptr->Method () == UPDATE_PLAN) {
-				num_reskim++;
+				num_update++;
+			} else {
+				num_build++;
 			}
 		}
 
@@ -68,6 +73,7 @@ bool Router::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 						time2 = plan_ptr->Arrive () - plan_ptr->Depart ();
 
 						time_diff = abs (time1 - time2);
+
 						if (time_diff >= min_time_diff) {
 							if (time_diff < max_time_diff && time2 > 0) {
 								prob = (double) time_diff / time2;

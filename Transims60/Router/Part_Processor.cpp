@@ -168,7 +168,6 @@ void Router::Part_Processor::Read_Trips (void)
 			exe->Read_Trips (0);
 
 			for (p=0; p < num_processors; p++) {
-				//trip_queue [p]->End_Queue ();
 				trip_queue [p]->Exit_Queue ();
 			}
 			threads.Join_All ();

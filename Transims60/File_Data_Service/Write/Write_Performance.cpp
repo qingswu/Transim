@@ -53,7 +53,7 @@ void Data_Service::Write_Performance (Performance_File &file, Perf_Period_Array 
 				Show_Progress ();
 
 				perf_ptr = perf_period_itr->Data_Ptr (index);
-				if (!fill_flag && perf_ptr->Veh_Time () == 0 && perf_ptr->Volume () == 0) continue;
+				if (!fill_flag && !perf_ptr->Output_Check ()) continue;
 
 				dir_ptr = &dir_array [index];
 
@@ -68,7 +68,7 @@ void Data_Service::Write_Performance (Performance_File &file, Perf_Period_Array 
 
 				if (dir_ptr->Use_Index () >= 0) {
 					perf_ptr = perf_period_itr->Data_Ptr (dir_ptr->Use_Index ());
-					if (!fill_flag && perf_ptr->Veh_Time () == 0 && perf_ptr->Volume () == 0) continue;
+					if (!fill_flag && !perf_ptr->Output_Check ()) continue;
 
 					perf_rec.Type (1);
 

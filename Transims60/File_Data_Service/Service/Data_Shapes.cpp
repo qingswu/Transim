@@ -253,7 +253,7 @@ bool Data_Service::Link_Shape (Link_Data *link_ptr, int dir, Points &points, dou
 bool Data_Service::Turn_Shape (int dir_in, int dir_out, Points &points, double setback, bool curve_flag, double side_in, double side_out, double sub_off, double sub_len)
 {
 	int dir;
-	double length, offset, max_len, off1, off2;
+	double length, offset, max_len, off1, off2, len;
 
 	Dir_Data *dir_ptr;
 	Link_Data *link_ptr;
@@ -279,12 +279,30 @@ bool Data_Service::Turn_Shape (int dir_in, int dir_out, Points &points, double s
 	}
 	max_len += off1;
 
-	length = UnRound (link_ptr->Length ()) - off1;
+	len = UnRound (link_ptr->Length ());
+	length = len - off1;
 	offset = length - setback;
 	if (offset < off2) offset = off2;
 	length -= offset;
-	if (length < 0.0) length = 0.0;
 
+	if (length <= 0.0) {
+		if (setback > len) {
+			length = len - (off1 + off2) / 2;
+			if (length > 0) {
+				offset = off2 / 2.0;
+			} else {
+				length = len;
+				offset = 0;
+			}
+		} else {
+			offset = off2;
+			length = setback;
+			if (length + offset > len) {
+				offset = (len - length) / 2.0;
+				if (offset < 0) offset = 0;
+			}
+		}
+	}
 	Link_Shape (link_ptr, dir, pts, offset, length, side_in);
 
 	for (pt_itr = pts.begin (); pt_itr != pts.end (); pt_itr++) {
@@ -298,21 +316,28 @@ bool Data_Service::Turn_Shape (int dir_in, int dir_out, Points &points, double s
 
 	link_ptr = &link_array [dir_ptr->Link ()];
 
-	length = UnRound (link_ptr->Length () - link_ptr->Aoffset () - link_ptr->Boffset ());
-	if (length < 0.0) length = 0.0;
-
 	if (dir == 0) {
 		off1 = UnRound (link_ptr->Aoffset ());
 	} else {
 		off1 = UnRound (link_ptr->Boffset ());
 	}
+	length = UnRound (link_ptr->Length () - link_ptr->Aoffset () - link_ptr->Boffset ());
+	if (length <= 0.0) {
+		length = UnRound (link_ptr->Length () - (link_ptr->Aoffset () + link_ptr->Boffset ()) / 2);
+		if(length <= 0.0) {
+			off1 = 0;
+			length = UnRound (link_ptr->Length ());
+		} else {
+			off1 = off1 / 2.0;
+		}
+	}
+
 	max_len += off1;
 
 	offset = off1;
 	if (length > setback) length = setback;
 
 	Link_Shape (link_ptr, dir, pts, offset, length, side_out);
-
 	//---- curve connection ----
 
 	if (curve_flag) {

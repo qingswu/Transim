@@ -22,7 +22,7 @@ public:
 
 protected:
 	enum SimSubareas_Keys { 
-		NUMBER_OF_SUBAREAS = 1, CENTER_NODE_NUMBER, SUBAREA_BOUNDARY_FILE
+		NUMBER_OF_SUBAREAS = 1, CENTER_NODE_NUMBER, SUBAREA_BOUNDARY_FILE, SUBAREA_DATA_FIELD,
 	};
 	virtual void Program_Control (void);
 

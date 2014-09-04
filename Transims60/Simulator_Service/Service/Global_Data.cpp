@@ -143,7 +143,7 @@ void Simulator_Service::Global_Data (void)
 				out_off = link_itr->Boffset ();
 			}
 			if (index < 0) continue;
-
+//if (link_itr->Link () == 28 && dir==0) sim->Write (1, " index=") << index;
 			list = &node_link [bnode];
 			link_list [index] = *list;
 			*list = index;
@@ -373,6 +373,9 @@ void Simulator_Service::Global_Data (void)
 		for (index = *list; index >= 0; index = link_list [index]) {
 			dir_ptr = &dir_array [index];
 
+			if (flag) {
+				sim_dir_array [index].Control (node_itr->Control ());
+			}
 			bear1 = dir_ptr->Out_Bearing ();
 			if (flag) bear1 = compass.Flip (bear1);
 

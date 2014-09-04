@@ -30,7 +30,7 @@ void PlanSum::Plan_Processing::operator()()
 {
 	int part = 0;
 
-	if (exe->new_delay_flag) {
+	if (exe->new_perf_flag) {
 		turn_flag = exe->System_File_Flag (CONNECTION);
 	}
 	plan_file = new Plan_File (exe->plan_file->File_Access (), exe->plan_file->Dbase_Format ());
@@ -42,8 +42,9 @@ void PlanSum::Plan_Processing::operator()()
 
 		//---- initialize link delay data ----
 
-		if (exe->new_delay_flag) {
+		if (exe->new_perf_flag) {
 			perf_period_array.Initialize (&exe->time_periods);
+			perf_period_array.Set_Time0 ();
 
 			if (turn_flag) {
 				int num = (int) exe->connect_array.size ();
@@ -121,7 +122,7 @@ void PlanSum::Plan_Processing::operator()()
 
 		//---- combine the link flow data ----
 
-		if (exe->new_delay_flag) {
+		if (exe->new_perf_flag) {
 			exe->perf_period_array.Add_Flows (perf_period_array, true);
 
 			if (turn_flag) {

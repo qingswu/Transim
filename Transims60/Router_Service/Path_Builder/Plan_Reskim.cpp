@@ -88,7 +88,7 @@ bool Path_Builder::Plan_Reskim (Plan_Ptr plan_ptr)
 				} else {
 					len_factor = len / link_ptr->Length ();
 				}
-				time = perf_period_array_ptr->Flow_Time (index, tod, len_factor, len, param.pce, param.occupancy);
+				time = perf_period_array_ptr->Flow_Time (index, tod, len_factor, link_ptr->Length (), param.pce, param.occupancy);
 
 				diff = time - leg_itr->Time ();
 				leg_itr->Time (time);
@@ -166,7 +166,7 @@ bool Path_Builder::Plan_Reskim (Plan_Ptr plan_ptr)
 				} else {
 					len_factor = len / link_ptr->Length ();
 				}
-				time = perf_period_array_ptr->Flow_Time (index, tod, len_factor, len, param.pce, param.occupancy, false);
+				time = perf_period_array_ptr->Flow_Time (index, tod, len_factor, link_ptr->Length (), param.pce, param.occupancy, false);
 
 				diff = time - leg_ritr->Time ();
 				leg_ritr->Time (time);

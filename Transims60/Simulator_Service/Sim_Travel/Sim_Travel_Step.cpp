@@ -68,7 +68,7 @@ void Sim_Travel_Step::Start_Processing (void)
 
 		for (i=0, itr = sim->sim_travel_array.begin (); itr != sim->sim_travel_array.end (); itr++, i++) {
 			if (itr->Plan_Index () >= 0) {
-				sim->Active (true);
+				if (itr->Person () > 0 || itr->Passengers () > 0) sim->Active (true);
 				if (itr->Next_Event () <= sim->time_step && itr->Status () <= OFF_NET_END) {
 					travel_queue.Put (i);
 #ifdef CHECK
@@ -77,9 +77,8 @@ void Sim_Travel_Step::Start_Processing (void)
 				}
 			}
 		}
-//if (sim->time_step > 0) sim->Write (0, " travel complete ");	// 216000
 		travel_queue.Complete_Work ();
-//if (sim->time_step > 0) sim->Write (0, " OK ");
+
 #ifdef CHECK
 		if (count != travel_queue.Total_Records ()) {
 			sim->Write (1, String ("Travel Queue %d vs %d") % count % travel_queue.Total_Records ());
@@ -88,7 +87,7 @@ void Sim_Travel_Step::Start_Processing (void)
 	} else {
 		for (itr = sim->sim_travel_array.begin (); itr != sim->sim_travel_array.end (); itr++) {
 			if (itr->Plan_Index () >= 0) {
-				sim->Active (true);
+				if (itr->Person () > 0 || itr->Passengers () > 0) sim->Active (true);
 				if (itr->Next_Event () <= sim->time_step && itr->Status () <= OFF_NET_END) {
 					(*sim_travel_process)->Travel_Processing (&(*itr));
 				}
@@ -98,9 +97,7 @@ void Sim_Travel_Step::Start_Processing (void)
 #else
 	for (itr = sim->sim_travel_array.begin (); itr != sim->sim_travel_array.end (); itr++) {
 		if (itr->Plan_Index () >= 0) {
-			if (itr->Person () > 0) {
-				sim->Active (true);
-			}
+			if (itr->Person () > 0 || itr->Passengers () > 0) sim->Active (true);
 			if (itr->Next_Event () <= sim->time_step && itr->Status () <= OFF_NET_END) {
 				sim_travel_process.Travel_Processing (&(*itr));
 			}
