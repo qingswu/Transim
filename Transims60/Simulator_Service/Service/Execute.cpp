@@ -71,7 +71,7 @@ void Simulator_Service::Execute (void)
 	sim_update_step.Initialize ();
 	sim_plan_step.Initialize ();
 	sim_travel_step.Initialize ();
-	sim_link_step.Initialize ();
+	sim_node_step.Initialize ();
 	sim_output_step.Initialize ();
 
 	Show_Message (1);
@@ -84,12 +84,12 @@ void Simulator_Service::Execute (void)
 Sim_Statistics * Simulator_Service::Stop_Simulation (void)
 {
 	sim_travel_step.Add_Statistics (stats);
-	sim_link_step.Add_Statistics (stats);
+	sim_node_step.Add_Statistics (stats);
 
 	sim_update_step.Stop_Processing ();
 	sim_plan_step.Stop_Processing ();
 	sim_travel_step.Stop_Processing ();
-	sim_link_step.Stop_Processing ();
+	sim_node_step.Stop_Processing ();
 	sim_output_step.Stop_Processing ();
 
 	return (&stats);

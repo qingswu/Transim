@@ -27,6 +27,7 @@ void Sim_Parameters::Clear_Parameters (void)
 	lane_factor = 0.0;
 	time_factor = 0.0;
 	veh_factor = 0.0;
+	cap_factor = 1.0;
 	look_ahead = 0;
 	plan_follow = 0;
 	lane_change_levels = 0;

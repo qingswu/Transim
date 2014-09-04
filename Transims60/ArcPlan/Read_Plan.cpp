@@ -73,6 +73,8 @@ void ArcPlan::Read_Plan (void)
 		if (plan.Mode () < MAX_MODE && !select_mode [plan.Mode ()]) continue;
 		if (select_purposes && !purpose_range.In_Range (plan.Purpose ())) continue;
 		if (select_travelers && !traveler_range.In_Range (plan.Type ())) continue;
+		if (select_vehicles && !vehicle_range.In_Range (plan.Veh_Type ())) continue;
+		if (select_priorities || !select_priority [plan.Priority ()]) continue;
 		if (select_start_times && !start_range.In_Range (plan.Start ())) continue;
 		if (select_end_times && !end_range.In_Range (plan.End ())) continue;
 		if (select_origins && !org_range.In_Range (plan.Origin ())) continue;

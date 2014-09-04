@@ -1,14 +1,14 @@
 //*********************************************************
-//	Sim_Link_Process.cpp - simulate directional links
+//	Sim_Node_Process.cpp - simulate approach links
 //*********************************************************
 
-#include "Sim_Link_Process.hpp"
+#include "Sim_Node_Process.hpp"
 
 //---------------------------------------------------------
-//	Sim_Link_Process -- constructor
+//	Sim_Node_Process -- constructor
 //---------------------------------------------------------
 
-Sim_Link_Process::Sim_Link_Process (void) : Static_Service ()
+Sim_Node_Process::Sim_Node_Process (void) : Static_Service ()
 {
 	id = 1;
 	num_pce = num_vehicles = num_waiting = 0;
@@ -17,9 +17,9 @@ Sim_Link_Process::Sim_Link_Process (void) : Static_Service ()
 
 #ifdef THREADS
 
-Sim_Link_Process::Sim_Link_Process (Work_Queue *queue, int _id) : Static_Service ()
+Sim_Node_Process::Sim_Node_Process (Work_Queue *queue, int _id) : Static_Service ()
 {
-	link_queue = queue;
+	node_queue = queue;
 	id = _id + 1; 
 	num_pce = num_vehicles = num_waiting = 0;
 	stats.Clear_Statistics ();
@@ -29,15 +29,15 @@ Sim_Link_Process::Sim_Link_Process (Work_Queue *queue, int _id) : Static_Service
 //	operator
 //---------------------------------------------------------
 
-void Sim_Link_Process::operator()()
+void Sim_Node_Process::operator()()
 {
-	int link;
+	int node;
 
 	for (;;) {
-		link = link_queue->Get ();
-		if (link < 0) break;
-		Link_Processing (link);
-		link_queue->Finished ();
+		node = node_queue->Get ();
+		if (node < 0) break;
+		Node_Processing (node);
+		node_queue->Finished ();
 	}
 }
 #endif

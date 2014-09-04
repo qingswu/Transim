@@ -46,15 +46,6 @@
     <Filter Include="Sim_Update\Source_Files">
       <UniqueIdentifier>{32d581c5-c550-4f34-a749-26202d90f2d9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sim_Link">
-      <UniqueIdentifier>{ccaf9b82-11b7-4ca1-b76e-c3125f8fb6db}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sim_Link\Header Files">
-      <UniqueIdentifier>{a4e8b9a7-10d3-4ca0-bfb8-2b5fe8b13ac7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sim_Link\Source Files">
-      <UniqueIdentifier>{f508c3b1-0a5b-4c3c-bfd5-fd018256df45}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Sim_Node">
       <UniqueIdentifier>{0cbbb61f-ed12-48b0-a6c5-baeebc3ed37a}</UniqueIdentifier>
     </Filter>
@@ -156,14 +147,14 @@
     <ClInclude Include="..\Include\Sim_Travel_Data.hpp">
       <Filter>Sim_Travel\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\Sim_Link_Step.hpp">
-      <Filter>Sim_Link\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Sim_Link_Process.hpp">
-      <Filter>Sim_Link\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Include\Sim_Travel_Process.hpp">
       <Filter>Sim_Travel\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Sim_Node_Process.hpp">
+      <Filter>Sim_Node\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Sim_Node_Step.hpp">
+      <Filter>Sim_Node\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -278,35 +269,38 @@
     <ClCompile Include="Sim_Travel\Sim_Travel_Data.cpp">
       <Filter>Sim_Travel\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Sim_Link\Cell_Use.cpp">
-      <Filter>Sim_Link\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Sim_Link\Check_Behind.cpp">
-      <Filter>Sim_Link\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Sim_Link\Lane_Change.cpp">
-      <Filter>Sim_Link\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Sim_Link\Link_Processing.cpp">
-      <Filter>Sim_Link\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Sim_Link\Load_Vehicle.cpp">
-      <Filter>Sim_Link\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Sim_Link\Move_Vehicle.cpp">
-      <Filter>Sim_Link\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Sim_Link\Sim_Link_Step.cpp">
-      <Filter>Sim_Link\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Sim_Link\Sim_Link_Process.cpp">
-      <Filter>Sim_Link\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Service\Sim_Dir_Data.cpp">
       <Filter>Service\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Sim_Travel\Sim_Travel_Process.cpp">
       <Filter>Sim_Travel\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sim_Node\Cell_Use.cpp">
+      <Filter>Sim_Node\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sim_Node\Check_Behind.cpp">
+      <Filter>Sim_Node\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sim_Node\Lane_Change.cpp">
+      <Filter>Sim_Node\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sim_Node\Link_Processing.cpp">
+      <Filter>Sim_Node\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sim_Node\Load_Vehicle.cpp">
+      <Filter>Sim_Node\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sim_Node\Move_Vehicle.cpp">
+      <Filter>Sim_Node\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sim_Node\Sim_Node_Process.cpp">
+      <Filter>Sim_Node\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sim_Node\Sim_Node_Step.cpp">
+      <Filter>Sim_Node\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sim_Node\Node_Processing.cpp">
+      <Filter>Sim_Node\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

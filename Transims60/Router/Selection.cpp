@@ -92,6 +92,7 @@ bool Router::Selection (Trip_Data *trip_ptr)
 	if (delete_households && hhold_delete.In_Range (hhold)) return (false);
 	if (mode < MAX_MODE && delete_mode [mode]) return (false);
 	if (delete_travelers && traveler_delete.In_Range (type)) return (false);
+	if (select_vehicles && !vehicle_range.In_Range (trip_ptr->Veh_Type ())) return (false);
 
 	return (!percent_flag || random_select.Probability () <= select_percent);
 }

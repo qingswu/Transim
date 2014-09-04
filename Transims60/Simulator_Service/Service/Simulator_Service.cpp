@@ -58,6 +58,7 @@ void Simulator_Service::Simulator_Service_Keys (int *keys)
 		{ LOOK_AHEAD_VEHICLE_FACTOR, "LOOK_AHEAD_VEHICLE_FACTOR", LEVEL0, OPT_KEY, FLOAT_KEY, "0.0", "0.0..25.0", NO_HELP },
 		{ MAXIMUM_SWAPPING_SPEED, "MAXIMUM_SWAPPING_SPEED", LEVEL0, OPT_KEY, FLOAT_KEY, "80 mph", "-1..80 mph", NO_HELP },
 		{ MAXIMUM_SPEED_DIFFERENCE, "MAXIMUM_SPEED_DIFFERENCE", LEVEL0, OPT_KEY, FLOAT_KEY, "20 mph", "0..20 mph", NO_HELP },
+		{ CAPACITY_FACTOR, "CAPACITY_FACTOR", LEVEL0, OPT_KEY, FLOAT_KEY, "1.0", "0.5..3.0", NO_HELP },
 		{ ENFORCE_PARKING_LANES, "ENFORCE_PARKING_LANES", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ DRIVER_REACTION_TIME, "DRIVER_REACTION_TIME", LEVEL1, OPT_KEY, LIST_KEY, "1.0 seconds", "0.0..5.0 seconds", NO_HELP },
 		{ PERMISSION_PROBABILITY, "PERMISSION_PROBABILITY", LEVEL1, OPT_KEY, LIST_KEY, "50 percent", "0..100 percent", NO_HELP },
@@ -110,7 +111,7 @@ void Simulator_Service::Simulator_Service_Keys (int *keys)
 Sim_Statistics * Simulator_Service::Get_Statistics (void)
 {
 	sim_travel_step.Add_Statistics (stats);
-	sim_link_step.Add_Statistics (stats);
+	sim_node_step.Add_Statistics (stats);
 	return (&stats);
 }
 

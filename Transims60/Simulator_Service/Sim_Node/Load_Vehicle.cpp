@@ -2,14 +2,14 @@
 //	Load_Vehicle.cpp - attempt to load a vehicle to the link
 //*********************************************************
 
-#include "Sim_Link_Process.hpp"
+#include "Sim_Node_Process.hpp"
 #include "Simulator_Service.hpp"
 
 //---------------------------------------------------------
 //	Load_Vehicle
 //---------------------------------------------------------
 
-bool Sim_Link_Process::Load_Vehicle (int traveler)
+bool Sim_Node_Process::Load_Vehicle (int traveler)
 {
 	int lane, cell, subarea, dir_index, offset;
 	bool loaded, type_flag, bound_flag, side_flag;

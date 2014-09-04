@@ -2,14 +2,14 @@
 //	Cell_Use.cpp - check the cell use restrictions
 //*********************************************************
 
-#include "Sim_Link_Process.hpp"
+#include "Sim_Node_Process.hpp"
 #include "Simulator_Service.hpp"
 
 //---------------------------------------------------------
 //	Cell_Use
 //---------------------------------------------------------
 
-bool Sim_Link_Process::Cell_Use (Sim_Dir_Ptr sim_dir_ptr, int lane, int cell, Travel_Step &step, bool use_flag)
+bool Sim_Node_Process::Cell_Use (Sim_Dir_Ptr sim_dir_ptr, int lane, int cell, Travel_Step &step, bool use_flag)
 {
 	int i, index, num, seed, offset, type, veh_type;
 	Use_Type use;

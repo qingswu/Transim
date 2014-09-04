@@ -1,9 +1,9 @@
 //*********************************************************
-//	Sim_Link_Process.hpp - simulate directional links
+//	Sim_Node_Process.hpp - simulate approach links
 //*********************************************************
 
-#ifndef SIM_LINK_PROCESS_HPP
-#define SIM_LINK_PROCESS_HPP
+#ifndef SIM_NODE_PROCESS_HPP
+#define SIM_NODE_PROCESS_HPP
 
 #include "APIDefs.hpp"
 #include "Threads.hpp"
@@ -15,21 +15,22 @@
 #include "Work_Queue.hpp"
 
 //---------------------------------------------------------
-//	Sim_Link_Process - execution class definition
+//	Sim_Node_Process - execution class definition
 //---------------------------------------------------------
 
-class SYSLIB_API Sim_Link_Process : public Static_Service
+class SYSLIB_API Sim_Node_Process : public Static_Service
 {
 public:
-	Sim_Link_Process (void);
+	Sim_Node_Process (void);
 
 #ifdef THREADS
-	Sim_Link_Process (Work_Queue *queue, int id = 0); 
+	Sim_Node_Process (Work_Queue *queue, int id = 0); 
 
-	Work_Queue *link_queue;
+	Work_Queue *node_queue;
 
 	void operator()();
 #endif
+	bool Node_Processing (int node);
 	bool Link_Processing (int link);
 	bool Load_Vehicle (int traveler);
 	bool Cell_Use (Sim_Dir_Ptr sim_dir_ptr, int lane, int cell, Travel_Step &step, bool use_flag = false);

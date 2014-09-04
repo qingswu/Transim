@@ -15,7 +15,6 @@ public:
 	Sim_Parameters (void) { Clear_Parameters ();};
 	
 	void Clear_Parameters (void);
-	//void Set_Parameters (Sim_Parameters &p);
 
 	Dtime  start_time_step;                        //---- simulation start time step ----
 	Dtime  end_time_step;                          //---- simulation end time step ----
@@ -35,6 +34,7 @@ public:
 	double lane_factor;
 	double time_factor;
 	double veh_factor;
+	double cap_factor;
 	int    look_ahead;
 	int    plan_follow;
 	int    lane_change_levels;
