@@ -122,7 +122,7 @@ bool Path_Builder::Plan_Update (Plan_Data *plan_data)
 						} else {
 							use_index = index;
 						}
-						perf_period_array_ptr->Flow_Time (use_index, time, factor, len, param.pce, param.occupancy, forward_flag);
+						perf_period_array_ptr->Flow_Time (use_index, time, factor, link_ptr->Length (), param.pce, param.occupancy, forward_flag);
 					}
 					imp = 0;
 

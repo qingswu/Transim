@@ -11,7 +11,7 @@
 
 Sim_Link_Step::Sim_Link_Step (void) : Static_Service ()
 {
-	num_vehicles = num_waiting = 0;
+	num_pce = num_vehicles = num_waiting = 0;
 
 #ifdef THREADS
 	num_threads = 0;
@@ -36,7 +36,7 @@ void Sim_Link_Step::Initialize (void)
 {
 	Randomize_Links ();
 
-	num_vehicles = num_waiting = 0;
+	num_pce = num_vehicles = num_waiting = 0;
 
 #ifdef THREADS
 	num_threads = sim->Num_Threads ();
@@ -81,7 +81,7 @@ void Sim_Link_Step::Start_Processing (void)
 		for (itr = link_list.begin (); itr != link_list.end (); itr++) {
 			sim_dir_ptr = &sim->sim_dir_array [*itr];
 			if (!sim->method_time_flag [sim_dir_ptr->Method ()]) continue;
-			if (sim_dir_ptr->Count () > 0 || sim_dir_ptr->load_queue.size () > 0) {
+			if (sim_dir_ptr->Count () > 0 || sim_dir_ptr->First_Load () >= 0) {
 				link_queue.Put (*itr);
 #ifdef CHECK
 				count++;
@@ -101,6 +101,7 @@ void Sim_Link_Step::Start_Processing (void)
 		for (int i=0; i < num_threads; i++) {
 			sim_link_ptr = sim_link_process [i];
 
+			num_pce += sim_link_ptr->Num_PCE ();
 			num_vehicles += sim_link_ptr->Num_Vehicles ();
 			num_waiting += sim_link_ptr->Num_Waiting ();
 			sim_link_ptr->Reset_Counters ();
@@ -111,6 +112,7 @@ void Sim_Link_Step::Start_Processing (void)
 		for (itr = link_list.begin (); itr != link_list.end (); itr++) {
 			sim_link_ptr->Link_Processing (*itr);
 		}
+		num_pce = sim_link_ptr->Num_PCE ();
 		num_vehicles = sim_link_ptr->Num_Vehicles ();
 		num_waiting = sim_link_ptr->Num_Waiting ();
 		sim_link_ptr->Reset_Counters ();
@@ -119,19 +121,22 @@ void Sim_Link_Step::Start_Processing (void)
 	for (itr = link_list.begin (); itr != link_list.end (); itr++) {
 		sim_link_process.Link_Processing (*itr);
 	}
+	num_pce = sim_link_process.Num_PCE ();
 	num_vehicles = sim_link_process.Num_Vehicles ();
 	num_waiting = sim_link_process.Num_Waiting ();
-
+#ifdef CHECK
 	if (num_vehicles > 0 || num_waiting > 0) {
 		Int_Itr int_itr;
-		int count_veh, count_wait;
+		Sim_Travel_Ptr sim_travel_ptr;
+		int count_veh, count_wait, traveler;
 		count_veh = count_wait = 0;
 
 		for (itr = link_list.begin (); itr != link_list.end (); itr++) {
 			Sim_Dir_Ptr sim_dir_ptr = &sim->sim_dir_array [*itr];
 			int count = 0;
+			int i;
 
-			for (int_itr = sim_dir_ptr->begin (); int_itr != sim_dir_ptr->end (); int_itr++) {
+			for (i=0, int_itr = sim_dir_ptr->begin (); int_itr != sim_dir_ptr->end (); int_itr++, i++) {
 				if (*int_itr > 0) count++;
 			}
 			if (count != sim_dir_ptr->Count ()) {
@@ -139,12 +144,16 @@ void Sim_Link_Step::Start_Processing (void)
 			}
 			count_veh += count;
 
-			count_wait += (int) sim_dir_ptr->load_queue.size ();
+			for (traveler = sim_dir_ptr->First_Load (); traveler >= 0; traveler = sim_travel_ptr->Next_Load ()) {
+				sim_travel_ptr = &sim->sim_travel_array [traveler];
+				if (sim_travel_ptr->Person () > 0 || sim_travel_ptr->Passengers () > 0) count_wait++;
+			}
 		}
-		if (num_vehicles != count_veh || num_waiting != count_wait) {
-			sim->Write (1, " step=") << sim->time_step << " veh=" << count_veh << " vs " << num_vehicles << " wait=" << count_wait << " vs " << num_waiting;
+		if (num_pce != count_veh || num_waiting != count_wait) {
+			sim->Write (1, " step=") << sim->time_step << " veh=" << count_veh << " vs " << num_pce << " wait=" << count_wait << " vs " << num_waiting;
 		}
 	}
+#endif
 	sim_link_process.Reset_Counters ();
 #endif
 	if (num_vehicles > 0 || num_waiting > 0) sim->Active (true);

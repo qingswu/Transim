@@ -48,7 +48,7 @@ public:
 	double slow_down_prob [EXTERNAL+1];
 	
 	Double_List traveler_fac;
-	Double_List comfort_speed;
+	Integer_List comfort_speed;
 	bool   traveler_flag;
 
 	bool   look_ahead_flag;

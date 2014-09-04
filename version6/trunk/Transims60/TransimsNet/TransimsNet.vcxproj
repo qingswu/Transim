@@ -309,9 +309,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Add_Link_Data.cpp" />
+    <ClCompile Include="Add_Node_Data.cpp" />
+    <ClCompile Include="Add_Zone_Data.cpp" />
     <ClCompile Include="Connections.cpp" />
     <ClCompile Include="Control.cpp" />
     <ClCompile Include="Execute.cpp" />
+    <ClCompile Include="Get_Access_Data.cpp" />
+    <ClCompile Include="Get_Connect_Data.cpp" />
+    <ClCompile Include="Get_Lane_Use_Data.cpp" />
+    <ClCompile Include="Get_Link_Data.cpp" />
+    <ClCompile Include="Get_Location_Data.cpp" />
+    <ClCompile Include="Get_Node_Data.cpp" />
+    <ClCompile Include="Get_Parking_Data.cpp" />
+    <ClCompile Include="Get_Pocket_Data.cpp" />
+    <ClCompile Include="Get_Shape_Data.cpp" />
+    <ClCompile Include="Get_Signal_Data.cpp" />
+    <ClCompile Include="Get_Sign_Data.cpp" />
+    <ClCompile Include="Get_Turn_Pen_Data.cpp" />
+    <ClCompile Include="Get_Zone_Data.cpp" />
     <ClCompile Include="Lane_Ranges.cpp" />
     <ClCompile Include="Lane_Use.cpp" />
     <ClCompile Include="Link_Access.cpp" />
@@ -319,7 +335,11 @@
     <ClCompile Include="Pocket_Lanes.cpp" />
     <ClCompile Include="Read_Approach.cpp" />
     <ClCompile Include="Read_Boundary.cpp" />
+    <ClCompile Include="Read_Link_Data.cpp" />
     <ClCompile Include="Read_Link_Use.cpp" />
+    <ClCompile Include="Read_Node_Data.cpp" />
+    <ClCompile Include="Read_Shape_Data.cpp" />
+    <ClCompile Include="Read_Zone_Data.cpp" />
     <ClCompile Include="Traffic_Controls.cpp" />
     <ClCompile Include="TransimsNet.cpp" />
     <ClCompile Include="Zone_Access.cpp" />

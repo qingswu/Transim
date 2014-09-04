@@ -11,7 +11,7 @@
 TransimsNet::TransimsNet (void) : Data_Service ()
 {
 	Program ("TransimsNet");
-	Version (7);
+	Version (10);
 	Title ("Network Conversion Utility");
 
 	System_File_Type required_files [] = {
@@ -42,12 +42,20 @@ TransimsNet::TransimsNet (void) : Data_Service ()
 		{ PARKING_DETAILS_WARRANT, "PARKING_DETAILS_WARRANT", LEVEL1, OPT_KEY, TEXT_KEY, "", "AREA_TYPES, TIME, USE, IN seconds, OUT seconds, HOURLY cents, DAILY cents", NO_HELP },
 		{ STREET_PARKING_WARRANT, "STREET_PARKING_WARRANT", LEVEL1, OPT_KEY, TEXT_KEY, "", "TYPES, AREA_TYPES, TIME", NO_HELP },
 		{ UPDATE_NODE_RANGE, "UPDATE_NODE_RANGE", LEVEL0, OPT_KEY, LIST_KEY, "ALL", RANGE_RANGE, NO_HELP },
+		{ UPDATE_ZONE_RANGE, "UPDATE_ZONE_RANGE", LEVEL0, OPT_KEY, LIST_KEY, "ALL", RANGE_RANGE, NO_HELP },
 		{ UPDATE_LINK_RANGE, "UPDATE_LINK_RANGE", LEVEL0, OPT_KEY, LIST_KEY, "ALL", RANGE_RANGE, NO_HELP },
 		{ UPDATE_NODE_FILE, "UPDATE_NODE_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
+		{ UPDATE_NODE_DATA_FLAG, "UPDATE_NODE_DATA_FLAG", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
+		{ UPDATE_ZONE_FILE, "UPDATE_ZONE_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
+		{ UPDATE_ZONE_DATA_FLAG, "UPDATE_ZONE_DATA_FLAG", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ UPDATE_LINK_FILE, "UPDATE_LINK_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
+		{ UPDATE_LINK_DATA_FLAG, "UPDATE_LINK_DATA_FLAG", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
+		{ UPDATE_SHAPE_FILE, "UPDATE_SHAPE_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		{ DELETE_NODE_RANGE, "DELETE_NODE_RANGE", LEVEL0, OPT_KEY, LIST_KEY, "NONE", RANGE_RANGE, NO_HELP },
+		{ DELETE_ZONE_RANGE, "DELETE_ZONE_RANGE", LEVEL0, OPT_KEY, LIST_KEY, "NONE", RANGE_RANGE, NO_HELP },
 		{ DELETE_LINK_RANGE, "DELETE_LINK_RANGE", LEVEL0, OPT_KEY, LIST_KEY, "NONE", RANGE_RANGE, NO_HELP },
 		{ DELETE_NODE_FILE, "DELETE_NODE_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
+		{ DELETE_ZONE_FILE, "DELETE_ZONE_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		{ DELETE_LINK_FILE, "DELETE_LINK_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		{ LINK_USE_FILE, "LINK_USE_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		{ LINK_USE_FORMAT, "LINK_USE_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, FORMAT_HELP },
@@ -70,16 +78,18 @@ TransimsNet::TransimsNet (void) : Data_Service ()
 
 	zone_flag = zout_flag, turn_flag = shape_flag = name_flag = uturn_flag = signal_id_flag = false;
 	update_flag = delete_flag = connect_flag = replicate_flag = boundary_flag = false;
-	update_link_flag = update_node_flag = delete_link_flag = delete_node_flag = false;
+	update_link_flag = update_node_flag = update_zone_flag = update_shape_flag = update_dir_flag = false;
+	delete_link_flag = delete_node_flag = delete_zone_flag = false;
+	link_data_flag = node_data_flag = zone_data_flag = false;
 	ext_zone_flag = false;
 
 	details_flag = link_use_flag = approach_flag = false;
 	location_id = parking_id = 0;
 	location_base = parking_base = 0;
 
-	nnode = nlink = nparking = nactivity = nprocess = npocket = nconnect = nsign = nsignal = nuse = 0;
+	nnode = nlink = nparking = nactivity = naccess = npocket = nconnect = nsign = nsignal = nuse = 0;
 	mparking = mactivity = mprocess = mpocket = muse = 0;
-	xlink = xnode = xparking = xactivity = xprocess = xpocket = xconnect = xsign = xsignal = xuse = 0;
+	xlink = xnode = xzone = xshape = xparking = xlocation = xaccess = xpocket = xconnect = xsign = xsignal = xuse = xturn = 0;
 	nshort = nlength = nexternal = nzone = nzout = max_splits = 0;
 	nfixed1 = nfixed2 = nfixed3 = nactuated1 = nactuated2 = nactuated3 = nstop = nyield = 0;
 	min_length = link_setback = 0;

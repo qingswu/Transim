@@ -692,6 +692,15 @@ void TransimsNet::Program_Control (void)
 		update_node_flag = true;
 	}
 
+	//---- update zone range ----
+
+	key = Get_Control_Text (UPDATE_ZONE_RANGE);
+
+	if (!key.empty () && !key.Equals ("ALL")) {
+		update_zone_range.Add_Ranges (key);
+		update_zone_flag = true;
+	}
+
 	//---- update link range ----
 
 	key = Get_Control_Text (UPDATE_LINK_RANGE);
@@ -703,40 +712,100 @@ void TransimsNet::Program_Control (void)
 
 	//---- update node file ----
 
+	node_data_flag = Set_Control_Flag (UPDATE_NODE_DATA_FLAG);
+
 	key = Get_Control_String (UPDATE_NODE_FILE);
 
 	if (!key.empty ()) {
-		Db_File file;
+		if (node_data_flag) {
+			node_data_file.File_Type ("Update Node File");
+			node_data_file.Open (Project_Filename (key));
 
-		file.File_Type ("Update Node File");
-		file.Open (Project_Filename (key));
+		} else {
+			Db_File file;
 
-		while (file.Read ()) {
-			key = file.Record_String ();
-			if (key.Integer () == 0) continue;
-			update_node_range.Add_Ranges (key);
+			file.File_Type ("Update Node File");
+			file.Open (Project_Filename (key));
+
+			while (file.Read ()) {
+				key = file.Record_String ();
+				if (key.Integer () == 0) continue;
+				update_node_range.Add_Ranges (key);
+			}
+			file.Close ();
 		}
-		file.Close ();
 		update_node_flag = true;
+
+		Get_Control_Flag (UPDATE_NODE_DATA_FLAG);
+	}
+
+	//---- update zone file ----
+	
+	zone_data_flag = Set_Control_Flag (UPDATE_ZONE_DATA_FLAG);
+
+	key = Get_Control_String (UPDATE_ZONE_FILE);
+
+	if (!key.empty ()) {
+		if (zone_data_flag) {
+			zone_data_file.File_Type ("Update Zone File");
+			zone_data_file.Open (Project_Filename (key));
+
+		} else {
+			Db_File file;
+
+			file.File_Type ("Update Zone File");
+			file.Open (Project_Filename (key));
+
+			while (file.Read ()) {
+				key = file.Record_String ();
+				if (key.Integer () == 0) continue;
+				update_zone_range.Add_Ranges (key);
+			}
+			file.Close ();
+		}
+		update_zone_flag = true;
+
+		Get_Control_Flag (UPDATE_ZONE_DATA_FLAG);
 	}
 
 	//---- update link file ----
+	
+	link_data_flag = Set_Control_Flag (UPDATE_LINK_DATA_FLAG);
 
 	key = Get_Control_String (UPDATE_LINK_FILE);
 
 	if (!key.empty ()) {
-		Db_File file;
+		if (link_data_flag) {
+			link_data_file.File_Type ("Update Link File");
+			link_data_file.Open (Project_Filename (key));
 
-		file.File_Type ("Update Link File");
-		file.Open (Project_Filename (key));
+		} else {
+			Db_File file;
 
-		while (file.Read ()) {
-			key = file.Record_String ();
-			if (key.Integer () == 0) continue;
-			update_link_range.Add_Ranges (key);
+			file.File_Type ("Update Link File");
+			file.Open (Project_Filename (key));
+
+			while (file.Read ()) {
+				key = file.Record_String ();
+				if (key.Integer () == 0) continue;
+				update_link_range.Add_Ranges (key);
+			}
+			file.Close ();
 		}
-		file.Close ();
 		update_link_flag = true;
+
+		Get_Control_Flag (UPDATE_LINK_DATA_FLAG);
+	}
+
+	//---- update shape file ----
+
+	key = Get_Control_String (UPDATE_SHAPE_FILE);
+
+	if (!key.empty ()) {
+		shape_data_file.File_Type ("Update Shape File");
+		shape_data_file.Open (Project_Filename (key));
+
+		update_shape_flag = true;
 	}
 
 	//---- delete node range ----
@@ -746,6 +815,15 @@ void TransimsNet::Program_Control (void)
 	if (!key.empty () && !key.Equals ("NONE")) {
 		delete_node_range.Add_Ranges (key);
 		delete_node_flag = true;
+	}
+
+	//---- delete zone range ----
+
+	key = Get_Control_Text (DELETE_ZONE_RANGE);
+
+	if (!key.empty () && !key.Equals ("NONE")) {
+		delete_zone_range.Add_Ranges (key);
+		delete_zone_flag = true;
 	}
 
 	//---- delete link range ----
@@ -776,6 +854,25 @@ void TransimsNet::Program_Control (void)
 		delete_node_flag = true;
 	}
 
+	//---- delete zone file ----
+
+	key = Get_Control_String (DELETE_ZONE_FILE);
+
+	if (!key.empty ()) {
+		Db_File file;
+
+		file.File_Type ("Delete Zone File");
+		file.Open (Project_Filename (key));
+
+		while (file.Read ()) {
+			key = file.Record_String ();
+			if (key.Integer () == 0) continue;
+			delete_zone_range.Add_Ranges (key);
+		}
+		file.Close ();
+		delete_zone_flag = true;
+	}
+
 	//---- delete link file ----
 
 	key = Get_Control_String (DELETE_LINK_FILE);
@@ -794,6 +891,7 @@ void TransimsNet::Program_Control (void)
 		file.Close ();
 		delete_link_flag = true;
 	}
+	delete_flag = (delete_node_flag || delete_zone_flag || delete_link_flag);
 
 	//---- link use file ----
 

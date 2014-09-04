@@ -149,7 +149,7 @@ void TransimsNet::Zone_Access (void)
 
 			//---- add the access link ----
 
-			access_rec.Link (++nprocess);
+			access_rec.Link (++naccess);
 			access_rec.From_Type (LOCATION_ID);
 			access_rec.From_ID (location);
 			access_rec.To_Type (PARKING_ID);

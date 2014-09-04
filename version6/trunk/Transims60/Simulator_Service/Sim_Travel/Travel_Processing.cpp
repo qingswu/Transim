@@ -137,10 +137,7 @@ void Sim_Travel_Process::Travel_Processing (Sim_Travel_Ptr sim_travel_ptr)
 					//---- add the vehicle to the link load queue ----
 
 					sim_travel_ptr->Status (OFF_ON_DRIVE);
-
-					sim->sim_dir_array.Lock (step.sim_dir_ptr);
 					step.sim_dir_ptr->Load_Queue (sim_travel_ptr->Traveler ());
-					sim->sim_dir_array.UnLock (step.sim_dir_ptr);
 					break;
 				}
 			}
@@ -196,10 +193,7 @@ void Sim_Travel_Process::Travel_Processing (Sim_Travel_Ptr sim_travel_ptr)
 
 					if (sim_travel_ptr->Status () == OFF_NET_START) {
 						sim_travel_ptr->Status (OFF_ON_LOAD);
-
-						sim->sim_dir_array.Lock (step.sim_dir_ptr);
 						step.sim_dir_ptr->Load_Queue (sim_travel_ptr->Traveler ());
-						sim->sim_dir_array.UnLock (step.sim_dir_ptr);
 						break;
 					}
 
@@ -208,10 +202,7 @@ void Sim_Travel_Process::Travel_Processing (Sim_Travel_Ptr sim_travel_ptr)
 					//---- add the vehicle to the link load queue ----
 
 					sim_travel_ptr->Status (OFF_ON_LOAD);
-
-					sim->sim_dir_array.Lock (step.sim_dir_ptr);
 					step.sim_dir_ptr->Load_Queue (sim_travel_ptr->Traveler ());
-					sim->sim_dir_array.UnLock (step.sim_dir_ptr);
 					break;
 				}
 

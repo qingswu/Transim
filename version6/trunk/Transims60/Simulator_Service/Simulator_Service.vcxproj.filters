@@ -55,6 +55,15 @@
     <Filter Include="Sim_Link\Source Files">
       <UniqueIdentifier>{f508c3b1-0a5b-4c3c-bfd5-fd018256df45}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sim_Node">
+      <UniqueIdentifier>{0cbbb61f-ed12-48b0-a6c5-baeebc3ed37a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sim_Node\Header Files">
+      <UniqueIdentifier>{cbb87988-0c2e-41d1-9c34-17889fe5a97f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sim_Node\Source Files">
+      <UniqueIdentifier>{537bbb26-5500-4872-90ce-77e756cb875a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\Event_Output.hpp">

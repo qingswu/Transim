@@ -106,6 +106,7 @@ public:
 	void   Weight_Flows (Perf_Data *perf_ptr, double weight);
 	void   Weight_Flows (Perf_Data *perf1_ptr, double fac1, Perf_Data *perf2_ptr, double fac2);
 	void   Sum_Periods (Perf_Data *perf_ptr);
+	bool   Output_Check (void);
 
 private:
 	Dtime  time;

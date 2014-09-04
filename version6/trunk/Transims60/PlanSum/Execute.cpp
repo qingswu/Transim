@@ -18,8 +18,9 @@ void PlanSum::Execute (void)
 
 	//---- initialize link delay data ----
 
-	if (new_delay_flag && !System_File_Flag (PERFORMANCE)) {
+	if (new_perf_flag && !System_File_Flag (PERFORMANCE)) {
 		perf_period_array.Initialize (&time_periods);
+		perf_period_array.Set_Time0 ();
 
 		if (turn_flag) {
 			num = (int) connect_array.size ();
@@ -93,7 +94,7 @@ void PlanSum::Execute (void)
 
 	//---- calculate the travel times ----
 
-	if (new_delay_flag && Time_Updates ()) {
+	if (new_perf_flag && Time_Updates ()) {
 		Update_Travel_Times ();
 	}
 	if (System_File_Flag (NEW_PERFORMANCE)) {

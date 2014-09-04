@@ -11,7 +11,7 @@
 PlanSum::PlanSum (void) : Data_Service (), Select_Service (), Flow_Time_Service ()
 {
 	Program ("PlanSum");
-	Version (7);
+	Version (8);
 
 	Title ("Travel Plan Summary Utility");
 
@@ -93,7 +93,7 @@ PlanSum::PlanSum (void) : Data_Service (), Select_Service (), Flow_Time_Service 
 #endif
 	max_rail = 0;
 
-	select_flag = new_delay_flag = turn_flag = skim_flag = trip_flag = zone_flag = time_flag = travel_flag = false; 
+	select_flag = new_perf_flag = turn_flag = skim_flag = trip_flag = zone_flag = time_flag = travel_flag = false; 
 	volume_flag = passenger_flag = transfer_flag = rider_flag = xfer_flag = xfer_detail = line_xfer_flag = false;
 	access_flag = zone_file_flag = access_file_flag = diurnal_flag = on_off_flag = boarding_flag = false;
 	access_group_flag = false;

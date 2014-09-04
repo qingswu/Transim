@@ -30,6 +30,7 @@ public:
 	int   Passengers (void)           { return (passengers); }
 	int   Step_Code (void)            { return (step); }
 	int   Plan_Index (void)           { return (plan_index); }
+	int   Next_Load (void)            { return (next_load); }
 
 	void  Traveler (int value)        { traveler = value; };
 	void  Household (int value)       { hhold = value; }
@@ -44,6 +45,7 @@ public:
 	void  Passengers (int value)      { passengers = (short) value; }
 	void  Step_Code (int code)        { step = (short) code; }
 	void  Plan_Index (int value)      { plan_index = value; }
+	void  Next_Load (int value)       { next_load = value; }
 
 	void  Add_Wait (Dtime value)      { wait += value; }
 
@@ -51,7 +53,7 @@ public:
 	bool Next_Plan (void);
 	void Add_Plan (Sim_Plan_Data &plan);
 
-	void  Clear (void)                { memset (this, '\0', sizeof (*this)); vehicle = plan_index = -1; }
+	void  Clear (void)                { memset (this, '\0', sizeof (*this)); vehicle = plan_index = next_load = -1; }
 
 	bool  Pack (Data_Buffer &data)    { return (data.Add_Data (this, sizeof (*this))); }
 	bool  UnPack (Data_Buffer &data)  { return (data.Get_Data (this, sizeof (*this))); }
@@ -72,6 +74,7 @@ private:
 	short passengers;
 	short step;
 	int   plan_index;
+	int   next_load;
 };
 
 typedef Vector <Sim_Travel_Data>    Sim_Travel_Array;

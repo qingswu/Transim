@@ -24,6 +24,8 @@ void TransimsNet::Pocket_Lanes (void)
 	Pocket_Data pocket_rec, *pocket_ptr;;
 	Approach_Link_Map_Itr approach_itr;
 
+	if (delete_link_flag && !update_link_flag && !update_dir_flag) return;
+
 	Show_Message (String ("Creating Pocket Lanes -- Record"));
 	Set_Progress ();
 
@@ -31,6 +33,7 @@ void TransimsNet::Pocket_Lanes (void)
 		Show_Progress ();
 
 		if (link_itr->Type () == EXTERNAL || !Use_Permission (link_itr->Use (), CAR)) continue;
+		if (!update_dir_flag && update_link_flag && !update_link_range.In_Range (link_itr->Link ())) continue;
 
 		map_index.Area_Type (link_itr->Area_Type ());
 
@@ -45,6 +48,10 @@ void TransimsNet::Pocket_Lanes (void)
 				dir_index = link_itr->BA_Dir ();
 			}
 			if (dir_index < 0) continue;
+
+			if (update_dir_flag && !update_dir_range.In_Range (dir_index)) {
+				if (update_link_flag && !update_link_range.In_Range (link_itr->Link ())) continue;
+			}
 
 			dir_ptr = &dir_array [dir_index];
 			left_turn = right_turn = left_merge = right_merge = approach_lane_flag = false;

@@ -38,15 +38,16 @@ public:
 	bool Check_Behind (Sim_Veh_Data veh_cell, Travel_Step &travel_step, int num_cells = 1, bool use_flag = false);
 
 	int  ID (void)                      { return (id); }
+	int  Num_PCE (void)                 { return (num_pce); }
 	int  Num_Vehicles (void)            { return (num_vehicles); }
 	int  Num_Waiting (void)             { return (num_waiting); }
 
-	void Reset_Counters (void)          { num_vehicles = num_waiting = 0; }
+	void Reset_Counters (void)          { num_vehicles = num_waiting = num_pce = 0; }
 
 	Sim_Statistics & Get_Statistics (void) { return (stats); }
 
 private:
 	Sim_Statistics stats;
-	int num_vehicles, num_waiting, id;
+	int num_pce, num_vehicles, num_waiting, id;
 };
 #endif

@@ -23,16 +23,13 @@ void Simulator::Execute (void)
 
 	//---- initialize the global data structures ----
 
+	Show_Message ("Initializing the Simulator");
+
 	Global_Data ();
 
 	time_step = param.start_time_step;
 	sim_period = sim_periods.Period (time_step) - 1;
 	end_period = 0;
-
-	//---- read the plan file ----
-
-	Show_Message ("Initializing the First Time Step -- Plan");
-	Set_Progress ();
 		
 	//---- create simulation partitions ---
 
@@ -46,14 +43,13 @@ void Simulator::Execute (void)
 	read_status = first = true;
 	input_total = update_total = link_total = output_total = travel_total = 0;
 
-	End_Progress ();
-	Show_Message ("Processing Time of Day");
+	Show_Message (2, "Processing Time of Day");
 	Set_Progress ();
 
 	//---- process each time step ----
 
 	for (; time_step <= param.end_time_step; time_step += param.step_size) {
-		Show_Progress (time_step.Time_String ())
+		Show_Progress (time_step.Time_String ());
 
 		if (time_step >= end_period) {
 			end_period = Set_Sim_Period ();
@@ -89,11 +85,11 @@ void Simulator::Execute (void)
 
 			if (read_status) {
 				start = clock ();
+
 				read_status = sim_plan_step.Start_Processing ();
+
 				input_total += (clock () - start);
 			}
-
-;
 		}
 		Active (false);
 
@@ -109,12 +105,11 @@ void Simulator::Execute (void)
 		sim_link_step.Start_Processing ();
 		link_total += (clock () - start);
 
-		if (!read_status && !Active ()) break;
-
 		if (Num_Vehicles () > max_vehicles) {
 			max_vehicles = Num_Vehicles ();
 			max_time = time_step;
 		}
+		if (!Active () && !read_status) break;
 	}
 	if (Master ()) End_Progress (time_step.Time_String ());
 
@@ -125,6 +120,7 @@ void Simulator::Execute (void)
 	start = input_total + output_total + update_total + travel_total + link_total;
 	if (start == 0) start = 1;
 
+	Break_Check (6);
 	Write (2, String ("Seconds in Input Processing = %.1lf (%.1lf%%)") % 
 		((double) input_total / CLOCKS_PER_SEC) % (100.0 * input_total / start) % FINISH);
 	Write (1, String ("Seconds in Output Processing = %.1lf (%.1lf%%)") % 

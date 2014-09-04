@@ -19,12 +19,15 @@ void TransimsNet::Lane_Ranges (void)
 	bool approach_lane_flag = false;
 
 	Dir_Data *to_ptr;
+	Link_Data *link_ptr;
 	Dir_Itr dir_itr;
 	Int_Map bear_map;
 	Int_Map_Itr map_itr;
 	Connect_Data *connect_ptr;
 	Pocket_Data *pocket_ptr;
 	Approach_Link_Map_Itr approach_itr;
+	
+	if (delete_link_flag && !update_link_flag) return;
 
 	Show_Message ("Building Lane Connectivity -- Record");
 	Set_Progress ();
@@ -33,6 +36,13 @@ void TransimsNet::Lane_Ranges (void)
 
 	for (dir_index = 0, dir_itr = dir_array.begin (); dir_itr != dir_array.end (); dir_itr++, dir_index++) {
 		Show_Progress ();
+
+		if (update_dir_flag && !update_dir_range.In_Range (dir_index)) {
+			if (update_link_flag) {
+				link_ptr = &link_array [dir_itr->Link ()];
+				if (!update_link_range.In_Range (link_ptr->Link ())) continue;
+			}
+		}
 
 		//---- approach lane type ranges ----
 

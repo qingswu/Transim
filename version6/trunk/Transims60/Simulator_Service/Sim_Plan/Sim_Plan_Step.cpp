@@ -87,9 +87,8 @@ bool Sim_Plan_Step::Start_Processing (void)
 		plan_queue.Start_Work ();
 
 		Read_Plans ();
-//if (sim->time_step > 216000) sim->Write (1, " plan complete ");
+
 		plan_queue.Complete_Work ();
-//if (sim->time_step > 216000) sim->Write (0, " OK ");
 		return (stat);
 	}
 #endif

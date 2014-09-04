@@ -58,6 +58,7 @@ void Router::Execute (void)
 	if (Memory_Flag ()) {
 		Map_Trip_Plan ();
 	}
+	Print (1);
 
 	//---- processing method ----
 
@@ -87,7 +88,14 @@ void Router::Execute (void)
 	//---- save the performance data ----
 
 	if (System_File_Flag (NEW_PERFORMANCE)) {
-		if (save_iter_flag) System_File_Handle (NEW_PERFORMANCE)->Create ();
+		if (save_iter_flag) {
+			Db_File *file = System_File_Handle (NEW_PERFORMANCE);
+			if (file->Part_Flag ()) {
+				file->Open (0);
+			} else {
+				file->Create ();
+			}
+		}
 		Write_Performance (full_flag);
 	}
 
@@ -176,7 +184,7 @@ void Router::Execute (void)
 	if (plan_flag) {
 		plan_file->Print_Summary ();
 		if (num_reroute > 0) Print (1, "Number of Re-Routed Plans      = ") << num_reroute;
-		if (num_reskim > 0) Print (1,  "Number of Re-Skimmed Plans     = ") << num_reskim;
+		if (num_update > 0) Print (1,  "Number of Updated Plans        = ") << num_update;
 	}
 	if (new_plan_flag) {
 		new_plan_file->Print_Summary ();

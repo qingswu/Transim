@@ -20,7 +20,6 @@ bool Router::Memory_Loop (int part, Plan_Processor *plan_process_ptr)
 	Plan_Data *new_plan_ptr, *plan_ptr;
 	Path_Parameters param;
 	Trip_Index trip_index;
-	//Gap_Data *gap_ptr;
 	
 	Set_Parameters (param);
 
@@ -57,6 +56,13 @@ bool Router::Memory_Loop (int part, Plan_Processor *plan_process_ptr)
 		hhold = plan_ptr->Household ();
 		if (hhold < 1) continue;
 
+		if (hhold != last_hhold) {
+			if (last_hhold > 0 && ptr_array->size () > 0) {
+				part_processor.Plan_Build (ptr_array, part, plan_process_ptr);
+				ptr_array = new Plan_Ptr_Array ();
+			}
+			last_hhold = hhold;
+		}
 		if (hhold > max_hhold) break;
 
 		plan_ptr->Get_Index (trip_index);
@@ -74,19 +80,16 @@ bool Router::Memory_Loop (int part, Plan_Processor *plan_process_ptr)
 				}
 			}
 			build_flag = select_priority [plan_ptr->Priority ()];
-		}
 
-		if (hhold != last_hhold) {
-			if (last_hhold > 0 && ptr_array->size () > 0) {
-				part_processor.Plan_Build (ptr_array, part, plan_process_ptr);
-				ptr_array = new Plan_Ptr_Array ();
+			if (build_flag || plan_ptr->size () == 0 || plan_ptr->Problem () > 0) {
+				plan_ptr->Method (BUILD_PATH);
+				plan_ptr->Depart (plan_ptr->Start ());
+				plan_ptr->Arrive (plan_ptr->End ());
+				plan_ptr->Activity (plan_ptr->Duration ());
+			} else {
+				plan_ptr->Method (UPDATE_PLAN);
 			}
-			last_hhold = hhold;
-		}
-
-		//---- determine the processing method ----
-
-		if (build_flag || plan_ptr->size () == 0 || plan_ptr->Problem () > 0) {
+		} else if (plan_ptr->size () == 0 || plan_ptr->Problem () > 0) {
 			plan_ptr->Method (BUILD_PATH);
 			plan_ptr->Depart (plan_ptr->Start ());
 			plan_ptr->Arrive (plan_ptr->End ());
@@ -122,6 +125,9 @@ bool Router::Memory_Loop (int part, Plan_Processor *plan_process_ptr)
 		} else {
 			plan_ptr->Method (COPY_PLAN);
 		}
+
+		//---- save the plan data ----
+
 		new_plan_ptr = new Plan_Data ();
 		*new_plan_ptr = *plan_ptr;
 

@@ -11,13 +11,13 @@
 
 bool Sim_Link_Process::Link_Processing (int link)
 {
-	int i, index, max_exit, exit_count, lane0, lane, cell, traveler, step_number, step_size;
+	int i, index, max_exit, exit_count, lane0, lane, cell, traveler, step_number, step_size, next_load;
 	double max_flow;
 	Dtime time;
 
 	Int_Itr load_itr;
 	Sim_Dir_Ptr sim_dir_ptr;
-	Sim_Travel_Ptr sim_travel_ptr;
+	Sim_Travel_Ptr sim_travel_ptr, last_travel_ptr;
 	Sim_Plan_Ptr sim_plan_ptr;
 	Sim_Leg_Ptr sim_leg_ptr;
 	Travel_Step step;
@@ -103,7 +103,8 @@ bool Sim_Link_Process::Link_Processing (int link)
 
 				sim_travel_ptr->Speed (0);
 				sim->Output_Step (step);
-				num_vehicles++;
+				if (sim_travel_ptr->Person () > 0 || sim_travel_ptr->Passengers () > 0) num_vehicles++;
+				num_pce++;
 				continue;
 			}
 
@@ -174,27 +175,29 @@ bool Sim_Link_Process::Link_Processing (int link)
 					}
 				}
 			}
-			if (sim_travel_ptr->Status () > OFF_NET_END) {
-				num_vehicles++;	
+			if (sim_travel_ptr->Status () == ON_NET_DRIVE) {
+				if (sim_travel_ptr->Person () > 0 || sim_travel_ptr->Passengers () > 0) num_vehicles++;
+				num_pce++;
 			}
 		}
 
 		//---- priority load processing ----
 
 		if (cell == sim_dir_ptr->Load_Cell ()) {
-			for (i=0, load_itr = sim_dir_ptr->load_queue.begin (); load_itr != sim_dir_ptr->load_queue.end (); load_itr++, i++) {
-				if (*load_itr < 0) continue;
+			for (traveler = sim_dir_ptr->First_Load (); traveler >= 0; traveler = sim_travel_ptr->Next_Load ()) {
+				sim_travel_ptr = &sim->sim_travel_array [traveler];
 
-				sim_travel_ptr = &sim->sim_travel_array [*load_itr];
-				if (sim_travel_ptr->Wait () > sim->param.min_load_time) {
-					if (Load_Vehicle (*load_itr)) {
-						sim_dir_ptr->load_queue [i] = -1;
-						sim_dir_ptr->Load_Cell (-1);
-						if (sim_travel_ptr->Status () > OFF_NET_END) {
-							num_vehicles++;
+				if (sim_travel_ptr->Status () == OFF_ON_LOAD || sim_travel_ptr->Status () == OFF_ON_DRIVE) {
+					if (sim_travel_ptr->Wait () > sim->param.min_load_time) {
+						if (Load_Vehicle (traveler)) {
+							sim_dir_ptr->Load_Cell (-1);
+							if (sim_travel_ptr->Status () == ON_NET_DRIVE) {
+								if (sim_travel_ptr->Person () > 0 || sim_travel_ptr->Passengers () > 0) num_vehicles++;
+								num_pce++;
+							}
+							break;
 						}
 					}
-					break;
 				}
 			}
 		}
@@ -205,40 +208,58 @@ bool Sim_Link_Process::Link_Processing (int link)
 load_check:
 	sim_dir_ptr->Load_Cell (-1);
 
-	if (sim_dir_ptr->load_queue.size () > 0) {
-		Integers reload;
+	traveler = sim_dir_ptr->First_Load ();
+	sim_dir_ptr->First_Load (-1);
+	sim_dir_ptr->Last_Load (-1);
+	last_travel_ptr = 0;
 
-		for (load_itr = sim_dir_ptr->load_queue.begin (); load_itr != sim_dir_ptr->load_queue.end (); load_itr++) {
-			if (*load_itr < 0) continue;
+	for (; traveler > 0; traveler = next_load) {
+		sim_travel_ptr = &sim->sim_travel_array [traveler];
+		next_load = sim_travel_ptr->Next_Load ();
+		sim_travel_ptr->Next_Load (-1);
 
-			sim_travel_ptr = &sim->sim_travel_array [*load_itr];
+		if (sim_travel_ptr->Status () != OFF_ON_LOAD && sim_travel_ptr->Status () != OFF_ON_DRIVE) continue;
+			
+		//---- try to load the vehicle onto the link ----
 
-			//---- try to load the vehicle onto the link ----
+		if (Load_Vehicle (traveler)) {
+			if (sim_travel_ptr->Status () == ON_NET_DRIVE) {
+				if (sim_travel_ptr->Person () > 0 || sim_travel_ptr->Passengers () > 0) num_vehicles++;
+				num_pce++;
+			}
+		} else {
+			sim_travel_ptr->Add_Wait (step_size);
 
-			if (!Load_Vehicle (*load_itr)) {
-				sim_travel_ptr->Add_Wait (step_size);
+			//---- check the load time constraint ----
 
-				//---- check the load time constraint ----
-
-				if (sim_travel_ptr->Wait () > sim->param.max_load_time) {
-					step.clear ();
-					step.Traveler (*load_itr);
-					step.sim_travel_ptr = sim_travel_ptr;
-					step.sim_plan_ptr = 0;
-					step.sim_veh_ptr = 0;
-
-					step.Problem (LOAD_PROBLEM);
-
-					sim->Output_Step (step);
+			if (sim_travel_ptr->Wait () < sim->param.max_load_time) {
+				if (last_travel_ptr == 0) {
+					sim_dir_ptr->First_Load (traveler);
 				} else {
-					reload.push_back (*load_itr);
-					num_waiting++;			//---- number of vehicles still in the loading queue ----
+					last_travel_ptr->Next_Load (traveler);
 				}
-			} else if (sim_travel_ptr->Status () > OFF_NET_END) {
-				num_vehicles++;
+				sim_dir_ptr->Last_Load (traveler);
+				last_travel_ptr = sim_travel_ptr;
+
+				//---- number of non-transit vehicles still in the loading queue ----
+
+				if (sim_travel_ptr->Person () > 0 || sim_travel_ptr->Passengers () > 0) num_waiting++;
+
+			} else {
+
+				//---- process a load problem ----
+
+				step.clear ();
+				step.Traveler (traveler);
+				step.sim_travel_ptr = sim_travel_ptr;
+				step.sim_plan_ptr = 0;
+				step.sim_veh_ptr = 0;
+
+				step.Problem (LOAD_PROBLEM);
+
+				sim->Output_Step (step);
 			}
 		}
-		sim_dir_ptr->load_queue.swap (reload);
 	}
 	sim->sim_dir_array.UnLock (sim_dir_ptr, ID ());
 

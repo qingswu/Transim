@@ -433,7 +433,7 @@ next_mode:
 				} else {
 					len_factor = (double) len / link_ptr->Length ();
 				}
-				perf_period_array_ptr->Flow_Time (use_index, to_ptr->Time (), len_factor, len, param.pce, param.occupancy, forward_flag);
+				perf_period_array_ptr->Flow_Time (use_index, to_ptr->Time (), len_factor, link_ptr->Length (), param.pce, param.occupancy, forward_flag);
 
 				if (out_index >= 0 && param.turn_flow_flag) {
 					if (forward_flag) {

@@ -5,6 +5,7 @@
 #ifndef SIM_DIR_DATA_HPP
 #define SIM_DIR_DATA_HPP
 
+#include "Sim_Travel_Data.hpp"
 #include "TypeDefs.hpp"
 #include "Threads.hpp"
 
@@ -41,6 +42,9 @@ public:
 	int   Min_Traveler (void)        { return (min_trav); }
 	int   Max_Traveler (void)        { return (max_trav); }
 	int   First_Use (void)           { return (first_use); }
+	int   First_Load (void)          { return (first_load); }
+	int   Last_Load (void)           { return (last_load); }
+	int   Control (void)             { return (control); }
 
 	void  Speed (int value)          { speed = (short) value; }
 	void  Dir (int value)            { dir = (char) value; }
@@ -65,10 +69,10 @@ public:
 	void  Min_Traveler (int value)   { min_trav = (char) value; }
 	void  Max_Traveler (int value)   { max_trav = (char) value; }
 	void  First_Use (int value)      { first_use = value; }
+	void  First_Load (int value)     { first_load = value; }
+	void  Last_Load (int value)      { last_load = value; }
+	void  Control (int value)        { control = value; }
 	
-	void  Load_Queue (int value)             { load_queue.push_back (value); }
-	Integers load_queue;
-
 	void Make_Cells (void)                   { assign ((max_cell + 1) * lanes, 0); thru.assign (lanes * 2, 0); }
 
 	int  Index (int lane, int cell)          { return (cell * lanes + lane); }
@@ -98,6 +102,8 @@ public:
 	void Remove (void)                       { if (count > 0) count--; }
 	void Remove (int index)                  { Clear (index); Remove (); }
 	void Remove (int lane, int cell)         { Clear (lane, cell); Remove (); }
+
+	void Load_Queue (int value);
 	
 	int  Thru_Link (int lane)                { return (thru [lane]); }
 	void Thru_Link (int lane, int to_link)   { thru [lane] = to_link; }
@@ -116,7 +122,7 @@ public:
 	void Clear (void)
 	{
 		length = 0; speed = setback = in_offset = max_cell = out_cell = load_cell = count = lock = 0; 
-		dir = lanes = method = turn = type = subarea = 0; load_queue.clear (); thru.clear ();
+		dir = lanes = method = turn = type = subarea = 0; first_load = last_load = control = -1; thru.clear ();
 		Clear_Use ();
 	}
 
@@ -145,6 +151,9 @@ private:
 	char     max_trav;
 	short    lock;
 	int      first_use;
+	int      first_load;
+	int      last_load;
+	int      control;
 	Integers thru;
 };
 

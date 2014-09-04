@@ -141,6 +141,7 @@ void Simulator_Service::Program_Control (void)
 			Print (1);
 			group.group = i;
 			group.methods.assign (num_periods, NO_SIMULATION);
+			group.subareas.clear ();
 
 			//---- group subareas ----
 
@@ -287,12 +288,12 @@ void Simulator_Service::Program_Control (void)
 
 	//---- max comfortable speed ----
 
-	Get_Control_List_Groups (MAX_COMFORTABLE_SPEED, param.comfort_speed, true);
+	Get_Control_List_Groups (MAX_COMFORTABLE_SPEED, list, true);
 	
-	for (dbl_itr = param.comfort_speed.begin (); dbl_itr != param.comfort_speed.end (); dbl_itr++) {
+	for (dbl_itr = list.begin (); dbl_itr != list.end (); dbl_itr++) {
+		param.comfort_speed.push_back (Round (*dbl_itr));
 		if (*dbl_itr != 0.0) {
 			param.comfort_flag = true;
-			break;
 		}
 	}
 

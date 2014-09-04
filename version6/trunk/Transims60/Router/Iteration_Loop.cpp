@@ -124,7 +124,7 @@ void Router::Iteration_Loop (void)
 				gap = Merge_Delay (new_factor, (!last_flag && !save_flag));
 			}
 			if (Master ()) {
-				Write (1, "Link Convergence Gap = ") << gap;
+				if (max_iteration > 1) Write (1, "Link Convergence Gap  = ") << gap;
 				num_time_updates++;
 			}
 			if (link_gap > 0.0 && gap > link_gap) link_last_flag = false;
@@ -141,7 +141,7 @@ void Router::Iteration_Loop (void)
 			gap = Get_Trip_Gap ();
 
 			if (Master ()) {
-				Write (1, "Trip Convergence Gap = ") << gap;
+				Write (1, "Trip Convergence Gap  = ") << gap;
 			}
 			if (trip_gap > 0.0 && gap > trip_gap) trip_last_flag = false;
 		}
@@ -154,11 +154,17 @@ void Router::Iteration_Loop (void)
 			gap = line_array.Ridership_Gap (param.cap_penalty_flag, factor);
 
 			if (Master ()) {
-				Write (1, "Transit Capacity Gap = ") << gap;
+				Write (1, "Transit Capacity Gap  = ") << gap;
 			}
 			if (transit_gap > 0.0 && gap > transit_gap) transit_last_flag = false;
 		}
 
+		//---- build count ----
+
+		Write (1, "Number of Paths Built = ") << num_build;
+		num = num_build + num_update;
+		if (num > 0) Write (0, String (" (%.1lf%%)") % (num_build * 100.0 / num) % FINISH);
+		 
 		//---- convergence check ----
 
 		if (!last_flag && link_last_flag && trip_last_flag && transit_last_flag) {
@@ -201,8 +207,12 @@ void Router::Iteration_Loop (void)
 		if (!last_flag) {
 			if (save_flag) {
 				if (System_File_Flag (NEW_PERFORMANCE)) {
-					System_File_Handle (NEW_PERFORMANCE)->Create ();
-
+					Db_File *file = System_File_Handle (NEW_PERFORMANCE);
+					if (file->Part_Flag ()) {
+						file->Open (iteration);
+					} else {
+						file->Create ();
+					}
 					Write_Performance (full_flag);
 
 					perf_period_array.Zero_Flows (reroute_time);
@@ -210,10 +220,10 @@ void Router::Iteration_Loop (void)
 						turn_period_array.Zero_Turns (reroute_time);
 					}
 				}
-			}
-			if (rider_flag && save_flag) {
-				System_File_Handle (NEW_RIDERSHIP)->Create ();
-				Write_Ridership ();
+				if (rider_flag) {
+					System_File_Handle (NEW_RIDERSHIP)->Create ();
+					Write_Ridership ();
+				}
 			}
 			if (trip_flag && !trip_memory_flag) {
 				if (trip_set_flag) {
@@ -236,8 +246,8 @@ void Router::Iteration_Loop (void)
 					plan_file->Open (0);
 					plan_file->Reset_Counters ();
 				}
-				num_reroute = num_reskim = 0;
 			}
+			num_build = num_reroute = num_reskim = num_update = 0;
 			Reset_Problems ();
 		}
 	}

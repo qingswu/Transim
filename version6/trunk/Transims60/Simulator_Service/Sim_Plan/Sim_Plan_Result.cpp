@@ -108,7 +108,7 @@ bool Sim_Plan_Step::Sim_Plan_Result (Sim_Trip_Ptr sim_trip_ptr)
 #endif
 	sim_travel_ptr = &sim->sim_travel_array [traveler];
 	sim_travel_ptr->Add_Plan (*sim_plan_ptr);
-
+//if (sim_travel_ptr->Household () == 6977) sim->Write (1, " traveler=") << traveler;
 	delete sim_trip_ptr;
 	return (true);
 }

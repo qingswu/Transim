@@ -76,6 +76,7 @@ class SYSLIB_API Simulator_Service : public Data_Service, public Select_Service
 
 	friend class Sim_Plan_Data;
 	friend class Sim_Travel_Data;
+	friend class Sim_Dir_Data;
 
 public:
 
@@ -120,15 +121,6 @@ protected:
 
 	int  Num_Subareas (void)               { return (num_subareas); }
 	void Num_Subareas (int value)          { num_subareas = value; }
-
-	int  Num_Parts (void)                  { return (num_parts); }
-	void Num_Parts (int value)             { num_parts = value; }
-	
-	int  First_Part (void)                 { return (first_part); }
-	void First_Part (int num)              { first_part = num; }
-
-	int  Last_Part (void)                  { return (last_part); }
-	void Last_Part (int num)               { last_part = num; }
 
 	int  Num_Simulators (void)             { return (num_sims); }
 	void Num_Simulators (int value)        { num_sims = value; }
@@ -200,7 +192,7 @@ protected:
 
 private:
 	int num_subareas, max_subarea, num_sims, num_vehicles, transit_id;
-	int first_part, last_part, num_parts, num_travelers, step_code;
+	int num_travelers, step_code;
 	double avg_cell_per_veh;
 	bool active;
 	Sim_Statistics stats;

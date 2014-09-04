@@ -25,11 +25,12 @@ public:
 
 	void Add_Statistics (Sim_Statistics &_stats);
 
+	int  Num_PCE (void)                 { return (num_pce); }
 	int  Num_Vehicles (void)            { return (num_vehicles); }
 	int  Num_Waiting (void)             { return (num_waiting); }
 
 private:
-	int num_vehicles, num_waiting;
+	int num_pce, num_vehicles, num_waiting;
 	Integers link_list;
 
 #ifdef THREADS

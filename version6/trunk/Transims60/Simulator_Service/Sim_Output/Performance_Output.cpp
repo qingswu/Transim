@@ -230,10 +230,12 @@ void Performance_Output::Output_Check (Travel_Step &step)
 	if (step.veh_type_ptr != 0) {
 		if (!veh_types.empty () && !veh_types.In_Range (step.veh_type_ptr->Type ())) return;
 		pce = UnRound (step.veh_type_ptr->PCE ());
+		persons = step.veh_type_ptr->Occupancy () / 100.0;
+		if (persons < 1.0) persons = 1.0;
 	} else {
 		pce = 1.0;
+		persons = 1.0 + step.sim_travel_ptr->Passengers ();
 	}
-	persons = 1.0 + step.sim_travel_ptr->Passengers ();
 
 	if (step.sim_dir_ptr == 0) {
 		step.sim_dir_ptr = &sim->sim_dir_array [step [0].link];
@@ -304,10 +306,13 @@ void Performance_Output::Output_Check (Travel_Step &step)
 				if (sim_dir_ptr->Lock () != step.Process_ID ())  sim->Error (String ("Performance Output::Output_Check: Link Lock=%d vs %d time_step=%d, traveler=%d") % sim_dir_ptr->Lock () % step.Process_ID () % sim->time_step % step.Traveler ());
 #endif
 				perf_ptr = &perf_period [dir_index];
+
 				if (cell > 0) {
 					perf_ptr->Add_Enter (pce);
-				}
-				if (first_step || cell > 0 || stop_flag) {
+					perf_ptr->Add_Persons (persons);
+					perf_ptr->Add_Volume (pce);
+					perf_ptr->Add_Occupancy (pce);
+				} else if (first_step) {
 					perf_ptr->Add_Persons (persons);
 					perf_ptr->Add_Volume (pce);
 					perf_ptr->Add_Occupancy (pce);

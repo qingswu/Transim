@@ -115,8 +115,12 @@ void Router::DUE_Loop (void)
 	
 				if (!select_priority [old_plan_ptr->Priority ()]) {
 					skip++;
-					plan_ptr = old_plan_ptr;
-					plan_ptr->Method (RESKIM_PLAN);
+					//plan_ptr = old_plan_ptr;
+					//plan_ptr->Method (RESKIM_PLAN);
+					plan_ptr = new Plan_Data ();
+					*plan_ptr = *old_plan_ptr;
+
+					plan_ptr->Method (UPDATE_PLAN);
 				} else {
 					plan_ptr = new Plan_Data ();
 					*plan_ptr = *trip_ptr;
@@ -198,8 +202,12 @@ void Router::DUE_Loop (void)
 		if (iteration < max_iteration) {
 			if (save_iter_flag && save_iter_range.In_Range (iteration)) {
 				if (System_File_Flag (NEW_PERFORMANCE)) {
-					System_File_Handle (NEW_PERFORMANCE)->Create ();
-
+					Db_File *file = System_File_Handle (NEW_PERFORMANCE);
+					if (file->Part_Flag ()) {
+						file->Open (iteration);
+					} else {
+						file->Create ();
+					}
 					Write_Performance (full_flag);
 				}
 			}

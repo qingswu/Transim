@@ -26,16 +26,21 @@ void SimSubareas::Program_Control (void)
 
 	//---- get the subarea boundary file ----
 
-	key = exe->Get_Control_String (SUBAREA_BOUNDARY_FILE);
+	key = Get_Control_String (SUBAREA_BOUNDARY_FILE);
 
 	if (!key.empty ()) {
 
-		boundary_file.File_Type ("Select Subarea Polygon");
+		boundary_file.File_Type ("Subarea Boundary File");
 
 		boundary_file.Open (exe->Project_Filename (key));
 
-		subarea_field = boundary_file.Required_Field ("SUBAREA", "ID", "NUMBER", "PARTITION", "SUB");
-
+		if (Check_Control_Key (SUBAREA_DATA_FIELD)) {
+			key = Get_Control_Text (SUBAREA_DATA_FIELD);
+			subarea_field = boundary_file.Required_Field (key);
+			Print (0, String (" (Number = %d)") % (subarea_field + 1));
+		} else {
+			subarea_field = boundary_file.Required_Field ("SUBAREA", "ID", "NUMBER", "PARTITION", "SUB");
+		}
 		boundary_flag = true;
 
 	} else {

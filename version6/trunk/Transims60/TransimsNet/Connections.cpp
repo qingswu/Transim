@@ -24,6 +24,8 @@ void TransimsNet::Connections (void)
 	Int_Map_Stat bear_stat;
 	Int_Map_Itr map_itr, thru_itr;
 	Connect_Data connect_rec, *connect_ptr;
+	
+	if ((delete_link_flag || delete_node_flag) && (!update_link_flag || !update_node_flag)) return;
 
 	Show_Message ("Building Link Connections -- Record");
 	Set_Progress ();
@@ -78,9 +80,10 @@ void TransimsNet::Connections (void)
 
 	for (node=0, list_itr = node_list.begin (); list_itr != node_list.end (); list_itr++, node++) {
 
-		if (replicate_flag) {
+		if (replicate_flag || update_node_flag) {
 			node_ptr = &node_array [node];
-			if (zone_map.find (node_ptr->Node ()) != zone_map.end ()) continue;
+			if (update_node_flag && !update_node_range.In_Range (node_ptr->Node ())) continue;
+			if (replicate_flag && zone_map.find (node_ptr->Node ()) != zone_map.end ()) continue;
 		}
 		num_in = 0;
 		for (dir_index = list_itr->To_List (); dir_index >= 0; dir_index = next_list->To_List ()) {
@@ -293,6 +296,10 @@ void TransimsNet::Connections (void)
 					} else {
 						connect_rec.Type ((left_flag) ? L_SPLIT : R_SPLIT);
 					}
+				}
+
+				if (update_link_flag && !update_node_flag) {
+					if (!update_link_range.In_Range (link_ptr->Link ())) continue;
 				}
 
 				//---- insert the connection record ----

@@ -12,8 +12,8 @@ void PlanSum::Plan_Processing::Read_Plans (int part)
 {
 	int mode, period, index, previous_index, flow_index, high_mode;
 	Dtime time, time2;
-	double flow;
-	bool flag, drive_flag, transit_flag;
+	double flow, pce, occ;
+	bool flag, drive_flag, transit_flag, veh_type_flag;
 
 	Plan_Data plan;
 	Plan_Leg_Itr leg_itr;
@@ -40,6 +40,9 @@ void PlanSum::Plan_Processing::Read_Plans (int part)
 	Zone_Data *zone_ptr;
 	Xfer_IO xfer_io;
 	Xfer_IO_Map_Stat xfer_stat;
+
+	pce = occ = 1.0;
+	veh_type_flag = (exe->veh_type_array.size () > 0);
 
 	//---- open the file partition ----
 
@@ -242,10 +245,21 @@ void PlanSum::Plan_Processing::Read_Plans (int part)
 
 		//---- trace the path ----
 
-		if (exe->new_delay_flag && drive_flag) {
+		if (exe->new_perf_flag && drive_flag) {
 
 			time = plan.Depart ();
 			previous_index = -1;
+
+			if (veh_type_flag) {
+				Int_Map_Itr itr = exe->veh_type_map.find (plan.Veh_Type ());
+				if (itr != exe->veh_type_map.end ()) {
+					Veh_Type_Data *ptr = &exe->veh_type_array [itr->second];
+					pce = UnRound (ptr->PCE ());
+					occ = ptr->Occupancy () / 100.0;
+				} else {
+					pce = occ = 1.0;
+				}
+			}
 
 			for (leg_itr = plan.begin (); leg_itr != plan.end (); leg_itr++) {
 				if (leg_itr->Mode () == DRIVE_MODE && leg_itr->Link_Type ()) {
@@ -282,16 +296,17 @@ void PlanSum::Plan_Processing::Read_Plans (int part)
 								exe->Warning (String ("Traveler=%d-%d-%d-%d Link=%d was Not Found") % plan.Household () % plan.Person () % plan.Tour () % plan.Trip () % leg_itr->ID ());
 								break;
 							}
-							perf_period = perf_period_array_ptr->Period_Ptr (period);
-							perf_ptr = perf_period->Data_Ptr (flow_index);
-							
+
 							if (leg_itr->Length () >= link_ptr->Length ()) {
 								flow = 1.0;
+								perf_period = perf_period_array_ptr->Period_Ptr (period);
+								perf_ptr = perf_period->Data_Ptr (flow_index);
+								perf_ptr->Time (leg_itr->Time ());
 							} else {
 								flow = (double) leg_itr->Length () / link_ptr->Length ();
 								if (flow < 0.01) flow = 0.01;
 							}
-							perf_ptr->Add_Volume (flow);
+							perf_period_array_ptr->Flow_Time (flow_index, time, flow, link_ptr->Length (), pce, occ);
 
 							if (turn_flag) {
 								if (previous_index >= 0) {

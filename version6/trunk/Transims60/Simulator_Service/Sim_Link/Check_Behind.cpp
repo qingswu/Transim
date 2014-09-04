@@ -21,9 +21,9 @@ bool Sim_Link_Process::Check_Behind (Sim_Veh_Data veh_data, Travel_Step &step, i
 	Sim_Travel_Ptr sim_travel_ptr;
 	Sim_Plan_Ptr sim_plan_ptr;
 	Sim_Leg_Ptr leg_ptr;
-	Sim_Connect_Ptr sim_con_ptr;
 	Veh_Type_Data *veh_type_ptr;
 	Sim_Veh_Ptr veh_ptr;
+	Connect_Data *connect_ptr;
 
 	//---- check the lane range ----
 
@@ -165,15 +165,14 @@ bool Sim_Link_Process::Check_Behind (Sim_Veh_Data veh_data, Travel_Step &step, i
 
 		leg_ptr = sim_plan_ptr->Get_Leg ();
 		if (leg_ptr == 0 || leg_ptr->Connect () < 0) return (true);
-
-		sim_con_ptr = &sim->sim_connection [leg_ptr->Connect ()];
-		//if (sim_con_ptr->To_Index () != dir_index) return (true);
+		
+		connect_ptr = &sim->connect_array [leg_ptr->Connect ()];
+		if (connect_ptr->To_Index () != dir_index) return (true);
 
 		//---- check for a traffic control ----
 
 		if (offset <= sim_dir_ptr->Out_Offset ()) {
-			//control = sim_con_ptr->Control ();
-			control = RED_LIGHT;
+			control = connect_ptr->Control ();
 
 			if (control == RED_LIGHT || control == STOP_SIGN || control == STOP_GREEN) {
 				return (true);
