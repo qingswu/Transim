@@ -118,7 +118,7 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 
 	//---- check for parking or stop events ----
 
-	leg_ptr = sim_plan_ptr->Get_Leg ();
+	step.sim_leg_ptr = leg_ptr = sim_plan_ptr->Get_Leg ();
 	if (leg_ptr->Type () == STOP_ID) {
 		sim->Warning ("STOP_ID");
 		return (false);
@@ -578,7 +578,7 @@ make_move:
 
 			if (!sim_plan_ptr->Next_Leg ()) break;
 
-			leg_ptr = sim_plan_ptr->Get_Leg ();
+			step.sim_leg_ptr = leg_ptr = sim_plan_ptr->Get_Leg ();
 			next_ptr = sim_plan_ptr->Get_Next (leg_ptr);
 
 			if (next_ptr != 0) {

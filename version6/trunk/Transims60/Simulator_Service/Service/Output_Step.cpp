@@ -176,7 +176,7 @@ bool Simulator_Service::Output_Step (Travel_Step &step)
 		//---- release link locks ----
 
 		for (sim_veh_itr = step.begin (); sim_veh_itr != step.end (); sim_veh_itr++) {
-			if (sim_veh_itr->link != index) {
+			if (sim_veh_itr->link != index && sim_veh_itr->lane > -1) {
 				index = sim_veh_itr->link;
 				sim_dir_ptr = &sim->sim_dir_array [index];
 				sim->sim_dir_array.UnLock (sim_dir_ptr, step.Process_ID ());

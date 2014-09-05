@@ -45,6 +45,7 @@ public:
 
 	Sim_Travel_Ptr   sim_travel_ptr;
 	Sim_Plan_Ptr     sim_plan_ptr;
+	Sim_Leg_Ptr      sim_leg_ptr;
 	Sim_Dir_Ptr      sim_dir_ptr;
 	Sim_Veh_Ptr      sim_veh_ptr;
 	Veh_Type_Data    *veh_type_ptr;
@@ -52,7 +53,7 @@ public:
 	void  Clear (void)
 	{
 		traveler = dir_index = parking = stop = -1; speed = delay = problem = event_type = process_id = 0; 
-		sim_travel_ptr = 0; sim_plan_ptr = 0; sim_dir_ptr = 0; sim_veh_ptr = 0; veh_type_ptr = 0; 
+		sim_travel_ptr = 0; sim_plan_ptr = 0; sim_leg_ptr = 0; sim_dir_ptr = 0; sim_veh_ptr = 0; veh_type_ptr = 0; 
 		exit_flag = true;  clear ();
 	}
 

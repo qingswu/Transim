@@ -80,6 +80,10 @@ void Sim_Travel_Step::Start_Processing (void)
 		travel_queue.Complete_Work ();
 
 #ifdef CHECK
+		Sim_Dir_Itr sim_dir_itr;
+		for (sim_dir_itr = sim->sim_dir_array.begin (); sim_dir_itr != sim->sim_dir_array.end (); sim_dir_itr++) {
+			if (sim_dir_itr->Lock () > 0) sim->Error (" travel lock error");
+		}
 		if (count != travel_queue.Total_Records ()) {
 			sim->Write (1, String ("Travel Queue %d vs %d") % count % travel_queue.Total_Records ());
 		}
