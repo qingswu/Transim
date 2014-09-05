@@ -28,6 +28,11 @@ void Router::Write_Plan_Files (void)
 			if (plan_itr->Household () == 0) continue;
 			Show_Progress ();
 
+			if (plan_itr->Depart () < 0) {
+				exe->Warning (String ("Plan Record = %d-%d-%d-%d has Negative Departure Time") % 
+					plan_itr->Household () % plan_itr->Person () % plan_itr->Tour () % plan_itr->Trip ());
+				plan_itr->Depart (0);
+			}
 			plan_itr->Get_Index (time_index);
 
 			time_stat = plan_time_map.insert (Time_Map_Data (time_index, i));

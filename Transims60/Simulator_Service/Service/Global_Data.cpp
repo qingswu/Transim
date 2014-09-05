@@ -15,8 +15,7 @@ void Simulator_Service::Global_Data (void)
 	
 	int length, offset, *list, c0, c1, bear1, bear2, next, max_cell;
 	bool flag;
-
-	Dtime hour = Dtime (1, HOURS);
+	double cap_factor;
 
 	Link_Data *link_ptr;
 	Dir_Data *dir_ptr, *app_ptr;
@@ -123,6 +122,10 @@ void Simulator_Service::Global_Data (void)
 	use_code = Use_Code ("CAR/TRUCK/BUS/RAIL");
 	transfer = 0;
 
+	cap_factor = method_time_step [MACROSCOPIC];
+	if (cap_factor <= 0.0) cap_factor = Dtime (6, SECONDS);
+	cap_factor = param.cap_factor * cap_factor / Dtime (1, HOURS);
+
 	for (link_itr = link_array.begin (); link_itr != link_array.end (); link_itr++) {
 
 		if ((link_itr->Use () & use_code) == 0) continue;
@@ -172,7 +175,7 @@ void Simulator_Service::Global_Data (void)
 			sim_dir_ptr->Max_Cell (max_cell);
 			sim_dir_ptr->In_Cell (MIN (((in_off + param.cell_size - 1) / param.cell_size), max_cell));
 			sim_dir_ptr->Out_Cell (MAX (MIN (((length - out_off) / param.cell_size), max_cell), 0));
-			sim_dir_ptr->Max_Flow (Round (param.cap_factor * dir_ptr->Capacity () / hour));
+			sim_dir_ptr->Max_Flow (Round (cap_factor * dir_ptr->Capacity ()));
 			sim_dir_ptr->Method (node_ptr->Method ());
 			sim_dir_ptr->Subarea (node_ptr->Subarea ());
 

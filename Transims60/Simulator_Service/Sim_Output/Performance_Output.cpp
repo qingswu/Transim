@@ -206,7 +206,7 @@ void Performance_Output::Output_Check (Travel_Step &step)
 {
 	if (step.Traveler () < 0 || !time_range.In_Range (sim->time_step) || step.size () < 1) return;
 
-	int dir_index, cell, cells, offset;
+	int dir_index, cell, cells, offset, lane;
 	double pce, persons, vmt, vht;
 	bool skip, stop_flag;
 
@@ -243,10 +243,6 @@ void Performance_Output::Output_Check (Travel_Step &step)
 	sim_dir_ptr = step.sim_dir_ptr;
 
 	vht = sim->method_time_step [sim_dir_ptr->Method ()];
-//
-//#ifdef CHECK
-//		if (step.Time () < sim->param.step_size)  sim->Error (String ("Performance Output::Output_Check: VHT=%lf") % vht);
-//#endif
 
 	vht *= pce;
 	cells = (int) step.size ();
@@ -271,6 +267,8 @@ void Performance_Output::Output_Check (Travel_Step &step)
 			} else {
 				offset = 0;
 			}
+			lane = sim_veh_itr->lane;
+
 			dir_index = sim_veh_itr->link;
 			sim_dir_ptr = &sim->sim_dir_array [dir_index];
 			skip = false;
@@ -307,12 +305,10 @@ void Performance_Output::Output_Check (Travel_Step &step)
 #endif
 				perf_ptr = &perf_period [dir_index];
 
-				if (cell > 0) {
+				if (cell > 0 || (cell == 0 && lane == -1)) {
 					perf_ptr->Add_Enter (pce);
-					perf_ptr->Add_Persons (persons);
-					perf_ptr->Add_Volume (pce);
-					perf_ptr->Add_Occupancy (pce);
-				} else if (first_step) {
+				}
+				if (cell > 0 || first_step) {
 					perf_ptr->Add_Persons (persons);
 					perf_ptr->Add_Volume (pce);
 					perf_ptr->Add_Occupancy (pce);
@@ -333,6 +329,10 @@ void Performance_Output::Output_Check (Travel_Step &step)
 					perf_ptr->Add_Stop_Count (pce);
 				}
 				offset = sim_veh_itr->offset;
+
+				if (sim_veh_itr->Parked ()) {
+					perf_ptr->Add_Exit (pce);
+				}
 			}
 		}
 	}

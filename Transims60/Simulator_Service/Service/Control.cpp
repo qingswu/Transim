@@ -246,7 +246,7 @@ void Simulator_Service::Program_Control (void)
 
 	//---- capacity factor ----
 
-	param.cap_factor = Round (Get_Control_Double (CAPACITY_FACTOR));
+	param.cap_factor = Get_Control_Double (CAPACITY_FACTOR);
 
 	//---- enforce parking lanes -----
 

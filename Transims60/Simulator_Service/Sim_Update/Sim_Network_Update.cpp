@@ -26,7 +26,7 @@ bool Sim_Network_Update::Update_Check (void)
 
 	int i, dir, index, min_lane, max_lane, num, lanes;
 	bool complex, match, use_update_flag, turn_update_flag;
-	double rate, rate_factor, pockets;
+	double capacity, cap_factor, pockets;
 
 	Lane_Data lane_data, *lane_ptr;
 	Lane_Array lane_array;
@@ -44,9 +44,9 @@ bool Sim_Network_Update::Update_Check (void)
 	turn_update_flag = (turn_update_time <= sim->time_step);
 	if (turn_update_flag) turn_update_time = MAX_INTEGER;
 		
-	rate_factor = sim->method_time_step [MACROSCOPIC];
-	if (rate_factor <= 0.0) rate_factor = Dtime (6, SECONDS);
-	rate_factor = sim->param.cap_factor * rate_factor / Dtime (1, HOURS);
+	cap_factor = sim->method_time_step [MACROSCOPIC];
+	if (cap_factor <= 0.0) cap_factor = Dtime (6, SECONDS);
+	cap_factor = sim->param.cap_factor * cap_factor / Dtime (1, HOURS);
 
 	//---- initialize link dir data ----
 
@@ -207,11 +207,11 @@ exit_use:
 
 		if (lanes < dir_ptr->Lanes ()) {
 			pockets = (dir_ptr->Left () + dir_ptr->Right ()) * 0.5;
-			rate = (double) dir_ptr->Capacity () * (lanes + pockets) / (dir_ptr->Lanes () + pockets);
+			capacity = (double) dir_ptr->Capacity () * (lanes + pockets) / (dir_ptr->Lanes () + pockets);
 		} else {
-			rate = dir_ptr->Capacity ();
+			capacity = dir_ptr->Capacity ();
 		}
-		sim_dir_itr->Max_Flow (Round (rate * rate_factor));
+		sim_dir_itr->Max_Flow (Round (capacity * cap_factor));
 
 		if (turn_update_flag) {
 

@@ -71,14 +71,27 @@ void Sim_Node_Step::Start_Processing (void)
 
 	if (num_threads > 1) {
 		Threads threads;
-
+#ifdef CHECK
+		Sim_Dir_Itr sim_dir_itr;
+		for (sim_dir_itr = sim->sim_dir_array.begin (); sim_dir_itr != sim->sim_dir_array.end (); sim_dir_itr++) {
+			if (sim_dir_itr->Lock () > 0) sim->Error (" pre node lock error");
+		}
+#endif
 		node_queue.Start_Work ();
 
 		for (itr = node_list.begin (); itr != node_list.end (); itr++) {
+			Node_Data *node_ptr = &sim->node_array [*itr];
+			if (!sim->method_time_flag [node_ptr->Method ()]) continue;
+			if (sim->method_time_step [node_ptr->Method ()] <= 0) continue;
 			node_queue.Put (*itr);
 		}
 		node_queue.Complete_Work ();
-
+#ifdef CHECK
+		//Sim_Dir_Itr sim_dir_itr;
+		for (sim_dir_itr = sim->sim_dir_array.begin (); sim_dir_itr != sim->sim_dir_array.end (); sim_dir_itr++) {
+			if (sim_dir_itr->Lock () > 0) sim->Error (" post node lock error");
+		}
+#endif
 		//---- sum the counters ----
 
 		num_vehicles = num_waiting = 0;
