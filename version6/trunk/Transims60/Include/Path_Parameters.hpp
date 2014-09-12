@@ -60,6 +60,8 @@ typedef struct {
 	int       station_imped;                 //---- per boarding at a transit station ----
 	double    rail_bias;                     //---- perception factor for rail in-vehicle time ----
 	int       rail_const;                    //---- per rail boarding ----
+	double    brt_bias;                      //---- perception factor for brt in-vehicle time -----
+	int       brt_const;                     //---- per brt boarding ----
 	double    bus_bias;                      //---- perception factor for bus in-vehicle time -----
 	int       bus_const;                     //---- per bus boarding ----
 

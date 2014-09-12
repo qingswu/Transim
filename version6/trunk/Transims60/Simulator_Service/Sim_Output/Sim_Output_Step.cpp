@@ -305,7 +305,7 @@ void Sim_Output_Step::Stop_Processing (void)
 
 void Sim_Output_Step::Output_Check (Travel_Step &step)
 {
-	if (step.Traveler () < 0) return;
+	if (step.Traveler () < 2) return;
 
 	Output_Itr itr;
 

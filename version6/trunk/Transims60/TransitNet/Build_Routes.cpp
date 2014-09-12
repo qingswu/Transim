@@ -83,7 +83,7 @@ void TransitNet::Build_Routes (void)
 			line_ptr->Clear ();
 		}
 		mode = route_itr->Mode ();
-		use = (mode <= EXPRESS_BUS) ? BUS : RAIL;
+		use = (mode <= BRT) ? BUS : RAIL;
 
 		line_ptr->Route (route);
 		line_ptr->Mode (mode);
@@ -114,7 +114,7 @@ void TransitNet::Build_Routes (void)
 				case EXPRESS_BUS:
 					type = 5;
 					break;
-				case TROLLEY:
+				case BRT:
 					type = 6;
 					break;
 				case STREETCAR:
@@ -241,8 +241,8 @@ void TransitNet::Build_Routes (void)
 							link_ptr = &link_array [dir_ptr->Link ()];
 
 							if (!Use_Permission (link_ptr->Use (), use)) {
-								Warning (String ("Link %d does Not Permit %s Service") % 
-									link_ptr->Link () % Transit_Code ((Transit_Type) mode));
+								Warning (String ("Route %d Link %d does Not Permit %s Service Vehicle Type %d") % route %
+									link_ptr->Link () % Transit_Code ((Transit_Type) mode) % veh_type_ptr->Type ());
 							}
 							if (ttime == 0) {
 								if (speed_flag && speed > 0) {
@@ -328,8 +328,8 @@ void TransitNet::Build_Routes (void)
 					link_ptr = &link_array [dir_ptr->Link ()];
 
 					if (!Use_Permission (link_ptr->Use (), use)) {
-						Warning (String ("Link %d does Not Permit %s Service") % 
-							link_ptr->Link () % Transit_Code ((Transit_Type) mode));
+						Warning (String ("Route %d Link %d does Not Permit %s Service Vehicle Type %d") % route %
+							link_ptr->Link () % Transit_Code ((Transit_Type) mode) % veh_type_ptr->Type ());
 					}
 					if (ttime == 0) {
 						if (speed_flag && speed > 0) {
@@ -361,7 +361,7 @@ void TransitNet::Build_Routes (void)
 
 		//---- assign stops to route links ----
 
-		bus_flag = (mode == LOCAL_BUS || mode == EXPRESS_BUS);
+		bus_flag = (mode == LOCAL_BUS || mode == EXPRESS_BUS || mode == BRT);
 
 		dir_ptr = next_ptr = 0;
 		put_flag = false;
@@ -432,7 +432,7 @@ void TransitNet::Build_Routes (void)
 					first_flag = true;
 				}
 			}
-			if (bus_flag && !short_flag && prev_dwell > 0 && dwell > 0 && local_access [dir_index] != 0) {
+			if (bus_flag && mode != BRT && !short_flag && prev_dwell > 0 && dwell > 0 && local_access [dir_index] != 0) {
 				mid_flag = true;
 			}
 			if (!short_flag && dwell > 0) {
@@ -466,7 +466,7 @@ void TransitNet::Build_Routes (void)
 				offset_time = (int) ((double) first_offset * ttime / link_ptr->Length () + 0.5);
 				cum_flag = false;
 				
-				if (bus_flag) {
+				if (bus_flag && mode != BRT) {
 
 					//---- check for special conditions ----
 

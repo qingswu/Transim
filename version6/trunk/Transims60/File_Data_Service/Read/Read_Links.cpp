@@ -240,6 +240,73 @@ bool Data_Service::Get_Link_Data (Link_File &file, Link_Data &link_rec, Dir_Data
 	link_rec.Aoffset (file.Setback_A ());
 	link_rec.Boffset (file.Setback_B ());
 
+	//---- shape index ----
+
+	map_itr = shape_map.find (link_rec.Link ());
+	if (map_itr == shape_map.end ()) {
+		link_rec.Shape (-1);
+	} else {
+		link_rec.Shape (map_itr->second);
+	}
+
+	//---- process link shapes ----
+
+	if (link_rec.Length () == 0) {
+		double xa, ya, xb, yb, x1, y1, x2, y2, length, dx, dy;
+		Node_Data *node_ptr;
+
+		node_ptr = &node_array [link_rec.Anode ()];
+
+		xa = node_ptr->X ();
+		ya = node_ptr->Y ();
+
+		node_ptr = &node_array [link_rec.Bnode ()];
+
+		xb = node_ptr->X ();
+		yb = node_ptr->Y ();
+
+		//---- get the shape record ----
+
+		length = 0;
+
+		if (System_File_Flag (SHAPE) && link_rec.Shape () >= 0) {
+			XYZ_Itr pt_itr;
+
+			Shape_Data *shape_ptr = &shape_array [link_rec.Shape ()];
+
+			x1 = xa;
+			y1 = ya;
+
+			for (pt_itr = shape_ptr->begin (); pt_itr != shape_ptr->end (); pt_itr++) {
+				x2 = pt_itr->x;
+				y2 = pt_itr->y;
+
+				dx = x2 - x1;
+				dy = y2 - y1;
+
+				length += sqrt (dx * dx + dy * dy);
+
+				x1 = x2;
+				y1 = y2;
+			}
+
+			dx = xb - x1;
+			dy = yb - y1;
+
+			length += sqrt (dx * dx + dy * dy);
+		} else {
+			dx = xb - xa;
+			dy = yb - ya;
+
+			length = sqrt (dx * dx + dy * dy);
+		}
+		if (length < 1.0) length = 1.0;
+
+		link_rec.Length (DTOI (length));
+	}
+
+	//---- check offsets ----
+
 	if (link_rec.Length () - link_rec.Aoffset () - link_rec.Boffset () < 0) {
 		Warning (String ("Link %d Length %.1lf and Setbacks %.1lf, %.1lf are Incompatible") %
 			link_rec.Link () % UnRound (link_rec.Length ()) % 
@@ -268,14 +335,6 @@ bool Data_Service::Get_Link_Data (Link_File &file, Link_Data &link_rec, Dir_Data
 	link_rec.Divided (file.Divided ());
 	link_rec.Grade (file.Grade ());
 
-	//---- shape index ----
-
-	map_itr = shape_map.find (link_rec.Link ());
-	if (map_itr == shape_map.end ()) {
-		link_rec.Shape (-1);
-	} else {
-		link_rec.Shape (map_itr->second);
-	}
 	link_rec.Notes (file.Notes ());
 
 	//---- calculate link bearings ----

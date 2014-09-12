@@ -12,8 +12,7 @@ void Simulator_Service::Global_Data (void)
 {
 	int i, j, k, n, use_code, dir, index, in_off, out_off, bnode, lane, min_lane, max_lane;
 	int transfer, change, record, subarea;
-	
-	int length, offset, *list, c0, c1, bear1, bear2, next, max_cell;
+	int length, offset, *list, c0, c1, bear1, bear2, next, max_cell, runs;
 	bool flag;
 	double cap_factor;
 
@@ -25,8 +24,11 @@ void Simulator_Service::Global_Data (void)
 	Pocket_Data *pocket_ptr;
 	Lane_Map_Array lane_map;
 	Lane_Map_Itr lane_itr;
-
-	Veh_Type_Itr type_itr;
+	Line_Itr line_itr;  
+	Veh_Type_Itr veh_type_itr;
+	Veh_Type_Data *veh_type_ptr;
+	Sim_Veh_Data veh_data;
+	Sim_Travel_Data sim_travel_data;
 	Link_Itr link_itr;
 	Node_Data *node_ptr;
 	Location_Itr loc_itr;
@@ -45,9 +47,9 @@ void Simulator_Service::Global_Data (void)
 	use_code = Use_Code ("CAR");
 
 	if (param.cell_size == 0) {
-		for (type_itr = veh_type_array.begin (); type_itr != veh_type_array.end (); type_itr++) {
-			if ((type_itr->Use () & use_code) != 0) {
-				param.cell_size = type_itr->Length ();
+		for (veh_type_itr = veh_type_array.begin (); veh_type_itr != veh_type_array.end (); veh_type_itr++) {
+			if ((veh_type_itr->Use () & use_code) != 0) {
+				param.cell_size = veh_type_itr->Length ();
 				break;
 			}
 		}
@@ -58,26 +60,49 @@ void Simulator_Service::Global_Data (void)
 	}
 	param.half_cell = param.cell_size / 2;
 
-	for (type_itr = veh_type_array.begin (); type_itr != veh_type_array.end (); type_itr++) {
-		type_itr->Cells (MAX (((type_itr->Length () + param.half_cell) / param.cell_size), 1));
+	for (veh_type_itr = veh_type_array.begin (); veh_type_itr != veh_type_array.end (); veh_type_itr++) {
+		veh_type_itr->Cells (MAX (((veh_type_itr->Length () + param.half_cell) / param.cell_size), 1));
 	}
+
+	//---- initialize vehicle and traveler memory -----
+
+	max_cell = 0;
+
+	if (param.transit_flag) {
+
+		//---- count transit cells ----
+
+		for (line_itr = line_array.begin (); line_itr != line_array.end (); line_itr++) {
+			runs = (int) line_itr->begin ()->size ();
+
+			if (line_itr->run_types.size () > 0) {
+				for (i=0; i < runs; i++) {
+					veh_type_ptr = &veh_type_array [line_itr->Run_Type (i)];
+					max_cell += veh_type_ptr->Cells ();
+				}
+			} else {
+				veh_type_ptr = &veh_type_array [line_itr->Type ()];
+				max_cell += runs * veh_type_ptr->Cells ();
+			}
+		}
+	}
+
+	//---- reserve memory ----
+
+	sim_travel_array.reserve (line_array.Num_Runs () + num_travelers);
+	sim_veh_array.reserve (2 * num_travelers + max_cell);
+
+	//---- insert blank records to avoid numbering conflicts ----
+
+	sim_veh_array.push_back (veh_data);				//---- zero reserved for non-vehicle trips ----
+
+	sim_travel_array.push_back (sim_travel_data);	//---- zero reserved for unoccupied cells ----
+	sim_travel_array.push_back (sim_travel_data);	//---- -1 reserved for pocket lanes, <-1 = traveler ID for tail of multi-cell vehicles ----
 
 	//---- create transit vehicles -----
 
 	if (param.transit_flag) {
 		Transit_Vehicles ();
-	} else if (num_travelers > 0) {
-		Sim_Veh_Data veh_data;
-
-		//---- reserve memory ----
-
-		sim_travel_array.reserve (num_travelers);
-		sim_veh_array.reserve (2 * num_travelers);
-
-		//---- insert two blank vehicle cells to avoid numbering conflicts ----
-
-		sim_veh_array.push_back (veh_data);
-		sim_veh_array.push_back (veh_data);
 	}
 
 	//---- convert the distance/speed parameters to cells ----
@@ -164,6 +189,7 @@ void Simulator_Service::Global_Data (void)
 			sim_dir_ptr = &sim_dir_array [index];
 
 			sim_dir_ptr->Speed (dir_ptr->Speed ());
+if (sim_dir_ptr->Speed () < param.cell_size) sim_dir_ptr->Speed (param.cell_size);
 			sim_dir_ptr->Dir (dir);
 			sim_dir_ptr->Type (link_itr->Type ());
 			sim_dir_ptr->Turn (false);

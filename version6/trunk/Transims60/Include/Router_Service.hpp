@@ -74,7 +74,8 @@ protected:
 		DISTANCE_VALUES, COST_VALUES, FREEWAY_BIAS_FACTORS, EXPRESSWAY_BIAS_FACTORS, 
 		LEFT_TURN_PENALTIES, RIGHT_TURN_PENALTIES, U_TURN_PENALTIES, 
 		TRANSFER_PENALTIES, STOP_WAITING_PENALTIES, STATION_WAITING_PENALTIES,
-		BUS_BIAS_FACTORS, BUS_BIAS_CONSTANTS, RAIL_BIAS_FACTORS, RAIL_BIAS_CONSTANTS, 
+		BUS_BIAS_FACTORS, BUS_BIAS_CONSTANTS, BRT_BIAS_FACTORS, BRT_BIAS_CONSTANTS, 
+		RAIL_BIAS_FACTORS, RAIL_BIAS_CONSTANTS, 
 		MAX_WALK_DISTANCES, WALK_PENALTY_DISTANCES, WALK_PENALTY_FACTORS, 
 		MAX_BICYCLE_DISTANCES, BIKE_PENALTY_DISTANCES, BIKE_PENALTY_FACTORS, 
 		MAX_WAIT_TIMES, WAIT_PENALTY_TIMES, WAIT_PENALTY_FACTORS, MIN_WAIT_TIMES, 
@@ -110,9 +111,9 @@ private:
 	Double_List value_walk, value_bike, value_wait, value_xfer, value_time, value_dist, value_cost, value_park;
 	Integer_List left_imped, right_imped, uturn_imped, xfer_imped, stop_imped, station_imped;
 	Integer_List max_parkride, max_kissride, max_walk, walk_pen, max_bike, bike_pen;
-	Integer_List max_xfers, rail_const, bus_const;
+	Integer_List max_xfers, rail_const, brt_const, bus_const;
 	Dtime_List max_wait, wait_pen, min_wait;
-	Double_List freeway_fac, express_fac, kissride_fac, rail_bias, bus_bias, walk_fac, bike_fac, wait_fac;
+	Double_List freeway_fac, express_fac, kissride_fac, rail_bias, brt_bias, bus_bias, walk_fac, bike_fac, wait_fac;
 
 	Db_Header park_pen_file;
 	Db_Header stop_pen_file;

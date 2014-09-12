@@ -11,7 +11,8 @@
 void NetPrep::Program_Control (void)
 {
 	String key;
-	int i, j, num;
+	Strings parts;
+	int i, j, num, mode;
 
 	//---- create the network files ----
 
@@ -575,17 +576,36 @@ void NetPrep::Program_Control (void)
 				Error ("Route Mode Map was Not Found");
 			}
 			for (str_itr = str_list.begin (); str_itr != str_list.end (); str_itr++) {
-				j = Transit_Code (*str_itr);
+				key = *str_itr;
+				key.Parse (parts, "=");
+				if (parts.size () != 2) {
+					Error ("Route Mode Map Syntax (input_mode_number = TRANSIMS_mode_name)");
+				}
+				mode = parts [0].Integer ();
+				j = Transit_Code (parts [1]);
 				if (j == ANY_TRANSIT) {
 					Error ("Route Mode Map is Out of Range");
 				}
-				mode_map.push_back (j);
+				mode_map.insert (Int_Map_Data (mode, j));
 			}
 
 			//---- process the mode veh_type map ----
 
-			if (!Get_Control_List_Groups (MODE_VEH_TYPE_MAP, mode_type_map)) {
-				Error ("Mode Vehicle Type Map was Not Found");
+			memset (mode_type_map, '\0', sizeof (mode_type_map));
+
+			if (Get_Control_List_Groups (MODE_VEH_TYPE_MAP, str_list)) {
+				for (str_itr = str_list.begin (); str_itr != str_list.end (); str_itr++) {
+					key = *str_itr;
+					key.Parse (parts, "=");
+					if (parts.size () != 2) {
+						Error ("Mode Veh Type Map Syntax (TRANSIMS_mode_name = vehicle_type_number)");
+					}
+					j = Transit_Code (parts [0]);
+					if (j == ANY_TRANSIT) {
+						Error ("Route Mode Map is Out of Range");
+					}
+					mode_type_map [j] = parts [1].Integer ();
+				}
 			}
 
 			//---- read the input route files ----

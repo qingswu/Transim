@@ -56,7 +56,12 @@ void Simulator::Execute (void)
 		}
 		Step_Code (time_step);
 		io_flag = ((time_step % one_second) == 0);
-	
+
+		if (random_time > 0) {
+			random_node_flag = ((time_step & random_time) == 0 && time_step > 0);
+		} else {
+			random_node_flag = false;
+		}
 		for (i=0; i <= MICROSCOPIC; i++) {
 			if (method_time_step [i] > 0) {
 				method_time_flag [i] = ((time_step % method_time_step [i]) == 0);
@@ -100,7 +105,7 @@ void Simulator::Execute (void)
 		travel_total += (clock () - start);
 
 		//---- process the network traffic ----
-
+;
 		start = clock ();
 		sim_node_step.Start_Processing ();
 		node_total += (clock () - start);
@@ -110,6 +115,7 @@ void Simulator::Execute (void)
 			max_time = time_step;
 		}
 		if (!Active () && !read_status) break;
+//Write (0, " OK");
 	}
 	if (Master ()) End_Progress (time_step.Time_String ());
 

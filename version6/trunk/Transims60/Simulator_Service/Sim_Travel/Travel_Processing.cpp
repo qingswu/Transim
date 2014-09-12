@@ -118,29 +118,24 @@ void Sim_Travel_Process::Travel_Processing (Sim_Travel_Ptr sim_travel_ptr)
 		//---- check the leg type ----
 
 		if (sim_leg_ptr->Mode () == DRIVE_MODE) {
-
-			if (sim_leg_ptr->Type () != DIR_ID) {
-				sim->Warning ("Drive Type Error=") << sim_leg_ptr->Type ();
-				break;
-			} else {
-				step.Dir_Index (sim_leg_ptr->Index ());
 #ifdef CHECK
-				if (sim_leg_ptr->Type () != DIR_ID) sim->Error (String ("Sim_Travel_Process::Travel_Processing: Leg Type=%d") % sim_leg_ptr->Type ());
-				if (step.Dir_Index () < 0 || (int) sim->sim_dir_array.size () <= step.Dir_Index ()) sim->Error ("Sim_Travel_Process::Travel_Processing: Dir_Index");
+			if (sim_leg_ptr->Type () != DIR_ID) sim->Error (String ("Sim_Travel_Process::Travel_Processing: Leg Type=%d") % sim_leg_ptr->Type ());
+			if (sim_leg_ptr->Index () < 0 || (int) sim->sim_dir_array.size () <= sim_leg_ptr->Index ()) sim->Error ("Sim_Travel_Process::Travel_Processing: Dir_Index");
 #endif
-				step.sim_dir_ptr = &sim->sim_dir_array [sim_leg_ptr->Index ()];
+			step.Dir_Index (sim_leg_ptr->Index ());
+			step.sim_dir_ptr = &sim->sim_dir_array [sim_leg_ptr->Index ()];
 
-				if (step.sim_dir_ptr->Method () == NO_SIMULATION) {
-					sim_travel_ptr->Status (OFF_NET_DRIVE);
-				} else {
+			if (step.sim_dir_ptr->Method () == NO_SIMULATION) {
+				sim_travel_ptr->Status (OFF_NET_DRIVE);
+			} else {
 
-					//---- add the vehicle to the link load queue ----
+				//---- add the vehicle to the link load queue ----
 
-					sim_travel_ptr->Status (OFF_ON_DRIVE);
-					step.sim_dir_ptr->Load_Queue (sim_travel_ptr->Traveler ());
-					break;
-				}
+				sim_travel_ptr->Status (OFF_ON_DRIVE);
+				step.sim_dir_ptr->Load_Queue (sim_travel_ptr->Traveler ());
+				break;
 			}
+
 		} else if (sim_leg_ptr->Type () == PARKING_ID || sim_leg_ptr->Type () == STOP_ID) {
 			next_leg_ptr = sim_plan_ptr->Get_Next (sim_leg_ptr);
 

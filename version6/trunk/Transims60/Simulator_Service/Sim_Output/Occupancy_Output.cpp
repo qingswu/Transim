@@ -255,7 +255,7 @@ void Occupancy_Output::Write_Check (void)
 
 void Occupancy_Output::Output_Check (Travel_Step &step)
 {
-	if (max_flag || step.Traveler () < 0 || step.size () == 0 || !data_flag) return;
+	if (max_flag || step.Traveler () < 2 || step.size () == 0 || !data_flag) return;
 	
 	int dir_index, cell, index;
 	bool skip, first;

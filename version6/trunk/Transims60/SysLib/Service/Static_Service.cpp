@@ -219,11 +219,11 @@ Static_Service::Code_Text Static_Service::connect_codes [] = {
 //---- transit mode codes ----
 
 Static_Service::Code_Text Static_Service::transit_codes [] = {
-	{ NO_TRANSIT, "NONE" }, { NO_TRANSIT, "NO_MODE" }, { NO_TRANSIT, "N/A" }, { NO_TRANSIT, "" },
-	{ LOCAL_BUS, "BUS" }, { LOCAL_BUS, "LOCAL_BUS" }, { LOCAL_BUS, "LOCAL" }, { EXPRESS_BUS, "EXPRESS" }, 
-	{ EXPRESS_BUS, "EXPRESS_BUS" }, { TROLLEY, "TROLLEY" }, { STREETCAR, "STREETCAR" }, 
-	{ LRT, "LIGHTRAIL" }, { LRT, "LRT" }, { RAPIDRAIL, "RAPIDRAIL" }, { RAPIDRAIL, "METRORAIL" },
-	{ REGIONRAIL, "REGIONRAIL" }, { REGIONRAIL, "AMTRAK" }, { ANY_TRANSIT, "ANY_MODE" }, { ANY_TRANSIT, "ANY" }, 
+	{ NO_TRANSIT, "NONE" }, { LOCAL_BUS, "LOCAL_BUS" }, { EXPRESS_BUS, "EXPRESS_BUS" }, { BRT, "BRT" }, 
+	{ STREETCAR, "STREETCAR" }, { LRT, "LIGHTRAIL" }, { RAPIDRAIL, "RAPIDRAIL" }, { REGIONRAIL, "REGIONRAIL" }, 
+	{ ANY_TRANSIT, "ANY_MODE" }, { NO_TRANSIT, "NO_MODE" }, { NO_TRANSIT, "N/A" }, { NO_TRANSIT, "" },
+	{ LOCAL_BUS, "BUS" }, { LOCAL_BUS, "LOCAL" }, { EXPRESS_BUS, "EXPRESS" }, { BRT, "TROLLEY" }, 
+	{ LRT, "LRT" }, { RAPIDRAIL, "METRORAIL" }, { REGIONRAIL, "AMTRAK" },  { ANY_TRANSIT, "ANY" }, 
 	{ 0, 0 }
 };
 
@@ -307,7 +307,7 @@ Static_Service::Code_Text  Static_Service::use_codes [] = {
 	{ BUS, "BUS" }, { RAIL, "RAIL" }, { SOV, "SOV" }, { HOV2, "HOV2" }, { HOV3, "HOV3" }, 
 	{ HOV4, "HOV4" }, { LIGHTTRUCK, "LIGHTTRUCK" }, { HEAVYTRUCK, "HEAVYTRUCK" }, { RESTRICTED, "RESTRICTED" }, 
 	{ NONE, "NONE" }, { CAR, "CAR" }, { BIKE, "BIKE" }, { TAXI, "TAXI" }, { BUS, "LOCAL" }, { BUS, "EXPRESS" },
-	{ BUS, "LOCAL_BUS" }, { BUS, "EXPRESS_BUS" }, { RAIL, "TROLLEY" }, { RAIL, "STREETCAR" }, 
+	{ BUS, "LOCAL_BUS" }, { BUS, "EXPRESS_BUS" }, { BUS, "BRT" }, { BUS, "TROLLEY" }, { RAIL, "STREETCAR" }, 
 	{ RAIL, "LIGHTRAIL" }, { RAIL, "LRT" }, { RAIL, "RAPIDRAIL" }, { RAIL, "METRORAIL"}, { RAIL, "REGIONRAIL" }, 
 	{ RAIL, "AMTRAK" }, { 0, 0 }
 };

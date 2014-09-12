@@ -118,7 +118,7 @@ bool Sim_Node_Process::Load_Vehicle (int traveler)
 		//---- try to load onto the best lanes ----
 
 		for (lane = next_leg->In_Best_High (); lane >= next_leg->In_Best_Low (); lane--) {
-			loaded = Cell_Use (sim_dir_ptr, lane, cell, step);
+			loaded = Check_Cell (sim_dir_ptr, lane, cell, step);
 			if (loaded) break;
 		}
 		if (!loaded) {
@@ -126,12 +126,12 @@ bool Sim_Node_Process::Load_Vehicle (int traveler)
 			//---- try to load on the permitted lanes ----
 
 			for (lane = next_leg->In_Lane_High (); lane > next_leg->In_Best_High (); lane--) {
-				loaded = Cell_Use (sim_dir_ptr, lane, cell, step);
+				loaded = Check_Cell (sim_dir_ptr, lane, cell, step);
 				if (loaded) break;
 			}
 			if (!loaded) {
 				for (lane = next_leg->In_Best_Low ()-1; lane >= next_leg->In_Lane_Low (); lane--) {
-					loaded = Cell_Use (sim_dir_ptr, lane, cell, step);
+					loaded = Check_Cell (sim_dir_ptr, lane, cell, step);
 					if (loaded) break;
 				}
 			}
@@ -142,7 +142,7 @@ bool Sim_Node_Process::Load_Vehicle (int traveler)
 		//---- try to load onto the best lanes ----
 
 		for (lane = next_leg->In_Best_Low (); lane <= next_leg->In_Best_High (); lane++) {
-			loaded = Cell_Use (sim_dir_ptr, lane, cell, step);
+			loaded = Check_Cell (sim_dir_ptr, lane, cell, step);
 			if (loaded) break;
 		}
 		if (!loaded) {
@@ -150,12 +150,12 @@ bool Sim_Node_Process::Load_Vehicle (int traveler)
 			//---- try to load on the permitted lanes ----
 
 			for (lane = next_leg->In_Lane_Low (); lane < next_leg->In_Best_Low (); lane++) {
-				loaded = Cell_Use (sim_dir_ptr, lane, cell, step);
+				loaded = Check_Cell (sim_dir_ptr, lane, cell, step);
 				if (loaded) break;
 			}
 			if (!loaded) {
 				for (lane = next_leg->In_Best_High ()+1; lane <= next_leg->In_Lane_High (); lane++) {
-					loaded = Cell_Use (sim_dir_ptr, lane, cell, step);
+					loaded = Check_Cell (sim_dir_ptr, lane, cell, step);
 					if (loaded) break;
 				}
 			}
@@ -187,6 +187,7 @@ bool Sim_Node_Process::Load_Vehicle (int traveler)
 		sim_travel_ptr->Speed (sim_dir_ptr->Speed ());
 	}
 	sim_travel_ptr->Wait (0);
+	sim_travel_ptr->Priority (0);
 	sim_travel_ptr->Step_Code (sim->Step_Code ());
 
 	sim_dir_ptr->Add (lane, cell, traveler);

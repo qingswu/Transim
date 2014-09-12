@@ -3,6 +3,7 @@
 //*********************************************************
 
 #include "Sim_Node_Process.hpp"
+#include "Simulator_Service.hpp"
 
 //---------------------------------------------------------
 //	Sim_Node_Process -- constructor
@@ -10,19 +11,14 @@
 
 Sim_Node_Process::Sim_Node_Process (void) : Static_Service ()
 {
-	id = 1;
-	num_pce = num_vehicles = num_waiting = 0;
-	stats.Clear_Statistics ();
 }
 
 #ifdef THREADS
 
-Sim_Node_Process::Sim_Node_Process (Work_Queue *queue, int _id) : Static_Service ()
+Sim_Node_Process::Sim_Node_Process (Work_Queue *queue, int id) : Static_Service ()
 {
 	node_queue = queue;
-	id = _id + 1; 
-	num_pce = num_vehicles = num_waiting = 0;
-	stats.Clear_Statistics ();
+	Initialize (id);
 }
 
 //---------------------------------------------------------
@@ -41,3 +37,15 @@ void Sim_Node_Process::operator()()
 	}
 }
 #endif
+
+//---------------------------------------------------------
+//	Initialize
+//---------------------------------------------------------
+
+void Sim_Node_Process::Initialize (int _id)
+{
+	id = _id + 1; 
+	num_pce = num_vehicles = num_waiting = 0;
+	stats.Clear_Statistics ();
+	random.Seed (sim->Random_Seed () * id);
+}

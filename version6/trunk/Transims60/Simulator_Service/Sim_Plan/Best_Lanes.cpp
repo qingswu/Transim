@@ -122,7 +122,6 @@ bool Sim_Plan_Process::Best_Lanes (Sim_Trip_Ptr sim_trip_ptr, Integers &leg_list
 			last_leg->Out_Best_High (high_lane);
 
 			time = MIN ((time * (des_off - org_off) / length), 1);
-			//last_leg->Time (time);
 			continue;
 		}
 		if (leg_ptr->Mode () != DRIVE_MODE) continue;
@@ -231,7 +230,6 @@ END_LOCK
 		last_leg->Connect (map2_itr->second);
 			
 		time = MIN ((time * (des_off - org_off) / length), 1);
-		//last_leg->Time (time);
 
 		dir_index = to_index;
 		des_off = length = sim_dir_ptr->Length ();

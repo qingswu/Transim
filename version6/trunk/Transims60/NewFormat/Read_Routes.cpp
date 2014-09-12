@@ -61,7 +61,7 @@ void NewFormat::Read_Routes (void)
 			case EXPRESS_BUS:
 				route_rec.Veh_Type (5);
 				break;
-			case TROLLEY:
+			case BRT:
 				route_rec.Veh_Type (6);
 				break;
 			case STREETCAR:

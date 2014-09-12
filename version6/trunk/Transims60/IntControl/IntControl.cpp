@@ -11,7 +11,7 @@
 IntControl::IntControl (void) : Data_Service ()
 {
 	Program ("IntControl");
-	Version (2);
+	Version (3);
 	Title ("Intersection Traffic Controls");
 
 	System_File_Type required_files [] = {

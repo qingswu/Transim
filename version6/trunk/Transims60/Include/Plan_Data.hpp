@@ -144,7 +144,9 @@ public:
 	void operator = (Trip_Data data)        { *((Trip_Data *) this) = data; }
 
 	Time_Index Get_Time_Index (void)        { return (Time_Index (depart, Household (), Person ())); }
-	void Get_Time_Index (Time_Index &index) { index.Set (depart, Household (), Person ()); }
+
+	void Get_Index (Trip_Index &index)      { Trip_Data::Get_Index (index); }
+	void Get_Index (Time_Index &index)      { index.Set (depart, Household (), Person ()); }
 
 	bool Internal_IDs (void);
 	bool External_IDs (void);

@@ -64,7 +64,7 @@ bool Sim_Plan_Step::Read_Plans (void)
 		first_num = next [num];
 
 		if (file_set [num]->Read_Plan (*plan_ptr)) {
-			plan_ptr->Get_Time_Index (*time_ptr);
+			plan_ptr->Get_Index (*time_ptr);
 
 			//---- update the record order ---
 

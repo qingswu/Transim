@@ -172,7 +172,7 @@ Traveler_Output::~Traveler_Output ()
 
 void Traveler_Output::Output_Check (Travel_Step &step)
 {
-	if (step.Traveler () < 0 || !time_range.In_Range (sim->time_step) || step.size () < 1) return;
+	if (step.Traveler () < 2 || !time_range.In_Range (sim->time_step) || step.size () < 1) return;
 
 	Traveler_Data data;
 	Sim_Veh_Itr sim_veh_itr;

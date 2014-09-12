@@ -302,5 +302,14 @@
     <ClCompile Include="Sim_Node\Node_Processing.cpp">
       <Filter>Sim_Node\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Sim_Node\Look_Ahead.cpp">
+      <Filter>Sim_Node\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sim_Node\Sum_Path.cpp">
+      <Filter>Sim_Node\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sim_Node\Check_Cell.cpp">
+      <Filter>Sim_Node\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

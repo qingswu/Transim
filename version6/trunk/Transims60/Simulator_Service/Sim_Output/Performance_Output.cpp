@@ -204,7 +204,7 @@ void Performance_Output::Write_Check (void)
 
 void Performance_Output::Output_Check (Travel_Step &step)
 {
-	if (step.Traveler () < 0 || !time_range.In_Range (sim->time_step) || step.size () < 1) return;
+	if (step.Traveler () < 2 || !time_range.In_Range (sim->time_step) || step.size () < 1) return;
 
 	int dir_index, cell, cells, offset, lane;
 	double pce, persons, vmt, vht;

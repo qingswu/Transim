@@ -258,12 +258,7 @@ Sim_Trip_Ptr Sim_Plan_Process::Plan_Processing (Plan_Data *plan_ptr)
 	if (drive_flag) {
 		sim->stats.num_veh_trips++;
 
-		if (!Best_Lanes (sim_trip_ptr, leg_list)) {
-			//step.Problem (CONNECT_PROBLEM);
-			//step.Status (2);
-			//Output_Step (step);
-			//sim_travel_ptr->Next_Plan ();
-		}
+		Best_Lanes (sim_trip_ptr, leg_list);
 	}
 	return (sim_trip_ptr);
 

@@ -11,7 +11,7 @@
 ArcPerf::ArcPerf (void) : Data_Service (), Select_Service (), Draw_Service ()
 {
 	Program ("ArcPerf");
-	Version (7);
+	Version (8);
 	Title ("ArcView Performance Files");
 
 	System_File_Type required_files [] = {

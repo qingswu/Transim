@@ -174,6 +174,7 @@ void Simulator_Service::Program_Control (void)
 			sim_group_array.push_back (group);
 		}
 	}
+	random_time = Get_Control_Time (RANDOM_NODE_INCREMENT);
 
 	//---- time steps per second ----
 

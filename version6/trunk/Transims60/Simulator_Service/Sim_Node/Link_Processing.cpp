@@ -82,7 +82,7 @@ bool Sim_Node_Process::Link_Processing (int link)
 
 			//---- data problem ----
 
-			if (sim_travel_ptr->Vehicle () < 0) {
+			if (sim_travel_ptr->Vehicle () < 1) {
 				step.Problem (PATH_PROBLEM);
 				sim->Output_Step (step);
 				continue;
@@ -255,6 +255,5 @@ load_check:
 		}
 	}
 	sim->sim_dir_array.UnLock (sim_dir_ptr, ID ());
-
 	return (true);
 }

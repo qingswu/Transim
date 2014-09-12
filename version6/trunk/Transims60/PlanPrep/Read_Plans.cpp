@@ -157,7 +157,7 @@ void PlanPrep::Plan_Processing::Read_Plans (int part)
 				}
 			}
 		} else if (exe->Trip_Sort () == TIME_SORT) {
-			plan_ptr->Get_Time_Index (time_index);
+			plan_ptr->Get_Index (time_index);
 
 			time_stat = time_sort.insert (Time_Map_Data (time_index, (int) plan_ptr_array.size ()));
 

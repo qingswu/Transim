@@ -11,10 +11,10 @@
 
 bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 {
-	int i, in_offset, out_offset, length, in_cell, out_cell, max_cell, speed, min_speed, max_speed, spd1, spd2, spd0;
+	int i, in_offset, out_offset, in_cell, out_cell, max_cell, speed, min_speed, max_speed, spd1, spd2, spd0;
 	int dir_index, new_index, index, move, offset, new_offset, move_size, cell, lane, max_move, lanes;
-	int distance, min_distance, max_distance, l, low, high, control, from_dir, num_cells, off, num_sec;
-	bool new_link, lane_change, move_flag, exit_flag, next_leg_flag, slow_down, change_flag;
+	int distance, min_distance, max_distance, l, low, high, control, from_dir, num_cells, c, num_sec;
+	bool new_link, keep_flag, move_flag, exit_flag, next_leg_flag, slow_down, change_flag;
 	double speed_change;
 	Dtime step_size;
 
@@ -38,8 +38,8 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 	}
 	sim_travel_ptr = step.sim_travel_ptr;
 #ifdef CHECK
-	if (sim_travel_ptr == 0) sim->Error ("Sim_Link_Process::Move_Vehicle: sim_travel_ptr");
-	if (sim_travel_ptr->Vehicle () < 0) sim->Error ("Sim_Link_Process::Move_Vehicle: Vehicle");
+	if (sim_travel_ptr == 0) sim->Error ("Sim_Node_Process::Move_Vehicle: sim_travel_ptr");
+	if (sim_travel_ptr->Vehicle () < 1) sim->Error ("Sim_Node_Process::Move_Vehicle: Vehicle");
 #endif
 
 	if (step.sim_veh_ptr == 0) {
@@ -47,11 +47,8 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 	}
 	sim_veh_ptr = step.sim_veh_ptr;
 #ifdef CHECK
-	if (sim_veh_ptr == 0) sim->Error ("Sim_Link_Process::Move_Vehicle: sim_veh_ptr");
+	if (sim_veh_ptr == 0) sim->Error ("Sim_Node_Process::Move_Vehicle: sim_veh_ptr");
 #endif
-	offset = sim_veh_ptr->offset;
-	cell = sim->Offset_Cell (offset);
-	lane = sim_veh_ptr->lane;
 
 	if (step.Dir_Index () < 0) {
 		step.Dir_Index (sim_veh_ptr->link);
@@ -68,7 +65,7 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 	sim_dir_ptr = step.sim_dir_ptr;
 
 #ifdef CHECK
-	if (sim_dir_ptr == 0) sim->Error ("Sim_Link_Process::Move_Vehicle: sim_dir_ptr");
+	if (sim_dir_ptr == 0) sim->Error ("Sim_Node_Process::Move_Vehicle: sim_dir_ptr");
 #endif
 	step_size = sim->method_time_step [sim_dir_ptr->Method ()];
 
@@ -77,8 +74,8 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 	}
 	sim_plan_ptr = step.sim_plan_ptr;
 #ifdef CHECK
-	if (sim_plan_ptr == 0) sim->Error ("Sim_Link_Process::Move_Vehicle: sim_plan_ptr");
-	if (sim_plan_ptr->Veh_Type () < 0) sim->Error ("Sim_Link_Process::Move_Vehicle: Veh_Type");
+	if (sim_plan_ptr == 0) sim->Error ("Sim_Node_Process::Move_Vehicle: sim_plan_ptr");
+	if (sim_plan_ptr->Veh_Type () < 0) sim->Error ("Sim_Node_Process::Move_Vehicle: Veh_Type");
 #endif
 
 	if (step.veh_type_ptr == 0) {
@@ -86,14 +83,13 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 	}
 	veh_type_ptr = step.veh_type_ptr;
 #ifdef CHECK
-	if (veh_type_ptr == 0) sim->Error ("Sim_Link_Process::Move_Vehicle: veh_type_ptr");
+	if (veh_type_ptr == 0) sim->Error ("Sim_Node_Process::Move_Vehicle: veh_type_ptr");
 #endif
 
 	//---- initialize the link limits ----
 
 	in_offset = sim_dir_ptr->In_Offset ();
 	out_offset = sim_dir_ptr->Out_Offset ();
-	length = sim_dir_ptr->Length ();
 
 	in_cell = sim_dir_ptr->In_Cell ();
 	out_cell = sim_dir_ptr->Out_Cell ();
@@ -119,12 +115,10 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 	//---- check for parking or stop events ----
 
 	step.sim_leg_ptr = leg_ptr = sim_plan_ptr->Get_Leg ();
-	if (leg_ptr->Type () == STOP_ID) {
-		sim->Warning ("STOP_ID");
-		return (false);
-	}
-	low = leg_ptr->Out_Best_Low ();
-	high = leg_ptr->Out_Best_High ();
+
+#ifdef CHECK
+	if (leg_ptr->Type () == STOP_ID) sim->Error ("Sim_Node_Process::Move_Vehicle: Leg Type");
+#endif
 
 	next_ptr = sim_plan_ptr->Get_Next (leg_ptr);
 
@@ -134,26 +128,44 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 
 			if (sim_park_ptr->Type () != BOUNDARY) {
 				if (sim_dir_ptr->Dir () == 0) {
-					length = sim_park_ptr->Offset_AB ();
+					max_cell = sim->Offset_Cell (sim_park_ptr->Offset_AB ());
 				} else {
-					length = sim_park_ptr->Offset_BA ();
+					max_cell = sim->Offset_Cell (sim_park_ptr->Offset_BA ());
 				}
-				max_cell = sim->Offset_Cell (length);
 			}
 		} else if (next_ptr->Type () == STOP_ID) {
 			sim_stop_ptr = &sim->sim_stop_array [next_ptr->Index ()];
-			length = sim_stop_ptr->Offset ();
-			max_cell = sim->Offset_Cell (length);
+			max_cell = sim->Offset_Cell (sim_stop_ptr->Offset ());
 		}
 	}
+	
+	//---- remove the vehicle from the current location ----
+
+	sim_veh = *sim_veh_ptr;
+
+	offset = sim_veh.offset;
+	cell = sim->Offset_Cell (offset);
+	lane = sim_veh.lane;
+
+	step.push_back (sim_veh);
+
+	sim_dir_ptr->Remove (lane, cell);
 
 	connect_ptr = 0;
 	control = UNCONTROLLED;
-	change_flag = false;
+	change_flag = keep_flag = false;
 
 	//---- meso / micro setup ----
 
 	if (sim_dir_ptr->Method () > MACROSCOPIC) {
+
+		//---- look ahead lane change ----
+
+		if (Look_Ahead (sim_dir_ptr, lane, cell, step)) {
+			keep_flag = true;
+			sim_veh.lane = lane;
+			step.push_back (sim_veh);
+		}
 
 		//---- get the connection control ----
 
@@ -164,7 +176,10 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 
 		//---- set plan following / lane change flags ----
 
-		num_cells = max_cell - sim->Offset_Cell (sim_veh_ptr->offset);
+		num_cells = max_cell - cell;
+
+		low = leg_ptr->Out_Best_Low ();
+		high = leg_ptr->Out_Best_High ();
 
 		if (num_cells < sim->param.plan_follow && (lane < low || lane > high)) {
 			change_flag = true;
@@ -180,11 +195,11 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 			}
 			lanes = (sim->param.lane_change_levels * num_cells / lanes + sim->param.plan_follow / 2) / sim->param.plan_follow; 
 
-			if (lanes <= sim->param.change_priority && max_speed > min_speed) {
+			if (lanes <= sim->param.change_priority && max_speed > 0 && max_speed > min_speed) {
 				if (lanes > 0) {
-					if (Cell_Use (sim_dir_ptr, lane + l, cell, step)) {
-						num_cells = sim_dir_ptr->Speed () * lanes / sim->param.lane_change_levels + 1;
-						if (max_speed > num_cells) {
+					if (Check_Cell (sim_dir_ptr, lane + l, cell, step)) {
+						spd0 = sim_dir_ptr->Speed () * lanes / sim->param.lane_change_levels + 1;
+						if (max_speed > spd0) {
 							max_speed -= veh_type_ptr->Max_Decel ();
 						}
 					}
@@ -192,6 +207,19 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 					max_speed -= veh_type_ptr->Max_Decel ();
 				}
 				if (max_speed < min_speed) max_speed = min_speed;
+
+				lanes = sim->param.change_priority - lanes + 1;
+				if (lanes > sim_travel_ptr->Priority ()) sim_travel_ptr->Priority (lanes);
+			}
+
+			//---- consider a lane change ----
+
+			if (change_flag && sim_travel_ptr->Priority () > 0) {
+				if (Check_Cell (sim_dir_ptr, lane + l, cell, step)) {
+					sim_veh.lane = lane = lane + l;
+					step.push_back (sim_veh);
+					change_flag = false;
+				}
 			}
 		}
 
@@ -224,13 +252,6 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 			}
 		}
 	}
-	
-	//---- remove the vehicle from the current location ----
-
-	sim_veh = *sim_veh_ptr;
-	step.push_back (sim_veh);
-
-	sim_dir_ptr->Remove (lane, cell);
 
 	//---- calculate the move limits ----
 
@@ -266,7 +287,7 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 	//---- process each movement increment ----
 
 	for (move = 0; move <= max_move; move++) {
-		new_link = next_leg_flag = lane_change = false;
+		new_link = next_leg_flag = slow_down = false;
 
 		//---- meso / micro logic ----
 
@@ -278,37 +299,14 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 
 				//---- check the exit lanes ----
 
-				if (lane < leg_ptr->Out_Lane_Low ()) {
-					if (Cell_Use (sim_dir_ptr, lane + 1, cell, step)) {
-						lane++;
-						lane_change = true;
-						goto make_move;
+				if (lane < leg_ptr->Out_Best_Low () || lane > leg_ptr->Out_Best_High ()) { 
+					if (Lane_Change (sim_dir_ptr, lane, cell, step)) {
+						sim_veh.Location (dir_index, lane, offset);
+						step.push_back (sim_veh);
+						keep_flag = true;
 					}
-					break;
-				} else if (lane > leg_ptr->Out_Lane_High ()) {
-					if (Cell_Use (sim_dir_ptr, lane - 1, cell, step)) {
-						lane--;
-						lane_change = true;
-						goto make_move;
-					}
-					break;
-				}
-
-				//---- try changing to the best lane ----
-
-				if (lane < leg_ptr->Out_Best_Low ()) {
-					if (Cell_Use (sim_dir_ptr, lane + 1, cell, step)) {
-						lane++;
-						lane_change = true;
-						goto make_move;
-					}
-				} else if (lane > leg_ptr->Out_Best_High ()) {
-					if (Cell_Use (sim_dir_ptr, lane - 1, cell, step)) {
-						lane--;
-						lane_change = true;
-						goto make_move;
-					}
-				}
+					if (lane < leg_ptr->Out_Lane_Low () || lane > leg_ptr->Out_Lane_High ()) continue;
+				} 
 
 				//---- check the traffic control ----
 
@@ -317,7 +315,7 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 					//---- check stop controls ----
 
 					if (control == RED_LIGHT || (speed > 0 && (control == STOP_SIGN || control == STOP_GREEN))) {
-						if (move > 1 && move == max_move && !lane_change) {
+						if (move > 1 && move == max_move && !keep_flag) {
 							slow_down = true;
 						} else {
 							if (control == RED_LIGHT) {
@@ -332,7 +330,7 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 					//---- yellow decision ----
 
 					if (control == YELLOW_LIGHT && distance > min_distance) {	
-						if (move > 1 && move == max_move && !lane_change) {
+						if (move > 1 && move == max_move && !keep_flag) {
 							slow_down = true;
 						} else {
 							control_ptr = &sim->sim_signal_array [sim_dir_ptr->Control ()];
@@ -345,31 +343,49 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 					//---- check conflicts ----
 
 					if (control != PROTECTED_GREEN && connect_ptr > 0) {
-				
+#ifdef CHECK
+						if (leg_ptr->Connect () < 0 || leg_ptr->Connect () >= (int) sim->sim_connection.size ()) 
+							sim->Error ("Sim_Node_Process::Move_Vehicle: leg connect");
+#endif				
 						sim_con_ptr = &sim->sim_connection [leg_ptr->Connect ()];
 
 						for (i=0; i < sim_con_ptr->Max_Conflicts (); i++) {
 							index = sim_con_ptr->Conflict (i);
 							if (index < 0) continue;
-
+#ifdef CHECK
+							if (index >= (int) sim->connect_array.size ()) 
+								sim->Error ("Sim_Node_Process::Move_Vehicle: connect index");
+#endif	
 							conflict_ptr = &sim->connect_array [index];
 
 							if (i == 0) {
 								from_dir = conflict_ptr->Dir_Index ();
 								low = conflict_ptr->Low_Lane ();
 								high = conflict_ptr->High_Lane ();
-								off = sim->sim_dir_array [from_dir].Length () - 1;
+#ifdef CHECK
+								if (from_dir < 0 || from_dir >= (int) sim->sim_dir_array.size ()) 
+									sim->Error ("Sim_Node_Process::Move_Vehicle: from_dir");
+#endif	
+								c = sim->sim_dir_array [from_dir].Max_Cell ();
 							} else {
 								from_dir = conflict_ptr->To_Index ();
 								low = conflict_ptr->To_Low_Lane ();
 								high = conflict_ptr->To_High_Lane ();
-								off = 0;
+								c = 0;
 							}
 							num_cells = max_cell - cell + (high - low + 1) / 2;
+#ifdef CHECK
+							if (num_cells < 0) 
+								sim->Error (String ("Sim_Node_Process::Move_Vehicle: num_cells=%d") % num_cells);
+							if (from_dir < 0 || from_dir >= (int) sim->sim_dir_array.size ()) 
+								sim->Error ("Sim_Node_Process::Move_Vehicle: from_dir");
 
+							if (low < 0 || high >= sim->sim_dir_array [from_dir].Lanes ()) 
+								sim->Error ("Sim_Node_Process::Move_Vehicle: lanes");
+#endif
 							for (l=low; l <= high; l++) {
-								if (!Check_Behind (Sim_Veh_Data (from_dir, l, off), step, num_cells)) {
-									if (move > 1 && !lane_change) {
+								if (!Check_Behind (from_dir, l, c, step, num_cells)) {
+									if (move > 1 && !keep_flag) {
 										slow_down = true;
 									} else {
 										step.Speed (0);
@@ -384,23 +400,13 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 
 			} else {
 
-				//---- try changing to the best lane ----
+				//---- try changing lanes ----
 
 				if (change_flag) {
-					if (lane < leg_ptr->Out_Best_Low ()) {
-						if (Cell_Use (sim_dir_ptr, lane + 1, cell, step)) {
-							lane++;
-							lane_change = true;
-							change_flag = (lane < leg_ptr->Out_Best_Low ());
-							goto make_move;
-						}
-					} else if (lane > leg_ptr->Out_Best_High ()) {
-						if (Cell_Use (sim_dir_ptr, lane - 1, cell, step)) {
-							lane--;
-							lane_change = true;
-							change_flag = (lane > leg_ptr->Out_Best_High ());
-							goto make_move;
-						}
+					if (Lane_Change (sim_dir_ptr, lane, cell, step)) {
+						keep_flag = true;
+						change_flag = (lane < leg_ptr->Out_Best_Low () || lane > leg_ptr->Out_Best_High ());
+						goto make_move;
 					}
 				}
 			}
@@ -425,6 +431,7 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 		//---- end of leg ----
 
 		if (cell > max_cell) {
+
 			if (next_ptr->Type () == PARKING_ID) {
 
 				//---- park the vehicle ----
@@ -468,6 +475,7 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 					sim_travel_ptr->Next_Event (sim->time_step);
 					sim_travel_ptr->Status (ON_OFF_DRIVE);
 					sim_travel_ptr->Wait (0);
+					sim_travel_ptr->Priority (0);
 					exit_flag = true;
 					goto output;
 				}
@@ -482,6 +490,47 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 				high = next_ptr->In_Best_High ();
 				new_link = true;
 			}
+
+		} else {
+
+			//---- check for a pocket lane ----
+
+			if (sim_dir_ptr->Get (lane, cell) < 0) {
+				if (lane > 0) {
+					l = lane - 1;
+
+					if (Check_Cell (sim_dir_ptr, l, cell, step)) {
+						lane = l;
+						goto make_move;
+					}
+				}
+				l = lane + 1;
+				if (l < sim_dir_ptr->Lanes ()) {
+					if (Check_Cell (sim_dir_ptr, l, cell, step)) {
+						lane = l;
+						goto make_move;
+					}
+				}
+				if (cell > 1) {
+					cell--;
+					if (lane > 0) {
+						l = lane - 1;
+
+						if (Check_Cell (sim_dir_ptr, l, cell, step)) {
+							lane = l;
+							goto make_move;
+						}
+					}
+					l = lane + 1;
+					if (l < sim_dir_ptr->Lanes ()) {
+						if (Check_Cell (sim_dir_ptr, l, cell, step)) {
+							lane = l;
+							goto make_move;
+						}
+					}
+				}
+				break;
+			}
 		}
 
 		//---- check the new cell options ----
@@ -489,8 +538,7 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 		move_flag = false;
 
 		for (l = low; l <= high; l++) {
-
-			if (Cell_Use (new_dir_ptr, l, cell, step)) {
+			if (Check_Cell (new_dir_ptr, l, cell, step)) {
 				lane = l;
 				move_flag = true;
 				break;
@@ -501,54 +549,8 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 
 				//---- consider changing lanes ----
 
-				if (leg_ptr->Out_Best_Low () < lane) {
-					if (Cell_Use (new_dir_ptr, lane - 1, cell, step)) {
-						lane = lane - 1;
-						move_flag = true;
-					}
-				}
-				if (!move_flag) {
-					if (leg_ptr->Out_Best_High () > lane) {
-						if (Cell_Use (new_dir_ptr, lane + 1, cell, step)) {
-							lane = lane + 1;
-							move_flag = true;
-						}
-					}
-					if (!move_flag) {
-						if (leg_ptr->Out_Lane_Low () < lane) {
-							if (Cell_Use (new_dir_ptr, lane - 1, cell, step)) {
-								lane = lane - 1;
-								move_flag = true;
-							}
-						}
-						if (!move_flag) {
-							if (leg_ptr->Out_Lane_High () > lane) {
-								if (Cell_Use (new_dir_ptr, lane + 1, cell, step)) {
-									lane = lane + 1;
-									move_flag = true;
-								}
-							}
-							if (!move_flag) {
-								l = low - 1;
-								if (l >= 0 && new_dir_ptr->Get (low, cell) < 0) {
-									if (Cell_Use (new_dir_ptr, l, cell, step)) {
-										lane = l;
-										move_flag = true;
-									}
-								}
-								if (!move_flag) {
-									l = high + 1;
-									if (l < new_dir_ptr->Lanes () && new_dir_ptr->Get (high, cell) < 0) {
-										if (Cell_Use (new_dir_ptr, l, cell, step)) {
-											lane = l;
-											move_flag = true;
-										}
-									}
-								}
-							}
-						}
-					}
-				}
+				move_flag = Lane_Change (new_dir_ptr, lane, cell, step);
+				if (move_flag) keep_flag = true;
 			}
 			if (!move_flag) {
 				if (new_link) {
@@ -556,6 +558,8 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 				}
 				break;
 			}
+		} else if (!new_link) {
+			keep_flag = false;
 		}
 
 		//---- move forward ----
@@ -570,11 +574,13 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 
 make_move:
 		sim_veh.Location (dir_index, lane, offset);
+
 		step.push_back (sim_veh);
 
 		//---- move to the next leg ----
 
 		if (next_leg_flag) {
+			keep_flag = true;
 
 			if (!sim_plan_ptr->Next_Leg ()) break;
 
@@ -587,17 +593,14 @@ make_move:
 
 					if (sim_park_ptr->Type () != BOUNDARY) {
 						if (sim_dir_ptr->Dir () == 0) {
-							length = sim_park_ptr->Offset_AB ();
+							max_cell = sim->Offset_Cell (sim_park_ptr->Offset_AB ());
 						} else {
-							length = sim_park_ptr->Offset_BA ();
+							max_cell = sim->Offset_Cell (sim_park_ptr->Offset_BA ());
 						}
-						max_cell = sim->Offset_Cell (length);
 					}
 				} else if (next_ptr->Type () == STOP_ID) {
 					sim_stop_ptr = &sim->sim_stop_array [next_ptr->Index ()];
-
-					length = sim_stop_ptr->Offset ();
-					max_cell = sim->Offset_Cell (length);
+					max_cell = sim->Offset_Cell (sim_stop_ptr->Offset ());
 				}
 			}
 
@@ -610,6 +613,24 @@ make_move:
 				if (leg_ptr->Connect () >= 0) {
 					connect_ptr = &sim->connect_array [leg_ptr->Connect ()];
 					control = connect_ptr->Control ();
+				}
+
+				//---- set plan following / lane change flags ----
+
+				num_cells = max_cell - cell;
+		
+				low = leg_ptr->Out_Best_Low ();
+				high = leg_ptr->Out_Best_High ();
+
+				if (num_cells < sim->param.plan_follow && (lane < low || lane > high)) {
+					change_flag = true;
+
+					lanes = (sim->param.lane_change_levels * num_cells + sim->param.plan_follow / 2) / sim->param.plan_follow; 
+
+					if (lanes <= sim->param.change_priority) {
+						lanes = sim->param.change_priority - lanes + 1;
+						if (lanes > sim_travel_ptr->Priority ()) sim_travel_ptr->Priority (lanes);
+					}
 				}
 			}
 		}
@@ -646,6 +667,7 @@ output:
 		sim_travel_ptr->Add_Wait (step_size);
 	} else if (move) {
 		sim_travel_ptr->Wait (0);
+		sim_travel_ptr->Priority (0);
 	}
 	return (exit_flag);
 }

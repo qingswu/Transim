@@ -77,6 +77,7 @@ class SYSLIB_API Simulator_Service : public Data_Service, public Select_Service
 	friend class Sim_Plan_Data;
 	friend class Sim_Travel_Data;
 	friend class Sim_Dir_Data;
+	friend class Sim_Dir_Array;
 
 public:
 
@@ -85,9 +86,8 @@ public:
 protected:
 	enum Simulator_Service_Keys { 
 		SIMULATION_START_TIME = SIM_SERVICE_OFFSET, SIMULATION_END_TIME, SIMULATION_TIME_BREAKS, 
-		SIMULATION_GROUP_SUBAREAS, GROUP_PERIOD_METHODS,
+		SIMULATION_GROUP_SUBAREAS, GROUP_PERIOD_METHODS, RANDOM_NODE_INCREMENT, 
 		UNSIMULATED_TIME_STEPS, MACROSCOPIC_TIME_STEPS, MESOSCOPIC_TIME_STEPS, MICROSCOPIC_TIME_STEPS,
-
 		CELL_SIZE, PLAN_FOLLOWING_DISTANCE, LOOK_AHEAD_DISTANCE, LOOK_AHEAD_LANE_FACTOR, 
 		LOOK_AHEAD_TIME_FACTOR, LOOK_AHEAD_VEHICLE_FACTOR, MAXIMUM_SWAPPING_SPEED, 
 		MAXIMUM_SPEED_DIFFERENCE, CAPACITY_FACTOR, ENFORCE_PARKING_LANES, 
@@ -137,9 +137,10 @@ protected:
 	int sim_period, max_method;
 	Time_Periods sim_periods;
 	Shts_Array period_subarea_method;
+	bool random_node_flag;
 	bool method_time_flag [MICROSCOPIC + 1];
 	Dtime method_time_step [MICROSCOPIC + 1];
-	Dtime time_step, end_period, half_second, one_second, one_minute, one_hour;
+	Dtime time_step, end_period, half_second, one_second, one_minute, one_hour, random_time;
 	Dtimes period_step_size;
 
 	//---- simulation groups ----

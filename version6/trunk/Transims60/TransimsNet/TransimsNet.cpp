@@ -11,7 +11,7 @@
 TransimsNet::TransimsNet (void) : Data_Service ()
 {
 	Program ("TransimsNet");
-	Version (10);
+	Version (12);
 	Title ("Network Conversion Utility");
 
 	System_File_Type required_files [] = {

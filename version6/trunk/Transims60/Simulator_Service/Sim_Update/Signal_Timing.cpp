@@ -33,7 +33,7 @@ bool Sim_Control_Update::Signal_Timing (int index, Sim_Signal_Itr signal_itr)
 	for (int_itr = signal_ptr->nodes.begin (); int_itr != signal_ptr->nodes.end (); int_itr++) {
 		node_ptr = &sim->node_array [*int_itr];
 
-		if (node_ptr->Method () == MESOSCOPIC || node_ptr->Method () == MICROSCOPIC) {
+		if (node_ptr->Method () >= MESOSCOPIC) {
 			flag = true;
 			break;
 		}

@@ -16,6 +16,8 @@ void ArcSnapshot::Program_Control (void)
 
 	string method_text [] = { "AT_INCREMENT", "TOTAL", "MAXIMUM", "" };
 
+	Set_Range_String (SUMMARY_TIME_INCREMENT, "0.0..1440.0");
+
 	//---- open network files ----
 
 	Data_Service::Program_Control ();

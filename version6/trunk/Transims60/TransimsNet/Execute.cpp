@@ -124,12 +124,13 @@ void TransimsNet::Execute (void)
 
 	//---- link detail lane use ----
 
-	if (link_use_flag && System_File_Flag (NEW_LANE_USE)) {
-		Read_Link_Uses ();
+	if (System_File_Flag (NEW_LANE_USE)) {
+		if (link_use_flag) {
+			Read_Link_Uses ();
 
-		Lane_Use ();
-		nuse = (int) lane_use_array.size ();
-
+			Lane_Use ();
+			nuse = (int) lane_use_array.size ();
+		}
 		Write_Lane_Uses ();
 	}
 
