@@ -34,6 +34,8 @@ void Router_Service::Set_Parameters (Path_Parameters &p, int type, int veh_type)
 	p.station_imped = station_imped.Best (type) * 10;
 	p.bus_bias = bus_bias.Best (type);
 	p.bus_const = bus_const.Best (type) * 10;
+	p.brt_bias = brt_bias.Best (type);
+	p.brt_const = brt_const.Best (type) * 10;
 	p.rail_bias = rail_bias.Best (type);
 	p.rail_const = rail_const.Best (type) * 10;
 	p.max_walk = Round (max_walk.Best (type));

@@ -14,6 +14,7 @@ int Path_Builder::Build_Path (int lot)
 	bike_flag = (param.max_bike != 0);
 	wait_flag = (param.max_wait != 0);
 	rail_bias_flag = (param.rail_bias != 1.0 || param.rail_const != 0);
+	brt_bias_flag = (param.brt_bias != 1.0 || param.brt_const != 0);
 	bus_bias_flag = (param.bus_bias != 1.0 || param.bus_const != 0);
 	turn_flag = (param.left_imped > 0 || param.right_imped > 0 || param.uturn_imped > 0);
 	random_flag = (param.random_imped > 0);

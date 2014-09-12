@@ -315,7 +315,7 @@ enum Use_Type {         //---- facility use restrictions ----
 	SOV, HOV2, HOV3, HOV4, LIGHTTRUCK, HEAVYTRUCK, TAXI, RESTRICTED, NONE
 };
 enum Transit_Type {     //---- transit route/mode types ----
-	NO_TRANSIT, LOCAL_BUS, EXPRESS_BUS, TROLLEY, STREETCAR, LRT, 
+	NO_TRANSIT, LOCAL_BUS, EXPRESS_BUS, BRT, STREETCAR, LRT, 
 	RAPIDRAIL, REGIONRAIL, ANY_TRANSIT
 };
 enum Class_Type {       //---- transit fare types ----

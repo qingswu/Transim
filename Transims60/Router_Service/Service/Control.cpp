@@ -249,6 +249,16 @@ void Router_Service::Program_Control (void)
 		Get_Control_List_Groups (BUS_BIAS_CONSTANTS, bus_const);
 		param.bus_const = bus_const [0] * 10;
 
+		//---- brt bias factor ----
+		
+		Get_Control_List_Groups (BRT_BIAS_FACTORS, brt_bias);
+		param.brt_bias = brt_bias [0];
+
+		//---- brt bias constant ----
+
+		Get_Control_List_Groups (BRT_BIAS_CONSTANTS, brt_const);
+		param.brt_const = brt_const [0] * 10;
+
 		//---- rail bias factor ----
 
 		Get_Control_List_Groups (RAIL_BIAS_FACTORS, rail_bias);

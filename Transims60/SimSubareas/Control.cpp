@@ -32,8 +32,9 @@ void SimSubareas::Program_Control (void)
 
 		boundary_file.File_Type ("Subarea Boundary File");
 
-		boundary_file.Open (exe->Project_Filename (key));
-
+		if (!boundary_file.Open (Project_Filename (key))) {
+			Error (String ("Opening Boundary File %s") % boundary_file.Filename ());
+		}
 		if (Check_Control_Key (SUBAREA_DATA_FIELD)) {
 			key = Get_Control_Text (SUBAREA_DATA_FIELD);
 			subarea_field = boundary_file.Required_Field (key);

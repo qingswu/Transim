@@ -10,7 +10,7 @@
 
 void Simulator_Service::Transit_Vehicles (void)
 {
-	int i, j, k, k1, last_veh, route, index, traveler, cells, line_cells, runs;
+	int i, j, k, k1, last_veh, route, index, traveler, cells, line_cells;
 	String transit_veh;
 	bool run_flag;
 
@@ -54,36 +54,6 @@ void Simulator_Service::Transit_Vehicles (void)
 	}
 	Print (2, "Transit Vehicle ID = ") << transit_veh;
 	Print (1, "Number of Transit Vehicles = ") << line_array.Num_Runs ();
-
-	//---- count vehicle cells ----
-
-	cells = 0;
-
-	for (line_itr = line_array.begin (); line_itr != line_array.end (); line_itr++) {
-		runs = (int) line_itr->begin ()->size ();
-
-		if (line_itr->run_types.size () > 0) {
-			for (i=0; i < runs; i++) {
-				veh_type_ptr = &veh_type_array [line_itr->Run_Type (i)];
-				cells += veh_type_ptr->Cells ();
-			}
-		} else {
-			veh_type_ptr = &veh_type_array [line_itr->Type ()];
-			cells += runs * veh_type_ptr->Cells ();
-		}
-	}
-
-	//---- reserve memory ----
-
-	sim_travel_array.reserve (line_array.Num_Runs () + num_travelers);
-	sim_veh_array.reserve (2 * num_travelers + cells);
-
-	//---- insert two blank vehicle cells to avoid numbering conflicts ----
-
-	sim_veh_array.push_back (veh_data);
-	sim_veh_array.push_back (veh_data);
-
-	//run_update_time = MAX_INTEGER;
 
 	//---- create a traveler for each transit run ----
 

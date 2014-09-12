@@ -10,7 +10,7 @@
 
 void NetPrep::Input_Routes (void)
 {
-	int i, period, last_node, last_saved, in_lines, out_lines;
+	int i, period, last_node, last_saved, in_lines, out_lines, mode;
 	bool stop, line_flag, first_node;
 	Dtime freq;
 	String record, text;
@@ -44,6 +44,7 @@ void NetPrep::Input_Routes (void)
 		data.ttime = 0;
 		data.offset = -1;
 		data.mode = -1;
+		data.veh_type = group_itr->veh_type;
 		data.notes = String ("Group %d") % group_itr->group;
 		
 		first_node = false;
@@ -84,6 +85,7 @@ void NetPrep::Input_Routes (void)
 					data.ttime = 0;
 					data.offset = -1;
 					data.mode = -1;
+					data.veh_type = group_itr->veh_type;
 					data.notes = String ("Group %d") % group_itr->group;
 					line_flag = true;
 					first_node = true;
@@ -107,21 +109,17 @@ void NetPrep::Input_Routes (void)
 
 					record.Split (text, ",");
 
-					data.mode = text.Integer ();
+					mode = text.Integer ();
+					map_itr = mode_map.find (mode);
 
-					if (data.mode > 0) {
-						if (data.mode < (int) mode_map.size ()) {
-							data.mode = mode_map [data.mode];
-
-							if (data.mode == -1) {
-								Warning (String ("Mode %s was Not Converted") % text);
-								mode_map [data.mode] = -2;
-								data.mode = -1;
-							}
-						} else {
-							data.mode = -1;
-						}
+					if (map_itr == mode_map.end ()) {
+						Warning (String ("Mode %d was Not Converted") % mode);
+						mode_map.insert (Int_Map_Data (data.mode, NO_TRANSIT));
+						mode = 0;
+					} else {
+						mode = map_itr->second;
 					}
+					data.mode = mode;
 
 				} else if (text.Starts_With ("FREQ")) {
 

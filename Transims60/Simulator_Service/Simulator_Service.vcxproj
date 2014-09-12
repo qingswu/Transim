@@ -280,7 +280,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='BinThreads|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>..\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_MSC_EXTENSIONS;THREADS;CHECK</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_MSC_EXTENSIONS;THREADS;</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -357,13 +357,16 @@
     <ClCompile Include="Service\Sim_Parameters.cpp" />
     <ClCompile Include="Sim_Node\Cell_Use.cpp" />
     <ClCompile Include="Sim_Node\Check_Behind.cpp" />
+    <ClCompile Include="Sim_Node\Check_Cell.cpp" />
     <ClCompile Include="Sim_Node\Lane_Change.cpp" />
     <ClCompile Include="Sim_Node\Link_Processing.cpp" />
     <ClCompile Include="Sim_Node\Load_Vehicle.cpp" />
+    <ClCompile Include="Sim_Node\Look_Ahead.cpp" />
     <ClCompile Include="Sim_Node\Move_Vehicle.cpp" />
     <ClCompile Include="Sim_Node\Node_Processing.cpp" />
     <ClCompile Include="Sim_Node\Sim_Node_Process.cpp" />
     <ClCompile Include="Sim_Node\Sim_Node_Step.cpp" />
+    <ClCompile Include="Sim_Node\Sum_Path.cpp" />
     <ClCompile Include="Sim_Output\Event_Output.cpp" />
     <ClCompile Include="Sim_Output\Occupancy_Output.cpp" />
     <ClCompile Include="Sim_Output\Performance_Output.cpp" />

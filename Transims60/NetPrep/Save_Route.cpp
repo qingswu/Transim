@@ -144,7 +144,11 @@ void NetPrep::Save_Route (Route_Data &data)
 
 		route_ptr->Name (data.name);
 		route_ptr->Mode (data.mode);
-		route_ptr->Veh_Type (mode_type_map.Best (data.mode));
+		if (data.veh_type == 0) {
+			route_ptr->Veh_Type (mode_type_map [data.mode]); 
+		} else {
+			route_ptr->Veh_Type (data.veh_type);
+		}
 		route_ptr->Notes (data.notes);
 
 		for (i=0; i < num_periods; i++) {
@@ -266,7 +270,11 @@ void NetPrep::Save_Route (Route_Data &data)
 
 			route_ptr->Name (data.name);
 			route_ptr->Mode (data.mode);
-			route_ptr->Veh_Type (mode_type_map.Best (data.mode));
+			if (data.veh_type == 0) {
+				route_ptr->Veh_Type (mode_type_map [data.mode]);
+			} else {
+				route_ptr->Veh_Type (data.veh_type);
+			}
 			route_ptr->Notes (data.notes);
 
 			for (i=0; i < num_periods; i++) {

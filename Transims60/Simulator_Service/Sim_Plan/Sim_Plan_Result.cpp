@@ -77,7 +77,7 @@ bool Sim_Plan_Step::Sim_Plan_Result (Sim_Trip_Ptr sim_trip_ptr)
 	person_index.Person (sim_travel_ptr->Person ());
 
 	traveler = (int) sim->sim_travel_array.size ();
-	if (traveler == 0) traveler = 1;
+	if (traveler == 0) traveler = 2;
 
 	person_stat = sim->person_map.insert (Person_Map_Data (person_index, traveler));
 
@@ -91,12 +91,6 @@ bool Sim_Plan_Step::Sim_Plan_Result (Sim_Trip_Ptr sim_trip_ptr)
 
 		//---- create a new travel record ----
 
-		if (sim->sim_travel_array.size () == 0) {
-			Sim_Travel_Data sim_travel_data;
-			sim_travel_data.Traveler (0);
-			sim_travel_data.Household (0);
-			sim->sim_travel_array.push_back (sim_travel_data);
-		}
 		sim_travel_ptr->Traveler (traveler);
 		sim_travel_ptr->random.Seed (sim->Random_Seed () + traveler);
 		sim_travel_ptr->Status (NOT_ACTIVE);
@@ -104,11 +98,11 @@ bool Sim_Plan_Step::Sim_Plan_Result (Sim_Trip_Ptr sim_trip_ptr)
 		sim->sim_travel_array.push_back (*sim_travel_ptr);
 	}
 #ifdef CHECK
-	if (traveler < 0 || (int) sim->sim_travel_array.size () <= traveler) sim->Error ("Sim_Plan_Step::Sim_Plan_Result: traveler");
+	if (traveler < 2 || (int) sim->sim_travel_array.size () <= traveler) sim->Error ("Sim_Plan_Step::Sim_Plan_Result: traveler");
 #endif
 	sim_travel_ptr = &sim->sim_travel_array [traveler];
 	sim_travel_ptr->Add_Plan (*sim_plan_ptr);
-//if (sim_travel_ptr->Household () == 6977) sim->Write (1, " traveler=") << traveler;
+
 	delete sim_trip_ptr;
 	return (true);
 }

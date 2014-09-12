@@ -38,7 +38,7 @@ void PlanPrep::Time_Combine (Plan_File *temp_file, int num_temp)
 		time_ptr = time_rec_set [num];
 
 		if (temp_file_set [num]->Read_Plan (*plan_ptr)) {
-			plan_ptr->Get_Time_Index (*time_ptr);
+			plan_ptr->Get_Index (*time_ptr);
 		} else {
 			time_ptr->Set (MAX_INTEGER, 0, 0);
 		}
@@ -93,7 +93,7 @@ void PlanPrep::Time_Combine (Plan_File *temp_file, int num_temp)
 		//---- get the next record for the first partition ----
 
 		if (temp_file_set [num]->Read_Plan (*plan_ptr)) {
-			plan_ptr->Get_Time_Index (*time_ptr);
+			plan_ptr->Get_Index (*time_ptr);
 
 			//---- update the record order ---
 

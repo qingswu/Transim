@@ -64,12 +64,8 @@ bool Sim_Transit_Update::Update_Check (void)
 			person_index.Person (0);
 
 			traveler = (int) sim->sim_travel_array.size ();
+			if (traveler == 0) traveler = 2;
 
-			if (traveler == 0) {
-				sim_travel_data.Traveler (0);
-				sim->sim_travel_array.push_back (sim_travel_data);
-				traveler = 1;
-			}
 			person_stat = sim->person_map.insert (Person_Map_Data (person_index, traveler));
 
 			//---- create a new traveler ----

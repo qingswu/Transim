@@ -37,7 +37,7 @@ bool Sim_Plan_Step::First_Plan (void)
 				time_ptr = time_set [num];
 
 				if (file_set [num]->Read_Plan (*plan_ptr)) {
-					plan_ptr->Get_Time_Index (*time_ptr);
+					plan_ptr->Get_Index (*time_ptr);
 					stat = true;
 
 					//---- sort the partition numbers by time ----

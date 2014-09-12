@@ -140,8 +140,8 @@ private:
 	//---- transit line files ----
 	
 	Format_Type route_format;
-	Integers mode_map;
-	Integer_List mode_type_map;
+	Int_Map mode_map;
+	int mode_type_map [ANY_TRANSIT];
 	Time_Periods schedule_periods;
 
 	typedef struct {
@@ -158,7 +158,7 @@ private:
 	
 	typedef struct {
 		bool oneway, flip;
-		int mode;
+		int mode, veh_type;
 		Dtime ttime, offset;
 		String name, notes;
 		Dtimes headway;

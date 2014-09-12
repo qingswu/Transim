@@ -11,7 +11,7 @@
 TransitNet::TransitNet (void) : Data_Service ()
 {
 	Program ("TransitNet");
-	Version (7);
+	Version (10);
 	Title ("Transit Network Conversion Utility");
 	
 	System_File_Type required_files [] = {

@@ -21,11 +21,10 @@ bool Sim_Node_Process::Cell_Use (Sim_Dir_Ptr sim_dir_ptr, int lane, int cell, Tr
 	step.Delay (0);
 
 	if (lane < 0 || lane >= sim_dir_ptr->Lanes () || cell < 0 || cell > sim_dir_ptr->Max_Cell ()) return (false);
-	if (!sim_dir_ptr->Check (lane, cell)) return (false);
 	if (cell <= sim_dir_ptr->In_Cell () || cell >= sim_dir_ptr->Out_Cell ()) return (true);
 
 	if (step.sim_travel_ptr == 0) {
-		if (step.Traveler () < 0) return (false);
+		if (step.Traveler () < 2) return (false);
 		step.sim_travel_ptr = &sim->sim_travel_array [step.Traveler ()];
 	}
 	if (step.sim_plan_ptr == 0) {
@@ -123,7 +122,7 @@ bool Sim_Node_Process::Cell_Use (Sim_Dir_Ptr sim_dir_ptr, int lane, int cell, Tr
 					int diff = 0;
 					if (use_ptr->Max_Delay () > use_ptr->Min_Delay ()) {
 						seed = abs (index + sim->Random_Seed () + step.Traveler () + lane);
-						diff = DTOI ((use_ptr->Max_Delay () - use_ptr->Min_Delay ()) * sim->random.Probability (seed));
+						diff = DTOI ((use_ptr->Max_Delay () - use_ptr->Min_Delay ()) * random.Probability (seed));
 					}
 					step.Delay (use_ptr->Min_Delay () + diff);
 				}

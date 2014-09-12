@@ -144,7 +144,6 @@ public:
 				exit_wait.notify_one ();
 				return (ptr);
 			} else if (data_done) {
-				mutex_lock lock (data_mutex);
 				data_wait.notify_one ();
 			} else {
 				result_full.notify_all ();
@@ -159,6 +158,7 @@ public:
 	void Finished (void)
 	{
 		mutex_lock lock (result_mutex);
+
 		num_out++;
 		if (num_in == num_out && (end_of_work || end_of_data)) {
 			work_done = end_of_work;
@@ -174,6 +174,7 @@ public:
 	void End_of_Work (void)
 	{ 
 		mutex_lock lock (work_mutex);
+
 		end_of_work = true;
 		work_empty.notify_one ();
 
@@ -189,8 +190,9 @@ public:
 
 	void Complete_Work (void)
 	{
+		mutex_lock lock (result_mutex);
+
 		if (num_in != num_out) {
-			mutex_lock lock (data_mutex);
 			end_of_data = true;
 			data_wait.wait (lock);
 		}
@@ -219,7 +221,7 @@ private:
 
 	condition_variable  work_full, work_empty, result_full, result_empty;
 	condition_variable  exit_wait, data_wait;
-	mutex  work_mutex, result_mutex, exit_mutex, data_mutex;
+	mutex  work_mutex, result_mutex, exit_mutex;
 };
 #endif
 #endif

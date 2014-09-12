@@ -12,7 +12,7 @@
 Sim_Plan_Ptr Sim_Travel_Data::Get_Plan (void)
 {
 #ifdef CHECK
-	if (plan_index >= 0 && (int) sim->sim_plan_array.size () <= plan_index) sim->Error ("Sim_Travel_Data::Get_Plan: plan_index");
+	if (plan_index >= 0 && (int) sim->sim_plan_array.size () <= plan_index) sim->Error (String ("Sim_Travel_Data::Get_Plan: plan_index=%d traveler=%d step=%d") % plan_index % Traveler () % sim->time_step);
 #endif
 	return ((plan_index >= 0) ? sim->sim_plan_array.Record_Pointer (plan_index) : 0);
 }
@@ -24,7 +24,7 @@ Sim_Plan_Ptr Sim_Travel_Data::Get_Plan (void)
 bool Sim_Travel_Data::Next_Plan (void)
 {
 #ifdef CHECK
-	if (plan_index < 0 || (int) sim->sim_plan_array.size () <= plan_index) sim->Error ("Sim_Travel_Data::Next_Plan: plan_index");
+	if (plan_index < 0 || (int) sim->sim_plan_array.size () <= plan_index) sim->Error (String ("Sim_Travel_Data::Next_Plan: plan_index=%d") % plan_index);
 #endif
 	return ((plan_index = sim->sim_plan_array.Free_Record (plan_index)) >= 0);
 }
@@ -44,7 +44,7 @@ void Sim_Travel_Data::Add_Plan (Sim_Plan_Data &plan)
 
 		for (index = plan_index; index >= 0; index = plan_ptr->Next_Record ()) {
 #ifdef CHECK
-			if (index < 0 || (int) sim->sim_plan_array.size () <= index) sim->Error ("Sim_Travel_Data::Add_Plan: index");
+			if (index < 0 || (int) sim->sim_plan_array.size () <= index) sim->Error (String ("Sim_Travel_Data::Add_Plan: index=%d") % index);
 #endif
 			plan_ptr = sim->sim_plan_array.Record_Pointer (index);
 #ifdef CHECK

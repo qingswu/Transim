@@ -166,13 +166,18 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 
 					//---- apply mode bias ----
 
-					if (line_ptr->Mode () > EXPRESS_BUS) {
-						if (rail_bias_flag) {
-							imped = DTOI (imped * param.rail_bias + param.rail_const);
+					if (line_ptr->Mode () <= EXPRESS_BUS) {
+						if (bus_bias_flag) {
+							imped = DTOI (imped * param.bus_bias + param.bus_const);
 							if (imped < 1) imped = 1;
 						}
-					} else if (bus_bias_flag) {
-						imped = DTOI (imped * param.bus_bias + param.bus_const);
+					} else if (line_ptr->Mode () == BRT) {
+						if (brt_bias_flag) {
+								imped = DTOI (imped * param.brt_bias + param.brt_const);
+								if (imped < 1) imped = 1;
+						}
+					} else if (rail_bias_flag) {
+						imped = DTOI (imped * param.rail_bias + param.rail_const);
 						if (imped < 1) imped = 1;
 					}
 					to_imp = wait_imp + imped;
@@ -381,13 +386,18 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 
 					//---- apply mode bias ----
 
-					if (line_ptr->Mode () > EXPRESS_BUS) {
-						if (rail_bias_flag) {
-							imped = DTOI (imped * param.rail_bias + param.rail_const);
+					if (line_ptr->Mode () <= EXPRESS_BUS) {
+						if (bus_bias_flag) {
+							imped = DTOI (imped * param.bus_bias + param.bus_const);
 							if (imped < 1) imped = 1;
 						}
-					} else if (bus_bias_flag) {
-						imped = DTOI (imped * param.bus_bias + param.bus_const);
+					} else if (line_ptr->Mode () == BRT) {
+						if (brt_bias_flag) {
+								imped = DTOI (imped * param.brt_bias + param.brt_const);
+								if (imped < 1) imped = 1;
+						}
+					} else if (rail_bias_flag) {
+						imped = DTOI (imped * param.rail_bias + param.rail_const);
 						if (imped < 1) imped = 1;
 					}
 					to_imp = wait_imp + imped;

@@ -18,12 +18,14 @@ void ArcSnapshot::Write_Snapshot (int period)
 	Dir_Data *dir_ptr;
 	Link_Data *link_ptr;
 
+	sum_periods.Period_Range (period, low, high);
+
 	if (snapshot_flag) {
 		Show_Message (String ("Writing %s -- Record") % arcview_snapshot.File_Type ());
 
 		//---- open the output file ----
 
-		buffer = String ("%s_%s.shp") % shapename % sum_periods.Range_Label (period, pad_flag);
+		buffer = String ("%s_%s.shp") % shapename % high.Time_Label (pad_flag);
 
 		if (!arcview_snapshot.Open (buffer)) {
 			File_Error ("Opening ArcView Snapshot File", arcview_snapshot.Shape_Filename ());
@@ -34,8 +36,6 @@ void ArcSnapshot::Write_Snapshot (int period)
 		Show_Message (String ("Writing %s -- Record") % new_snapshot_file.File_Type ());
 	}
 	Set_Progress ();
-
-	sum_periods.Period_Range (period, low, high);
 
 	arcview_snapshot.Put_Field (start_field, low);
 	arcview_snapshot.Put_Field (end_field, high);

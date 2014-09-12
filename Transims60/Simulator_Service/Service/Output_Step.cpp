@@ -22,7 +22,7 @@ bool Simulator_Service::Output_Step (Travel_Step &step)
 	//---- check the traveler data ----
 
 	if (step.sim_travel_ptr == 0) {
-		if (step.Traveler () < 0) return (false);
+		if (step.Traveler () < 2) return (false);
 
 		step.sim_travel_ptr = &sim->sim_travel_array [step.Traveler ()];
 	}
@@ -80,7 +80,7 @@ bool Simulator_Service::Output_Step (Travel_Step &step)
 				sim_veh = step.back ();
 			} else {
 #ifdef CHECK
-				if (step.sim_travel_ptr->Vehicle () < 0) sim->Error ("Simulator_Service::Output_Step: Vehicle");
+				if (step.sim_travel_ptr->Vehicle () < 1) sim->Error ("Simulator_Service::Output_Step: Vehicle");
 #endif
 				sim_veh = sim->sim_veh_array [step.sim_travel_ptr->Vehicle ()];
 			}
@@ -137,7 +137,7 @@ bool Simulator_Service::Output_Step (Travel_Step &step)
 
 	if (step.sim_veh_ptr == 0) {
 #ifdef CHECK
-		if (step.sim_travel_ptr->Vehicle () < 0) sim->Error ("Simulator_Service::Output_Step: Vehicle");
+		if (step.sim_travel_ptr->Vehicle () < 1) sim->Error ("Simulator_Service::Output_Step: Vehicle");
 #endif
 		step.sim_veh_ptr = &sim->sim_veh_array [step.sim_travel_ptr->Vehicle ()];
 #ifdef CHECK
@@ -169,6 +169,7 @@ bool Simulator_Service::Output_Step (Travel_Step &step)
 	}
 
 #ifdef THREADS
+
 	if (Num_Threads () > 0 && (int) step.size () > 1) {
 		int index = step.Dir_Index ();
 		Sim_Veh_Itr sim_veh_itr;

@@ -68,7 +68,7 @@ private:
 	int near_offset, parking_lot;
 	bool time_flag, dist_flag, length_flag, zero_flag, wait_time_flag, use_flag, local_acc_flag, access_flag;
 	bool transfer_flag, reset_veh_flag, mode_path_flag [MAX_MODE], flow_flag, walk_acc_flag, park_flag;
-	bool walk_flag, bike_flag, wait_flag, rail_bias_flag, bus_bias_flag, turn_flag, random_flag;
+	bool walk_flag, bike_flag, wait_flag, rail_bias_flag, brt_bias_flag, bus_bias_flag, turn_flag, random_flag;
 	bool zero_flows_flag, update_time_flag;
 
 	Dtime time_limit, min_time_limit, parking_duration;

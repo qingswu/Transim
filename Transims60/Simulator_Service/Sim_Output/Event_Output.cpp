@@ -146,7 +146,7 @@ void Event_Output::Event_Check (Travel_Step &step)
 	if (!time_range.In_Range (sim->time_step)) return;
 
 	if (step.sim_travel_ptr == 0) {
-		if (step.Traveler () < 0) return;
+		if (step.Traveler () < 2) return;
 		step.sim_travel_ptr = &sim->sim_travel_array [step.Traveler ()];
 	}
 	if (step.sim_travel_ptr == 0) return;

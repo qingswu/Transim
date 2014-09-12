@@ -60,7 +60,7 @@ void PlanPrep::Plan_Processing::Temp_Time_Write (int part)
 		time_ptr = time_rec_set [num];
 
 		if (stat) {
-			plan_ptr->Get_Time_Index (*time_ptr);
+			plan_ptr->Get_Index (*time_ptr);
 		} else {
 			time_ptr->Set (MAX_INTEGER, 0, 0);
 		}
@@ -78,7 +78,7 @@ void PlanPrep::Plan_Processing::Temp_Time_Write (int part)
 		merge_ptr = new Plan_Data ();
 
 		if (merge_file->Read_Plan (*merge_ptr)) {
-			merge_ptr->Get_Time_Index (time_index);
+			merge_ptr->Get_Index (time_index);
 		} else {
 			time_index.Set (MAX_INTEGER, 0, 0);
 		}
@@ -130,7 +130,7 @@ void PlanPrep::Plan_Processing::Temp_Time_Write (int part)
 			time_ptr = time_rec_set [num];
 
 			if (stat) {
-				plan_ptr->Get_Time_Index (*time_ptr);
+				plan_ptr->Get_Index (*time_ptr);
 			} else {
 				time_ptr->Set (MAX_INTEGER, 0, 0);
 			}
@@ -155,7 +155,7 @@ void PlanPrep::Plan_Processing::Temp_Time_Write (int part)
 					new_plan_file->Write_Plan (*merge_ptr);
 				}
 				if (merge_file->Read_Plan (*merge_ptr)) {
-					merge_ptr->Get_Time_Index (time_index);
+					merge_ptr->Get_Index (time_index);
 
 					if (time_index < last_time) {
 						MAIN_LOCK

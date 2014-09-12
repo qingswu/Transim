@@ -51,10 +51,12 @@ void Random::Randomize (Integers &list)
 	Int_Itr itr;
 
 	size = (int) list.size ();
+	if (size < 2) return;
+
 	new_list.assign (size, -1);
 
 	for (itr = list.begin (); itr != list.end (); itr++) {
-		while (size > 0) {
+		for (;;) {
 			index = (int) (size * Probability ());
 			if (index < size && new_list [index] == -1) {
 				new_list [index] = *itr;

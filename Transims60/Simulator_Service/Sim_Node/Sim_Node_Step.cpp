@@ -52,7 +52,10 @@ void Sim_Node_Step::Initialize (void)
 		}
 	} else {
 		*sim_node_process = new Sim_Node_Process ();
+		(*sim_node_process)->Initialize ();
 	}
+#else
+	sim_node_process.Initialize ();
 #endif
 }
 
@@ -64,6 +67,12 @@ void Sim_Node_Step::Start_Processing (void)
 {
 	Int_Itr itr;
 
+	//---- randomize the node list ----
+
+	if (sim->random_node_flag) {
+		Randomize_Nodes ();
+	}
+
 	//---- simulate the approach links ----
 
 #ifdef THREADS
@@ -71,12 +80,7 @@ void Sim_Node_Step::Start_Processing (void)
 
 	if (num_threads > 1) {
 		Threads threads;
-#ifdef CHECK
-		Sim_Dir_Itr sim_dir_itr;
-		for (sim_dir_itr = sim->sim_dir_array.begin (); sim_dir_itr != sim->sim_dir_array.end (); sim_dir_itr++) {
-			if (sim_dir_itr->Lock () > 0) sim->Error (" pre node lock error");
-		}
-#endif
+
 		node_queue.Start_Work ();
 
 		for (itr = node_list.begin (); itr != node_list.end (); itr++) {
@@ -86,12 +90,7 @@ void Sim_Node_Step::Start_Processing (void)
 			node_queue.Put (*itr);
 		}
 		node_queue.Complete_Work ();
-#ifdef CHECK
-		//Sim_Dir_Itr sim_dir_itr;
-		for (sim_dir_itr = sim->sim_dir_array.begin (); sim_dir_itr != sim->sim_dir_array.end (); sim_dir_itr++) {
-			if (sim_dir_itr->Lock () > 0) sim->Error (" post node lock error");
-		}
-#endif
+
 		//---- sum the counters ----
 
 		num_vehicles = num_waiting = 0;
@@ -156,14 +155,19 @@ void Sim_Node_Step::Stop_Processing (void)
 
 void Sim_Node_Step::Randomize_Nodes (void) 
 {
-	int num_nodes = (int) sim->node_array.size ();
-	node_list.assign (num_nodes, 0);
+	//---- create a list of nodes ----
+
+	if (node_list.size () == 0) {
+		int num_nodes = (int) sim->node_array.size ();
+		node_list.assign (num_nodes, 0);
+
+		for (int i=0; i < num_nodes; i++) {
+			node_list [i] = i;
+		}
+	}
 
 	//---- randomize the node list ----
 
-	for (int i=0; i < num_nodes; i++) {
-		node_list [i] = i;
-	}
 	sim->random.Randomize (node_list);
 }
 

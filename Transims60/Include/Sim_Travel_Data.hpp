@@ -27,6 +27,7 @@ public:
 	int   Vehicle (void)              { return (vehicle); }
 	int   Speed (void)                { return (speed); }
 	int   Type (void)                 { return (type); }
+	int   Priority (void)             { return (priority); }
 	int   Passengers (void)           { return (passengers); }
 	int   Step_Code (void)            { return (step); }
 	int   Plan_Index (void)           { return (plan_index); }
@@ -41,7 +42,8 @@ public:
 	void  Wait (Dtime value)          { wait = value; }	
 	void  Vehicle (int value)         { vehicle = value; }
 	void  Speed (int value)           { speed = (short) value; }
-	void  Type (int value)            { type = (short) value; }
+	void  Type (int value)            { type = (char) value; }
+	void  Priority (int value)        { priority = (char) value; }
 	void  Passengers (int value)      { passengers = (short) value; }
 	void  Step_Code (int code)        { step = (short) code; }
 	void  Plan_Index (int value)      { plan_index = value; }
@@ -53,7 +55,7 @@ public:
 	bool Next_Plan (void);
 	void Add_Plan (Sim_Plan_Data &plan);
 
-	void  Clear (void)                { memset (this, '\0', sizeof (*this)); vehicle = plan_index = next_load = -1; }
+	void  Clear (void)                { memset (this, '\0', sizeof (*this)); plan_index = next_load = -1; }
 
 	bool  Pack (Data_Buffer &data)    { return (data.Add_Data (this, sizeof (*this))); }
 	bool  UnPack (Data_Buffer &data)  { return (data.Get_Data (this, sizeof (*this))); }
@@ -70,7 +72,8 @@ private:
 	Dtime wait;
 	int   vehicle;
 	short speed;
-	short type;
+	char  type;
+	char  priority;
 	short passengers;
 	short step;
 	int   plan_index;

@@ -115,7 +115,7 @@ void PlanCompare::Plan_Processing::Read_Plans (int part)
 		//---- check the plan sort ----
 
 		if (time_sort) {
-			plan.Get_Time_Index (time_rec);
+			plan.Get_Index (time_rec);
 
 			if (time_rec < last_time_rec) {
 				MAIN_LOCK
@@ -137,7 +137,7 @@ void PlanCompare::Plan_Processing::Read_Plans (int part)
 		while ((time_sort && time_index < time_rec) || (!time_sort && trip_index < trip_rec)) {
 			if (compare_file->Read_Plan (compare_plan)) {
 				if (time_sort) {
-					compare_plan.Get_Time_Index (time_index);
+					compare_plan.Get_Index (time_index);
 
 					if (time_index < last_time_index) {
 						MAIN_LOCK

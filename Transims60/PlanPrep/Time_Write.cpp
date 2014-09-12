@@ -27,7 +27,7 @@ void PlanPrep::Plan_Processing::Time_Write (void)
 		merge_ptr = new Plan_Data ();
 
 		if (merge_file->Read_Plan (*merge_ptr)) {
-			merge_ptr->Get_Time_Index (time_index);
+			merge_ptr->Get_Index (time_index);
 		} else {
 			time_index.Set (MAX_INTEGER, 0);
 		}
@@ -76,7 +76,7 @@ void PlanPrep::Plan_Processing::Time_Write (void)
 					new_plan_file->Write_Plan (*merge_ptr);
 				}
 				if (merge_file->Read_Plan (*merge_ptr)) {
-					merge_ptr->Get_Time_Index (time_index);
+					merge_ptr->Get_Index (time_index);
 
 					if (time_index < last_time) {
 						MAIN_LOCK

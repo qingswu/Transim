@@ -226,11 +226,12 @@ void IntControl::Create_Signals (void)
 				dir_ptr = &dir_array [index];
 				num_out++;
 			}
-		}
-		if (num_in == 0 || num_out == 0) {
-			node_ptr = &node_array [*node_itr];
-			Warning (String ("Signal %d Node %d does not have Entry and Exit Links") % signal_itr->Signal () % node_ptr->Node ());
-			continue;
+
+			if (num_in == 0 || num_out == 0) {
+				node_ptr = &node_array [*node_itr];
+				Warning (String ("Signal %d Node %d does not have Entry and Exit Links") % signal_itr->Signal () % node_ptr->Node ());
+				continue;
+			}
 		}
 
 		//---- add time period range ----

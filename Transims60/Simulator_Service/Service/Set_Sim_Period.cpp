@@ -58,7 +58,7 @@ Dtime Simulator_Service::Set_Sim_Period (void)
 
 					leg_ptr = sim_plan_ptr->Get_Leg ();
 
-					if (sim_travel_ptr->Vehicle () < 0) continue;
+					if (sim_travel_ptr->Vehicle () < 1) continue;
 					sim_veh_ptr = &sim_veh_array [sim_travel_ptr->Vehicle ()];
 
 					low = (int) ((sim_dir_itr->Length () - sim_veh_ptr->offset) * leg_ptr->Time () / sim_dir_itr->Length ());

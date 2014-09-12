@@ -693,10 +693,11 @@ void Performance_Data::Get_Data (Perf_Data *perf_ptr, int dir_index)
 void Performance_Data::Get_Data (Perf_Data *perf_ptr, Dir_Data *dir_ptr, Link_Data *link_ptr)
 {
 	int i, lanes;
-	double length, lane_len, speed, ratio;
+	double length, len, lane_len, speed, ratio;
 	Dtime time;
 
 	length = link_ptr->Length ();
+	len = exe->UnRound (length);
 
 	Persons (perf_ptr->Persons ());
 	Volume (perf_ptr->Volume ());
@@ -753,9 +754,10 @@ void Performance_Data::Get_Data (Perf_Data *perf_ptr, Dir_Data *dir_ptr, Link_Da
 	}
 	if (lanes < 1) lanes = 1;
 
-	lane_len = exe->External_Units (length, ((exe->Metric_Flag ()) ? KILOMETERS : MILES)) * lanes;
+	lane_len = exe->External_Units (len, ((exe->Metric_Flag ()) ? KILOMETERS : MILES)) * lanes;
 	if (lane_len <= 0) lane_len = 1.0;
-	Lane_Len (lane_len);
+
+	Lane_Len (len * lanes);
 
 	ratio = (double) (End () - Start () + 1) / Dtime (1.0, HOURS);
 
