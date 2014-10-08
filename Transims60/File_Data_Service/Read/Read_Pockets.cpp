@@ -8,38 +8,36 @@
 //	Read_Pockets
 //---------------------------------------------------------
 
-void Data_Service::Read_Pockets (void)
+void Data_Service::Read_Pockets (Pocket_File &file)
 {
-	Pocket_File *file = (Pocket_File *) System_File_Handle (POCKET);
-
 	int num;
 	Pocket_Data pocket_rec;
 
 	//---- store the pocket data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 	
-	Initialize_Pockets (*file);
+	Initialize_Pockets (file);
 
-	while (file->Read ()) {
+	while (file.Read ()) {
 		Show_Progress ();
 
 		pocket_rec.Clear ();
 
-		if (Get_Pocket_Data (*file, pocket_rec)) {
+		if (Get_Pocket_Data (file, pocket_rec)) {
 			pocket_array.push_back (pocket_rec);
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	num = (int) pocket_array.size ();
 
 	if (num && num != Progress_Count ()) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % num);
 	}
 	if (num > 0) {
 		System_Data_True (POCKET);

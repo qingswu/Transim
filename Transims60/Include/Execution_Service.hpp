@@ -17,7 +17,7 @@
 
 class SYSLIB_API Execution_Service : public Control_Service
 {
-	friend Control_Service;
+	friend class Control_Service;
 
 public:
 	Execution_Service (void);

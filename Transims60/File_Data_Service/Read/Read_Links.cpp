@@ -12,35 +12,33 @@
 //	Read_Links
 //---------------------------------------------------------
 
-void Data_Service::Read_Links (void)
+void Data_Service::Read_Links (Link_File &file)
 {
 	int num, anode, bnode, index;
 	bool shape_flag;
 	Arc_Link_File *arc_file = 0;
-
-	Link_File *file = (Link_File *) System_File_Handle (LINK);
 	
 	Int_Map_Stat map_stat;
 	Int2_Map_Stat ab_stat;
 	Link_Data link_rec;
 	Dir_Data ab_rec, ba_rec;
 
-	shape_flag = (!System_File_Flag (SHAPE) && file->Dbase_Format () == ARCVIEW); 
+	shape_flag = (!System_File_Flag (SHAPE) && file.Dbase_Format () == ARCVIEW); 
 
 	if (shape_flag) {
-		arc_file = (Arc_Link_File *) file;
+		arc_file = (Arc_Link_File *) &file;
 	}
 
 	//---- store the link data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 
-	Initialize_Links (*file);
+	Initialize_Links (file);
 
 	anode = bnode = 0;
 
-	while (file->Read_Record ()) {
+	while (file.Read_Record ()) {
 		Show_Progress ();
 
 		link_rec.Clear ();
@@ -48,10 +46,10 @@ void Data_Service::Read_Links (void)
 		ba_rec.Clear ();
 
 		if (AB_Map_Flag ()) {
-			anode = file->Node_A ();
-			bnode = file->Node_B ();
+			anode = file.Node_A ();
+			bnode = file.Node_B ();
 		}
-		if (Get_Link_Data (*file, link_rec, ab_rec, ba_rec)) {
+		if (Get_Link_Data (file, link_rec, ab_rec, ba_rec)) {
 			map_stat = link_map.insert (Int_Map_Data (link_rec.Link (), (int) link_array.size ()));
 
 			if (!map_stat.second) {
@@ -142,14 +140,14 @@ void Data_Service::Read_Links (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	num = (int) link_array.size ();
 
 	if (num && num != Progress_Count ()) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % num);
 	}
 	if (num > 0) System_Data_True (LINK);
 
@@ -163,7 +161,7 @@ void Data_Service::Read_Links (void)
 	return;
 
 num_error:
-	Error (String ("%s Direction Numbering") % file->File_ID ());
+	Error (String ("%s Direction Numbering") % file.File_ID ());
 }
 
 //---------------------------------------------------------

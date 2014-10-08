@@ -21,11 +21,6 @@ class Vector : public vector <Type>
 public:
 	Vector (void) {}
 
-	void Free (void) 
-	{
-		vector <Type> temp;
-		swap (temp);
-	}
 	bool Pack (Data_Buffer &data, bool type_flag = false)
 	{
 		size_t num = vector <Type>::size ();
@@ -76,11 +71,6 @@ class Deque : public deque <Type>
 public:
 	Deque (void) {}
 
-	void Free (void) 
-	{
-		deque <Type> temp;
-		swap (temp);
-	}
 	bool Pack (Data_Buffer &data)
 	{
 		size_t num = deque <Type>::size ();

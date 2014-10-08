@@ -71,6 +71,9 @@
     <ClCompile Include="Subtotal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Check_Network.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\Validate.hpp">

@@ -8,10 +8,8 @@
 //	Read_Lines
 //---------------------------------------------------------
 
-void Data_Service::Read_Lines (void)
+void Data_Service::Read_Lines (Line_File &file)
 {
-	Line_File *file = (Line_File *) System_File_Handle (TRANSIT_ROUTE);
-
 	int i, num;
 	bool keep_flag;
 	Int_Map_Stat map_stat;
@@ -19,28 +17,28 @@ void Data_Service::Read_Lines (void)
 
 	//---- store the route data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 	
-	Initialize_Lines (*file);
+	Initialize_Lines (file);
 
-	while (file->Read (false)) {
+	while (file.Read (false)) {
 		Show_Progress ();
 
 		line_rec.Clear ();
 
-		keep_flag = Get_Line_Data (*file, line_rec);
+		keep_flag = Get_Line_Data (file, line_rec);
 
-		num = file->Num_Nest ();
+		num = file.Num_Nest ();
 		if (num > 0) line_rec.reserve (num);
 
 		for (i=1; i <= num; i++) {
-			if (!file->Read (true)) {
-				Error (String ("Number of Stop Records for Route %d") % file->Route ());
+			if (!file.Read (true)) {
+				Error (String ("Number of Stop Records for Route %d") % file.Route ());
 			}
 			Show_Progress ();
 
-			Get_Line_Data (*file, line_rec);
+			Get_Line_Data (file, line_rec);
 		}
 		if (keep_flag) {
 			map_stat = line_map.insert (Int_Map_Data (line_rec.Route (), (int) line_array.size ()));
@@ -55,14 +53,14 @@ void Data_Service::Read_Lines (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	num = (int) line_array.size ();
 
 	if (num && num != Progress_Count ()) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % num);
 	}
 	if (num > 0) System_Data_True (TRANSIT_ROUTE);
 }
@@ -142,6 +140,7 @@ bool Data_Service::Get_Line_Data (Line_File &file, Line_Data &line_rec)
 		return (false);
 	}
 	line_stop.Stop (itr->second);
+
 	zone = file.Zone ();
 
 	if (Num_Fare_Zones () > 0 && (zone < 0 || zone > Num_Fare_Zones ())) {

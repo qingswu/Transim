@@ -22,13 +22,13 @@ public:
 
 protected:
 	enum SimSubareas_Keys { 
-		NUMBER_OF_SUBAREAS = 1, CENTER_NODE_NUMBER, SUBAREA_BOUNDARY_FILE, SUBAREA_DATA_FIELD,
+		NUMBER_OF_SUBAREAS = 1, CENTER_NODE_NUMBER, SUBAREA_BOUNDARY_FILE, SUBAREA_DATA_FIELD, SUBAREA_UPDATE_FLAG
 	};
 	virtual void Program_Control (void);
 
 private:
 	int num_subareas, center, subarea_field;
-	bool boundary_flag;
+	bool boundary_flag, update_flag;
 
 	Integers subarea_count;
 	Arcview_File boundary_file;

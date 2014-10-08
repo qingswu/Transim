@@ -11,7 +11,7 @@
 TripPrep::TripPrep (void) : Data_Service (), Select_Service ()
 {
 	Program ("TripPrep");
-	Version (1);
+	Version (2);
 	Title ("Trip Processing Utility");
 
 	System_File_Type required_files [] = {
@@ -26,7 +26,7 @@ TripPrep::TripPrep (void) : Data_Service (), Select_Service ()
 	};
 	int select_service_keys [] = {
 		SELECT_HOUSEHOLDS, SELECT_MODES, SELECT_PURPOSES, SELECT_START_TIMES, SELECT_END_TIMES, 
-		SELECT_ORIGINS, SELECT_DESTINATIONS, SELECT_TRAVELER_TYPES, SELECTION_PERCENTAGE, 
+		SELECT_ORIGINS, SELECT_DESTINATIONS, SELECT_TRAVELER_TYPES, SELECT_VEHICLE_TYPES, SELECTION_PERCENTAGE, 
 		DELETION_FILE, DELETION_FORMAT, DELETE_HOUSEHOLDS, DELETE_MODES, DELETE_TRAVELER_TYPES, 0
 	};
 	Control_Key keys [] = { //--- code, key, level, status, type, default, range, help ----

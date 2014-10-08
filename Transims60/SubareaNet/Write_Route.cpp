@@ -50,6 +50,8 @@ void SubareaNet::Write_Route (void)
 		Show_Progress ();
 			
 		stops = (int) line_itr->size ();
+		if (stops == 0) continue;
+
 		line_stop_ptr = &line_itr->at (0);
 
 		driver_ptr = &(line_itr->driver_array);

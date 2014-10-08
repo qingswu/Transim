@@ -37,7 +37,7 @@ void LocationData::Execute (void)
 
 	//---- read the activity location file ----
 
-	Read_Locations ();
+	Read_Locations (*((Location_File *) System_File_Handle (LOCATION)));
 
 	//---- walk access to transit ----
 

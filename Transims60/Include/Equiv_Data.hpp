@@ -25,23 +25,29 @@ public:
 
 	virtual bool Read (bool report_flag);
 
-	void   Group_Label (int group, string label);
+	void Group_Label (int group, string label);
 	
 	int  Get_Group (int id);
 
+	int  First_Group (void);
+	int  Next_Group (void);
+
 	string Group_Label (int group);
 	Int_Set * Group_List (int group);
+	Integers * Group_Order (int group);
 	Time_Periods * Group_Period (int group);
 
 	int  Num_Groups (void);
 	int  Max_Group (void);
+	void Sort_Flag (bool flag)        { sort_flag = flag; }
 
 protected:
-	void   Time_Flag (void)             { time_flag = true; }
+	void Time_Flag (void)             { time_flag = true; }
 
 	typedef struct {
 		String label;
 		Int_Set list;
+		Integers order;
 		Time_Periods period;
 	} Equiv_Group;
 
@@ -51,9 +57,10 @@ protected:
 	typedef pair <Group_Map_Itr, bool>  Group_Map_Stat;
 
 	Group_Map group_map;
+	Group_Map_Itr group_itr;
 
 private:
-	bool time_flag;
+	bool time_flag, sort_flag;
 	String type;
 };
 

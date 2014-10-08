@@ -73,7 +73,7 @@ public:
 	bool  Read (void *record, int size);
 	bool  Read (void);
 	bool  Read (bool nested)                 { Nested (nested); return (Read ()); }
-	bool  Read (void *record, int size, off_t offset);
+	bool  Read (void *record, int size, size_t offset);
 
 	virtual bool  Write_Record (int number = 0);
 
@@ -81,17 +81,17 @@ public:
 	bool  Write (void);
 	bool  Write (bool nested);
 	bool  Write (char *record)               { return (Write (record, (int) strlen (record))); }
-	bool  Write (void *record, int size, off_t offset);
+	bool  Write (void *record, int size, size_t offset);
 
 	virtual bool  Close (void);
 	virtual bool  Rewind (void);
-	virtual off_t File_Size (void);
+	virtual size_t File_Size (void);
 
-	off_t Offset (void);
-	bool  Offset (off_t offset);
+	size_t Offset (void);
+	bool  Offset (size_t offset);
 
-	void  First_Offset (off_t offset)       { first_offset = offset; }
-	off_t First_Offset (void)               { return (first_offset); }
+	void  First_Offset (size_t offset)      { first_offset = offset; }
+	size_t First_Offset (void)               { return (first_offset); }
 
 	void  File_Access (Access_Type access)  { file_access = access; }
 	Access_Type  File_Access (void)         { return (file_access); }
@@ -162,7 +162,7 @@ private:
 
 	bool  part_flag;
 	int   num_files, num_records, record_num, max_record_num, part_num, version, extend;
-	off_t first_offset;
+	size_t first_offset;
 
 	String filename, pathname;
 };

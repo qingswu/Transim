@@ -442,8 +442,8 @@ void Performance_Output::Write_Summary (void)
 		file->Enter (data.Enter ());
 		file->Exit (data.Exit ());
 		file->Flow (data.Flow ());
-		file->Speed (UnRound (data.Speed ()));
-		file->Time_Ratio (UnRound (data.Time_Ratio ()));
+		file->Speed (data.Speed ());
+		file->Time_Ratio (data.Time_Ratio ());
 
 		file->Delay (data.Delay ());
 		file->Density (data.Density ());
@@ -451,7 +451,7 @@ void Performance_Output::Write_Summary (void)
 		file->Queue (data.Queue ());
 		file->Max_Queue (data.Max_Queue ());
 		file->Failure (data.Failure ());
-		file->Veh_Dist (UnRound (data.Veh_Dist ()));
+		file->Veh_Dist (data.Veh_Dist ());
 		file->Veh_Time (data.Veh_Time ());
 		file->Veh_Delay (data.Veh_Delay ());
 

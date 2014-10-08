@@ -91,12 +91,12 @@ void LinkSum::Top_100_Ratios (int type)
 					case TOP_SPEED:
 						if (dir_ptr->Time0 () <= 0) continue;
 						base = DTOI ((double) link_itr->Length () / dir_ptr->Time0 ());
-						load = data.Speed ();
+						load = Round (data.Speed ());
 						break;
 					case TOP_TIME_RATIO:
 						base = dir_ptr->Time0 ();
 						load = data.Time ();
-						ratio = data.Time_Ratio () * 1000;
+						ratio = DTOI (data.Time_Ratio () * 1000);
 						break;
 					case TOP_VC_RATIO:
 						if (data.VC_Ratio () <= 0) continue;

@@ -72,7 +72,7 @@ void Sim_Travel_Process::Travel_Processing (Sim_Travel_Ptr sim_travel_ptr)
 				sim->sim_output_step.Event_Check (step);
 			}
 
-		} else {
+		} else if (sim_travel_ptr->Status () != OFF_NET_WAIT) {
 			sim_plan_ptr->Next_Leg ();
 		}
 
@@ -157,7 +157,10 @@ void Sim_Travel_Process::Travel_Processing (Sim_Travel_Ptr sim_travel_ptr)
 
 				sim_veh_ptr = &sim->sim_veh_array [veh_map_itr->second];
 
-				if (!sim_veh_ptr->Parked ()) break;
+				if (!sim_veh_ptr->Parked ()) {
+					sim_travel_ptr->Status (OFF_NET_WAIT);
+					break;
+				}
 
 				//---- assign the vehicle to the driver ----
 

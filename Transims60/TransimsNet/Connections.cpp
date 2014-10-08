@@ -24,6 +24,7 @@ void TransimsNet::Connections (void)
 	Int_Map_Stat bear_stat;
 	Int_Map_Itr map_itr, thru_itr;
 	Connect_Data connect_rec, *connect_ptr;
+	Int2_Map_Itr connect_itr;
 	
 	if ((delete_link_flag || delete_node_flag) && (!update_link_flag || !update_node_flag)) return;
 
@@ -276,43 +277,57 @@ void TransimsNet::Connections (void)
 				to_index = map_itr->second;
 				to_ptr = &dir_array [to_index];
 
-				connect_rec.Dir_Index (dir_index);
-				connect_rec.To_Index (to_index);
-				num = (int) connect_array.size ();
+				connect_itr = connect_map.find (Int2_Key (dir_index, to_index));
 
-				if (thru == index) {
-					connect_rec.Type (THRU);
-					thru_index = num;
-				} else if (dir_ptr->Link () == to_ptr->Link ()) {
-					connect_rec.Type (UTURN);
+				if (connect_itr != connect_map.end ()) {
+					connect_ptr = &connect_array [connect_itr->second];
+					if (connect_ptr->Type () == THRU) {
+						thru_index = connect_itr->second;
+					}
 				} else {
-					if (thru >= 0) {
-						left_flag = (index < thru);
+
+					connect_rec.Dir_Index (dir_index);
+					connect_rec.To_Index (to_index);
+					num = (int) connect_array.size ();
+
+					if (thru == index) {
+						connect_rec.Type (THRU);
+						thru_index = num;
+					} else if (dir_ptr->Link () == to_ptr->Link ()) {
+						connect_rec.Type (UTURN);
 					} else {
-						left_flag = (change < 0);
+						if (thru >= 0) {
+							left_flag = (index < thru);
+						} else {
+							left_flag = (change < 0);
+						}
+						if (abs (change) > thru_diff) {
+							connect_rec.Type ((left_flag) ? LEFT : RIGHT);
+						} else {
+							connect_rec.Type ((left_flag) ? L_SPLIT : R_SPLIT);
+						}
 					}
-					if (abs (change) > thru_diff) {
-						connect_rec.Type ((left_flag) ? LEFT : RIGHT);
-					} else {
-						connect_rec.Type ((left_flag) ? L_SPLIT : R_SPLIT);
+
+					if (update_link_flag && !update_node_flag) {
+						if (!update_link_range.In_Range (link_ptr->Link ())) continue;
 					}
+
+					//---- insert the connection record ----
+
+					connect_rec.Next_To (dir_ptr->First_Connect_To ());
+					dir_ptr->First_Connect_To (num);
+
+					connect_rec.Next_From (to_ptr->First_Connect_From ());
+					to_ptr->First_Connect_From (num);
+
+					if (repair_flag) {
+						connect_rec.Low_Lane (-1);
+						connect_rec.High_Lane (-1);
+					}
+					connect_map.insert (Int2_Map_Data (Int2_Key (dir_index, to_index), num));
+					connect_array.push_back (connect_rec);
+					nconnect++;
 				}
-
-				if (update_link_flag && !update_node_flag) {
-					if (!update_link_range.In_Range (link_ptr->Link ())) continue;
-				}
-
-				//---- insert the connection record ----
-
-				connect_rec.Next_To (dir_ptr->First_Connect_To ());
-				dir_ptr->First_Connect_To (num);
-
-				connect_rec.Next_From (to_ptr->First_Connect_From ());
-				to_ptr->First_Connect_From (num);
-
-				connect_map.insert (Int2_Map_Data (Int2_Key (dir_index, to_index), num));
-				connect_array.push_back (connect_rec);
-				nconnect++;
 			}
 
 			//---- check if the thru movements is a merge ----

@@ -39,17 +39,22 @@ void NetPrep::Save_Route (Route_Data &data)
 				ab_itr = ab_map.find (Int2_Key (a, b));
 
 				if (ab_itr != ab_map.end ()) {
-					dir_ptr = &dir_array [ab_itr->second];
-					link_ptr = &link_array [dir_ptr->Link ()];
+					if (!data.oneway) {
+						dir_ptr = &dir_array [ab_itr->second];
+						link_ptr = &link_array [dir_ptr->Link ()];
 
-					if (link_ptr->AB_Dir () < 0 || link_ptr->BA_Dir () < 0) {
-						count++;
+						if (link_ptr->AB_Dir () < 0 || link_ptr->BA_Dir () < 0) {
+							count++;
+						}
 					}
 				} else {
 					ab_itr = ab_map.find (Int2_Key (b, a));
 
 					if (ab_itr != ab_map.end ()) {
 						error++;
+					}
+					if (!data.oneway) {
+						count++;
 					}
 				}
 			}

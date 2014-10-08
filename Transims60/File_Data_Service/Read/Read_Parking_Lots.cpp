@@ -8,10 +8,8 @@
 //	Read_Parking_Lots
 //---------------------------------------------------------
 
-void Data_Service::Read_Parking_Lots (void)
+void Data_Service::Read_Parking_Lots (Parking_File &file)
 {
-	Parking_File *file = (Parking_File *) System_File_Handle (PARKING);
-	
 	int i, num;
 	bool keep_flag;
 	Int_Map_Stat map_stat;
@@ -19,28 +17,28 @@ void Data_Service::Read_Parking_Lots (void)
 
 	//---- store the parking data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 	
-	Initialize_Parking_Lots (*file);
+	Initialize_Parking_Lots (file);
 
-	while (file->Read (false)) {
+	while (file.Read (false)) {
 		Show_Progress ();
 
 		parking_rec.Clear ();
 
-		keep_flag = Get_Parking_Data (*file, parking_rec);
+		keep_flag = Get_Parking_Data (file, parking_rec);
 
-		num = file->Num_Nest ();
+		num = file.Num_Nest ();
 		if (num > 0) parking_rec.reserve (num);
 
 		for (i=1; i <= num; i++) {
-			if (!file->Read (true)) {
-				Error (String ("Number of Nested Records for Parking %d") % file->Parking ());
+			if (!file.Read (true)) {
+				Error (String ("Number of Nested Records for Parking %d") % file.Parking ());
 			}
 			Show_Progress ();
 
-			Get_Parking_Data (*file, parking_rec);
+			Get_Parking_Data (file, parking_rec);
 		}
 		if (keep_flag) {
 			map_stat = parking_map.insert (Int_Map_Data (parking_rec.Parking (), (int) parking_array.size ()));
@@ -53,14 +51,14 @@ void Data_Service::Read_Parking_Lots (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	num = (int) parking_array.size ();
 
 	if (num && num != Progress_Count ()) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % num);
 	}
 	if (num > 0) System_Data_True (PARKING);
 }

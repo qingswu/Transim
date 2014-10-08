@@ -10,6 +10,8 @@
 
 bool SubareaNet::Get_Access_Data (Access_File &file, Access_Data &data)
 {
+	Node_Data *node_ptr;
+
 	//---- find the highest ID ----
 
 	int id = file.Link ();
@@ -18,6 +20,15 @@ bool SubareaNet::Get_Access_Data (Access_File &file, Access_Data &data)
 	//---- do standard processing ----
 
 	if (Data_Service::Get_Access_Data (file, data)) {
+
+		if (data.From_Type () == NODE_ID) {
+			node_ptr = &node_array [data.From_ID ()];
+			if (node_ptr->Subarea () == 0) return (false);
+		}
+		if (data.To_Type () == NODE_ID) {
+			node_ptr = &node_array [data.To_ID ()];
+			if (node_ptr->Subarea () == 0) return (false);
+		}
 
 		//---- copy the fields to the subarea file ----
 

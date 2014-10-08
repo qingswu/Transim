@@ -13,14 +13,15 @@
 Select_Service::Select_Service (void)
 {
 	select_households = select_purposes = select_start_times = select_end_times = select_origins = select_destinations = false;
-	select_travelers = select_vehicles = select_problems = select_subarea = select_org_zones = select_des_zones = false;
+	select_travelers = select_vehicles = select_problems = select_subareas = select_polygon = select_org_zones = select_des_zones = false;
 	select_modes = select_facilities = select_priorities = select_links = select_nodes = delete_flag = select_stops = select_routes = false;
-	percent_flag = time_diff_flag = cost_diff_flag = select_parking = select_vc = select_ratio = select_time_of_day = false;
-	min_time_diff = max_time_diff = 0;
+	percent_flag = max_percent_flag = select_parking = select_vc = select_ratio = select_time_of_day = false;
+	time_diff_flag = cost_diff_flag = trip_diff_flag = false;
+	min_time_diff = max_time_diff = min_trip_diff = max_trip_diff = 0;
 	min_cost_diff = max_cost_diff = 0;
-	max_min_time_diff = 1;
+	max_min_time_diff = max_min_trip_diff = 1;
 	max_min_cost_diff = 1;
-	select_percent = max_percent_select = percent_time_diff = percent_cost_diff = 100.0;
+	select_percent = max_percent_select = percent_time_diff = percent_cost_diff = percent_trip_diff = 100.0;
 	vc_ratio = time_ratio = 0.0;
 }
 
@@ -52,7 +53,7 @@ void Select_Service::Select_Service_Keys (int *keys)
 		{ SELECT_NODES, "SELECT_NODES", LEVEL1, OPT_KEY, LIST_KEY, "ALL", RANGE_RANGE, NO_HELP },
 		{ SELECT_STOPS, "SELECT_STOPS", LEVEL0, OPT_KEY, LIST_KEY, "ALL", RANGE_RANGE, NO_HELP },
 		{ SELECT_ROUTES, "SELECT_ROUTES", LEVEL0, OPT_KEY, LIST_KEY, "ALL", RANGE_RANGE, NO_HELP },
-		{ SELECT_SUBAREA_POLYGON, "SELECT_SUBAREA_POLYGON", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
+		{ SELECT_SUBAREAS, "SELECT_SUBAREAS", LEVEL0, OPT_KEY, LIST_KEY, "", RANGE_RANGE, NO_HELP },
 		{ SELECT_ORIGIN_ZONES, "SELECT_ORIGIN_ZONES", LEVEL0, OPT_KEY, LIST_KEY, "ALL", RANGE_RANGE, NO_HELP },
 		{ SELECT_DESTINATION_ZONES, "SELECT_DESTINATION_ZONES", LEVEL0, OPT_KEY, LIST_KEY, "ALL", RANGE_RANGE, NO_HELP },
 		{ PERCENT_TIME_DIFFERENCE, "PERCENT_TIME_DIFFERENCE", LEVEL0, OPT_KEY, FLOAT_KEY, "0.0 percent", "0.0..100.0 percent", NO_HELP },
@@ -61,8 +62,12 @@ void Select_Service::Select_Service_Keys (int *keys)
 		{ PERCENT_COST_DIFFERENCE, "PERCENT_COST_DIFFERENCE", LEVEL0, OPT_KEY, FLOAT_KEY, "0.0 percent", "0.0..100.0 percent", NO_HELP },
 		{ MINIMUM_COST_DIFFERENCE, "MINIMUM_COST_DIFFERENCE", LEVEL0, OPT_KEY, FLOAT_KEY, "10 impedance", "0..500 impedance", NO_HELP },
 		{ MAXIMUM_COST_DIFFERENCE, "MAXIMUM_COST_DIFFERENCE", LEVEL0, OPT_KEY, FLOAT_KEY, "1000 impedance", "0..10000 impedance", NO_HELP },
+		{ PERCENT_TRIP_DIFFERENCE, "PERCENT_TRIP_DIFFERENCE", LEVEL0, OPT_KEY, FLOAT_KEY, "0.0 percent", "0.0..100.0 percent", NO_HELP },
+		{ MINIMUM_TRIP_DIFFERENCE, "MINIMUM_TRIP_DIFFERENCE", LEVEL0, OPT_KEY, TIME_KEY, "10 minutes", "0..120 minutes", NO_HELP },
+		{ MAXIMUM_TRIP_DIFFERENCE, "MAXIMUM_TRIP_DIFFERENCE", LEVEL0, OPT_KEY, TIME_KEY, "60 minutes", "0..1440 minutes", NO_HELP },
 		{ SELECTION_PERCENTAGE, "SELECTION_PERCENTAGE", LEVEL0, OPT_KEY, FLOAT_KEY, "100.0 percent", "0.01..100.0 percent", NO_HELP },
 		{ MAXIMUM_PERCENT_SELECTED, "MAXIMUM_PERCENT_SELECTED", LEVEL0, OPT_KEY, FLOAT_KEY, "100.0 percent", "0.1..100.0 percent", NO_HELP },
+		{ SELECTION_POLYGON, "SELECTION_POLYGON", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		{ DELETION_FILE, "DELETION_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		{ DELETION_FORMAT, "DELETION_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, FORMAT_HELP },
 		{ DELETE_HOUSEHOLDS, "DELETE_HOUSEHOLDS", LEVEL0, OPT_KEY, LIST_KEY, "NONE", RANGE_RANGE, NO_HELP },
@@ -421,20 +426,19 @@ void Select_Service::Read_Select_Keys (void)
 		}
 	}
 
-	//---- get the select subarea polygon ----
+	//---- get the select subareas ----
 
-	key = exe->Get_Control_String (SELECT_SUBAREA_POLYGON);
+	key = exe->Get_Control_String (SELECT_SUBAREAS);
 
 	if (!key.empty ()) {
-		exe->Print (1);
-		subarea_file.File_Type ("Select Subarea Polygon");
+		key = exe->Get_Control_Text (SELECT_SUBAREAS);
 
-		subarea_file.Open (exe->Project_Filename (key));
-		
-		if (!subarea_file.Read_Record ()) {
-			exe->Error (String ("Reading %s") % subarea_file.File_Type ());
+		if (!key.empty () && !key.Equals ("ALL")) {
+			select_subareas = true;
+			if (!subarea_range.Add_Ranges (key)) {
+				exe->Error ("Adding Subarea Ranges");
+			}
 		}
-		select_subarea = true;
 	}
 
 	//---- select origin zones ----
@@ -507,11 +511,33 @@ void Select_Service::Read_Select_Keys (void)
 		if (max_min_cost_diff < 1) max_min_cost_diff = 1;
 	}
 
+	//---- percent trip difference ----
+
+	if (exe->Control_Key_Status (PERCENT_TRIP_DIFFERENCE)) {
+		percent_trip_diff = exe->Get_Control_Double (PERCENT_TRIP_DIFFERENCE);
+		trip_diff_flag = (percent_trip_diff > 0.0);
+		percent_trip_diff /= 100.0;
+
+		//---- minimum trip difference ----
+
+		if (exe->Control_Key_Status (MINIMUM_TRIP_DIFFERENCE)) {
+			min_trip_diff = exe->Get_Control_Time (MINIMUM_TRIP_DIFFERENCE);
+		}
+
+		//---- maximum trip difference ----
+
+		if (exe->Control_Key_Status (MAXIMUM_TRIP_DIFFERENCE)) {
+			max_trip_diff = exe->Get_Control_Time (MAXIMUM_TRIP_DIFFERENCE);
+		}
+		max_min_trip_diff = max_trip_diff - min_trip_diff;
+		if (max_min_trip_diff < 1) max_min_trip_diff = 1;
+	}
+
 	//---- selection percentage ----
 
 	if (exe->Control_Key_Status (SELECTION_PERCENTAGE)) {
 		select_percent = exe->Get_Control_Double (SELECTION_PERCENTAGE);
-		percent_flag = (select_percent != 100.0);
+		percent_flag = (select_percent > 0.0 && select_percent < 100.0);
 		select_percent /= 100.0;
 	}
 
@@ -519,7 +545,24 @@ void Select_Service::Read_Select_Keys (void)
 
 	if (exe->Control_Key_Status (MAXIMUM_PERCENT_SELECTED)) {
 		max_percent_select = exe->Get_Control_Double (MAXIMUM_PERCENT_SELECTED);
+		max_percent_flag = (max_percent_select > 0.0 && max_percent_select < 100.0);
 		max_percent_select /= 100.0;
+	}
+
+	//---- get the selection polygon ----
+
+	key = exe->Get_Control_String (SELECTION_POLYGON);
+
+	if (!key.empty ()) {
+		exe->Print (1);
+		polygon_file.File_Type ("Selection Polygon");
+
+		polygon_file.Open (exe->Project_Filename (key));
+		
+		if (!polygon_file.Read_Record ()) {
+			exe->Error (String ("Reading %s") % polygon_file.File_Type ());
+		}
+		select_polygon = true;
 	}
 
 	//---- deletion file ----
@@ -748,10 +791,50 @@ bool Select_Service::Select_Plan_Routes (Plan_Data &plan)
 }
 
 //---------------------------------------------------------
-//	Select_Plan_Subarea
+//	Select_Plan_Subareas
 //---------------------------------------------------------
 
-bool Select_Service::Select_Plan_Subarea (Plan_Data &plan)
+bool Select_Service::Select_Plan_Subareas (Plan_Data &plan)
+{
+	int id, node, subarea;
+	Link_Data *link_ptr;
+	Node_Data *node_ptr;
+	Int_Map_Itr map_itr;
+	Plan_Leg_Itr leg_itr;
+	
+	for (leg_itr = plan.begin (); leg_itr != plan.end (); leg_itr++) {
+		if (leg_itr->Type () == NODE_ID) {
+			id = leg_itr->ID ();
+			map_itr = dat->node_map.find (id);
+			if (map_itr == dat->node_map.end ()) continue;
+			node = map_itr->second;
+		} else if (leg_itr->Link_Type ()) {
+			id = leg_itr->Link_ID ();
+			map_itr = dat->link_map.find (id);
+			if (map_itr == dat->link_map.end ()) continue;
+
+			link_ptr = &dat->link_array [map_itr->second];
+			if (leg_itr->Link_Dir () == 1) {
+				node = link_ptr->Anode ();
+			} else {
+				node = link_ptr->Bnode ();
+			}
+		} else {
+			continue;
+		}
+		node_ptr = &dat->node_array [node];
+		subarea = node_ptr->Subarea ();
+
+		if (subarea_range.In_Range (subarea)) return (true);
+	}
+	return (false);
+}
+
+//---------------------------------------------------------
+//	Select_Plan_Polygon
+//---------------------------------------------------------
+
+bool Select_Service::Select_Plan_Polygon (Plan_Data &plan)
 {
 	int index;
 	Plan_Leg_Itr leg_itr;
@@ -771,11 +854,11 @@ bool Select_Service::Select_Plan_Subarea (Plan_Data &plan)
 		link_ptr = &dat->link_array [map_itr->second];
 		node_ptr = &dat->node_array [link_ptr->Anode ()];
 
-		if (In_Polygon (subarea_file, dat->UnRound (node_ptr->X ()), dat->UnRound (node_ptr->Y ()))) return (true);
+		if (In_Polygon (polygon_file, dat->UnRound (node_ptr->X ()), dat->UnRound (node_ptr->Y ()))) return (true);
 
 		node_ptr = &dat->node_array [link_ptr->Bnode ()];
 
-		if (In_Polygon (subarea_file, dat->UnRound (node_ptr->X ()), dat->UnRound (node_ptr->Y ()))) return (true);
+		if (In_Polygon (polygon_file, dat->UnRound (node_ptr->X ()), dat->UnRound (node_ptr->Y ()))) return (true);
 	}
 	return (false);
 }

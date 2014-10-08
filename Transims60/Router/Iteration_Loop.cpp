@@ -17,6 +17,8 @@ void Router::Iteration_Loop (void)
 	bool old_flag, duration_flag, last_skip, last_flag, link_last_flag, trip_last_flag, transit_last_flag;
 	bool last_new_plan_flag, last_problem_flag, last_skim_only;
 	double gap, new_factor, save_flag;
+	
+	clock_t path_time, update_time, total_time;
 
 	Trip_Data trip_data;
 	Path_Parameters param;
@@ -88,7 +90,17 @@ void Router::Iteration_Loop (void)
 				line_array.Clear_Ridership ();
 			}
 		}
-		total_records = 0;
+		if (total_records > 0 && max_percent_flag) {
+			percent_selected = ((double) num_selected / total_records);
+			if (percent_selected > max_percent_select) {
+				percent_selected = max_percent_select / percent_selected;
+			} else {
+				percent_selected = 1.0;
+			}
+		} else {
+			percent_selected = 1.0;
+		}
+		total_records = num_selected = 0;
 
 		if (last_flag) {
 			new_plan_flag = last_new_plan_flag;
@@ -106,13 +118,19 @@ void Router::Iteration_Loop (void)
 		}
 
 		//---- process each partition ----
+		
+		path_time = clock ();
 
 		part_processor.Read_Trips ();
+		
+		path_time = (clock () - path_time);
 
 		link_last_flag = trip_last_flag = transit_last_flag = true;
 		new_factor = factor;
 
 		//---- calculate the link gap ----
+		
+		update_time = clock ();
 
 		if (Time_Updates ()) {
 			if (MPI_Size () > 1) {
@@ -134,6 +152,7 @@ void Router::Iteration_Loop (void)
 				if (new_factor > max_factor) new_factor = max_factor;
 			}
 		}
+		update_time = (clock () - update_time);
 
 		//---- calculate the trip gap ----
 
@@ -149,6 +168,7 @@ void Router::Iteration_Loop (void)
 		//---- update transit penalties ----
 
 		if (!last_flag && (rider_flag || (System_File_Flag (RIDERSHIP) && param.cap_penalty_flag))) {
+
 			part_processor.Save_Riders ();
 
 			gap = line_array.Ridership_Gap (param.cap_penalty_flag, factor);
@@ -164,7 +184,17 @@ void Router::Iteration_Loop (void)
 		Write (1, "Number of Paths Built = ") << num_build;
 		num = num_build + num_update;
 		if (num > 0) Write (0, String (" (%.1lf%%)") % (num_build * 100.0 / num) % FINISH);
-		 
+
+		//---- processing time summary ----
+	
+		total_time = path_time + update_time;
+		if (total_time == 0) total_time = 1;
+
+		Write (1, String ("Path Building Seconds = %.1lf (%.1lf%%)") % 
+			((double) path_time / CLOCKS_PER_SEC) % (100.0 * path_time / total_time) % FINISH);
+		Write (1, String ("Time Updating Seconds = %.1lf (%.1lf%%)") %
+			((double) update_time / CLOCKS_PER_SEC) % (100.0 * update_time / total_time) % FINISH);
+
 		//---- convergence check ----
 
 		if (!last_flag && link_last_flag && trip_last_flag && transit_last_flag) {

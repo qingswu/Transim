@@ -45,9 +45,8 @@ void PlanSum::Link_Group (double min_vc)
 		Print (1);
 		Link_Group_Header ();
 	}
-	num = link_equiv.Max_Group ();
 
-	for (i=1; i <= num; i++) {
+	for (i = link_equiv.First_Group (); i > 0; i = link_equiv.Next_Group ()) {
 
 		list = link_equiv.Group_List (i);
 		if (list == 0) continue;

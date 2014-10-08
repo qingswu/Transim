@@ -38,7 +38,9 @@ void SimSubareas::Execute (void)
 	num = (int) node_array.size ();
 
 	for (i=0, int_itr = subarea_count.begin (); int_itr != subarea_count.end (); int_itr++, i++) {
-		Write (1, String ("Subarea %d Node Count = %d  (%.1lf%%)") % i % *int_itr % (*int_itr * 100.0 / num) % FINISH);
+		if (*int_itr > 0) {
+			Write (1, String ("Subarea %d Node Count = %d  (%.1lf%%)") % i % *int_itr % (*int_itr * 100.0 / num) % FINISH);
+		}
 	}
 	Show_Message (1);
 

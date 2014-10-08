@@ -95,6 +95,25 @@ typedef vector <Timing_Data>    Timing_Array;
 typedef Timing_Array::iterator  Timing_Itr;
 
 //---------------------------------------------------------
+//	Timing_Record class definition
+//---------------------------------------------------------
+
+class SYSLIB_API Timing_Record
+{
+public:
+	Timing_Record (void)       { Clear (); }
+
+	int  Signal (void)         { return (signal); }
+	void Signal (int value)    { signal = value; }
+
+	Timing_Data                timing_data;
+
+	void Clear (void)          { signal = -1; timing_data.Clear (); }
+private:
+	int signal;
+};
+
+//---------------------------------------------------------
 //	Timing40_Data
 //---------------------------------------------------------
 

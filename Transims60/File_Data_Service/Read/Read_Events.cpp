@@ -8,10 +8,8 @@
 //	Read_Events
 //---------------------------------------------------------
 
-void Data_Service::Read_Events (void)
+void Data_Service::Read_Events (Event_File &file)
 {
-	Event_File *file = (Event_File *) System_File_Handle (EVENT);
-	
 	int num;
 	Event_Data event_rec;
 	Event_Index event_index;
@@ -19,17 +17,17 @@ void Data_Service::Read_Events (void)
 
 	//---- store the event data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 	
-	Initialize_Events (*file);
+	Initialize_Events (file);
 
-	while (file->Read ()) {
+	while (file.Read ()) {
 		Show_Progress ();
 
 		event_rec.Clear ();
 
-		if (Get_Event_Data (*file, event_rec)) {
+		if (Get_Event_Data (file, event_rec)) {
 			event_rec.Get_Event_Index (event_index);
 
 			map_stat = event_map.insert (Event_Map_Data (event_index, (int) event_array.size ()));
@@ -46,14 +44,14 @@ void Data_Service::Read_Events (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 	
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	num = (int) event_array.size ();
 
 	if (num && num != Progress_Count ()) {
-		Print (1, String ("Number of %d Data Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of %d Data Records = %d") % file.File_ID () % num);
 	}
 	if (num > 0) System_Data_True (EVENT);
 }

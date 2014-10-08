@@ -173,27 +173,55 @@ next_mode:
 		mode = to_ptr->Mode ();
 
 		if (from_type == DIR_ID) {
+#ifdef CHECK
+			if (from_index < 0 || from_index >= (int) link_path.size ()) exe->Error ("Path_Builder::Trace: link_path from_index");
+#endif
 			from_ptr = &link_path [from_index];	
 		} else if (from_type == FROM_ID) {
 			if (park_flag) {
+#ifdef CHECK
+				if (from_index < 0 || from_index >= (int) from_parking.size ()) exe->Error ("Path_Builder::Trace: parking from_index");
+#endif
 				from_end = &from_parking [from_index];
 				park_flag = false;
 			} else {
+#ifdef CHECK
+				if (from_index < 0 || from_index >= (int) link_path.size ()) exe->Error ("Path_Builder::Trace: from from_index");
+#endif
 				from_end = &from->at (from_index);
 			}
 			path_ritr = from_end->rbegin ();
 			from_ptr = &(*path_ritr);
 		} else if (from_type == NODE_ID) {
+#ifdef CHECK
+			if (from_path < 0 || from_path > MAX_PATHS) exe->Error ("Path_Builder::Trace: node_path max_paths");
+			if (from_index < 0 || from_index >= (int) node_path [from_path].size ()) exe->Error ("Path_Builder::Trace: node_path from_index");
+#endif
 			from_ptr = &node_path [from_path] [from_index];
 		} else if (from_type == STOP_ID) {
 			if (mode == WAIT_MODE) {
+#ifdef CHECK
+				if (from_path < 0 || from_path >= MAX_PATHS) exe->Error ("Path_Builder::Trace: board_path max_paths");
+				if (from_index < 0 || from_index >= (int) board_path [from_path].size ()) exe->Error ("Path_Builder::Trace: board_path from_index");
+#endif
 				from_ptr = &board_path [from_path] [from_index];
 			} else {
+#ifdef CHECK
+				if (from_path < 0 || from_path >= MAX_PATHS) exe->Error ("Path_Builder::Trace: alight_path max_paths");
+				if (from_index < 0 || from_index >= (int) alight_path [from_path].size ()) exe->Error ("Path_Builder::Trace: alight_path from_index");
+#endif
 				from_ptr = &alight_path [from_path] [from_index];
 			}
 		} else if (from_type == ROUTE_ID) {
+#ifdef CHECK
+			if (from_path < 0 || from_path >= MAX_PATHS) exe->Error ("Path_Builder::Trace: wait_path max_paths");
+			if (from_index < 0 || from_index >= (int) wait_path [from_path].size ()) exe->Error ("Path_Builder::Trace: wait_path from_index");
+#endif
 			from_ptr = &wait_path [from_path] [to_index];
 		} else if (from_type == ACCESS_ID) {
+#ifdef CHECK
+			if (from_index < 0 || from_index >= (int) exe->access_array.size ()) exe->Error ("Path_Builder::Trace: access_array from_index");
+#endif
 			access_ptr = &exe->access_array [from_index];
 
 			if (param.walk_detail) {
@@ -220,8 +248,16 @@ next_mode:
 			if (!forward_flag) to_dir = (from_dir == 0) ? 1 : 0;
 
 			if (from_type == NODE_ID) {
+#ifdef CHECK
+				if (from_path < 0 || from_path > MAX_PATHS) exe->Error ("Path_Builder::Trace: node_path max_paths");
+				if (from_index < 0 || from_index >= (int) node_path [from_path].size ()) exe->Error ("Path_Builder::Trace: node_path from_index");
+#endif
 				from_ptr = &node_path [from_path] [from_index];
 			} else if (from_type == STOP_ID) {
+#ifdef CHECK
+				if (from_path < 0 || from_path >= MAX_PATHS) exe->Error ("Path_Builder::Trace: alight_path max_paths");
+				if (from_index < 0 || from_index >= (int) alight_path [from_path].size ()) exe->Error ("Path_Builder::Trace: alight_path from_index");
+#endif
 				from_ptr = &alight_path [from_path] [from_index];
 			}
 		} else {
@@ -279,6 +315,9 @@ next_mode:
 						}
 					}
 				} else if (param.walk_detail && (from_type == NODE_ID || from_type == FROM_ID)) {
+#ifdef CHECK
+					if (leg_ptr->size () == 0) exe->Error ("Path_Builder::Trace: prev_leg");
+#endif
 					prev_leg = &leg_ptr->back ();
 
 					if (prev_leg->Access_Type ()) {
@@ -288,6 +327,9 @@ next_mode:
 			} else if (type == NODE_ID) {
 				if (from_type == NODE_ID) {
 					if (param.walk_detail) {
+#ifdef CHECK
+						if (leg_ptr->size () == 0) exe->Error ("Path_Builder::Trace: prev_leg");
+#endif
 						prev_leg = &leg_ptr->back ();
 
 						if (prev_leg->Access_Type ()) {
@@ -319,11 +361,17 @@ next_mode:
 						continue;	//---- ignore the extra node record ----
 					} else if (from_end->Type () == LINK_ID) {
 						if (from_end->Index () < 0) return (0);
+#ifdef CHECK
+						if (leg_ptr->size () == 0) exe->Error ("Path_Builder::Trace: prev_leg");
+#endif
 						prev_leg = &leg_ptr->back ();
 
 						if (prev_leg->Access_Type ()) {
 							Add_Leg (WALK_MODE, NODE_ID, index);
 						}
+#ifdef CHECK
+						if (from_end->Index () < 0 || from_end->Index () >= (int) exe->link_array.size ()) exe->Error ("Path_Builder::Trace: link_array index");
+#endif
 						link_ptr = &exe->link_array [from_end->Index ()];
 						ab_flag = (link_ptr->Bnode () == index) ? forward_flag : !forward_flag;
 
@@ -335,12 +383,21 @@ next_mode:
 				} else if (from_type == STOP_ID) {
 					if (from_index < 0) return (0);
 					if (param.walk_detail) {
+#ifdef CHECK
+						if (leg_ptr->size () == 0) exe->Error ("Path_Builder::Trace: prev_leg");
+#endif
 						prev_leg = &leg_ptr->back ();
 
 						if (prev_leg->Access_Type ()) {
 							Add_Leg (WALK_MODE, NODE_ID, index);
 						}
+#ifdef CHECK
+						if (from_index < 0 || from_index >= (int) exe->stop_array.size ()) exe->Error ("Path_Builder::Trace: stop_array index");
+#endif
 						stop_ptr = &exe->stop_array [from_index];
+#ifdef CHECK
+						if (stop_ptr->Link () < 0 || stop_ptr->Link () >= (int) exe->link_array.size ()) exe->Error ("Path_Builder::Trace: link_array index");
+#endif
 						link_ptr = &exe->link_array [stop_ptr->Link ()];
 
 						ab_flag = (link_ptr->Bnode () == index) ? forward_flag : !forward_flag;
@@ -357,9 +414,12 @@ next_mode:
 
 				if (forward_flag) {
 					if (param.walk_detail && (from_type == NODE_ID || from_type == FROM_ID)) {
+
 						Add_Leg (mode, type, index, dir);
 						if (from_type == FROM_ID && time == 0) continue;
-
+#ifdef CHECK
+						if (index < 0 || index >= (int) exe->stop_array.size ()) exe->Error ("Path_Builder::Trace: stop_array index");
+#endif
 						stop_ptr = &exe->stop_array [index];
 
 						type = LINK_ID;
@@ -367,6 +427,18 @@ next_mode:
 						dir = from_dir;
 					} else {
 						if (time == 0 && from_type == to_type && from_index == to_index) continue;
+
+						if (param.walk_detail && time > 0 && from_type == STOP_ID && to_type == STOP_ID) {
+							Add_Leg (mode, type, index, dir);
+#ifdef CHECK
+							if (index < 0 || index >= (int) exe->stop_array.size ()) exe->Error ("Path_Builder::Trace: stop_array index");
+#endif
+							stop_ptr = &exe->stop_array [index];
+
+							type = LINK_ID;
+							index = stop_ptr->Link ();
+							dir = from_dir;
+						}
 					}
 				} else {
 					if (mode == WAIT_MODE) {
@@ -381,13 +453,18 @@ next_mode:
 
 					if (mode == WALK_MODE) {
 						Add_Leg (TRANSIT_MODE, type, index, 0, prev_imp, prev_time, prev_len);
-
+#ifdef CHECK
+						if (index < 0 || index >= (int) exe->stop_array.size ()) exe->Error ("Path_Builder::Trace: stop_array index");
+#endif
 						stop_ptr = &exe->stop_array [index];
 
 						type = LINK_ID;
 						index = stop_ptr->Link ();
 						dir = from_dir;
 					} else if (mode == TRANSIT_MODE) {
+#ifdef CHECK
+						if (leg_ptr->size () == 0) exe->Error ("Path_Builder::Trace: prev_leg");
+#endif
 						prev_leg = &leg_ptr->back ();
 
 						if (prev_leg->Type () == ROUTE_ID) {
@@ -418,14 +495,26 @@ next_mode:
 				if (path == 0) {
 					use_index = in_index;
 				} else {
+#ifdef CHECK
+					if (in_index < 0 || in_index >= (int) exe->dir_array.size ()) exe->Error ("Path_Builder::Trace: dir_array index");
+#endif
 					dir_ptr = &exe->dir_array [in_index];
 					use_index = dir_ptr->Use_Index ();
 					if (use_index < 0) use_index = in_index;
 				}
 				if (type == DIR_ID) {
+#ifdef CHECK
+					if (index < 0 || index >= (int) exe->dir_array.size ()) exe->Error ("Path_Builder::Trace: dir_array index");
+#endif
 					dir_ptr = &exe->dir_array [index];
+#ifdef CHECK
+					if (dir_ptr->Link () < 0 || dir_ptr->Link () >= (int) exe->link_array.size ()) exe->Error ("Path_Builder::Trace: link_array index");
+#endif
 					link_ptr = &exe->link_array [dir_ptr->Link ()];
 				} else {
+#ifdef CHECK
+					if (abs (index) >= (int) exe->link_array.size ()) exe->Error ("Path_Builder::Trace: link_array index");
+#endif
 					link_ptr = &exe->link_array [abs (index)];
 				}
 				if (len >= link_ptr->Length ()) {
@@ -479,10 +568,14 @@ next_mode:
 		to_ptr = from_ptr;
 	}
 	if (from_end->End_Type () == PARKING_ID) {
-
+#ifdef CHECK
+		if (from_end->Trip_End () < 0 || from_end->Trip_End () >= (int) parking_lots.size ()) exe->Error ("Path_Builder::Trace: parking_lots index");
+#endif
 		parking_end = &parking_lots [from_end->Trip_End ()];
 		if (parking_end->Best () < 0) return (0);
-
+#ifdef CHECK
+		if (parking_end->Best () < 0 || parking_end->Best () >= (int) to_parking.size ()) exe->Error ("Path_Builder::Trace: to_parking index");
+#endif
 		to = &to_parking [parking_end->Best ()];
 		path_itr = to->begin ();
 
@@ -583,7 +676,13 @@ bool Path_Builder::Add_Leg (int mode, int type, int index, int dir, int imped, i
 			case DIR_ID:
 			case USE_ID:
 				id = index;
+#ifdef CHECK
+				if (index < 0 || index >= (int) exe->dir_array.size ()) exe->Error ("Path_Builder::Add_Leg: dir_array index");
+#endif
 				dir_ptr = &exe->dir_array [index];
+#ifdef CHECK
+				if (dir_ptr->Link () < 0 || dir_ptr->Link () >= (int) exe->link_array.size ()) exe->Error ("Path_Builder::Add_Leg: link_array index");
+#endif
 				link_ptr = &exe->link_array [dir_ptr->Link ()];
 				if (len > link_ptr->Length ()) len = link_ptr->Length ();
 
@@ -593,6 +692,9 @@ bool Path_Builder::Add_Leg (int mode, int type, int index, int dir, int imped, i
 				break;
 			case LINK_ID:
 				id = index;
+#ifdef CHECK
+				if (index < 0 || index >= (int) exe->link_array.size ()) exe->Error ("Path_Builder::Add_Leg: link_array index");
+#endif
 				link_ptr = &exe->link_array [index];
 				if (path > 0 && mode == DRIVE_MODE) {
 					type = (dir == 1) ? USE_BA : USE_AB;
@@ -633,6 +735,9 @@ bool Path_Builder::Add_Leg (int mode, int type, int index, int dir, int imped, i
 		//---- accumulate walk data ----
 				
 		if (mode == WALK && !param.walk_detail && leg_ptr->size () > 0) {
+#ifdef CHECK
+			if (leg_ptr->size () == 0) exe->Error ("Path_Builder::Add_Leg: leg_ptr");
+#endif
 			prev_leg = &leg_ptr->back ();
 
 			if (prev_leg->Mode () == WALK_MODE) {

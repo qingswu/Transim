@@ -8,40 +8,42 @@
 //	Read_Drivers
 //---------------------------------------------------------
 
-void Data_Service::Read_Drivers (void)
+void Data_Service::Read_Drivers (Driver_File &file)
 {
-	Driver_File *file = (Driver_File *) System_File_Handle (TRANSIT_DRIVER);
+	int i, num, count, last_index;
+	bool keep_flag, connect_flag;
 
-	int i, num, count;
-	bool keep_flag;
 	Line_Data *line_ptr;
 	Driver_Data driver_rec;
+	Int2_Map_Itr connect_itr;
 
 	//---- store the transit driver data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 	
-	Initialize_Drivers (*file);
+	connect_flag = System_File_Flag (CONNECTION);
+
+	Initialize_Drivers (file);
 	count = 0;
 
-	while (file->Read (false)) {
+	while (file.Read (false)) {
 		Show_Progress ();
 
 		driver_rec.Clear ();
 
-		keep_flag = Get_Driver_Data (*file, driver_rec);
+		keep_flag = Get_Driver_Data (file, driver_rec);
 
-		num = file->Num_Nest ();
+		num = file.Num_Nest ();
 		if (num > 0) driver_rec.reserve (num);
 
 		for (i=1; i <= num; i++) {
-			if (!file->Read (true)) {
-				Error (String ("Number of Link Records for Route %d") % file->Route ());
+			if (!file.Read (true)) {
+				Error (String ("Number of Link Records for Route %d") % file.Route ());
 			}
 			Show_Progress ();
 
-			Get_Driver_Data (*file, driver_rec);
+			Get_Driver_Data (file, driver_rec);
 		}
 		if (keep_flag) {
 			line_ptr = &line_array [driver_rec.Route ()];
@@ -53,14 +55,14 @@ void Data_Service::Read_Drivers (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
 	line_array.Driver_Records (Progress_Count ());
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	if (count && count != Progress_Count ()) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % count);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % count);
 	}
 	if (count > 0) System_Data_True (TRANSIT_DRIVER);
 
@@ -83,21 +85,32 @@ void Data_Service::Read_Drivers (void)
 
 			driver_itr = line_itr->driver_array.begin ();
 			if (driver_itr == line_itr->driver_array.end ()) continue;
+			last_index = -1;
+			dir_ptr = 0;
 
 			for (stop_itr = line_itr->begin(); stop_itr != line_itr->end (); stop_itr++) {
 				stop_ptr = &stop_array [stop_itr->Stop ()];
 
 				for (; driver_itr != line_itr->driver_array.end (); driver_itr++) {
-					dir_ptr = &dir_array [*driver_itr];
-
+					if (*driver_itr != last_index) {
+						dir_ptr = &dir_array [*driver_itr];
+						if (connect_flag && last_index >= 0) {
+							connect_itr = connect_map.find (Int2_Key (last_index, *driver_itr));
+							if (connect_itr == connect_map.end ()) {
+								Warning (String ("Route %d Driver Links %d-%d are Not Connected") % line_itr->Route ()
+									% (link_array [dir_array [last_index].Link ()].Link ()) 
+									% (link_array [dir_ptr->Link ()].Link ()));
+							}
+						}
+						last_index = *driver_itr;
+					}
 					if (stop_ptr->Link_Dir () == dir_ptr->Link_Dir ()) break;
-
 					link_ptr = &link_array [dir_ptr->Link ()];
 					length += link_ptr->Length () - offset;
 					offset = 0;
 				}
 				if (driver_itr == line_itr->driver_array.end ()) {
-					Error (String ("Route %d Stops and Driver Links are Incompatible") % line_itr->Route ());
+					Error (String ("Route %d Stop %d and Driver Links are Incompatible") % line_itr->Route () % stop_ptr->Stop ());
 				}
 				if (first) {
 					first = false;

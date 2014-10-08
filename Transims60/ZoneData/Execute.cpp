@@ -38,7 +38,7 @@ void ZoneData::Execute (void)
 
 	//---- read the zone file ----
 
-	Read_Zones ();
+	Read_Zones (*((Zone_File *) System_File_Handle (ZONE)));
 
 	//---- sum zone data ----
 

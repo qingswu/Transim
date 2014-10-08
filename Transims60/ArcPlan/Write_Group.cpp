@@ -10,7 +10,7 @@
 
 void ArcPlan::Write_Group (void)
 {
-	int i, num, board, alight, max_group;
+	int i, num, board, alight;
 	int group_field, board_field, alight_field, total_field, name_field;
 
 	XYZ_Point pt;
@@ -33,9 +33,7 @@ void ArcPlan::Write_Group (void)
 
 	//---- process each stop group ----
 
-	max_group = stop_equiv.Max_Group ();
-
-	for (i=1; i <= max_group; i++) {
+	for (i = stop_equiv.First_Group (); i > 0; i = stop_equiv.Next_Group ()) {
 
 		group = stop_equiv.Group_List (i);
 		if (group == 0) continue;

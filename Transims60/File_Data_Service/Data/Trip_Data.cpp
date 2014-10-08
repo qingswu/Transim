@@ -12,7 +12,7 @@
 bool Trip_Data::Internal_IDs (void)
 {
 	Int_Map_Itr map_itr;
-	
+
 	map_itr = dat->location_map.find (Origin ());
 
 	if (map_itr == dat->location_map.end ()) {
@@ -54,6 +54,9 @@ bool Trip_Data::Internal_IDs (void)
 
 bool Trip_Data::External_IDs (void)
 {
+	if (Origin () < 0 || Origin () >= (int) dat->location_array.size ()) return (false);
+	if (Destination () < 0 || Destination () >= (int) dat->location_array.size ()) return (false);
+
 	Origin (dat->location_array [Origin ()].Location ());
 	Destination (dat->location_array [Destination ()].Location ());
 
@@ -61,6 +64,7 @@ bool Trip_Data::External_IDs (void)
 		Vehicle (0);
 		Veh_Type (0);
 	} else {
+		if (Veh_Type () >= (int) dat->veh_type_array.size ()) return (false);
 		Veh_Type (dat->veh_type_array [Veh_Type ()].Type ());
 	}
 	return (true);

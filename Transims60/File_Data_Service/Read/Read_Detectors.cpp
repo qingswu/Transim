@@ -8,29 +8,27 @@
 //	Read_Detectors
 //---------------------------------------------------------
 
-void Data_Service::Read_Detectors (void)
+void Data_Service::Read_Detectors (Detector_File &file)
 {
-	Detector_File *file = (Detector_File *) System_File_Handle (DETECTOR);
-	
 	int num;
 	Int_Map_Stat map_stat;
 	Detector_Data detector_rec;
 
 	//---- store the lane use data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 	
-	Initialize_Detectors (*file);
+	Initialize_Detectors (file);
 
 	num = 0;
 
-	while (file->Read ()) {
+	while (file.Read ()) {
 		Show_Progress ();
 
 		detector_rec.Clear ();
 
-		if (Get_Detector_Data (*file, detector_rec)) {
+		if (Get_Detector_Data (file, detector_rec)) {
 			map_stat = detector_map.insert (Int_Map_Data (detector_rec.Detector (), (int) detector_array.size ()));
 
 			if (!map_stat.second) {
@@ -42,14 +40,14 @@ void Data_Service::Read_Detectors (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	num = (int) detector_array.size ();
 
 	if (num && num != Progress_Count ()) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % num);
 	}
 	if (num > 0) {
 		System_Data_True (DETECTOR);

@@ -129,8 +129,8 @@ bool Plan_Leg::Internal_IDs (void)
 			id = map_itr->second;
 			break;
 		case ROUTE_ID:
-			map_itr = dat->route_map.find (id);
-			if (map_itr == dat->route_map.end ()) return (false);
+			map_itr = dat->line_map.find (id);
+			if (map_itr == dat->line_map.end ()) return (false);
 			id = map_itr->second;
 			break;
 		default:

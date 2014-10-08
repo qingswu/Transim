@@ -30,7 +30,7 @@ public:
 
 	void Clear (void)
 	{
-		start = check = 0; status = 0; phase = barrier = 0; Free ();
+		start = check = 0; status = 0; phase = barrier = 0; clear ();
 	}
 private:
 	Dtime  start;
@@ -64,7 +64,7 @@ public:
 
 	void Clear (void)
 	{
-		end_time = check_time = MAX_INTEGER; timing_index = -1; status = 0; Free ();
+		end_time = check_time = MAX_INTEGER; timing_index = -1; status = 0; clear ();
 	}
 private:
 	Dtime end_time;

@@ -60,18 +60,31 @@ void SubareaNet::Program_Control (void)
 	} else {
 		key = Get_Control_Text (SUBAREA_COORDINATE_BOX);
 
-		if (key.empty ()) {
-			Error ("A Subarea Polygon or Coordinate Box is Requried");
+		if (!key.empty ()) {
+			key.Parse (values);
+			if ((int) values.size () != 4) {
+				Error ("Subarea Coordinate Box does not include Four Values");
+			}
+			x_min = Round (values [0].Double ());
+			y_min = Round (values [1].Double ());
+			x_max = Round (values [2].Double ());
+			y_max = Round (values [3].Double ());
+			box_flag = true;
+
+		} else {
+
+			key = Get_Control_Text (SUBAREA_NODE_CODE);
+
+			if (key.empty ()) {
+				Error ("A Subarea Polygon, Coordinate Box, or Node Code is Requried");
+			}
+			node_code = key.Integer ();
+
+			if (node_code < 1 || node_code > 100) {
+				Error ("Subarea Node Code is Out of Range (1..100)");
+			}
+			node_flag = true;
 		}
-		key.Parse (values);
-		if ((int) values.size () != 4) {
-			Error ("Subarea Coordinate Box does not include Four Values");
-		}
-		x_min = Round (values [0].Double ());
-		y_min = Round (values [1].Double ());
-		x_max = Round (values [2].Double ());
-		y_max = Round (values [3].Double ());
-		box_flag = true;
 	}
 
 	//---- get the external offset length ----

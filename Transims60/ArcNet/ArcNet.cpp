@@ -11,7 +11,7 @@
 ArcNet::ArcNet (void) : Data_Service (), Draw_Service ()
 {
 	Program ("ArcNet");
-	Version (3);
+	Version (4);
 	Title ("Generate ArcView Shapefiles from a TRANSIMS Network");
 
 	System_File_Type optional_files [] = {

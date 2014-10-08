@@ -65,6 +65,7 @@ public:
 	void   System_Option_True (System_File_Type type)  { if (type < END_FILE) system_file [type].option = true; }
 
 	bool   System_Control_Check (System_File_Type type) { return ((type < END_FILE) ? Check_Control_Key (SYSTEM_FILE_OFFSET + type) : false); }
+	bool   System_Control_Empty (System_File_Type type) { return ((type < END_FILE) ? Control_Key_Empty (SYSTEM_FILE_OFFSET + type) : false); }
 
 	void   System_Read_False (System_File_Type type)   { if (type < END_FILE) system_file [type].read = false; }
 	

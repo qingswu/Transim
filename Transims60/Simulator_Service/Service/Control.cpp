@@ -382,10 +382,18 @@ void Simulator_Service::Program_Control (void)
 
 	param.print_problems = Get_Control_Flag (PRINT_PROBLEM_MESSAGES);
 
-	//---- estimated number of travelers -----
+	//---- print problem messages ----
 
 	Print (1);
+	read_all_flag = Get_Control_Flag (READ_ALL_PLANS_INTO_MEMORY);
+
+	//---- estimated number of travelers -----
+
 	num_travelers = Get_Control_Integer (NUMBER_OF_TRAVELERS);
+
+	//---- average number of legs per trip -----
+
+	average_legs = Get_Control_Integer (AVERAGE_LEGS_PER_TRIP);
 
 	//---- read the control keys ----
 

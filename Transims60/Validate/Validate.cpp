@@ -15,16 +15,17 @@ int Validate::volume_level [] = {
 Validate::Validate (void) : Data_Service ()
 {
 	Program ("Validate");
-	Version (5);
+	Version (12);
 	Title ("Compare Volumes to Counts");
 
 	System_File_Type required_files [] = {
 		NODE, LINK, END_FILE
 	};
 	System_File_Type optional_files [] = {
-		ZONE, POCKET, CONNECTION, SIGNAL, TIMING_PLAN, PHASING_PLAN, 
-		TRANSIT_STOP, TRANSIT_ROUTE, TRANSIT_SCHEDULE, TRANSIT_DRIVER,
-		PERFORMANCE, TURN_DELAY, RIDERSHIP, END_FILE
+		ZONE, SHAPE, POCKET, CONNECTION, ACCESS_LINK, LOCATION, PARKING, LANE_USE, 
+		SIGN, SIGNAL, TIMING_PLAN, PHASING_PLAN, DETECTOR, 
+		TRANSIT_STOP, TRANSIT_ROUTE, TRANSIT_SCHEDULE, TRANSIT_DRIVER, VEHICLE_TYPE,
+		TURN_PENALTY, PERFORMANCE, TURN_DELAY, RIDERSHIP, END_FILE
 	};
 	int file_service_keys [] = {
 		NOTES_AND_NAME_FIELDS, SAVE_LANE_USE_FLOWS, LINK_EQUIVALENCE_FILE, ZONE_EQUIVALENCE_FILE, 
@@ -46,6 +47,10 @@ Validate::Validate (void) : Data_Service ()
 		{ ADJUSTMENT_FACTOR, "ADJUSTMENT_FACTOR", LEVEL0, OPT_KEY, FLOAT_KEY, "1.0", "0.05..10.0", NO_HELP },
 		{ FACILITY_TYPE_LABELS, "FACILITY_TYPE_LABELS", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP},
 		{ AREA_TYPE_LABELS, "AREA_TYPE_LABELS", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
+		{ CHECK_NETWORK_FLAG, "CHECK_NETWORK_FLAG", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
+		{ NEW_PROBLEM_NODE_FILE, "NEW_PROBLEM_NODE_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
+		{ NEW_PROBLEM_LINK_FILE, "NEW_PROBLEM_LINK_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
+		{ NEW_PROBLEM_COORDINATE_FILE, "NEW_PROBLEM_COORDINATE_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
 		END_CONTROL
 	};
 	const char *reports [] = {
@@ -79,7 +84,8 @@ Validate::Validate (void) : Data_Service ()
 
 	Page_Size (120, 47);
 
-	delay_flag = link_flag = turn_flag = output_flag = zone_flag = method = line_flag = stop_flag = vc_flag = false;
+	problem_node_flag = problem_link_flag = problem_coord_flag = false;
+	delay_flag = link_flag = turn_flag = output_flag = zone_flag = method = line_flag = stop_flag = vc_flag = check_net_flag = false;
 	factor = 1.0;
 	hours = 1.0;
 

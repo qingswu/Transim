@@ -26,6 +26,14 @@ void TransimsNet::Zone_Access (void)
 	Zone_Itr zone_itr;
 	Access_Data access_rec;
 
+	naccess = (int) access_map.size ();
+
+	naccess = (int) access_array.size ();
+	if (naccess > 0) {
+		Int_Map_Itr map_itr = --access_map.end ();
+		naccess = ((map_itr->first / 10) + 1) * 10 - 1;
+	}
+
 	Show_Message (String ("Creating Zone Access Points -- Record"));
 	Set_Progress ();
 

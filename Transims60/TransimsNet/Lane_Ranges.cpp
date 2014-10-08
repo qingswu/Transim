@@ -236,6 +236,8 @@ void TransimsNet::Lane_Ranges (void)
 							}
 						} else if ((out_high - out_low) > 0 && lns_thru < dir_itr->Lanes ()) {
 							in_high = in_thru1;
+						} else if (lns_thru == 0) {
+							in_high = in_thru1;
 						} else {
 							in_high = in_left2;
 						}
@@ -285,7 +287,7 @@ void TransimsNet::Lane_Ranges (void)
 							}
 						} else if ((out_high - out_low) > 0 && lns_thru < dir_itr->Lanes ()) {
 							in_low = in_thru2;
-						} else if (lns_rsplit > 1) {
+						} else if (lns_rsplit > 1 || lns_thru == 0) {
 							in_low = in_thru2;
 						} else {
 							in_low = in_right1;

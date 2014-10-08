@@ -183,178 +183,172 @@ void Data_Service::Execute (void)
 	//---- nodes ----
 
 	file = System_File (NODE);
-	if (file->flag && file->read) Read_Nodes ();
+	if (file->flag && file->read) Read_Nodes (*((Node_File *) file->file));
 
 	//---- zones ----
 
 	file = System_File (ZONE);
-	if (file->flag && file->read) Read_Zones ();
+	if (file->flag && file->read) Read_Zones (*((Zone_File *) file->file));
 
 	//---- shapes ----
 
 	file = System_File (SHAPE);
-	if (file->flag && file->read) Read_Shapes ();
+	if (file->flag && file->read) Read_Shapes (*((Shape_File *) file->file));
 
 	//---- links ----
 
 	file = System_File (LINK);
-	if (file->flag && file->read) Read_Links ();
+	if (file->flag && file->read) Read_Links (*((Link_File *) file->file));
 
 	//---- pocket lanes ----
 
 	file = System_File (POCKET);
-	if (file->flag && file->read) Read_Pockets ();
+	if (file->flag && file->read) Read_Pockets (*((Pocket_File *) file->file));
 
 	//---- vehicle types ----
 
 	file = System_File (VEHICLE_TYPE);
-	if (file->flag && file->read) Read_Veh_Types ();
+	if (file->flag && file->read) Read_Veh_Types (*((Veh_Type_File *) file->file));
 
 	//---- lane use ----
 
 	file = System_File (LANE_USE);
-	if (file->flag && file->read) Read_Lane_Uses ();
+	if (file->flag && file->read) Read_Lane_Uses (*((Lane_Use_File *) file->file));
 
 	//---- connections ----
 
 	file = System_File (CONNECTION);
-	if (file->flag && file->read) Read_Connections ();
+	if (file->flag && file->read) Read_Connections (*((Connect_File *) file->file));
 
 	//---- turn penalties ----
 
 	file = System_File (TURN_PENALTY);
-	if (file->flag && file->read) Read_Turn_Pens ();
+	if (file->flag && file->read) Read_Turn_Pens (*((Turn_Pen_File *) file->file));
 
 	//---- parking lots ----
 
 	file = System_File (PARKING);
-	if (file->flag && file->read) Read_Parking_Lots ();
+	if (file->flag && file->read) Read_Parking_Lots (*((Parking_File *) file->file));
 
 	//---- locations ----
 
 	file = System_File (LOCATION);
-	if (file->flag && file->read) Read_Locations ();
+	if (file->flag && file->read) Read_Locations (*((Location_File *) file->file));
 
 	//---- transit stops ----
 
 	file = System_File (TRANSIT_STOP);
-	if (file->flag && file->read) Read_Stops ();
+	if (file->flag && file->read) Read_Stops (*((Stop_File *) file->file));
 
 	//---- access links ----
 
 	file = System_File (ACCESS_LINK);
-	if (file->flag && file->read) Read_Access_Links ();
+	if (file->flag && file->read) Read_Access_Links (*((Access_File *) file->file));
 
 	//---- signs ----
 
 	file = System_File (SIGN);
-	if (file->flag && file->read) Read_Signs ();
+	if (file->flag && file->read) Read_Signs (*((Sign_File *) file->file));
 
 	//---- signals ----
 
 	file = System_File (SIGNAL);
-	if (file->flag && file->read) Read_Signals ();
+	if (file->flag && file->read) Read_Signals (*((Signal_File *) file->file));
 
 	//---- detectors ----
 
 	file = System_File (DETECTOR);
-	if (file->flag && file->read) Read_Detectors ();
+	if (file->flag && file->read) Read_Detectors (*((Detector_File *) file->file));
 
 	//---- timing plans ----
 
 	file = System_File (TIMING_PLAN);
-	if (file->flag && file->read) Read_Timing_Plans ();
+	if (file->flag && file->read) Read_Timing_Plans (*((Timing_File *) file->file));
 
 	//---- phasing plans ----
 
 	file = System_File (PHASING_PLAN);
-	if (file->flag && file->read) Read_Phasing_Plans ();
+	if (file->flag && file->read) Read_Phasing_Plans (*((Phasing_File *) file->file));
 
 	//---- transit fares ----
 
 	file = System_File (TRANSIT_FARE);
-	if (file->flag && file->read) Read_Fares ();
+	if (file->flag && file->read) Read_Fares (*((Fare_File *) file->file));
 
 	//---- transit routes ----
 
 	file = System_File (TRANSIT_ROUTE);
-	if (file->flag && file->read) Read_Lines ();
+	if (file->flag && file->read) Read_Lines (*((Line_File *) file->file));
 
 	//---- transit schedules ----
 
 	file = System_File (TRANSIT_SCHEDULE);
-	if (file->flag && file->read) Read_Schedules ();
+	if (file->flag && file->read) Read_Schedules (*((Schedule_File *) file->file));
 
 	//---- transit drivers ----
 
 	file = System_File (TRANSIT_DRIVER);
-	if (file->flag && file->read) Read_Drivers ();
+	if (file->flag && file->read) Read_Drivers (*((Driver_File *) file->file));
 
 	//---- route nodes ----
 
 	file = System_File (ROUTE_NODES);
-	if (file->flag && file->read) Read_Route_Nodes ();
+	if (file->flag && file->read) Read_Route_Nodes (*((Route_Nodes_File *) file->file));
 
 	//---- selections ----
 
 	file = System_File (SELECTION);
-	if (file->flag && file->read) Read_Selections ();
+	if (file->flag && file->read) Read_Selections (*((Selection_File *) file->file));
 
 	//---- households ----
 
 	file = System_File (HOUSEHOLD);
-	if (file->flag && file->read) Read_Households ();
+	if (file->flag && file->read) Read_Households (*((Household_File *) file->file));
 
 	//---- performance ----
 
 	file = System_File (PERFORMANCE);
-	if (file->flag && file->read) {
-		Performance_File *file = (Performance_File *) System_File_Handle (PERFORMANCE);
-		Read_Performance (*file, perf_period_array);
-	}
+	if (file->flag && file->read) Read_Performance (*((Performance_File *) file->file), perf_period_array);
 
 	//---- turn_delay ----
 
 	file = System_File (TURN_DELAY);
-	if (file->flag && file->read) {
-		Turn_Delay_File *file = (Turn_Delay_File *) System_File_Handle (TURN_DELAY);
-		Read_Turn_Delays (*file, turn_period_array);
-	}
+	if (file->flag && file->read) Read_Turn_Delays (*((Turn_Delay_File *) file->file), turn_period_array);
 
 	//---- ridership ----
 
 	file = System_File (RIDERSHIP);
-	if (file->flag && file->read) Read_Ridership ();
+	if (file->flag && file->read) Read_Ridership (*((Ridership_File *) file->file));
 	
 	//---- trips ----
 
 	file = System_File (TRIP);
-	if (file->flag && file->read) Read_Trips ();
-	
+	if (file->flag && file->read) Read_Trips (*((Trip_File *) file->file));
+
 	//---- problems ----
 
 	file = System_File (PROBLEM);
-	if (file->flag && file->read) Read_Problems ();
+	if (file->flag && file->read) Read_Problems (*((Problem_File *) file->file));
 
 	//---- plans ----
 
 	file = System_File (PLAN);
-	if (file->flag && file->read) Read_Plans ();
+	if (file->flag && file->read) Read_Plans (*((Plan_File *) file->file));
 
 	//---- skims ----
 
 	file = System_File (SKIM);
-	if (file->flag && file->read) Read_Skims ();
+	if (file->flag && file->read) Read_Skims (*((Skim_File *) file->file));
 
 	//---- events ----
 
 	file = System_File (EVENT);
-	if (file->flag && file->read) Read_Events ();
+	if (file->flag && file->read) Read_Events (*((Event_File *) file->file));
 	
 	//---- travelers ----
 
 	file = System_File (TRAVELER);
-	if (file->flag && file->read) Read_Travelers ();
+	if (file->flag && file->read) Read_Travelers (*((Traveler_File *) file->file));
 
 	//---- zone location map file ----
 
@@ -422,8 +416,8 @@ Link_Data * Data_Service::Set_Link_Direction (Db_Header &file, int &link, int &d
 		}
 	}
 	if (offset < 0 || offset > link_ptr->Length ()) {
-		Warning (String ("%s %d Offset %.1lf is Out of Range (0..%.1lf)") %
-			file.File_ID () % Progress_Count () % UnRound (offset) % UnRound (link_ptr->Length ()));
+		//Warning (String ("%s %d Offset %.1lf is Out of Range (0..%.1lf)") %
+		//	file.File_ID () % Progress_Count () % UnRound (offset) % UnRound (link_ptr->Length ()));
 
 		if (offset < 0) {
 			offset = 0;

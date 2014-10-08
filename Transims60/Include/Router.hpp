@@ -57,9 +57,9 @@ private:
 	bool preload_flag;
 
 	Router_Method_Type method;
-	int total_records, num_file_sets, num_time_updates, num_trip_parts, max_speed_updates;
+	int total_records, num_file_sets, num_time_updates, num_trip_parts, max_speed_updates, num_selected;
 	int iteration, max_iteration, num_trip_sel, num_trip_rec, num_reroute, num_reskim, num_update, num_build, initial_priority;
-	double factor, increment, max_factor, link_gap, trip_gap, transit_gap, min_speed_diff;
+	double factor, increment, max_factor, link_gap, trip_gap, transit_gap, min_speed_diff, percent_selected;
 	
 	Trip_File *trip_file;
 	Plan_File *plan_file, *new_plan_file;
@@ -142,6 +142,7 @@ private:
 	//---- Router methods ----
 
 	void   Set_Partitions (void);
+	void   Input_Trips (void);
 	void   Map_Trip_Plan (void);
 	void   DUE_Loop (void);
 	double Reskim_Plans (bool average_flag);

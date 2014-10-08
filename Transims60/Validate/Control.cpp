@@ -18,6 +18,8 @@ void Validate::Program_Control (void)
 
 	//---- set equivalence flags ----
 
+	check_net_flag = Set_Control_Flag (CHECK_NETWORK_FLAG);
+
 	line_flag = Report_Flag (LINE_GROUP);
 	stop_flag = (Report_Flag (STOP_GROUP) || Report_Flag (BOARD_GROUP) || Report_Flag (ALIGHT_GROUP));
 
@@ -72,11 +74,14 @@ void Validate::Program_Control (void)
 		if (Report_Flag (TURN_MOVEMENT) || Report_Flag (TURN_LOS)) {
 			Error ("Turn Count File is Required for Turning Movement Reports");
 		}
-		System_File_False (POCKET);
-		System_File_False (CONNECTION);
-		System_File_False (SIGNAL);
-		System_File_False (TIMING_PLAN);
-		System_File_False (PHASING_PLAN);
+		if (!check_net_flag) {
+			System_File_False (POCKET);
+			System_File_False (CONNECTION);
+			System_File_False (SIGNAL);
+			System_File_False (TIMING_PLAN);
+			System_File_False (PHASING_PLAN);
+			System_File_False (DETECTOR);
+		}
 	}
 
 	//---- check for transit reports ----
@@ -100,7 +105,7 @@ void Validate::Program_Control (void)
 		if (stop_flag && !Check_Control_Key (STOP_GROUP_COUNT_FILE)) {
 			Error ("Stop Group Counts are Required for Stop Group Reports");
 		}
-	} else {
+	} else if (!check_net_flag) {
 		System_File_False (TRANSIT_STOP);
 		System_File_False (TRANSIT_ROUTE);
 		System_File_False (TRANSIT_SCHEDULE);
@@ -355,6 +360,47 @@ void Validate::Program_Control (void)
 				}
 			}
 			label_file.Close ();
+		}
+	}
+
+	//---- check network flag ----
+
+	Print (1);
+	Get_Control_Flag (CHECK_NETWORK_FLAG);
+
+	if (check_net_flag) {
+		key = Get_Control_String (NEW_PROBLEM_NODE_FILE);
+
+		if (!key.empty ()) {
+			Print (1);
+			problem_node_file.File_Type ("New Problem Node File");
+
+			problem_node_file.Create (Project_Filename (key));
+
+			problem_node_file.File () << "NODE" << endl;
+			problem_node_flag = true;
+		}
+		key = Get_Control_String (NEW_PROBLEM_LINK_FILE);
+
+		if (!key.empty ()) {
+			Print (1);
+			problem_link_file.File_Type ("New Problem Link File");
+
+			problem_link_file.Create (Project_Filename (key));
+
+			problem_link_file.File () << "LINK" << endl;
+			problem_link_flag = true;
+		}
+		key = Get_Control_String (NEW_PROBLEM_COORDINATE_FILE);
+
+		if (!key.empty ()) {
+			Print (1);
+			problem_coord_file.File_Type ("New Problem Coordinate File");
+
+			problem_coord_file.Create (Project_Filename (key));
+
+			problem_coord_file.File () << "NODE\tX_COORD\tY_COORD" << endl;
+			problem_coord_flag = true;
 		}
 	}
 

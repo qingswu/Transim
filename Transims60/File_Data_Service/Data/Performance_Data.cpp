@@ -704,18 +704,18 @@ void Performance_Data::Get_Data (Perf_Data *perf_ptr, Dir_Data *dir_ptr, Link_Da
 	Enter (perf_ptr->Enter ());
 	Exit (perf_ptr->Exit ());
 
-	Veh_Dist (perf_ptr->Veh_Dist ());
+	Veh_Dist (exe->UnRound (perf_ptr->Veh_Dist ()));
 	Veh_Time (perf_ptr->Veh_Time ());
 
-	Flow (Veh_Dist () / length);
+	Flow (Veh_Dist () / len);
 
 	if (perf_ptr->Veh_Time () > 0) {
-		speed = Veh_Dist () / Veh_Time ();
+		speed = perf_ptr->Veh_Dist () / Veh_Time ();
 	} else {
 		speed = length / dir_ptr->Time0 ();
 	}
 	if (speed < 0.1) speed = 0.1;
-	Speed (exe->Round (speed));
+	Speed (speed);
 
 	time = (int) (length / speed + 0.5);
 	if (time < 1) time = 1;
@@ -803,13 +803,13 @@ void Performance_Data::Get_Data (Vol_Spd_Data *vol_spd_ptr, Dir_Data *dir_ptr, L
 	Enter (vol_spd_ptr->Volume ());
 	Exit (vol_spd_ptr->Volume ());
 
-	Veh_Dist (vol_spd_ptr->Volume () * length);
+	Veh_Dist (vol_spd_ptr->Volume () * exe->UnRound (length));
 
-	Flow (Veh_Dist () / length);
+	Flow (vol_spd_ptr->Volume ());
 
 	speed = vol_spd_ptr->Speed ();
 	if (speed < 0.1) speed = 0.1;
-	Speed (exe->Round (speed));
+	Speed (speed);
 
 	time = (int) (length / speed + 0.5);
 	if (time < 1) time = 1;

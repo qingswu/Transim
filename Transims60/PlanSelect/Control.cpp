@@ -62,7 +62,7 @@ void PlanSelect::Program_Control (void)
 		}
 	}
 	if (delay_flag && (!System_File_Flag (NODE) || !System_File_Flag (LINK))) {
-		Error ("Link Delays required a Link and Node File");
+		Error ("Performance File require a Link and Node File");
 	}
 	if (select_org_zones || select_des_zones) {
 		if (!System_File_Flag (LOCATION)) {
@@ -71,20 +71,23 @@ void PlanSelect::Program_Control (void)
 	}
 	if (time_diff_flag) {
 		if (!delay_flag) {
-			Error ("Time Differences require a Link Delay File");
+			Error ("Time Differences require a Performance File");
 		}
+		perf_flag = true;
 	}
 	Print (2, String ("%s Control Keys:") % Program ());
 
 	//---- select vc ratios ----
 
 	if (select_vc && !delay_flag) {
-		Error ("A Link Delay File is needed for VC Ratios");
+		Error ("A Performance File is needed for VC Ratios");
+		perf_flag = true;
 	}
 
 	//---- select time ratios ----
 
 	if (select_ratio && !delay_flag) {
-		Error ("A Link Delay File is needed for Time Ratios");
+		Error ("A Performance File is needed for Time Ratios");
+		perf_flag = true;
 	}
 }

@@ -8,12 +8,10 @@
 //	Read_Plans
 //---------------------------------------------------------
 
-void Data_Service::Read_Plans (void)
+void Data_Service::Read_Plans (Plan_File &file)
 {
 	int i, part, num, count, num_rec, part_num, first, index;
 	bool keep_flag;
-
-	Plan_File *file = (Plan_File *) System_File_Handle (PLAN);
 
 	Trip_Index trip_index;
 	Trip_Map_Stat trip_stat;
@@ -23,12 +21,12 @@ void Data_Service::Read_Plans (void)
 
 	count = num_rec = first = index = 0;
 
-	Initialize_Plans (*file);
+	Initialize_Plans (file);
 
 	//---- check the partition number ----
 
-	if (file->Part_Flag () && First_Partition () != file->Part_Number ()) {
-		file->Open (0);
+	if (file.Part_Flag () && First_Partition () != file.Part_Number ()) {
+		file.Open (0);
 	} else if (First_Partition () >= 0) {
 		first = First_Partition ();
 	}
@@ -37,34 +35,34 @@ void Data_Service::Read_Plans (void)
 
 	for (part=0; ; part++) {
 		if (part > 0) {
-			if (!file->Open (part)) break;
+			if (!file.Open (part)) break;
 		}
-	
+
 		//---- store the plan data ----
 
-		if (file->Part_Flag ()) {
-			part_num = file->Part_Number ();
-			Show_Message (String ("Reading %s %d -- Record") % file->File_Type () % part_num);
+		if (file.Part_Flag ()) {
+			part_num = file.Part_Number ();
+			Show_Message (String ("Reading %s %d -- Record") % file.File_Type () % part_num);
 		} else {
 			part_num = part + first;
-			Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+			Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 		}
 		Set_Progress ();
 
-		while (file->Read (false)) {
+		while (file.Read (false)) {
 			Show_Progress ();
 
 			plan_rec.Clear ();
 
-			keep_flag = Get_Plan_Data (*file, plan_rec, part_num);
+			keep_flag = Get_Plan_Data (file, plan_rec, part_num);
 
-			num = file->Num_Nest ();
+			num = file.Num_Nest ();
 			if (num > 0 && keep_flag) plan_rec.reserve (num);
 
 			for (i=1; i <= num; i++) {
-				if (!file->Read (true)) {
+				if (!file.Read (true)) {
 					if (plan_rec.Household () == 0) {
-						file->Get_Index (trip_index);
+						file.Get_Index (trip_index);
 					} else {
 						plan_rec.Get_Index (trip_index);
 					}
@@ -73,9 +71,7 @@ void Data_Service::Read_Plans (void)
 				}
 				Show_Progress ();
 
-				if (keep_flag) {
-					Get_Plan_Data (*file, plan_rec, part_num);
-				}
+				Get_Plan_Data (file, plan_rec, part_num);
 			}
 			if (keep_flag) {
 				if (!plan_rec.Internal_IDs ()) continue;
@@ -106,8 +102,8 @@ void Data_Service::Read_Plans (void)
 				}
 				if (keep_flag) {
 					num = (int) plan_rec.size ();
-					file->Add_Trip (plan_rec.Household (), plan_rec.Person (), plan_rec.Tour ());
-					file->Add_Leg (num);
+					file.Add_Trip (plan_rec.Household (), plan_rec.Person (), plan_rec.Tour ());
+					file.Add_Leg (num);
 
 					plan_array.push_back (plan_rec);
 					plan_array.Max_Partition (plan_rec);
@@ -118,9 +114,9 @@ void Data_Service::Read_Plans (void)
 		End_Progress ();
 		num_rec += Progress_Count ();
 	}
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % num_rec);
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % num_rec);
 	if (part > 1) Print (0, String (" (%d files)") % part);
 
 	num = (int) plan_array.size ();
@@ -149,7 +145,7 @@ void Data_Service::Initialize_Plans (Plan_File &file)
 		if (percent != 100) {
 			num = (int) ((double) num * percent / 100.0);
 		} else if (file.Version () > 40) {
-			num = (int) (num / 2.0);
+			num /= 4;
 		}
 		if (num > 1) {
 			plan_array.reserve (num);
@@ -168,7 +164,11 @@ bool Data_Service::Get_Plan_Data (Plan_File &file, Plan_Data &plan_rec, int part
 	//---- process a header line ----
 
 	if (!file.Nested ()) {
-		if (!Get_Trip_Data (file, plan_rec, partition)) return (false);
+		file.Get_Data (plan_rec);
+
+		//---- check the household id ----
+
+		if (plan_rec.Household () < 1) return (false);
 
 		plan_rec.Depart (file.Depart ());
 		plan_rec.Arrive (file.Arrive ());
@@ -181,6 +181,7 @@ bool Data_Service::Get_Plan_Data (Plan_File &file, Plan_Data &plan_rec, int part
 		plan_rec.Cost (file.Cost ());
 		plan_rec.Impedance (file.Impedance ());
 
+		if (plan_rec.Partition () < partition) plan_rec.Partition (partition);
 		return (true);
 	}
 

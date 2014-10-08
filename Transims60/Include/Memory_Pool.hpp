@@ -37,7 +37,12 @@ template <typename Type>
 class Memory_Pool : public Vector <Type>
 {
 public:
-	Memory_Pool (void)           { Clear (); }
+	Memory_Pool (void)                                  { Clear (); }
+
+	size_t size (void)                                  { return (Vector <Type>::size ()); }
+	typename Type &at (size_t index)                    { return (Vector <Type>::at (index)); }
+	typename Memory_Pool <Type>::iterator begin (void)  { return (Vector <Type>::begin ()); }
+	typename Memory_Pool <Type>::iterator end (void)    { return (Vector <Type>::end ()); }
 
 	Type Get_Record (int index)
 	{
@@ -105,7 +110,7 @@ public:
 	}
 	void Clear (void)
 	{
-		first_free = -1; free_count = 0; Free ();
+		first_free = -1; free_count = 0; clear ();
 	}
 	bool Pack (Data_Buffer &data)
 	{

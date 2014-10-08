@@ -8,29 +8,27 @@
 //	Read_Connections
 //---------------------------------------------------------
 
-void Data_Service::Read_Connections (void)
+void Data_Service::Read_Connections (Connect_File &file)
 {
-	Connect_File *file = (Connect_File *) System_File_Handle (CONNECTION);
-
 	int num, in, out;
 	Int2_Map_Stat map_stat;
 	Connect_Data connect_rec;
 
 	//---- store the lane connectivity data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 	
-	Initialize_Connects (*file);
+	Initialize_Connects (file);
 	
 	num = 0;
 
-	while (file->Read ()) {
+	while (file.Read ()) {
 		Show_Progress ();
 
 		connect_rec.Clear ();
 
-		if (Get_Connect_Data (*file, connect_rec)) {
+		if (Get_Connect_Data (file, connect_rec)) {
 			in = connect_rec.Dir_Index ();
 			out = connect_rec.To_Index ();
 
@@ -58,14 +56,14 @@ void Data_Service::Read_Connections (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	num = (int) connect_array.size ();
 
 	if (num && num != Progress_Count ()) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % num);
 	}
 	if (num > 0) {
 		System_Data_True (CONNECTION);

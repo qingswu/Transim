@@ -8,10 +8,8 @@
 //	Read_Signs
 //---------------------------------------------------------
 
-void Data_Service::Read_Signs (void)
+void Data_Service::Read_Signs (Sign_File &file)
 {
-	Sign_File *file = (Sign_File *) System_File_Handle (SIGN);
-
 	int count, node;
 	Sign_Data sign_rec;
 	Link_Data *link_ptr;
@@ -20,18 +18,18 @@ void Data_Service::Read_Signs (void)
 
 	//---- store the turn data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 	
-	Initialize_Signs (*file);
+	Initialize_Signs (file);
 	count = 0;
 
-	while (file->Read ()) {
+	while (file.Read ()) {
 		Show_Progress ();
 
 		sign_rec.Clear ();
 
-		if (Get_Sign_Data (*file, sign_rec)) {
+		if (Get_Sign_Data (file, sign_rec)) {
 			dir_ptr = &dir_array [sign_rec.Dir_Index ()];
 			link_ptr = &link_array [dir_ptr->Link ()];
 
@@ -56,12 +54,12 @@ void Data_Service::Read_Signs (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	if (count && count != Progress_Count ()) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % count);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % count);
 	}
 	if (count > 0) System_Data_True (SIGN);
 }

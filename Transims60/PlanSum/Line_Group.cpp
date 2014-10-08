@@ -10,7 +10,7 @@
 
 void PlanSum::Line_Group_Report (void)
 {
-	int i, num, line;
+	int i, line;
 	int nrun, nstop, run, board, alight, load;
 	int sum_board, tot_board, max_board, min_board, avg_board;
 	int high_load, tot_load, max_load, min_load, avg_load;
@@ -35,9 +35,8 @@ void PlanSum::Line_Group_Report (void)
 		Print (1);
 		Line_Group_Header ();
 	}
-	num = line_equiv.Max_Group ();
 
-	for (i=1; i <= num; i++) {
+	for (i = line_equiv.First_Group (); i > 0; i = line_equiv.Next_Group ()) {
 		Show_Progress ();
 
 		list = line_equiv.Group_List (i);

@@ -66,4 +66,23 @@ private:
 typedef vector <Phasing_Data>    Phasing_Array;
 typedef Phasing_Array::iterator  Phasing_Itr;
 
+//---------------------------------------------------------
+//	Phasing_Record class definition
+//---------------------------------------------------------
+
+class SYSLIB_API Phasing_Record
+{
+public:
+	Phasing_Record (void)      { Clear (); }
+
+	int  Signal (void)         { return (signal); }
+	void Signal (int value)    { signal = value; }
+
+	Phasing_Data               phasing_data;
+
+	void Clear (void)          { signal = -1; phasing_data.Clear (); }
+private:
+	int signal;
+};
+
 #endif

@@ -20,7 +20,7 @@ bool TransimsNet::Get_Connect_Data (Connect_File &file, Connect_Data &connect_re
 		xconnect++;
 		return (false);
 	}
-	if (update_node_flag) {
+	if (update_node_flag && !repair_flag) {
 		Int_Map_Itr itr = link_map.find (file.Link ());
 		if (itr == link_map.end ()) {
 			xconnect++;

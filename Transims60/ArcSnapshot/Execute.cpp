@@ -18,7 +18,7 @@ void ArcSnapshot::Execute (void)
 
 	//---- set the subarea flag ----
 
-	if (select_subarea) {
+	if (select_subareas || select_polygon) {
 		Set_Subarea ();
 	}
 

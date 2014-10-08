@@ -11,7 +11,7 @@
 NetPrep::NetPrep (void) : Data_Service ()
 {
 	Program ("NetPrep");
-	Version (14);
+	Version (16);
 	Title ("Network Preparation Utility");
 
 	System_File_Type optional_files [] = {

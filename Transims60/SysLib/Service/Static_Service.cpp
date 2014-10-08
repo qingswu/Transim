@@ -397,7 +397,8 @@ Static_Service::Code_Text  Static_Service::constraint_codes [] = {
 //---- priority type codes ----
 
 Static_Service::Code_Text  Static_Service::priority_codes [] = {
-	{ LOW, "LOW" }, { MEDIUM, "MEDIUM" }, { HIGH, "HIGH" }, { CRITICAL, "CRITICAL" }, { 0, 0 }
+	{ NO_PRIORITY, "NO"}, { LOW, "LOW" }, { MEDIUM, "MEDIUM" }, { HIGH, "HIGH" }, { CRITICAL, "CRITICAL" }, 
+	{ NO_PRIORITY, "NO_PRIORITY" }, { 0, 0 }
 };
 
 //---- time point type codes ----

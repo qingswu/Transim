@@ -11,7 +11,7 @@
 TripSum::TripSum (void) : Data_Service (), Select_Service ()
 {
 	Program ("TripSum");
-	Version (2);
+	Version (4);
 	Title ("Trip Summary Utility");
 
 	System_File_Type required_files [] = {
@@ -35,7 +35,7 @@ TripSum::TripSum (void) : Data_Service (), Select_Service ()
 	int select_service_keys [] = {
 		SELECT_HOUSEHOLDS, SELECT_MODES, SELECT_PURPOSES, SELECT_START_TIMES, SELECT_END_TIMES, 
 		SELECT_ORIGINS, SELECT_DESTINATIONS, SELECT_TRAVELER_TYPES, SELECT_VEHICLE_TYPES, 
-		SELECT_SUBAREA_POLYGON, SELECT_ORIGIN_ZONES, SELECT_DESTINATION_ZONES, SELECTION_PERCENTAGE, 
+		SELECT_SUBAREAS, SELECTION_POLYGON, SELECT_ORIGIN_ZONES, SELECT_DESTINATION_ZONES, SELECTION_PERCENTAGE, 
 		0
 	};
 	Control_Key keys [] = { //--- code, key, level, status, type, default, range, help ----

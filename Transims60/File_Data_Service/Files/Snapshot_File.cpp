@@ -151,7 +151,7 @@ bool Snapshot_File::Write_Index (Dtime step)
 	if (!index_file.Check_File ()) return (false);
 
 	index->time = step;
-	index->record = Db_File::Offset () / sizeof (Compressed_Snapshot);
+	index->record = (unsigned int) (Db_File::Offset () / sizeof (Compressed_Snapshot));
 
 	return (index_file.Write ());
 }

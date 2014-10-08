@@ -63,7 +63,7 @@ void ArcRider::Write_Sum (void)
 
 	//---- process each line group ----
 
-	for (num=1; num <= line_equiv.Max_Group (); num++) {
+	for (num = line_equiv.First_Group (); num > 0; num = line_equiv.Next_Group ()) {
 
 		group = line_equiv.Group_List (num);
 		if (group == 0) continue;

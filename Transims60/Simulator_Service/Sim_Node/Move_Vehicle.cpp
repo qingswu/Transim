@@ -39,7 +39,7 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 	sim_travel_ptr = step.sim_travel_ptr;
 #ifdef CHECK
 	if (sim_travel_ptr == 0) sim->Error ("Sim_Node_Process::Move_Vehicle: sim_travel_ptr");
-	if (sim_travel_ptr->Vehicle () < 1) sim->Error ("Sim_Node_Process::Move_Vehicle: Vehicle");
+	if (sim_travel_ptr->Vehicle () < 1) sim->Error (String ("Sim_Node_Process::Move_Vehicle: Vehicle=%d, Traveler=%d") % sim_travel_ptr->Vehicle () % sim_travel_ptr->Traveler ());
 #endif
 
 	if (step.sim_veh_ptr == 0) {
@@ -83,7 +83,9 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 	}
 	veh_type_ptr = step.veh_type_ptr;
 #ifdef CHECK
-	if (veh_type_ptr == 0) sim->Error ("Sim_Node_Process::Move_Vehicle: veh_type_ptr");
+	if (veh_type_ptr == 0 || veh_type_ptr != &sim->veh_type_array [sim_plan_ptr->Veh_Type ()]) {
+		sim->Error ("Sim_Node_Process::Move_Vehicle: veh_type_ptr");
+	}
 #endif
 
 	//---- initialize the link limits ----
@@ -430,7 +432,7 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 
 		//---- end of leg ----
 
-		if (cell > max_cell) {
+		if (cell > max_cell || new_offset > sim_dir_ptr->Length ()) {
 
 			if (next_ptr->Type () == PARKING_ID) {
 
@@ -477,6 +479,7 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 					sim_travel_ptr->Wait (0);
 					sim_travel_ptr->Priority (0);
 					exit_flag = true;
+					sim->Remove_Vehicle (step);
 					goto output;
 				}
 				sim->sim_dir_array.Lock (new_dir_ptr, ID ());
@@ -495,7 +498,7 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 
 			//---- check for a pocket lane ----
 
-			if (sim_dir_ptr->Get (lane, cell) < 0) {
+			if (sim_dir_ptr->Get (lane, cell) == -1) {
 				if (lane > 0) {
 					l = lane - 1;
 
@@ -654,6 +657,65 @@ make_move:
 		cell = sim->Offset_Cell (sim_veh.offset);
 
 		sim_dir_ptr->Add (lane, cell, step.Traveler ());
+
+		//---- move multi-cell vehicles ----
+
+		if (veh_type_ptr->Cells () > 1 && ((int) step.size () > 1 || sim->Offset_Cell (step [0].offset) != cell)) {
+			Sim_Veh_Array to_step;
+			Sim_Veh_Itr sim_veh_itr;
+
+			new_index = (int) step.size () - 2;
+			index = sim_travel_ptr->Vehicle ();
+
+			for (cell=1; cell < veh_type_ptr->Cells (); cell++, new_index--) {
+				if (new_index >= 0) {
+					to_step.push_back (step [new_index]);
+				} else {
+					to_step.push_back (sim->sim_veh_array [index - new_index]);
+				}
+			}
+			new_index = -(step.Traveler ());
+
+			for (++index, sim_veh_itr = to_step.begin (); sim_veh_itr != to_step.end (); sim_veh_itr++, index++) {
+				sim_veh_ptr = &sim->sim_veh_array [index];
+
+				//---- remove the vehicle from the original location ----
+
+				if (!sim_veh_ptr->Parked ()) {
+					if (sim_veh_ptr->link != dir_index) {
+						dir_index = sim_veh_ptr->link;
+						sim_dir_ptr = &sim->sim_dir_array [dir_index];
+					}
+					lane = sim_veh_ptr->lane;
+					cell = sim->Offset_Cell (sim_veh_ptr->offset);
+
+					if (sim_dir_ptr->Get (lane, cell) != step.Traveler ()) {
+						sim_dir_ptr->Remove (lane, cell);
+					} else {
+						sim_dir_ptr->Remove ();
+					}
+				}
+
+				//---- add the vehicle at the new location ----
+
+				*sim_veh_ptr = *sim_veh_itr;
+
+				if (!sim_veh_ptr->Parked ()) {
+					if (sim_veh_ptr->link != dir_index) {
+						dir_index = sim_veh_ptr->link;
+						sim_dir_ptr = &sim->sim_dir_array [dir_index];
+					}
+					lane = sim_veh_ptr->lane;
+					cell = sim->Offset_Cell (sim_veh_ptr->offset);
+
+					if (sim_dir_ptr->Get (lane, cell) != step.Traveler ()) {
+						sim_dir_ptr->Add (lane, cell, new_index);
+					} else {
+						sim_dir_ptr->Add ();
+					}
+				}
+			}
+		}
 	}
 	sim_travel_ptr->Speed (DTOI (distance / sim->UnRound (step_size)));
 

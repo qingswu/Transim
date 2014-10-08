@@ -10,10 +10,8 @@
 //	Read_Locations
 //---------------------------------------------------------
 
-void Data_Service::Read_Locations (void)
+void Data_Service::Read_Locations (Location_File &file)
 {
-	Location_File *file = (Location_File *) System_File_Handle (LOCATION);
-
 	int num;
 	bool zone_flag = System_Data_Flag (ZONE);
 
@@ -22,24 +20,24 @@ void Data_Service::Read_Locations (void)
 
 	//---- store the location data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 
-	Initialize_Locations (*file);
+	Initialize_Locations (file);
 
-	while (file->Read ()) {
+	while (file.Read ()) {
 		Show_Progress ();
 
 		location_rec.Clear ();
 
-		if (Get_Location_Data (*file, location_rec)) {
+		if (Get_Location_Data (file, location_rec)) {
 			map_stat = location_map.insert (Int_Map_Data (location_rec.Location (), (int) location_array.size ()));
 
 			if (!map_stat.second) {
 				Warning ("Duplicate Location Number = ") << location_rec.Location ();
 				continue;
 			} else {
-				if (!file->Setback_Flag () && location_rec.Setback () == 0) {
+				if (!file.Setback_Flag () && location_rec.Setback () == 0) {
 					location_rec.Setback (Internal_Units (100.0, FEET));
 				}
 				location_array.push_back (location_rec);
@@ -51,14 +49,14 @@ void Data_Service::Read_Locations (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	num = (int) location_array.size ();
 
 	if (num && num != Progress_Count ()) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % num);
 	}
 	if (num > 0) System_Data_True (LOCATION);
 }

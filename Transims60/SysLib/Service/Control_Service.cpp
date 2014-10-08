@@ -1747,6 +1747,16 @@ int Control_Service::Number_Control_Group (int code, int nest1, int nest2, int n
 }
 
 //-----------------------------------------------------------
+//	Control_Key_Empty - check for key data 
+//-----------------------------------------------------------
+	
+bool Control_Service::Control_Key_Empty (int code, int nest1, int nest2, int nest3, int nest4)
+{
+	String key = Get_Control_String (code, nest1, nest2, nest3, nest4);
+	return (key.empty ());
+}
+
+//-----------------------------------------------------------
 //	Check_Control_Key - search for a key code 
 //-----------------------------------------------------------
 	

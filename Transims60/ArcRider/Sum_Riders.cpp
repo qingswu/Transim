@@ -10,7 +10,7 @@
 
 void ArcRider::Sum_Riders (void)
 {
-	int *board, *alight, *start, *end, *cap_start, *cap_end, stop, index, load, runs, capacity, cap, run, num;
+	int i, *board, *alight, *start, *end, *cap_start, *cap_end, stop, index, load, runs, capacity, cap, run;
 	bool flag;
 
 	Link_Data *link_ptr;
@@ -42,8 +42,8 @@ void ArcRider::Sum_Riders (void)
 			Int_Set_Itr itr;
 			flag = false;
 
-			for (num=1; num <= line_equiv.Max_Group () && !flag; num++) {
-				group = line_equiv.Group_List (num);
+			for (i = line_equiv.First_Group (); i > 0 && !flag; i = line_equiv.Next_Group ()) {
+				group = line_equiv.Group_List (i);
 				if (group == 0) continue;
 
 				for (itr = group->begin (); itr != group->end () && !flag; itr++) {

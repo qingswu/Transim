@@ -177,7 +177,7 @@ public:
 	void Route_Stops (int value)         { route_stops = value; }
 
 	void Add_Route_Stops (int value)     { route_stops += value; }
-	void Sum_Ridership (Plan_Data &plan);
+	void Sum_Ridership (Plan_Data &plan, bool id_flag = false);
 	void Clear_Ridership (void);
 
 	double Ridership_Gap (bool capacity_flag = false, double factor = 0.0);

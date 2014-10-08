@@ -44,6 +44,8 @@ void SimSubareas::Program_Control (void)
 		}
 		boundary_flag = true;
 
+		update_flag = Get_Control_Flag (SUBAREA_UPDATE_FLAG);
+
 	} else {
 
 		//---- get the number of subareas ----

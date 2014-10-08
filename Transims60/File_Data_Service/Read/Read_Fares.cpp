@@ -11,10 +11,8 @@
 //	Read_Fares
 //---------------------------------------------------------
 
-void Data_Service::Read_Fares (void)
+void Data_Service::Read_Fares (Fare_File &file)
 {
-	Fare_File *file = (Fare_File *) System_File_Handle (TRANSIT_FARE);
-
 	int num;
 	Fare_Index fare_key;
 	Fare_Map_Stat map_stat;
@@ -33,27 +31,27 @@ void Data_Service::Read_Fares (void)
 
 	//---- store the fare data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 
-	Initialize_Fares (*file);
+	Initialize_Fares (file);
 
 	num = 0;
 
-	while (file->Read ()) {
+	while (file.Read ()) {
 		Show_Progress ();
 
 		//---- process a binary file record ----
 
-		if (file->Code_Flag ()) {
-			fare_key.From_Zone (file->iFrom_Zone ());
-			fare_key.To_Zone (file->iTo_Zone ());
-			fare_key.From_Mode (file->iFrom_Mode ());
-			fare_key.To_Mode (file->iTo_Mode ());
-			fare_key.Period (file->iPeriod ());
-			fare_key.Class (file->iClass ());
+		if (file.Code_Flag ()) {
+			fare_key.From_Zone (file.iFrom_Zone ());
+			fare_key.To_Zone (file.iTo_Zone ());
+			fare_key.From_Mode (file.iFrom_Mode ());
+			fare_key.To_Mode (file.iTo_Mode ());
+			fare_key.Period (file.iPeriod ());
+			fare_key.Class (file.iClass ());
 			
-			fare = file->Fare ();
+			fare = file.Fare ();
 
 			map_stat = fare_map.insert (Fare_Map_Data (fare_key, fare));
 
@@ -69,7 +67,7 @@ void Data_Service::Read_Fares (void)
 
 		fare_rec.Clear ();
 
-		if (Get_Fare_Data (*file, fare_rec)) {
+		if (Get_Fare_Data (file, fare_rec)) {
 
 			//---- transit mode ----
 
@@ -232,12 +230,12 @@ void Data_Service::Read_Fares (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	if (num && num != Progress_Count ()) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % num);
 	}
 	if (num > 0) System_Data_True (TRANSIT_FARE);
 }

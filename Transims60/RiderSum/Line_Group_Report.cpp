@@ -10,7 +10,7 @@
 
 void RiderSum::Line_Group_Report (void)
 {
-	int n, riders, max_load, board, alight, run, runs, groups, mode, stop, stops, ndir, nstop, index, load;
+	int n, riders, max_load, board, alight, run, runs, mode, stop, stops, ndir, nstop, index, load;
 	String label;
 	
 	Int_Set *group;
@@ -33,19 +33,18 @@ void RiderSum::Line_Group_Report (void)
 
 	Header_Number (LINE_GROUP);
 	
-	groups = line_equiv.Num_Groups ();
+	n = line_equiv.Num_Groups ();
 
-	if (!Break_Check (groups + 7)) {
+	if (!Break_Check (n + 7)) {
 		Print (1);
 		Line_Group_Header ();
 	}
-	groups = line_equiv.Max_Group ();
 	mode = stops = 0;
 	
 	ndir = (int) dir_array.size ();
 	nstop = (int) stop_array.size ();
 
-	for (n=1; n <= groups; n++) {
+	for (n = line_equiv.First_Group (); n > 0; n = line_equiv.Next_Group ()) {
 
 		group = line_equiv.Group_List (n);
 		if (group == 0) continue;

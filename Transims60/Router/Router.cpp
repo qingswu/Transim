@@ -11,7 +11,7 @@
 Router::Router (void) : Router_Service (), Select_Service ()
 {
 	Program ("Router");
-	Version (42);
+	Version (52);
 	Title ("Network Path Building");
 
 	System_File_Type required_files [] = {
@@ -34,7 +34,9 @@ Router::Router (void) : Router_Service (), Select_Service ()
 		SELECT_START_TIMES, SELECT_END_TIMES, SELECT_ORIGINS, SELECT_DESTINATIONS, 
 		SELECT_TRAVELER_TYPES, SELECT_VEHICLE_TYPES, SELECT_ORIGIN_ZONES, SELECT_DESTINATION_ZONES, 
 		PERCENT_TIME_DIFFERENCE, MINIMUM_TIME_DIFFERENCE, MAXIMUM_TIME_DIFFERENCE, 
-		PERCENT_COST_DIFFERENCE, MINIMUM_COST_DIFFERENCE, MAXIMUM_COST_DIFFERENCE, SELECTION_PERCENTAGE, 
+		PERCENT_COST_DIFFERENCE, MINIMUM_COST_DIFFERENCE, MAXIMUM_COST_DIFFERENCE, 
+		PERCENT_TRIP_DIFFERENCE, MINIMUM_TRIP_DIFFERENCE, MAXIMUM_TRIP_DIFFERENCE,
+		SELECTION_PERCENTAGE, MAXIMUM_PERCENT_SELECTED,
 		DELETION_FILE, DELETION_FORMAT, DELETE_HOUSEHOLDS, DELETE_MODES, DELETE_TRAVELER_TYPES, 0
 	};
 	Control_Key keys [] = { //--- code, key, level, status, type, help ----
@@ -101,8 +103,9 @@ Router::Router (void) : Router_Service (), Select_Service ()
 	initial_priority = CRITICAL;
 
 	num_file_sets = 1;
-	total_records = num_time_updates = num_trip_parts = num_reroute = num_reskim = num_update = num_build = 0;
+	total_records = num_time_updates = num_trip_parts = num_reroute = num_reskim = num_update = num_build = num_selected = 0;
 	trip_flag = plan_flag = new_plan_flag = problem_flag = false;
+	percent_selected = 0.0;
 
 	trip_file = 0;
 	plan_file = new_plan_file = 0;

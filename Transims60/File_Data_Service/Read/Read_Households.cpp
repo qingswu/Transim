@@ -8,11 +8,10 @@
 //	Read_Households
 //---------------------------------------------------------
 
-void Data_Service::Read_Households (void)
+void Data_Service::Read_Households (Household_File &file)
 {
 	int i, part, num, count, num_rec, part_num, first, index;
 	bool keep_flag;
-	Household_File *file = (Household_File *) System_File_Handle (HOUSEHOLD);
 
 	Int_Map_Stat map_stat;
 	Household_Data household_rec;
@@ -21,12 +20,12 @@ void Data_Service::Read_Households (void)
 	Person_Map_Stat person_stat;
 
 	count = num_rec = first = 0;
-	Initialize_Households (*file);
+	Initialize_Households (file);
 
 	//---- check the partition number ----
 
-	if (file->Part_Flag () && First_Partition () != file->Part_Number ()) {
-		file->Open (0);
+	if (file.Part_Flag () && First_Partition () != file.Part_Number ()) {
+		file.Open (0);
 	} else if (First_Partition () >= 0) {
 		first = First_Partition ();
 	}
@@ -35,37 +34,37 @@ void Data_Service::Read_Households (void)
 
 	for (part=0; ; part++) {
 		if (part > 0) {
-			if (!file->Open (part)) break;
+			if (!file.Open (part)) break;
 		}
 	
 		//---- store the household data ----
 
-		if (file->Part_Flag ()) {
-			part_num = file->Part_Number ();
-			Show_Message (String ("Reading %s %d -- Record") % file->File_Type () % part_num);
+		if (file.Part_Flag ()) {
+			part_num = file.Part_Number ();
+			Show_Message (String ("Reading %s %d -- Record") % file.File_Type () % part_num);
 		} else {
 			part_num = part + first;
-			Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+			Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 		}
 		Set_Progress ();
 
-		while (file->Read (false)) {
+		while (file.Read (false)) {
 			Show_Progress ();
 
 			household_rec.Clear ();
 
-			keep_flag = Get_Household_Data (*file, household_rec, part_num);
+			keep_flag = Get_Household_Data (file, household_rec, part_num);
 
-			num = file->Num_Nest ();
+			num = file.Num_Nest ();
 			if (num > 0) household_rec.reserve (num);
 
 			for (i=1; i <= num; i++) {
-				if (!file->Read (true)) {
-					Error (String ("Number of Nested Records for Household %d") % file->Household ());
+				if (!file.Read (true)) {
+					Error (String ("Number of Nested Records for Household %d") % file.Household ());
 				}
 				Show_Progress ();
 
-				Get_Household_Data (*file, household_rec, part_num);
+				Get_Household_Data (file, household_rec, part_num);
 			}
 			if (keep_flag) {
 				index = (int) hhold_array.size ();
@@ -98,9 +97,9 @@ void Data_Service::Read_Households (void)
 		End_Progress ();
 		num_rec += Progress_Count ();
 	}
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % num_rec);
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % num_rec);
 	if (part > 1) Print (0, String (" (%d files)") % part);
 
 	num = (int) hhold_array.size ();

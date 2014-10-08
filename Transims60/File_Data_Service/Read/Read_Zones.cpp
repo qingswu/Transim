@@ -8,26 +8,24 @@
 //	Read_Zones
 //---------------------------------------------------------
 
-void Data_Service::Read_Zones (void)
+void Data_Service::Read_Zones (Zone_File &file)
 {
-	Zone_File *file = (Zone_File *) System_File_Handle (ZONE);
-	
 	Zone_Data zone_rec;
 	Int_Map_Stat map_stat;
 
 	//---- store the zone data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 	
-	Initialize_Zones (*file);
+	Initialize_Zones (file);
 
-	while (file->Read ()) {
+	while (file.Read ()) {
 		Show_Progress ();
 
 		zone_rec.Clear ();
 
-		if (Get_Zone_Data (*file, zone_rec)) {
+		if (Get_Zone_Data (file, zone_rec)) {
 			map_stat = zone_map.insert (Int_Map_Data (zone_rec.Zone (), (int) zone_array.size ()));
 
 			if (!map_stat.second) {
@@ -43,14 +41,14 @@ void Data_Service::Read_Zones (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 	
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	int num = (int) zone_array.size ();
 
 	if (num && num != Progress_Count ()) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % num);
 	}
 	if (num != Max_Zone_Number ()) Print (1, "Highest Zone Number = ") << Max_Zone_Number ();
 

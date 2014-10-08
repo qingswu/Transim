@@ -11,7 +11,7 @@
 void Simulator_Service::Global_Data (void)
 {
 	int i, j, k, n, use_code, dir, index, in_off, out_off, bnode, lane, min_lane, max_lane;
-	int transfer, change, record, subarea;
+	int transfer, change, record, subarea, mem_size;
 	int length, offset, *list, c0, c1, bear1, bear2, next, max_cell, runs;
 	bool flag;
 	double cap_factor;
@@ -89,8 +89,21 @@ void Simulator_Service::Global_Data (void)
 
 	//---- reserve memory ----
 
-	sim_travel_array.reserve (line_array.Num_Runs () + num_travelers);
+	mem_size = line_array.Num_Runs () + num_travelers;
+
+	sim_travel_array.reserve (mem_size);
 	sim_veh_array.reserve (2 * num_travelers + max_cell);
+
+	if (read_all_flag) {
+		Sim_Leg_Pool sim_leg_pool, *pool_ptr;
+
+		sim_leg_array.assign (1, sim_leg_pool);
+		pool_ptr = &sim_leg_array [0];
+
+		pool_ptr->reserve (mem_size * average_legs);
+
+		sim_plan_array.reserve (mem_size);
+	}
 
 	//---- insert blank records to avoid numbering conflicts ----
 
@@ -189,7 +202,6 @@ void Simulator_Service::Global_Data (void)
 			sim_dir_ptr = &sim_dir_array [index];
 
 			sim_dir_ptr->Speed (dir_ptr->Speed ());
-if (sim_dir_ptr->Speed () < param.cell_size) sim_dir_ptr->Speed (param.cell_size);
 			sim_dir_ptr->Dir (dir);
 			sim_dir_ptr->Type (link_itr->Type ());
 			sim_dir_ptr->Turn (false);

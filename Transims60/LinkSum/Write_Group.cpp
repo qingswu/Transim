@@ -80,7 +80,7 @@ void LinkSum::Write_Group (void)
 		group_file.Put_Field (0, group);
 
 		for (i=0, j=1; i < num_inc; i++) {
-			group_file.Put_Field (j++, vmt [i] * factor);
+			group_file.Put_Field (j++, UnRound (vmt [i] * factor));
 			group_file.Put_Field (j++, vht [i] / 3600.0);
 		}
 		if (!group_file.Write ()) {

@@ -31,10 +31,11 @@ public:
 		SELECT_ORIGINS, SELECT_DESTINATIONS, SELECT_TRAVELER_TYPES, SELECT_FACILITY_TYPES, 
 		SELECT_PARKING_LOTS, SELECT_VC_RATIOS, SELECT_TIME_RATIOS, SELECT_TRANSIT_MODES, 
 		SELECT_VEHICLE_TYPES, SELECT_PROBLEM_TYPES, SELECT_LINKS, SELECT_NODES, 
-		SELECT_STOPS, SELECT_ROUTES, SELECT_SUBAREA_POLYGON, SELECT_ORIGIN_ZONES, 
-		SELECT_DESTINATION_ZONES, PERCENT_TIME_DIFFERENCE, MINIMUM_TIME_DIFFERENCE, 
-		MAXIMUM_TIME_DIFFERENCE, PERCENT_COST_DIFFERENCE, MINIMUM_COST_DIFFERENCE, 
-		MAXIMUM_COST_DIFFERENCE, SELECTION_PERCENTAGE, MAXIMUM_PERCENT_SELECTED, 
+		SELECT_STOPS, SELECT_ROUTES, SELECT_SUBAREAS, SELECT_ORIGIN_ZONES, SELECT_DESTINATION_ZONES, 
+		PERCENT_TIME_DIFFERENCE, MINIMUM_TIME_DIFFERENCE, MAXIMUM_TIME_DIFFERENCE, 
+		PERCENT_COST_DIFFERENCE, MINIMUM_COST_DIFFERENCE, MAXIMUM_COST_DIFFERENCE, 
+		PERCENT_TRIP_DIFFERENCE, MINIMUM_TRIP_DIFFERENCE, MAXIMUM_TRIP_DIFFERENCE, 
+		SELECTION_PERCENTAGE, MAXIMUM_PERCENT_SELECTED, SELECTION_POLYGON, 
 		DELETION_FILE, DELETION_FORMAT,	DELETE_HOUSEHOLDS, DELETE_MODES, 
 		DELETE_TRAVELER_TYPES,
 	};
@@ -47,26 +48,28 @@ protected:
 	bool Select_Plan_Nodes (Plan_Data &plan);
 	bool Select_Plan_Stops (Plan_Data &plan);
 	bool Select_Plan_Routes (Plan_Data &plan);
-	bool Select_Plan_Subarea (Plan_Data &plan);
+	bool Select_Plan_Subareas (Plan_Data &plan);
+	bool Select_Plan_Polygon (Plan_Data &plan);
 
 	//---- selection data ----
 	
 	bool select_households, select_purposes, select_travelers, select_start_times, select_end_times;
 	bool select_origins, select_destinations, select_org_zones, select_des_zones, select_links, select_nodes;
-	bool select_vehicles, select_problems, select_subarea, percent_flag, time_diff_flag, cost_diff_flag;
+	bool select_vehicles, select_problems, select_subareas, select_polygon, percent_flag, max_percent_flag;
 	bool select_mode [MAX_MODE], select_facility [EXTERNAL+1], select_modes, select_facilities;
 	bool select_transit [ANY_TRANSIT], select_transit_modes, select_priorities, select_priority [CRITICAL+1];
 	bool select_stops, select_routes, select_time_of_day, select_parking, select_vc, select_ratio;
 	bool delete_mode [MAX_MODE], delete_modes, delete_travelers, delete_households, delete_flag;
-	Dtime min_time_diff, max_time_diff, max_min_time_diff;
+	bool time_diff_flag, cost_diff_flag, trip_diff_flag;
+	Dtime min_time_diff, max_time_diff, max_min_time_diff, min_trip_diff, max_trip_diff, max_min_trip_diff;
 	int min_cost_diff, max_cost_diff, max_min_cost_diff;
-	double select_percent, max_percent_select, percent_time_diff, percent_cost_diff, vc_ratio, time_ratio;;
+	double select_percent, max_percent_select, percent_time_diff, percent_cost_diff, percent_trip_diff, vc_ratio, time_ratio;;
 
 	Data_Range hhold_range, purpose_range, traveler_range, vehicle_range, problem_range, stop_range, route_range;
-	Data_Range org_range, des_range, org_zone_range, des_zone_range, hhold_delete, traveler_delete, parking_range;
+	Data_Range org_range, des_range, org_zone_range, des_zone_range, hhold_delete, traveler_delete, parking_range, subarea_range;
 	Data_Ranges link_ranges, node_ranges;
 	Time_Periods start_range, end_range, time_range;
-	Arcview_File subarea_file;
+	Arcview_File polygon_file;
 	Select_Map delete_map;
 
 private:

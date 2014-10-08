@@ -13,7 +13,7 @@ int	LinkSum::percent_break [NUM_PERCENTILES] = {50, 65, 70, 75, 80, 85, 90, 95, 
 LinkSum::LinkSum (void) : Data_Service (), Select_Service ()
 {
 	Program ("LinkSum");
-	Version (9);
+	Version (12);
 	Title ("Summarize Link Performance Data");
 
 	System_File_Type required_files [] = {
@@ -29,7 +29,7 @@ LinkSum::LinkSum (void) : Data_Service (), Select_Service ()
 		DAILY_WRAP_FLAG, SUMMARY_TIME_RANGES, SUMMARY_TIME_INCREMENT, CONGESTED_TIME_RATIO, 0
 	};
 	int select_service_keys [] = {
-		SELECT_FACILITY_TYPES, SELECT_VC_RATIOS, SELECT_TIME_RATIOS, SELECT_SUBAREA_POLYGON, 0
+		SELECT_FACILITY_TYPES, SELECT_VC_RATIOS, SELECT_TIME_RATIOS, SELECT_SUBAREAS, SELECTION_POLYGON, 0
 	};
 	Control_Key linksum_keys [] = { //--- code, key, level, status, type, default, range, help ----
 		{ COMPARE_PERFORMANCE_FILE, "COMPARE_PERFORMANCE_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },

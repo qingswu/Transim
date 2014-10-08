@@ -8,66 +8,69 @@
 //	Read_Timing_Plans
 //---------------------------------------------------------
 
-void Data_Service::Read_Timing_Plans (void)
+void Data_Service::Read_Timing_Plans (Timing_File &file)
 {
-	Timing_File *file = (Timing_File *) System_File_Handle (TIMING_PLAN);
+	int i, num, count;
+	bool keep;
 
-	int i, num, count, signal;
-	Timing_Data timing_rec;
+	Timing_Record timing_rec;
+	Timing_Data *timing_ptr;
 	Signal_Data *signal_ptr;
 
 	//---- store the timing plan data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 	
-	Initialize_Timing_Plans (*file);
+	Initialize_Timing_Plans (file);
 	count = 0;
 
-	while (file->Read (false)) {
+	timing_ptr = &(timing_rec.timing_data);
+
+	while (file.Read (false)) {
 		Show_Progress ();
 
 		timing_rec.Clear ();
 
-		signal = Get_Timing_Data (*file, timing_rec);
+		keep = Get_Timing_Data (file, timing_rec);
 
-		num = file->Num_Nest ();
-		if (num > 0) timing_rec.reserve (num);
+		num = file.Num_Nest ();
+		if (num > 0) timing_ptr->reserve (num);
 
 		for (i=1; i <= num; i++) {
-			if (!file->Read (true)) {
+			if (!file.Read (true)) {
 				Error (String ("Number of Phase Records for Signal %d Plan %d") % 
-					file->Signal () % file->Timing ());
+					file.Signal () % file.Timing ());
 			}
 			Show_Progress ();
 
-			Get_Timing_Data (*file, timing_rec);
+			Get_Timing_Data (file, timing_rec);
 		}
 
 		//---- save the results ----
 
-		if (signal >= 0) {
-			if (file->Version () <= 40) {
+		if (keep) {
+			if (file.Version () <= 40) {
 				bool keep;
 				Timing40_Map_Itr timing40_itr;
 				Timing40_Data *timing40_ptr;
 				Timing_Itr timing_itr;
 
-				timing40_itr = timing40_map.find (timing_rec.Timing ());
+				timing40_itr = timing40_map.find (timing_ptr->Timing ());
 
 				if (timing40_itr == timing40_map.end ()) {
-					Warning (String ("Timing Plan %d was Not Found in the Signal file") % timing_rec.Timing ());
+					Warning (String ("Timing Plan %d was Not Found in the Signal file") % timing_ptr->Timing ());
 					continue;
 				}
 				timing40_ptr = (Timing40_Data *) &(timing40_itr->second);
-				signal = timing40_ptr->Signal ();
+				timing_rec.Signal (timing40_ptr->Signal ());
 
-				signal_ptr = &signal_array [signal];
+				signal_ptr = &signal_array [timing_rec.Signal ()];
 				keep = true;
 
 				for (timing_itr = signal_ptr->timing_plan.begin (); timing_itr != signal_ptr->timing_plan.end (); timing_itr++) {
 					if (timing_itr->Timing () == timing40_ptr->Timing ()) {
-						Timing_Phase_Itr phase_itr = timing_rec.begin ();
+						Timing_Phase_Itr phase_itr = timing_ptr->begin ();
 						timing_itr->push_back (*phase_itr);
 						count++;
 						keep = false;
@@ -76,30 +79,30 @@ void Data_Service::Read_Timing_Plans (void)
 				}
 				if (!keep) continue;
 
-				timing_rec.Timing (timing40_ptr->Timing ());
-				timing_rec.Type (timing40_ptr->Type ());
-				timing_rec.Offset (timing40_ptr->Offset ());
+				timing_ptr->Timing (timing40_ptr->Timing ());
+				timing_ptr->Type (timing40_ptr->Type ());
+				timing_ptr->Offset (timing40_ptr->Offset ());
 			} else {
-				signal_ptr = &signal_array [signal];
+				signal_ptr = &signal_array [timing_rec.Signal ()];
 			}
-			signal_ptr->timing_plan.push_back (timing_rec);
+			signal_ptr->timing_plan.push_back (*timing_ptr);
 
-			count += (int) timing_rec.size () + 1;
+			count += (int) timing_ptr->size () + 1;
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	if (count && count != Progress_Count ()) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % count);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % count);
 	}
 	if (count > 0) System_Data_True (TIMING_PLAN);
 
 	//---- repair Version 4.0 data ----
 
-	if (file->Version () <= 40) {
+	if (file.Version () <= 40) {
 		int first, prev, next, barrier, ring, position, cycle;
 		bool flag;
 		Signal_Itr signal_itr;
@@ -193,31 +196,35 @@ void Data_Service::Initialize_Timing_Plans (Timing_File &file)
 //	Get_Timing_Data
 //---------------------------------------------------------
 
-int Data_Service::Get_Timing_Data (Timing_File &file, Timing_Data &timing_rec)
+bool Data_Service::Get_Timing_Data (Timing_File &file, Timing_Record &timing_rec)
 {
+	int signal;
 	Int_Map_Itr map_itr;
+
+	Timing_Data *timing_ptr = &(timing_rec.timing_data);
 
 	//---- process the header record ----
 	
 	if (!file.Nested ()) {
-		timing_rec.Timing (file.Timing ());
-		if (timing_rec.Timing () == 0) return (-1);
+		timing_ptr->Timing (file.Timing ());
+		if (timing_ptr->Timing () == 0) return (false);
 
-		timing_rec.Type (file.Type ());
-		timing_rec.Cycle (file.Cycle ());
-		timing_rec.Offset (file.Offset ());
-		timing_rec.Notes (file.Notes ());
+		timing_ptr->Type (file.Type ());
+		timing_ptr->Cycle (file.Cycle ());
+		timing_ptr->Offset (file.Offset ());
+		timing_ptr->Notes (file.Notes ());
 
 		if (file.Version () > 40) {
-			int signal = file.Signal ();
-			if (signal == 0) return (-1);
+			signal = file.Signal ();
+			if (signal == 0) return (false);
 
 			map_itr = signal_map.find (signal);
 			if (map_itr == signal_map.end ()) {
 				Warning (String ("Timing Signal %d was Not Found") % signal);
-				return (-1);
+				return (false);
 			}
-			return (map_itr->second);
+			timing_rec.Signal (map_itr->second);
+			return (true);
 		}
 	}
 	Timing_Phase phase_rec;
@@ -234,6 +241,6 @@ int Data_Service::Get_Timing_Data (Timing_File &file, Timing_Data &timing_rec)
 
 	if (phase_rec.Max_Green () == 0) phase_rec.Max_Green (phase_rec.Min_Green () + phase_rec.Extension ());
 
-	timing_rec.push_back (phase_rec);
-	return (1);
+	timing_ptr->push_back (phase_rec);
+	return (timing_rec.Signal () >= 0 || file.Version () <= 40);
 }

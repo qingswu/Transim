@@ -48,6 +48,7 @@ bool Sim_Transit_Update::Update_Check (void)
 		last_stop_ptr = &line_ptr->back ();
 
 		for (j=0, run_itr = stop_itr->begin (); run_itr != stop_itr->end (); run_itr++, j++) {
+			if (run_itr->Schedule () < sim->param.start_time_step) continue;
 			if (run_itr->Schedule () <= run_itr->Time ()) continue;
 			if (run_itr->Schedule () > sim->time_step) {
 				if (run_itr->Schedule () < run_update_time) {
@@ -88,6 +89,7 @@ bool Sim_Transit_Update::Update_Check (void)
 
 			sim_plan_ptr->Start (run_itr->Schedule ());
 			sim_plan_ptr->End (last_stop_ptr->at (j).Schedule ());
+			sim_plan_ptr->Veh_Type (line_ptr->Run_Type (j));
 
 			veh_index.Household (sim_travel_ptr->Household ());
 			veh_index.Vehicle (0);

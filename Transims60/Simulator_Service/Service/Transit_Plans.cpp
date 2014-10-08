@@ -78,6 +78,7 @@ void Simulator_Service::Transit_Plans (void)
 
 		sim_plan_ptr->Mode (TRANSIT_MODE);
 		sim_plan_ptr->Vehicle (0);
+		sim_plan_ptr->Veh_Type (line_itr->Type ());
 		last_leg = -1;
 		first_flag = true;
 		leg_list.clear ();

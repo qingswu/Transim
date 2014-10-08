@@ -8,38 +8,36 @@
 //	Read_Turn_Pens
 //---------------------------------------------------------
 
-void Data_Service::Read_Turn_Pens (void)
+void Data_Service::Read_Turn_Pens (Turn_Pen_File &file)
 {
-	Turn_Pen_File *file = (Turn_Pen_File *) System_File_Handle (TURN_PENALTY);
-
 	int num;
 	Turn_Pen_Data turn_rec;
 
 	//---- store the turn data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 	
-	Initialize_Turn_Pens (*file);
+	Initialize_Turn_Pens (file);
 
-	while (file->Read ()) {
+	while (file.Read ()) {
 		Show_Progress ();
 
 		turn_rec.Clear ();
 
-		if (Get_Turn_Pen_Data (*file, turn_rec)) {
+		if (Get_Turn_Pen_Data (file, turn_rec)) {
 			turn_pen_array.push_back (turn_rec);
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	num = (int) turn_pen_array.size ();
 
 	if (num && num != Progress_Count ()) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % num);
 	}
 	if (num > 0) {
 		System_Data_True (TURN_PENALTY);

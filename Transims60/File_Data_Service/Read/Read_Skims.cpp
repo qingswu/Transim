@@ -8,53 +8,51 @@
 //	Read_Skims
 //---------------------------------------------------------
 
-void Data_Service::Read_Skims (void)
+void Data_Service::Read_Skims (Skim_File &file)
 {
 	int part, num, num_rec, org, des, period;
-
-	Skim_File *file = (Skim_File *) System_File_Handle (SKIM);
 
 	Skim_Record skim_rec;
 	Skim_Data *skim_ptr;
 	Dtime *ttime;
 
-	Initialize_Skims (*file);
+	Initialize_Skims (file);
 	num_rec = 0;
 
 	//---- process each partition ----
 
 	for (part=0; ; part++) {
 		if (part > 0) {
-			if (!file->Open (part)) break;
+			if (!file.Open (part)) break;
 		}
 
 		//---- store the skim data ----
 
-		if (file->Part_Flag ()) {
-			Show_Message (String ("Reading %s %d -- Record") % file->File_Type () % file->Part_Number ());
+		if (file.Part_Flag ()) {
+			Show_Message (String ("Reading %s %d -- Record") % file.File_Type () % file.Part_Number ());
 		} else {
-			Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+			Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 		}
 		Set_Progress ();
 
-		while (file->Read ()) {
+		while (file.Read ()) {
 			Show_Progress ();
 
 			skim_rec.Clear ();
 
-			if (Get_Skim_Data (*file, skim_rec, part)) {
+			if (Get_Skim_Data (file, skim_rec, part)) {
 
-				org = file->Add_Org (skim_rec.Origin ());
-				des = file->Add_Des (skim_rec.Destination ());
+				org = file.Add_Org (skim_rec.Origin ());
+				des = file.Add_Des (skim_rec.Destination ());
 				period = skim_rec.Period ();
 
 				//---- process the record ----
 
 				if (Time_Table_Flag ()) {
-					ttime = file->Time_Skim (org, des, period);
+					ttime = file.Time_Skim (org, des, period);
 					ttime->Seconds (skim_rec.Time ());
 				} else {
-					skim_ptr = file->Table (org, des, period);
+					skim_ptr = file.Table (org, des, period);
 					skim_ptr->Add_Skim (skim_rec);
 				}
 			}
@@ -62,15 +60,15 @@ void Data_Service::Read_Skims (void)
 		End_Progress ();
 		num_rec += Progress_Count ();
 	}
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % num_rec);
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % num_rec);
 	if (part > 1) Print (0, String (" (%d files)") % part);
 
-	num = file->Table_Size ();
+	num = file.Table_Size ();
 
 	if (num && num != num_rec) {
-		Print (1, String ("Number of %s Table Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of %s Table Records = %d") % file.File_ID () % num);
 	}
 	if (num > 0) System_Data_True (SKIM);
 }

@@ -46,6 +46,7 @@ int Path_Builder::Transit_Plan (void)
 	path_end = &to_array [to->Best ()];
 
 	if (plan_flag) {
+
 		return (Trace_Path (&from_ptr->at (0), &from_array, path_end));
 	} else {
 		return (Save_Skims ());

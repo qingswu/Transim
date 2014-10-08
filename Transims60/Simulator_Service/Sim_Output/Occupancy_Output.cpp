@@ -184,12 +184,14 @@ void Occupancy_Output::Write_Check (void)
 							}
 						}
 					}
+					sim_dir_ptr = &sim->sim_dir_array [index];
+					if (!subarea_range.empty ()) {
+						if (!subarea_range.In_Range (sim_dir_ptr->Subarea ())) continue;
+					}
 
 					//---- allocate memory ----
 
 					occ_ptr = &occ_array [index];
-					sim_dir_ptr = &sim->sim_dir_array [index];
-
 					occ_ptr->assign (sim_dir_ptr->size (), 0);
 				}
 			} else {
@@ -198,8 +200,10 @@ void Occupancy_Output::Write_Check (void)
 				//---- allocate memory ----
 
 				for (index=0, sim_dir_itr = sim->sim_dir_array.begin (); sim_dir_itr != sim->sim_dir_array.end (); sim_dir_itr++, index++) {
+					if (!subarea_range.empty ()) {
+						if (!subarea_range.In_Range (sim_dir_itr->Subarea ())) continue;
+					}
 					occ_ptr = &occ_array [index];
-
 					occ_ptr->assign (sim_dir_itr->size (), 0);
 				}
 			}
@@ -279,6 +283,9 @@ void Occupancy_Output::Output_Check (Travel_Step &step)
 		step_size = (int) ((step_size + step.size () / 2) / (step.size () - 1));
 		if (step_size < 1) step_size = 1;
 	}
+	if (step.veh_type_ptr != 0) {
+		step_size *= step.veh_type_ptr->Cells ();
+	}
 
 	//---- output traveler record ----
 
@@ -317,16 +324,21 @@ void Occupancy_Output::Output_Check (Travel_Step &step)
 				}
 			}
 			if (!skip) {
-				ints_ptr = &occ_array [sim_veh_itr->link];
 				sim_dir_ptr = &sim->sim_dir_array [sim_veh_itr->link];
+				if (!subarea_range.empty ()) {
+					if (!subarea_range.In_Range (sim_dir_ptr->Subarea ())) skip = true;
+				}
+				if (!skip) {
 
-				//---- allocate memory ----
+					//---- allocate memory ----
 
-				if (ints_ptr->size () == 0) {
-					if (sim_dir_ptr->size () > 0) {
-						ints_ptr->assign (sim_dir_ptr->size (), 0);
-					} else {
-						skip = true;
+					ints_ptr = &occ_array [sim_veh_itr->link];
+					if (ints_ptr->size () == 0) {
+						if (sim_dir_ptr->size () > 0) {
+							ints_ptr->assign (sim_dir_ptr->size (), 0);
+						} else {
+							skip = true;
+						}
 					}
 				}
 			}
@@ -364,6 +376,9 @@ void Occupancy_Output::Write_Summary (void)
 		if (ints_itr->size () == 0) continue;
 
 		sim_dir_ptr = &sim->sim_dir_array [index];
+		if (!subarea_range.empty ()) {
+			if (!subarea_range.In_Range (sim_dir_ptr->Subarea ())) continue;
+		}
 		dir_ptr = &sim->dir_array [index];
 		link_ptr = &sim->link_array [dir_ptr->Link ()];
 

@@ -18,7 +18,7 @@ bool Simulator_Service::Output_Step (Travel_Step &step)
 	Sim_Veh_Data sim_veh;
 	Sim_Veh_Ptr sim_veh_ptr;
 	Problem_Data problem_data;
-	
+
 	//---- check the traveler data ----
 
 	if (step.sim_travel_ptr == 0) {
@@ -108,6 +108,11 @@ bool Simulator_Service::Output_Step (Travel_Step &step)
 
 			problem_data.Dir_Index (sim_veh.link);
 			problem_data.Lane (sim_veh.lane);
+		
+			if (sim_veh.link >= 0) {
+				sim_dir_ptr = &sim->sim_dir_array [sim_veh.link];
+				if (sim_veh.offset > sim_dir_ptr->Length ()) sim_veh.offset = sim_dir_ptr->Length ();
+			}
 			problem_data.Offset (sim_veh.offset);
 			problem_data.Route (-1);
 
@@ -154,18 +159,11 @@ bool Simulator_Service::Output_Step (Travel_Step &step)
 	if (sim_veh_ptr == 0) sim->Error ("Simulator_Service::Output_Step: sim_veh_ptr");
 #endif
 
-	if ((new_plan || sim_veh_ptr->Parked ()) && sim_veh_ptr->link >= 0) {
-		sim_dir_ptr = &sim->sim_dir_array [sim_veh_ptr->link];
-		int index = sim_dir_ptr->Index (sim_veh_ptr->lane, sim->Offset_Cell (sim_veh_ptr->offset));
-		int traveler = sim_dir_ptr->Get (index);
+	//---- park the vehicle ----
 
-		if (traveler == step.Traveler ()) {
-			sim_dir_ptr->Remove (index);
-#ifdef CHECK
-		} else if (!sim_veh_ptr->Parked () && traveler > 0 && step.sim_travel_ptr->Status () == ON_NET_DRIVE) {
-			sim->Error (String ("Simulator_Service::Output_Step: Traveler %d vs %d") % traveler % step.Traveler ());
-#endif
-		}
+	if (new_plan || sim_veh_ptr->Parked ()) {
+		step.veh_type_ptr = &sim->veh_type_array [sim_plan_ptr->Veh_Type ()];
+		Remove_Vehicle (step);
 	}
 
 #ifdef THREADS
@@ -190,12 +188,17 @@ bool Simulator_Service::Output_Step (Travel_Step &step)
 
 	if (new_plan) {
 		sim_veh_ptr->Parked (true);
+
 		step.sim_travel_ptr->Vehicle (0);
 		step.sim_travel_ptr->Next_Load (-1);
 
-		step.sim_travel_ptr->Status (NOT_ACTIVE);
-		step.sim_travel_ptr->Next_Event (sim_plan_ptr->Activity ());
-
+		if (step.sim_travel_ptr->Person () > 0) {
+			step.sim_travel_ptr->Status (NOT_ACTIVE);
+			step.sim_travel_ptr->Next_Event (sim->time_step + sim_plan_ptr->Activity ());
+		} else {
+			step.sim_travel_ptr->Status (OFF_NET_END);
+			step.sim_travel_ptr->Next_Event (sim->param.end_time_step);
+		}
 		if (!step.sim_travel_ptr->Next_Plan ()) return (false);
 
 		step.sim_plan_ptr = step.sim_travel_ptr->Get_Plan ();

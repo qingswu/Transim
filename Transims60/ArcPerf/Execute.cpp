@@ -16,7 +16,7 @@ void ArcPerf::Execute (void)
 
 	//---- flag selected links ----
 
-	if (select_links || select_subarea || select_facilities) {
+	if (select_links || select_subareas || select_polygon || select_facilities) {
 		Select_Links ();
 	}
 

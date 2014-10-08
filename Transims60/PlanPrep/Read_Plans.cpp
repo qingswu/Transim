@@ -107,8 +107,9 @@ void PlanPrep::Plan_Processing::Read_Plans (int part)
 		if (exe->select_destinations && !exe->des_range.In_Range (plan_ptr->Destination ())) continue;
 		if (exe->select_links && !exe->Select_Plan_Links (*plan_ptr)) continue;
 		if (exe->select_nodes && !exe->Select_Plan_Nodes (*plan_ptr)) continue;
-		if (exe->select_subarea && !exe->Select_Plan_Subarea (*plan_ptr)) continue;
-		
+		if (exe->select_subareas && !exe->Select_Plan_Subareas (*plan_ptr)) continue;
+		if (exe->select_polygon && !exe->Select_Plan_Polygon (*plan_ptr)) continue;
+
 		//---- check the deletion records ----
 
 		if (exe->delete_flag) {

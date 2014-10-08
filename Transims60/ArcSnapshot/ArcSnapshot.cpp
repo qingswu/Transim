@@ -11,7 +11,7 @@
 ArcSnapshot::ArcSnapshot (void) : Data_Service (), Select_Service (), Draw_Service ()
 {
 	Program ("ArcSnapshot");
-	Version (2);
+	Version (3);
 	Title ("Generate ArcView Shapefiles from TRANSIMS Snapshots");
 
 	System_File_Type required_files [] = {
@@ -27,7 +27,7 @@ ArcSnapshot::ArcSnapshot (void) : Data_Service (), Select_Service (), Draw_Servi
 		SUMMARY_TIME_RANGES, SUMMARY_TIME_INCREMENT, 0
 	};
 	int select_service_keys [] = {
-		SELECT_SUBAREA_POLYGON, SELECT_VEHICLE_TYPES, 0
+		SELECT_SUBAREAS, SELECTION_POLYGON, SELECT_VEHICLE_TYPES, 0
 	};
 	int draw_service_keys [] = {
 		LANE_WIDTH, CENTER_ONEWAY_LINKS, DRAW_VEHICLE_SHAPES, 0

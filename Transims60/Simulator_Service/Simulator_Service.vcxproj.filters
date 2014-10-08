@@ -96,9 +96,6 @@
     <ClInclude Include="..\Include\Sim_Stop_Data.hpp">
       <Filter>Service\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\Simulator_Service.hpp">
-      <Filter>Service\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Include\Sim_Plan_Process.hpp">
       <Filter>Sim_Plan\Header Files</Filter>
     </ClInclude>
@@ -155,6 +152,9 @@
     </ClInclude>
     <ClInclude Include="..\Include\Sim_Node_Step.hpp">
       <Filter>Sim_Node\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Simulator_Service.hpp">
+      <Filter>Service\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -310,6 +310,9 @@
     </ClCompile>
     <ClCompile Include="Sim_Node\Check_Cell.cpp">
       <Filter>Sim_Node\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Service\Remove_Vehicle.cpp">
+      <Filter>Service\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

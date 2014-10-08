@@ -38,8 +38,8 @@ public:
 	virtual bool Get_Access_Data (Access_File &file, Access_Data &data);
 	virtual bool Get_Sign_Data (Sign_File &file, Sign_Data &data);
 	virtual bool Get_Signal_Data (Signal_File &file, Signal_Data &data);
-	virtual int  Get_Timing_Data (Timing_File &file, Timing_Data &data);
-	virtual int  Get_Phasing_Data (Phasing_File &file, Phasing_Data &data);
+	virtual bool Get_Timing_Data (Timing_File &file, Timing_Record &data);
+	virtual bool Get_Phasing_Data (Phasing_File &file, Phasing_Record &data);
 	virtual bool Get_Detector_Data (Detector_File &file, Detector_Data &data);
 	virtual bool Get_Stop_Data (Stop_File &file, Stop_Data &data);
 	virtual bool Get_Line_Data (Line_File &file, Line_Data &data);

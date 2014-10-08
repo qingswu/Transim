@@ -85,6 +85,7 @@ void Sim_Travel_Step::Start_Processing (void)
 		}
 	}
 #else
+
 	for (itr = sim->sim_travel_array.begin (); itr != sim->sim_travel_array.end (); itr++) {
 		if (itr->Plan_Index () >= 0) {
 			if (itr->Person () > 0 || itr->Passengers () > 0) sim->Active (true);

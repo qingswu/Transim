@@ -10,7 +10,7 @@
 
 void RiderSum::Write_Group_Rider (void)
 {
-	int n, run, runs, num, length, period, num_periods, groups, routes, index, stop, to, link, capacity;
+	int n, run, runs, num, length, period, num_periods, routes, index, stop, to, link, capacity;
 	double factor, sum_time, time, capfac;
 	Dtime low, high;
 	String label;
@@ -46,11 +46,10 @@ void RiderSum::Write_Group_Rider (void)
 
 	//---- process each line group ----
 
-	groups = line_equiv.Max_Group ();
 	routes = 0;
 	memset (&data, '\0', sizeof (data));
 	
-	for (n=1; n <= groups; n++) {
+	for (n = line_equiv.First_Group (); n > 0; n = line_equiv.Next_Group ()) {
 
 		group = line_equiv.Group_List (n);
 		if (group == 0) continue;

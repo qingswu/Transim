@@ -326,6 +326,7 @@
     <ClCompile Include="Get_Shape_Data.cpp" />
     <ClCompile Include="Get_Signal_Data.cpp" />
     <ClCompile Include="Get_Sign_Data.cpp" />
+    <ClCompile Include="Get_Stop_Data.cpp" />
     <ClCompile Include="Get_Turn_Pen_Data.cpp" />
     <ClCompile Include="Get_Zone_Data.cpp" />
     <ClCompile Include="Lane_Ranges.cpp" />
@@ -340,6 +341,7 @@
     <ClCompile Include="Read_Node_Data.cpp" />
     <ClCompile Include="Read_Shape_Data.cpp" />
     <ClCompile Include="Read_Zone_Data.cpp" />
+    <ClCompile Include="Repair_Connections.cpp" />
     <ClCompile Include="Traffic_Controls.cpp" />
     <ClCompile Include="TransimsNet.cpp" />
     <ClCompile Include="Zone_Access.cpp" />

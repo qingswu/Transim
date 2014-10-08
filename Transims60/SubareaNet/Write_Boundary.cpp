@@ -227,7 +227,7 @@ void SubareaNet::Write_Boundary (void)
 
 			parking_file->Notes (ext_dir [j]);
 
-			if (!parking_file->Write ()) {
+			if (!parking_file->Write (false)) {
 				Error (String ("Writing %s") % parking_file->File_Type ());
 			}
 

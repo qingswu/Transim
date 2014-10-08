@@ -72,14 +72,19 @@ void TransimsNet::Execute (void)
 
 	if (replicate_flag) {
 		Zone_Access ();
-
-		Write_Access_Links ();
-	} else {
+	} else if (access_flag) {
 		Link_Access ();
 	}
+	if (System_File_Flag (NEW_ACCESS_LINK)) {
+		Write_Access_Links ();
+	}
 
-	Write_Locations ();
-	Write_Parking_Lots ();
+	if (System_File_Flag (NEW_LOCATION)) {
+		Write_Locations ();
+	}
+	if (System_File_Flag (NEW_PARKING)) {
+		Write_Parking_Lots ();
+	}
 
 	//---- build the link connection list ----
 
@@ -87,23 +92,37 @@ void TransimsNet::Execute (void)
 
 	//---- create traffic controls ----
 
-	Traffic_Controls ();
+	if (control_flag) {
+		Traffic_Controls ();
 
-	Write_Signs ();
-
-	Write_Signals ();
+		if (System_File_Flag (NEW_SIGN)) {
+			Write_Signs ();
+		}
+		if (System_File_Flag (NEW_SIGNAL)) {
+			Write_Signals ();
+		}
+	}
 
 	//---- create pocket lanes ----
 
-	Pocket_Lanes ();
-
-	Write_Pockets ();
+	if (!repair_flag) {
+		Pocket_Lanes ();
+	}
+	if (System_File_Flag (NEW_POCKET)) {
+		Write_Pockets ();
+	}
 
 	//---- create lane ranges ----
 
-	Lane_Ranges ();
-
-	Write_Connections ();
+	if (repair_flag) {
+		Repair_Connections ();
+		nconnect = (int) connect_array.size ();
+	} else {
+		Lane_Ranges ();
+	}
+	if (System_File_Flag (NEW_CONNECTION)) {
+		Write_Connections ();
+	}
 
 	//---- write the network ----
 
@@ -111,8 +130,9 @@ void TransimsNet::Execute (void)
 	nlink = (int) link_array.size ();
 	nshapes = (int) shape_array.size ();
 
-	Write_Nodes ();
-
+	if (System_File_Flag (NEW_NODE)) {
+		Write_Nodes ();
+	}
 	if (zout_flag) {
 		nzout = (int) zone_array.size ();
 		Write_Zones ();
@@ -120,7 +140,9 @@ void TransimsNet::Execute (void)
 	if (shape_flag) {
 		nshape = Write_Shapes ();
 	}
-	Write_Links ();
+	if (System_File_Flag (NEW_LINK)) {
+		Write_Links ();
+	}
 
 	//---- link detail lane use ----
 
@@ -140,14 +162,23 @@ void TransimsNet::Execute (void)
 		Write_Turn_Pens ();
 	}
 
+	//----- write transit stops ----
+
+	if (System_File_Flag (NEW_TRANSIT_STOP)) {
+		Write_Stops ();
+	}
+
 	//---- write summary statistics ----
 
 	Break_Check (6);
 	Write (2, "Number of Input Node Records = ") << node_array.size ();
 	Write (1, "Number of Input Link Records = ") << link_array.size ();
-	Write (1, "Number of Input Zone Records = ") << zone_array.size ();
 
-	Write (2, "Highest Zone Number = ") << Max_Zone_Number ();
+	if (System_File_Flag (ZONE)) {
+		Write (1, "Number of Input Zone Records = ") << zone_array.size ();
+
+		Write (2, "Highest Zone Number = ") << Max_Zone_Number ();
+	}
 
 	if (delete_flag) {
 		Break_Check (10);
@@ -164,30 +195,47 @@ void TransimsNet::Execute (void)
 		if (xuse) Write (1, "Number of Deleted Lane Use Records = ") << xuse;
 		if (xturn) Write (1, "Number of Deleted Turn Penalty Records = ") << xturn;
 		if (xsign) Write (1, "Number of Deleted Sign Records = ") << xsign;
-		if (xsignal) Write (1, "Number of Deleted Signal Records = ") << xsignal;	
+		if (xsignal) Write (1, "Number of Deleted Signal Records = ") << xsignal;
+		if (xstop) Write (1, "Number of Deleted Transit Stop Records = ") << xstop;
 	}
 
 	Break_Check (15);
-	Write (2, "Number of New Node Records = ") << nnode;
+	if (System_File_Flag (NEW_NODE)) {
+		Write (2, "Number of New Node Records = ") << nnode;
+	}
 	if (zout_flag) {
 		Write (1, "Number of New Zone Records = ") << nzout;
 	}
-	Write (1, "Number of New Link Records = ") << nlink;
-
+	if (System_File_Flag (NEW_LINK)) {
+		Write (1, "Number of New Link Records = ") << nlink;
+	}
 	if (shape_flag) {
 		Write (1, "Number of New Link Shapes = ") << nshapes;
 		Write (1, "Number of New Shape_Records = ") << nshape;
 	}
-	Write (1, "Number of New Location Records = ") << ((int) location_array.size () - location_base);
-	Write (1, "Number of New Parking Lot Records = ") << ((int) parking_array.size () - parking_base);
-	Write (1, "Number of New Access Link Records = ") << naccess;
-	Write (1, "Number of New Pocket Lane Records = ") << npocket;
-	Write (1, "Number of New Connection Records = ") << nconnect;
+	if (System_File_Flag (NEW_LOCATION)) {
+		Write (1, "Number of New Location Records = ") << ((int) location_array.size () - location_base);
+	}
+	if (System_File_Flag (NEW_PARKING)) {
+		Write (1, "Number of New Parking Lot Records = ") << ((int) parking_array.size () - parking_base);
+	}
+	if (System_File_Flag (NEW_ACCESS_LINK)) {
+		Write (1, "Number of New Access Link Records = ") << naccess;
+	}
+	if (System_File_Flag (NEW_POCKET)) {
+		Write (1, "Number of New Pocket Lane Records = ") << npocket;
+	}
+	if (System_File_Flag (NEW_CONNECTION)) {
+		Write (1, "Number of New Connection Records = ") << nconnect;
+	}
 	if (nturn > 0) Write (1, "Number of New Turn Penalty Records = ") << nturn;
 	if (nuse > 0) Write (1, "Number of New Lane Use Records = ") << nuse;
-	Write (1, "Number of New Sign Records = ") << nsign;
-	Write (1, "Number of New Signal Records = ") << nsignal;
-
+	if (System_File_Flag (NEW_SIGN)) {
+		Write (1, "Number of New Sign Records = ") << nsign;
+	}
+	if (System_File_Flag (NEW_SIGNAL)) {
+		Write (1, "Number of New Signal Records = ") << nsignal;
+	}
 	if (nexternal) {
 		Write (2, "Number of External Connections = ") << nexternal;
 	}

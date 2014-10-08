@@ -13,6 +13,20 @@ bool SubareaNet::Get_Connect_Data (Connect_File &file, Connect_Data &data)
 	//---- do standard processing ----
 
 	if (Data_Service::Get_Connect_Data (file, data)) {
+		
+		//---- check the subarea boundary ----
+
+		if (transit_flag) {
+			Dir_Data *dir_ptr = &dir_array [data.Dir_Index ()];
+			Link_Data *link_ptr = &link_array [dir_ptr->Link ()];
+
+			if (link_ptr->Type () == 0)  return (false);
+
+			dir_ptr = &dir_array [data.To_Index ()];
+			link_ptr = &link_array [dir_ptr->Link ()];
+
+			if (link_ptr->Type () == 0) return (false);
+		}
 
 		//---- copy the fields to the subarea file ----
 
@@ -25,9 +39,6 @@ bool SubareaNet::Get_Connect_Data (Connect_File &file, Connect_Data &data)
 		}
 		nconnect++;
 	}
-
-	//---- don't save the record ----
-
-	return (false);
+	return (true);
 }
 
