@@ -14,6 +14,12 @@ void Validate::Execute (void)
 	//---- read the network ----
 
 	Data_Service::Execute ();
+
+	//---- network validation ----
+
+	if (check_net_flag) {
+		Check_Network ();
+	}
 	
 	//----- create the node to zone equivalence -----
 

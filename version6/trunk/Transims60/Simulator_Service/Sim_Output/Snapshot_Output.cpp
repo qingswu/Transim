@@ -171,6 +171,10 @@ Snapshot_Output::Snapshot_Output (int num) : Sim_Output_Data ()
 	//---- print the compress flag ----
 
 	sim->Get_Control_Flag (Sim_Output_Step::NEW_SNAPSHOT_COMPRESSION, num);
+
+	if (compress) {
+		metric_flag = sim->Get_Control_Flag (Sim_Output_Step::NEW_SNAPSHOT_METRIC_FLAG, num);
+	}
 	return;
 
 coord_error:
@@ -206,6 +210,7 @@ void Snapshot_Output::Write_Check (void)
 	if (time_range.In_Range (sim->time_step) && time_range.At_Increment (sim->time_step)) {
 
 		int i, dir_index, offset, speed, lane, cell, cells, traveler, idx, veh;
+		double dvalue;
 		bool multi_cell;
 
 		Dir_Data *dir_ptr;
@@ -260,9 +265,13 @@ void Snapshot_Output::Write_Check (void)
 				file->Vehicle (sim_plan_ptr->Vehicle ());
 				file->Time (sim->time_step);
 
-				speed = sim_travel_ptr->Speed ();	
+				speed = sim_travel_ptr->Speed ();
+				dvalue = UnRound (speed);
 
-				file->Speed (UnRound (speed));
+				if (compress && metric_flag) {
+					dvalue = External_Units (dvalue, MPS);
+				}
+				file->Speed (dvalue);
 
 				Veh_Type_Data *type_ptr = &sim->veh_type_array [sim_plan_ptr->Veh_Type ()];
 
@@ -288,7 +297,7 @@ void Snapshot_Output::Write_Check (void)
 
 						if (sim_veh_ptr->lane != lane) continue;
 						offset = sim_veh_ptr->offset;
-						if (offset / sim->param.cell_size == cell) {
+						if (sim->Offset_Cell (offset) == cell) {
 							file->Cell (i);
 							break;
 						}
@@ -367,7 +376,11 @@ void Snapshot_Output::Write_Check (void)
 
 				if (compress) {
 					file->Lane (lane);
-					file->Offset (Resolve (offset));
+					dvalue = Resolve (offset);
+					if (metric_flag) {
+						dvalue = External_Units (dvalue, METERS);
+					}
+					file->Offset (dvalue);
 				} else {
 					lane = sim->Make_Lane_ID (dir_ptr, lane);
 

@@ -518,7 +518,7 @@ bool Db_File::Read (void *record, int size)
 	return (Record (record, size));
 }
 
-bool Db_File::Read (void *record, int size, off_t offset)
+bool Db_File::Read (void *record, int size, size_t offset)
 {
 	if (!Offset (offset)) return (false);
 
@@ -587,7 +587,7 @@ bool Db_File::Write (void *record, int size)
 	return (true);
 }
 
-bool Db_File::Write (void *record, int size, off_t offset)
+bool Db_File::Write (void *record, int size, size_t offset)
 {
 	if (!Offset (offset)) return (false);
 
@@ -658,7 +658,7 @@ bool Db_File::Rewind (void)
 		file.seekg (0);
 
 		if (First_Offset () > 0) {
-			int len = 0;
+			size_t len = 0;
 
 			while (!file.getline (Record_Pointer (), Record ().Max_Read ()).fail ()) {
 				Set_Size ();
@@ -678,7 +678,7 @@ bool Db_File::Rewind (void)
 //	Offset
 //---------------------------------------------------------
 
-bool Db_File::Offset (off_t offset)
+bool Db_File::Offset (size_t offset)
 {
 	if (Check_File ()) {
 		if (File_Format () == SQLITE3) {
@@ -703,16 +703,16 @@ bool Db_File::Offset (off_t offset)
 	return (false);
 }
 
-off_t Db_File::Offset (void)
+size_t Db_File::Offset (void)
 {
-	off_t offset = -1;
+	streampos offset = -1;
 
 	if (Check_File ()) {
 		if (File_Format () == SQLITE3) {
 			offset = 0;
 			exe->Warning ("Db_File::Offset on a SQLITE3 Database");
 		} else if (File_Format () != MATRIX) {
-			offset = (off_t) file.tellg ();
+			offset = file.tellg ();
 
 			if (offset < 0) {
 				if (File_Format () == BINARY) {
@@ -729,26 +729,26 @@ off_t Db_File::Offset (void)
 			}
 		}
 	}
-	return (offset);
+	return ((size_t) offset);
 }
 
 //-----------------------------------------------------------
 //	File_Size
 //-----------------------------------------------------------
 
-off_t Db_File::File_Size (void)
+size_t Db_File::File_Size (void)
 {
-	off_t offset = -1;
+	streampos offset = -1;
 
 	if (Check_File ()) {
 		if (File_Format () == SQLITE3) {
 			exe->Warning ("Db_File::File_Size on a SQLITE3 Database");
 			return (Status (POSITIONING));
 		} else if (File_Format () != MATRIX) {
-			off_t current = (off_t) file.tellg ();
+			streampos current = file.tellg ();
 
 			file.seekg (0, ios_base::end);
-			offset = (off_t) file.tellg ();
+			offset = (size_t) file.tellg ();
 
 			if (offset < 0) {
 				Status (POSITIONING);
@@ -758,7 +758,7 @@ off_t Db_File::File_Size (void)
 			}
 		}
 	}
-	return (offset);
+	return ((size_t) offset);
 }
 
 //-----------------------------------------------------------
@@ -786,8 +786,12 @@ int Db_File::Num_Records (void)
 			sqlite3_finalize (record_stmt);
 #endif
 		} else if (File_Format () == BINARY || File_Format () == FIXED_COLUMN) {
-			if (Max_Size () > 0) {
-				num_records = (int) (File_Size () - First_Offset () + Max_Size () - 1) / Max_Size ();
+			int size = Max_Size ();
+			if (Nest () == NESTED) {
+				size = Nest_Size (false) + 2 * Nest_Size (true);
+			}
+			if (size > 0) {
+				num_records = (int) ((File_Size () - First_Offset () + size - 1) / size);
 			}
 		} else {
 			FILE *temp = f_open (Filename (), "rt");
@@ -817,15 +821,19 @@ int Db_File::Estimate_Records (void)
 		if (File_Format () == SQLITE3) {
 			num = Num_Records ();
 		} else if (File_Format () == BINARY || File_Format () == FIXED_COLUMN) {
-			if (Max_Size () > 0) {
-				num = (File_Size () - First_Offset () + Max_Size () - 1) / Max_Size ();
+			int size = Max_Size ();
+			if (Nest () == NESTED) {
+				size = Nest_Size (false) + 2 * Nest_Size (true);
+			}
+			if (size > 0) {
+				num = (int) ((File_Size () - First_Offset () + size - 1) / size);
 			}
 		} else {
 			FILE *temp = f_open (Filename (), "rt");
 
 			if (temp != 0) {
 				int cum_size = 0;
-				off_t offset;
+				streampos offset;
 				char buffer [4096];
 
 				while (fgets (buffer, sizeof (buffer), temp) != 0) {
@@ -871,7 +879,7 @@ bool Db_File::Record_Number (int number)
 		record_num = 0;
 	} else {
 		if (number != record_num + 1 && (File_Format () == BINARY || File_Format () == FIXED_COLUMN)) {
-			off_t offset = First_Offset () + (number - 1) * Record_Size ();
+			size_t offset = First_Offset () + (number - 1) * Record_Size ();
 			if (!Offset (offset)) return (false);
 		}
 		record_num = number;

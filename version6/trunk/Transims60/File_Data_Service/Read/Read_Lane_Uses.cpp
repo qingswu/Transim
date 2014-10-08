@@ -8,10 +8,8 @@
 //	Read_Lane_Uses
 //---------------------------------------------------------
 
-void Data_Service::Read_Lane_Uses (void)
+void Data_Service::Read_Lane_Uses (Lane_Use_File &file)
 {
-	Lane_Use_File *file = (Lane_Use_File *) System_File_Handle (LANE_USE);
-	
 	int i, num, index, first_index, rec, lanes0, lanes1, lane, group, periods, size;
 
 	Dir_Itr dir_itr;
@@ -28,31 +26,31 @@ void Data_Service::Read_Lane_Uses (void)
 
 	//---- store the lane use data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 	
-	Initialize_Lane_Uses (*file);
+	Initialize_Lane_Uses (file);
 
 	num = 0;
 
-	while (file->Read ()) {
+	while (file.Read ()) {
 		Show_Progress ();
 
 		lane_use_rec.Clear ();
 
-		if (Get_Lane_Use_Data (*file, lane_use_rec)) {
+		if (Get_Lane_Use_Data (file, lane_use_rec)) {
 			lane_use_array.push_back (lane_use_rec);
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	num = (int) lane_use_array.size ();
 
 	if (num && num != Progress_Count ()) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % num);
 	}
 	if (num > 0) {
 		System_Data_True (LANE_USE);

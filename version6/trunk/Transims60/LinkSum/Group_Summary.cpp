@@ -29,7 +29,7 @@
 
 void LinkSum::Group_Sum_Report (void)
 {
-	int i, j, k, k1, index, use_index, num, link;
+	int i, j, k, k1, index, use_index, link;
 	double time, length, len, base, diff, value, percent, factor, flow_factor;
 	Dtime low, high, tod;
 	bool connect_flag;
@@ -64,9 +64,7 @@ void LinkSum::Group_Sum_Report (void)
 
 	//---- process each link group ----
 
-	num = link_equiv.Max_Group ();
-
-	for (i=1; i <= num; i++) {
+	for (i = link_equiv.First_Group (); i > 0; i = link_equiv.Next_Group ()) {
 
 		group = link_equiv.Group_List (i);
 		if (group == 0) continue;

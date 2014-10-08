@@ -24,7 +24,7 @@ bool Sim_Network_Update::Update_Check (void)
 {
 	if (use_update_time > sim->time_step && turn_update_time > sim->time_step) return (false);
 
-	int i, dir, index, min_lane, max_lane, num, lanes;
+	int i, dir, index, first_index, min_lane, max_lane, num, lanes;
 	bool complex, match, use_update_flag, turn_update_flag;
 	double capacity, cap_factor, pockets;
 
@@ -60,12 +60,11 @@ bool Sim_Network_Update::Update_Check (void)
 		link_ptr = &sim->link_array [dir_ptr->Link ()];
 
 		sim_dir_itr->Clear_Use (link_ptr->Use ());
-
-		index = dir_ptr->First_Lane_Use ();
+		first_index = dir_ptr->First_Lane_Use ();
 
 		//---- find the time period ----
 
-		for (period_ptr = &sim->use_period_array [index]; ; period_ptr = &sim->use_period_array [++index]) {
+		for (period_ptr = &sim->use_period_array [first_index]; ; period_ptr = &sim->use_period_array [++first_index]) {
 			if (period_ptr->Start () > sim->time_step) {
 				if (period_ptr->Start () < use_update_time) {
 					use_update_time = period_ptr->Start ();
@@ -83,7 +82,7 @@ bool Sim_Network_Update::Update_Check (void)
 
 		//---- initialize the default lane use ----
 
-		lane_data.Use (link_ptr->Use ());
+		lane_data.Clear (link_ptr->Use ());
 
 		lane_array.assign (sim_dir_itr->Lanes (), lane_data);
 
@@ -103,7 +102,7 @@ bool Sim_Network_Update::Update_Check (void)
 					lane_ptr = &lane_array [i];
 
 					if (lane_ptr->Index () < 0) {
-						lane_ptr->Index (index);
+						lane_ptr->Index (first_index);
 					}
 					lane_ptr->Complex (1);
 				}
@@ -115,7 +114,7 @@ bool Sim_Network_Update::Update_Check (void)
 							lane_ptr->Complex (1);
 							continue;
 						}
-						lane_ptr->Index (index);
+						lane_ptr->Index (first_index);
 						lane_ptr->Use (lane_ptr->Use () ^ use_ptr->Use ());
 						lane_ptr->Type (LIMIT);
 						if (use_ptr->Min_Veh_Type () >= 0) {
@@ -135,7 +134,7 @@ bool Sim_Network_Update::Update_Check (void)
 						lane_ptr->Complex (1);
 						continue;
 					}
-					lane_ptr->Index (index);
+					lane_ptr->Index (first_index);
 
 					if (use_ptr->Type () == PROHIBIT || use_ptr->Type () == LIMIT) {
 						if (use_ptr->Type () == PROHIBIT) {

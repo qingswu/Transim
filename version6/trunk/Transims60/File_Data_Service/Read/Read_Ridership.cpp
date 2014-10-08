@@ -8,7 +8,7 @@
 //	Read_Ridership
 //---------------------------------------------------------
 
-void Data_Service::Read_Ridership (void)
+void Data_Service::Read_Ridership (Ridership_File &file)
 {
 	int num_rec, stop, stops, stop2, run, runs, time, time1, time2, sched, sched1, sched2;
 	Dtime delta;
@@ -19,24 +19,22 @@ void Data_Service::Read_Ridership (void)
 	Line_Data *line_ptr;
 	Line_Run *run_ptr, *best_ptr;
 
-	Ridership_File *file = (Ridership_File *) System_File_Handle (RIDERSHIP);
-
 	//---- store the location data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 
 	num_rec = 0;
-	Initialize_Ridership (*file);
+	Initialize_Ridership (file);
 
 	delta = Dtime (3, MINUTES);
 
-	while (file->Read ()) {
+	while (file.Read ()) {
 		Show_Progress ();
 
 		rider_rec.Clear ();
 
-		if (Get_Ridership_Data (*file, rider_rec)) {
+		if (Get_Ridership_Data (file, rider_rec)) {
 			line_ptr = &line_array [rider_rec.Route ()];
 
 			//---- find the stop index ----
@@ -78,12 +76,12 @@ void Data_Service::Read_Ridership (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	if (num_rec && num_rec != Progress_Count ()) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % num_rec);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % num_rec);
 	}
 	if (num_rec > 0) System_Data_True (RIDERSHIP);
 

@@ -352,6 +352,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Service\Output_Step.cpp" />
+    <ClCompile Include="Service\Remove_Vehicle.cpp" />
     <ClCompile Include="Service\Set_Sim_Period.cpp" />
     <ClCompile Include="Service\Sim_Dir_Data.cpp" />
     <ClCompile Include="Service\Sim_Parameters.cpp" />

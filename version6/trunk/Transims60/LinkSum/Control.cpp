@@ -64,7 +64,7 @@ void LinkSum::Program_Control (void)
 	//---- get the select by link group flag ----
 
 	group_select = Get_Control_Flag (SELECT_BY_LINK_GROUP);
-	if (group_select || select_subarea || select_facilities) select_flag = true;
+	if (group_select || select_subareas || select_polygon || select_facilities) select_flag = true;
 
 	//---- turning movement data ----
 

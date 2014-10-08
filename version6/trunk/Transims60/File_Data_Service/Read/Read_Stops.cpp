@@ -8,27 +8,25 @@
 //	Read_Stops
 //---------------------------------------------------------
 
-void Data_Service::Read_Stops (void)
+void Data_Service::Read_Stops (Stop_File &file)
 {
-	Stop_File *file = (Stop_File *) System_File_Handle (TRANSIT_STOP);
-	
 	int num;
 	Stop_Data stop_rec;
 	Int_Map_Stat map_stat;
 
 	//---- store the transit stop data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 
-	Initialize_Stops (*file);
+	Initialize_Stops (file);
 
-	while (file->Read ()) {
+	while (file.Read ()) {
 		Show_Progress ();
 
 		stop_rec.Clear ();
 
-		if (Get_Stop_Data (*file, stop_rec)) {
+		if (Get_Stop_Data (file, stop_rec)) {
 			map_stat = stop_map.insert (Int_Map_Data (stop_rec.Stop (), (int) stop_array.size ()));
 
 			if (!map_stat.second) {
@@ -40,14 +38,14 @@ void Data_Service::Read_Stops (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	num = (int) stop_array.size ();
 
 	if (num && num != Progress_Count ()) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % num);
 	}
 	if (num > 0) System_Data_True (TRANSIT_STOP);
 }

@@ -99,6 +99,7 @@ public:
 	bool   List_Range_Check (Double_List &list, String range);
 	bool   List_Range_Check (Dtime_List &list, String range);
 
+	bool   Control_Key_Empty (int code, int nest1 = 0, int nest2 = 0, int nest3 = 0, int nest4 = 0);
 	bool   Check_Control_Key (int code, int nest1 = 0, int nest2 = 0, int nest3 = 0, int nest4 = 0);
 	void   Control_Key_Error (int code, string range = "", int nest1 = 0, int nest2 = 0, int nest3 = 0, int nest4 = 0);
 

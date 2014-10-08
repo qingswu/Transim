@@ -34,7 +34,7 @@ void ArcRider::Write_Group (void)
 
 	//---- process each stop group ----
 
-	for (i=1; i <= stop_equiv.Max_Group (); i++) {
+	for (i = stop_equiv.First_Group (); i > 0; i = stop_equiv.Next_Group ()) {
 
 		group = stop_equiv.Group_List (i);
 		if (group == NULL) continue;

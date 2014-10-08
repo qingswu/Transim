@@ -8,26 +8,24 @@
 //	Read_Nodes
 //---------------------------------------------------------
 
-void Data_Service::Read_Nodes (void)
+void Data_Service::Read_Nodes (Node_File &file)
 {
-	Node_File *file = (Node_File *) System_File_Handle (NODE);
-
 	Int_Map_Stat map_stat;
 	Node_Data node_rec;
 
 	//---- store the node data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 
-	Initialize_Nodes (*file);
+	Initialize_Nodes (file);
 
-	while (file->Read ()) {
+	while (file.Read ()) {
 		Show_Progress ();
 
 		node_rec.Clear ();
 
-		if (Get_Node_Data (*file, node_rec)) {
+		if (Get_Node_Data (file, node_rec)) {
 			map_stat = node_map.insert (Int_Map_Data (node_rec.Node (), (int) node_array.size ()));
 
 			if (!map_stat.second) {
@@ -39,14 +37,14 @@ void Data_Service::Read_Nodes (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	int num = (int) node_array.size ();
 
 	if (num && num != Progress_Count ()) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % num);
 	}
 	if (num > 0) System_Data_True (NODE);
 }

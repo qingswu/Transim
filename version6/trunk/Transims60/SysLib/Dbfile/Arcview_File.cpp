@@ -294,7 +294,7 @@ bool Arcview_Base::Arc_Close (void)
 					shape_header.mbox.min = shape_header.mbox.max = 0;
 				}
 			}
-			shape_header.file_size = shape_file.File_Size () / sizeof (short);
+			shape_header.file_size = (int) (shape_file.File_Size () / sizeof (short));
 
 			Reorder_Bits (&shape_header, 7);
 
@@ -322,7 +322,7 @@ bool Arcview_Base::Arc_Close (void)
 				index_header.mbox.min = shape_header.mbox.min;
 				index_header.mbox.max = shape_header.mbox.max;
 			}
-			index_header.file_size = index_file.File_Size () / sizeof (short);
+			index_header.file_size = (int) (index_file.File_Size () / sizeof (short));
 			Reorder_Bits (&index_header, 7);
 
 			if (!index_file.Write (&index_header, sizeof (index_header), 0L)) {
@@ -361,7 +361,7 @@ void Arcview_Base::Z_Flag (bool flag)
 bool Arcview_Base::Arc_Read (int number)
 {
 	int i, npts, type;
-	off_t offset;
+	size_t offset;
 	
 	double *z = 0;
 	XY_Point *pt;
@@ -574,7 +574,7 @@ bool Arcview_Base::Arc_Write (int number)
 {
 	bool insert_flag, first;
 	int i, type, size;
-	off_t offset;
+	size_t offset;
 
 	double *z = 0;
 	XY_Point  *pt;
@@ -656,17 +656,17 @@ bool Arcview_Base::Arc_Write (int number)
 			return (false); 
 		}
 	} else {
-		off_t index_offset = index_file.File_Size ();
+		size_t index_offset = index_file.File_Size ();
 		offset = shape_file.File_Size ();
 
-		record.rec_num = offset / sizeof (short);
+		record.rec_num = (int) (offset / sizeof (short));
 		
 		Reorder_Bits (&record, 2);
 	
 		if (!index_file.Write (&record, sizeof (record), index_offset)) {
 			return (false);
 		}
-		record.rec_num = (index_offset - index_file.First_Offset ()) / sizeof (record) + 1;
+		record.rec_num = (int) ((index_offset - index_file.First_Offset ()) / sizeof (record) + 1);
 		insert_flag = true;
 
 		Reorder_Bits (&record, 1);

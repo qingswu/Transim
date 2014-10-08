@@ -31,7 +31,7 @@ protected:
 private:
 	enum PlanSelect_Reports { FIRST_REPORT = 1, SECOND_REPORT };
 
-	bool delay_flag, turn_flag, new_plan_flag, select_parts;
+	bool delay_flag, turn_flag, new_plan_flag, select_parts, perf_flag;
 	int num_trips, num_select;
 
 	Plan_File *plan_file, *new_plan_file;

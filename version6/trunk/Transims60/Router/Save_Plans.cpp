@@ -26,14 +26,14 @@ bool Router::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 	for (itr = array_ptr->begin (); itr != array_ptr->end (); itr++) {
 		new_ptr = *itr;
 		if (new_ptr == 0) continue;
-			
+
 		if (new_ptr->Method () == RESKIM_PLAN) {
 			num_reskim++;
 			continue;
 		}
 		total_records++;
 
-		if (new_ptr->Problem () != 0) {
+		if (new_ptr->Problem () > 0) {
 			Set_Problem ((Problem_Type) new_ptr->Problem ());
 		} else {
 			if (rider_flag) {
@@ -57,8 +57,13 @@ bool Router::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 			plan_ptr = &plan_array [new_ptr->Index ()];
 
 			keep_new = (plan_ptr->Household () <= 0 || plan_ptr->size () == 0 || plan_ptr->Problem () > 0);
-			priority = CRITICAL;
 
+			if (plan_ptr->Priority () == NO_PRIORITY) {
+				priority = NO_PRIORITY;
+				keep_new = true;
+			} else {
+				priority = CRITICAL;
+			}
 			if (!keep_new && new_ptr->Problem () == 0) {
 
 				//---- select the plan to keep ----
@@ -72,20 +77,21 @@ bool Router::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 						time1 = new_ptr->Arrive () - new_ptr->Depart ();
 						time2 = plan_ptr->Arrive () - plan_ptr->Depart ();
 
-						time_diff = abs (time1 - time2);
+						time_diff = time1 - time2;
 
-						if (time_diff >= min_time_diff) {
-							if (time_diff < max_time_diff && time2 > 0) {
-								prob = (double) time_diff / time2;
-								if (prob >= percent_time_diff) {
-									if (max_min_time_diff > 1) {
-										time_diff = time_diff - min_time_diff;
-										priority = CRITICAL * time_diff / max_min_time_diff + MEDIUM;
-									} else {
-										priority = CRITICAL;
-									}
-									keep_new = true;
+						if (time_diff > max_time_diff) {
+							priority = CRITICAL;
+							keep_new = true;
+						} else if (time_diff >= min_time_diff && time2 > 0) {
+							prob = (double) time_diff / time2;
+							if (prob >= percent_time_diff) {
+								if (max_min_time_diff > 1) {
+									time_diff = time_diff - min_time_diff;
+									priority = CRITICAL * time_diff / max_min_time_diff + MEDIUM;
+								} else {
+									priority = CRITICAL;
 								}
+								keep_new = true;
 							}
 						}
 					}
@@ -96,19 +102,46 @@ bool Router::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 						cost1 = new_ptr->Impedance ();
 						cost2 = plan_ptr->Impedance ();
 
-						cost_diff = abs (cost1 - cost2);
-						if (cost_diff >= min_cost_diff) {
-							if (cost_diff < max_cost_diff && cost2 > 0) {
-								prob = (double) cost_diff / cost2;
-								if (prob >= percent_cost_diff) {
-									if (max_min_cost_diff > 1) {
-										cost_diff = cost_diff - min_cost_diff;
-										priority = MAX ((CRITICAL * cost_diff / max_min_cost_diff + MEDIUM), priority);
-									} else {
-										priority = CRITICAL;
-									}
-									keep_new = true;
+						cost_diff = cost1 - cost2;
+
+						if (cost_diff > max_cost_diff) {
+							priority = CRITICAL;
+							keep_new = true;
+						} else if (cost_diff >= min_cost_diff && cost2 > 0) {
+							prob = (double) cost_diff / cost2;
+							if (prob >= percent_cost_diff) {
+								if (max_min_cost_diff > 1) {
+									cost_diff = cost_diff - min_cost_diff;
+									priority = MAX ((CRITICAL * cost_diff / max_min_cost_diff + MEDIUM), priority);
+								} else {
+									priority = CRITICAL;
 								}
+								keep_new = true;
+							}
+						}
+					}
+
+					//---- compare trip times ----
+
+					if (trip_diff_flag) {
+						time1 = new_ptr->Arrive () - new_ptr->Depart ();
+						time2 = new_ptr->End () - new_ptr->Start ();
+
+						time_diff = time1 - time2;
+
+						if (time_diff > max_trip_diff) {
+							priority = CRITICAL;
+							keep_new = true;
+						} else if (time_diff >= min_trip_diff && time2 > 0) {
+							prob = (double) time_diff / time2;
+							if (prob >= percent_trip_diff) {
+								if (max_min_trip_diff > 1) {
+									time_diff = time_diff - min_trip_diff;
+									priority = CRITICAL * time_diff / max_min_trip_diff + MEDIUM;
+								} else {
+									priority = CRITICAL;
+								}
+								keep_new = true;
 							}
 						}
 					}
@@ -129,8 +162,11 @@ bool Router::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 			if (keep_new) {
 				plan_ptr->clear ();
 				*plan_ptr = *new_ptr;
+			}
+			plan_ptr->Priority (priority);
 
-				plan_ptr->Priority (priority);
+			if (select_priorities && select_priority [plan_ptr->Priority ()]) {
+				num_selected++;
 			}
 
 			if (save_trip_gap || trip_gap_map_flag) {

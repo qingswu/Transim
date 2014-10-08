@@ -24,8 +24,15 @@ void SimSubareas::Boundary_Nodes (void)
 	subarea = max_sub = -1;
 	min_sub = MAX_INTEGER;
 
+
 	for (node_itr = node_array.begin (); node_itr != node_array.end (); node_itr++) {
-		node_itr->Subarea (subarea);
+		if (update_flag) {
+			subarea = node_itr->Subarea ();
+			if (subarea < min_sub) min_sub = subarea;
+			if (subarea > max_sub) max_sub = subarea;
+		} else {
+			node_itr->Subarea (subarea);
+		}
 	}
 
 	//---- process each boundary ----

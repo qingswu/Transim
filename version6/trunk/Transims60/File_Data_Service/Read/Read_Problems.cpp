@@ -8,20 +8,19 @@
 //	Read_Problems
 //---------------------------------------------------------
 
-void Data_Service::Read_Problems (void)
+void Data_Service::Read_Problems (Problem_File &file)
 {
 	int part, num, num_rec, part_num, first;
-	Problem_File *file = (Problem_File *) System_File_Handle (PROBLEM);
 
 	Problem_Data problem_rec;
 
-	Initialize_Problems (*file);
+	Initialize_Problems (file);
 	num_rec = first = 0;
 
 	//---- check the partition number ----
 
-	if (file->Part_Flag () && First_Partition () != file->Part_Number ()) {
-		file->Open (0);
+	if (file.Part_Flag () && First_Partition () != file.Part_Number ()) {
+		file.Open (0);
 	} else if (First_Partition () >= 0) {
 		first = First_Partition ();
 	}
@@ -30,42 +29,42 @@ void Data_Service::Read_Problems (void)
 
 	for (part=0; ; part++) {
 		if (part > 0) {
-			if (!file->Open (part)) break;
+			if (!file.Open (part)) break;
 		}
 
 		//---- store the trip data ----
 
-		if (file->Part_Flag ()) {
-			part_num = file->Part_Number ();
-			Show_Message (String ("Reading %s %d -- Record") % file->File_Type () % part_num);
+		if (file.Part_Flag ()) {
+			part_num = file.Part_Number ();
+			Show_Message (String ("Reading %s %d -- Record") % file.File_Type () % part_num);
 		} else {
 			part_num = part + first;
-			Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+			Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 		}
 		Set_Progress ();
 
-		while (file->Read ()) {
+		while (file.Read ()) {
 			Show_Progress ();
 
 			problem_rec.Clear ();
 
-			if (Get_Problem_Data (*file, problem_rec, part_num)) {
-				file->Add_Trip (problem_rec.Household (), problem_rec.Person (), problem_rec.Tour ());
+			if (Get_Problem_Data (file, problem_rec, part_num)) {
+				file.Add_Trip (problem_rec.Household (), problem_rec.Person (), problem_rec.Tour ());
 				problem_array.push_back (problem_rec);
 			}
 		}
 		End_Progress ();
 		num_rec += Progress_Count ();
 	}
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % num_rec);
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % num_rec);
 	if (part > 1) Print (0, String (" (%d files)") % part);
 
 	num = (int) problem_array.size ();
 
 	if (num && num != num_rec) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % num);
 	}
 	if (num > 0) System_Data_True (PROBLEM);
 }

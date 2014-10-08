@@ -8,7 +8,7 @@
 //	Read_Schedules
 //---------------------------------------------------------
 
-void Data_Service::Read_Schedules (void)
+void Data_Service::Read_Schedules (Schedule_File &file)
 {
 	int i, j, nrun, nstop, index, npoints, num, stops, count;
 	int route, stop, last_route, first_stop, num_runs, max_runs;
@@ -23,41 +23,39 @@ void Data_Service::Read_Schedules (void)
 	Line_Run run_rec, *run_ptr = 0;
 	Int_Map_Itr map_itr;
 
-	Schedule_File *file = (Schedule_File *) System_File_Handle (TRANSIT_SCHEDULE);
-
 	//---- store the transit schedule data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 
-	Initialize_Schedules (*file);
+	Initialize_Schedules (file);
 	count = npoints = stops = 0;
 	last_route = first_stop = -1;
 	nrun = nstop = 1;
 	num_runs = max_runs = 0;
 
-	while (file->Read (false)) {
+	while (file.Read (false)) {
 		Show_Progress ();
 
 		//---- process the old file format ----
 
-		if (file->Version () <= 40) {
+		if (file.Version () <= 40) {
 
-			route = file->Route ();
+			route = file.Route ();
 			if (route == 0) continue;
 
 			//---- check the stop id ----
 
-			stop = file->Stop ();
+			stop = file.Stop ();
 
 			map_itr = stop_map.find (stop);
 			if (map_itr == stop_map.end ()) {
-				Warning (String ("Schedule Stop %d on Route %d was Not Found") % stop % file->Route ());
+				Warning (String ("Schedule Stop %d on Route %d was Not Found") % stop % file.Route ());
 				continue;
 			}
 			stop = map_itr->second;
 
-			time = file->Time (0);
+			time = file.Time (0);
 
 			//---- check for a new route ----
 
@@ -103,7 +101,7 @@ void Data_Service::Read_Schedules (void)
 			if (i > nstop) {
 				if (nstop == 1) {
 					Warning (String ("Schedule Stop %d is Not the First Stop on Route %d") % 
-						file->Stop () % route);
+						file.Stop () % route);
 					continue;
 				}
 				index = i;
@@ -137,20 +135,20 @@ void Data_Service::Read_Schedules (void)
 
 		sched_rec.Clear ();
 
-		keep_flag = Get_Schedule_Data (*file, sched_rec);
+		keep_flag = Get_Schedule_Data (file, sched_rec);
 
-		num = file->Num_Nest ();
+		num = file.Num_Nest ();
 
 		sched_rec.clear ();
 		if (num > 0) sched_rec.reserve (num);
 
 		for (i=0; i < num; i++) {
-			if (!file->Read (true)) {
-				Error (String ("Number of Stop Records for Route %d") % file->Route ());
+			if (!file.Read (true)) {
+				Error (String ("Number of Stop Records for Route %d") % file.Route ());
 			}
 			Show_Progress ();
 
-			Get_Schedule_Data (*file, sched_rec);
+			Get_Schedule_Data (file, sched_rec);
 		}
 
 		//---- write the schedule data to line data ----
@@ -159,6 +157,7 @@ void Data_Service::Read_Schedules (void)
 			line_ptr = &line_array [sched_rec.Route ()];
 
 			stops = (int) line_ptr->size ();
+			if (stops == 0) continue;
 
 			for (j=0; j < NUM_SCHEDULE_COLUMNS; j++) {
 				num = sched_rec.Run (j);
@@ -240,16 +239,16 @@ void Data_Service::Read_Schedules (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
 	line_array.Num_Runs (num_runs);
 	line_array.Max_Runs (max_runs);
 	line_array.Schedule_Records (Progress_Count ());
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	if (count && count != Progress_Count ()) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % count);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % count);
 	}
 	if (npoints > 0) {
 		Print (1, String ("Number of Interpolated Time Points = %d") % npoints);

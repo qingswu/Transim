@@ -67,6 +67,9 @@ void TransimsNet::Program_Control (void)
 		}
 	}
 
+	access_flag = (System_File_Flag (NEW_LOCATION) || System_File_Flag (NEW_PARKING));
+	control_flag = (System_File_Flag (NEW_SIGN) || System_File_Flag (NEW_SIGNAL));
+
 	Print (2, String ("%s Control Keys:") % Program ());	
 
 	//---- default link setback ----
@@ -807,6 +810,10 @@ void TransimsNet::Program_Control (void)
 
 		update_shape_flag = true;
 	}
+
+	//---- repair connections -----
+
+	repair_flag = Get_Control_Flag (REPAIR_CONNECTIONS);
 
 	//---- delete node range ----
 

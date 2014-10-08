@@ -8,27 +8,25 @@
 //	Read_Access_Links
 //---------------------------------------------------------
 
-void Data_Service::Read_Access_Links (void)
+void Data_Service::Read_Access_Links (Access_File &file)
 {
-	Access_File *file = (Access_File *) System_File_Handle (ACCESS_LINK);
-	
 	int num;
 	Int_Map_Stat map_stat;
 	Access_Data access_rec;
 
 	//---- store the access link data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 
-	Initialize_Access (*file);
+	Initialize_Access (file);
 
-	while (file->Read ()) {
+	while (file.Read ()) {
 		Show_Progress ();
 
 		access_rec.Clear ();
 
-		if (Get_Access_Data (*file, access_rec)) {
+		if (Get_Access_Data (file, access_rec)) {
 			map_stat = access_map.insert (Int_Map_Data (access_rec.Link (), (int) access_array.size ()));
 
 			if (!map_stat.second) {
@@ -40,14 +38,14 @@ void Data_Service::Read_Access_Links (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	num = (int) access_array.size ();
 
 	if (num && num != Progress_Count ()) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % num);
 	}
 	if (num > 0) System_Data_True (ACCESS_LINK);
 }

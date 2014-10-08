@@ -30,6 +30,12 @@ bool SubareaNet::Get_Node_Data (Node_File &file, Node_Data &data)
 			} else {
 				data.Subarea (0);
 			}
+		} else if (node_flag) {
+			if (data.Subarea () == node_code) {
+				data.Subarea (1);
+			} else {
+				data.Subarea (0);
+			}
 		} else if (In_Polygon (subarea_boundary, UnRound (data.X ()), UnRound (data.Y ()))) {
 			data.Subarea (1);
 		} else {

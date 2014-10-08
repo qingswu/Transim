@@ -61,7 +61,7 @@ int Line_Array::Vehicle_ID (int vehicles)
 //	Sum_Ridership
 //---------------------------------------------------------
 
-void Line_Array::Sum_Ridership (Plan_Data &plan)
+void Line_Array::Sum_Ridership (Plan_Data &plan, bool id_flag)
 {
 	int board, alight, route, run;
 	Dtime time, time2;
@@ -85,20 +85,28 @@ void Line_Array::Sum_Ridership (Plan_Data &plan)
 			if (leg_itr->Mode () == TRANSIT_MODE) {
 				alight = leg_itr->ID ();
 
-				map_itr = dat->stop_map.find (alight);
-				if (map_itr == dat->stop_map.end ()) continue;
+				if (!id_flag) {
+					map_itr = dat->stop_map.find (alight);
+					if (map_itr == dat->stop_map.end ()) continue;
 
-				alight = map_itr->second;
+					alight = map_itr->second;
 
-				map_itr = dat->stop_map.find (board);
-				if (map_itr == dat->stop_map.end ()) continue;
+					map_itr = dat->stop_map.find (board);
+					if (map_itr == dat->stop_map.end ()) continue;
 
-				board = map_itr->second;
+					board = map_itr->second;
 
-				map_itr = dat->line_map.find (route);
-				if (map_itr == dat->line_map.end ()) continue;
+					map_itr = dat->line_map.find (route);
+					if (map_itr == dat->line_map.end ()) continue;
 
-				line_ptr = &at (map_itr->second);
+					line_ptr = &at (map_itr->second);
+				} else {
+					if (route < 0) continue;
+#ifdef CHECK
+					if (route < 0 || route >= (int) size ()) exe->Error ("Line_Data::Sum_Ridership: route");
+#endif
+					line_ptr = &at (route);
+				}
 
 				//---- find the boarding and alighting locations ----
 

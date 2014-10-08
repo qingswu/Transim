@@ -12,7 +12,7 @@ void NetPrep::Program_Control (void)
 {
 	String key;
 	Strings parts;
-	int i, j, num, mode;
+	int i, j, num, mode, count, index;
 
 	//---- create the network files ----
 
@@ -575,18 +575,38 @@ void NetPrep::Program_Control (void)
 			if (!Get_Control_List_Groups (ROUTE_MODE_MAP, str_list)) {
 				Error ("Route Mode Map was Not Found");
 			}
-			for (str_itr = str_list.begin (); str_itr != str_list.end (); str_itr++) {
+
+			for (count=0, str_itr = str_list.begin (); str_itr != str_list.end (); str_itr++, count++) {
+				if (count == 0) continue;
 				key = *str_itr;
 				key.Parse (parts, "=");
+
 				if (parts.size () != 2) {
-					Error ("Route Mode Map Syntax (input_mode_number = TRANSIMS_mode_name)");
+					key = *str_itr;
+					index = (count % 3);
+
+					if (index == 1) {
+						mode = key.Integer ();
+					} else if (index == 2) {
+						if (!key.Equals ("=")) {
+							Error ("Route Mode Map Syntax (input_mode_number = TRANSIMS_mode_name)");
+						}
+					} else {
+						j = Transit_Code (key);
+						if (j == ANY_TRANSIT) {
+							Error ("Route Mode Map is Out of Range");
+						}
+						mode_map.insert (Int_Map_Data (mode, j));						
+					}
+				} else {
+					mode = parts [0].Integer ();
+					j = Transit_Code (parts [1]);
+					if (j == ANY_TRANSIT) {
+						Error ("Route Mode Map is Out of Range");
+					}
+					mode_map.insert (Int_Map_Data (mode, j));
+					count = 0;
 				}
-				mode = parts [0].Integer ();
-				j = Transit_Code (parts [1]);
-				if (j == ANY_TRANSIT) {
-					Error ("Route Mode Map is Out of Range");
-				}
-				mode_map.insert (Int_Map_Data (mode, j));
 			}
 
 			//---- process the mode veh_type map ----
@@ -594,17 +614,36 @@ void NetPrep::Program_Control (void)
 			memset (mode_type_map, '\0', sizeof (mode_type_map));
 
 			if (Get_Control_List_Groups (MODE_VEH_TYPE_MAP, str_list)) {
-				for (str_itr = str_list.begin (); str_itr != str_list.end (); str_itr++) {
+				j = 0;
+
+				for (count=0, str_itr = str_list.begin (); str_itr != str_list.end (); str_itr++, count++) {
 					key = *str_itr;
 					key.Parse (parts, "=");
+
 					if (parts.size () != 2) {
-						Error ("Mode Veh Type Map Syntax (TRANSIMS_mode_name = vehicle_type_number)");
+						key = *str_itr;
+						index = (count % 3);
+
+						if (index == 1) {
+							j = Transit_Code (key);
+							if (j == ANY_TRANSIT) {
+								Error ("Mode Veh Type Map is Out of Range");
+							}
+						} else if (index == 2) {
+							if (!key.Equals ("=")) {
+								Error ("Mode Veh Type Map Syntax (TRANSIMS_mode_name = vehicle_type_number)");
+							}
+						} else {
+							mode_type_map [j] = key.Integer ();
+						}
+					} else {
+						j = Transit_Code (parts [0]);
+						if (j == ANY_TRANSIT) {
+							Error ("Mode Veh_Type Map is Out of Range");
+						}
+						mode_type_map [j] = parts [1].Integer ();
+						count = 0;
 					}
-					j = Transit_Code (parts [0]);
-					if (j == ANY_TRANSIT) {
-						Error ("Route Mode Map is Out of Range");
-					}
-					mode_type_map [j] = parts [1].Integer ();
 				}
 			}
 

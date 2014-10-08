@@ -171,8 +171,8 @@ bool Sim_Node_Process::Load_Vehicle (int traveler)
 	//---- put the vehicle on the network ----
 
 	step.sim_veh_ptr = sim_veh_ptr = &sim->sim_veh_array [sim_travel_ptr->Vehicle ()];
-	
-	sim_veh_ptr->Location (dir_index, -1, offset);
+
+	sim_veh_ptr->Clear ();
 
 	step.push_back (*sim_veh_ptr);
 
@@ -214,7 +214,6 @@ bool Sim_Node_Process::Load_Vehicle (int traveler)
 	//---- try to move forward ---
 
 	Move_Vehicle (step);
-
 	return (true);
 
 access_problem:

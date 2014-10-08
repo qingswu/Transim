@@ -8,6 +8,7 @@
 //	exit_exception
 //---------------------------------------------------------
 
+#ifdef _WIN32
 exit_exception::exit_exception (const string& message) : code (0), exception (message.c_str ()) {}
 
 exit_exception::exit_exception (const char *message) : code (0), exception (message) {}
@@ -23,18 +24,19 @@ exit_exception::exit_exception (int _code)
 		exception ("TRANSIMS Normal Exit");
 	}
 }
-//struct ooops : std::exception {
-//  const char* what() const noexcept {return "Ooops!\n";}
-//};
-//
-//int main () {
-//  try {
-//      throw ooops;
-//  } catch (std::exception& ex) {
-//      std::cout << ex.what();
-//  }
-//  return 0
-
+#else
+exit_exception::exit_exception (int _code) 
+{
+	code = _code;
+	if (code == 2) {
+		std::cout << "TRANSIMS WARNING";
+	} else if (code == 1) {
+		std::cout << "TRANSIMS FATAL ERROR";
+	} else {
+		std::cout << "TRANSIMS Normal Exit";
+	}
+}
+#endif
 //---------------------------------------------------------
 //	Message_Service - constructor
 //---------------------------------------------------------

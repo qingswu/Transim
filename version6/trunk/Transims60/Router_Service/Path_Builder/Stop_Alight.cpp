@@ -80,9 +80,9 @@ bool Path_Builder::Stop_Alight (Transit_Path_Index path_index, Path_End_Array *t
 	if (xfer < param.max_xfers) {
 		path_ptr = &board_path [pathx] [stop];
 					
-		if (path_ptr->Imped () > from_imp) {
+		if (path_ptr->Imped () > from_imp && path_ptr->From () >= 0) {
 
-			to_imp = from_imp;
+			to_imp = from_imp + 1;
 			to_time = from_time;
 			to_len = from_len;
 			to_cost = from_cost;
@@ -140,7 +140,6 @@ bool Path_Builder::Stop_Alight (Transit_Path_Index path_index, Path_End_Array *t
 			index = access_ptr->ID (!ab_flag);
 
 			if (type != STOP_ID && type != NODE_ID) continue;
-			if (type == STOP_ID && xfer >= param.max_xfers) continue;
 
 			ttime = access_ptr->Time ();
 			cost = access_ptr->Cost ();
@@ -251,6 +250,7 @@ bool Path_Builder::Stop_Alight (Transit_Path_Index path_index, Path_End_Array *t
 			//---- consider adding the node or stop to the processing list ----
 
 			if (type == STOP_ID) {
+				if (xfer >= param.max_xfers) continue;
 				path_ptr = &board_path [pathx] [index];
 				path_index.Path (pathx);
 			} else if (type == NODE_ID) {
@@ -316,7 +316,7 @@ bool Path_Builder::Stop_Alight (Transit_Path_Index path_index, Path_End_Array *t
 		to_flag = false;
 
 		for (to=0, to_itr = to_ptr->begin (); to_itr != to_ptr->end (); to_itr++, to++) {
-			if (to_itr->Type () == LINK_ID && link != to_itr->Index ()) continue;
+			if (to_itr->Type () != LINK_ID || link != to_itr->Index ()) continue;
 
 			//---- calculate and check the length ----
 
@@ -423,7 +423,7 @@ bool Path_Builder::Stop_Alight (Transit_Path_Index path_index, Path_End_Array *t
 
 	//---- check for transit stops on the link ----
 
-	for (index = exe->link_stop [link]; index >= 0 && xfer < param.max_xfers; index = exe->next_stop [index]) {
+	for (index = exe->link_stop [link]; index >= 0; index = exe->next_stop [index]) {
 		if (index == stop) continue;
 
 		stop_ptr = &exe->stop_array [index];
@@ -545,6 +545,8 @@ bool Path_Builder::Stop_Alight (Transit_Path_Index path_index, Path_End_Array *t
 		}
 
 		//---- check the current path ----
+ 
+		if (xfer >= param.max_xfers) continue;
 
 		path_ptr = &board_path [pathx] [index];
 		

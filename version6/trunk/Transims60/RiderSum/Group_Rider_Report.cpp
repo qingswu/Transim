@@ -10,7 +10,7 @@
 
 void RiderSum::Group_Rider_Report (void)
 {
-	int n, run, runs, num, length, tot_len, period, num_periods, routes, groups, index, stop, to, link;
+	int n, run, runs, num, length, tot_len, period, num_periods, routes, index, stop, to, link;
 	int max_riders, max_board, max_alight, max_runs, total;
 	double factor, max_fac, sum_time, tot_time, time;
 	double vmt, vht, pmt, pht;
@@ -51,11 +51,10 @@ void RiderSum::Group_Rider_Report (void)
 		Group_Rider_Header ();
 	}
 
-	groups = line_equiv.Max_Group ();
 	routes = 0;
 	memset (&data, '\0', sizeof (data));
 	
-	for (n=1; n <= groups; n++) {
+	for (n = line_equiv.First_Group (); n > 0; n = line_equiv.Next_Group ()) {
 
 		group = line_equiv.Group_List (n);
 		if (group == 0) continue;

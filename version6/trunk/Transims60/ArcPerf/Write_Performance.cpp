@@ -92,15 +92,15 @@ use_link:
 				perf_file->Enter (data.Enter ());
 				perf_file->Exit (data.Exit ());
 				perf_file->Flow (data.Flow ());
-				perf_file->Speed (UnRound (data.Speed ()));
-				perf_file->Time_Ratio (UnRound (data.Time_Ratio ()));
+				perf_file->Speed (data.Speed ());
+				perf_file->Time_Ratio (data.Time_Ratio ());
 				perf_file->Delay (data.Delay ());
 				perf_file->Density (data.Density ());
 				perf_file->Max_Density (data.Max_Density ());
 				perf_file->Queue (data.Queue ());
 				perf_file->Max_Queue (data.Max_Queue ());
 				perf_file->Failure (data.Failure ());
-				perf_file->Veh_Dist (UnRound (data.Veh_Dist ()));
+				perf_file->Veh_Dist (data.Veh_Dist ());
 				perf_file->Veh_Time (data.Veh_Time ());
 				perf_file->Veh_Delay (data.Veh_Delay ());
 
@@ -108,9 +108,9 @@ use_link:
 
 				arcview_perf.Put_Field (length_field, UnRound (length));
 				arcview_perf.Put_Field (lane_len_field, data.Lane_Len ());
-				arcview_perf.Put_Field (vc_field, data.VC_Ratio ());
+				arcview_perf.Put_Field (vc_field, data.VC_Ratio () * 10.0);
 				arcview_perf.Put_Field (cong_time_field, 100.0 * data.Ratios () / num);
-				arcview_perf.Put_Field (cong_vmt_field, UnRound (data.Ratio_Dist ()));
+				arcview_perf.Put_Field (cong_vmt_field, data.Ratio_Dist ());
 				arcview_perf.Put_Field (cong_vht_field, data.Ratio_Time ());
 
 				if (index_flag) {

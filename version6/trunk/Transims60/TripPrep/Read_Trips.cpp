@@ -171,6 +171,7 @@ void TripPrep::Trip_Processing::Read_Trips (int part)
 		if (trip_ptr->Mode () < MAX_MODE && !exe->select_mode [trip_ptr->Mode ()]) continue;
 		if (exe->select_purposes && !exe->purpose_range.In_Range (trip_ptr->Purpose ())) continue;
 		if (exe->select_travelers && !exe->traveler_range.In_Range (trip_ptr->Type ())) continue;
+		if (exe->select_vehicles && !exe->vehicle_range.In_Range (trip_ptr->Veh_Type ())) continue;
 		if (exe->select_start_times && !exe->start_range.In_Range (trip_ptr->Start ())) continue;
 		if (exe->select_end_times && !exe->end_range.In_Range (trip_ptr->End ())) continue;
 		if (exe->select_origins && !exe->org_range.In_Range (trip_ptr->Origin ())) continue;

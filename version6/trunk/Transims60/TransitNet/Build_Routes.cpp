@@ -19,7 +19,7 @@ void TransitNet::Build_Routes (void)
 	Dtime offset_time, time_inc, low, high, last_time;
 	double factor, x, y, distance;
 	bool first, bus_flag, left_flag, prev_left, put_flag, short_flag, first_flag, mid_flag, last_flag, cum_flag, end_flag;
-	bool offset_flag;
+	bool offset_flag, connect_flag;
 	Use_Type use;
 	String note;
 
@@ -41,6 +41,7 @@ void TransitNet::Build_Routes (void)
 	Line_Stop_Itr line_stop_itr;
 	Line_Run line_run;
 	Node_Data *node_ptr;
+	Int_Itr driver_itr;
 
 	Route_Path_Data route_path, last_link;
 	Route_Path_Array route_path_array;
@@ -354,10 +355,31 @@ void TransitNet::Build_Routes (void)
 			n0 = n;
 		}
 
+		//---- check the route connections ----
+
+		dir_index = -1;
+		connect_flag = false;
+
+		for (driver_itr = line_ptr->driver_array.begin (); driver_itr != line_ptr->driver_array.end (); driver_itr++) {
+			if (dir_index >= 0) {
+				ab_itr = connect_map.find (Int2_Key (dir_index, *driver_itr));
+				if (ab_itr == connect_map.end ()) {
+					connect_flag = true;
+					Warning (String ("Route %d Driver Links %d-%d are Not Connected") % line_ptr->Route ()
+						% (link_array [dir_array [dir_index].Link ()].Link ()) 
+						% (link_array [dir_array [*driver_itr].Link ()].Link ()));
+				}
+			}
+			dir_index = *driver_itr;
+		}
+		if (connect_flag) {
+			errors++;
+		}
 		if (route_path_array.size () <= 1) {
 			Warning (String ("Route %d has Missing Node Records") % route);
 			continue;
 		}
+		if (connect_flag) continue;
 
 		//---- assign stops to route links ----
 

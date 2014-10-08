@@ -8,10 +8,8 @@
 //	Read_Shapes
 //---------------------------------------------------------
 
-void Data_Service::Read_Shapes (void)
+void Data_Service::Read_Shapes (Shape_File &file)
 {
-	Shape_File *file = (Shape_File *) System_File_Handle (SHAPE);
-	
 	int i, num;	
 	bool keep_flag;
 	Shape_Data shape_rec;
@@ -19,28 +17,28 @@ void Data_Service::Read_Shapes (void)
 
 	//---- store the shape point data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 
-	Initialize_Shapes (*file);
+	Initialize_Shapes (file);
 
-	while (file->Read (false)) {
+	while (file.Read (false)) {
 		Show_Progress ();
 
 		shape_rec.Clear ();
 
-		keep_flag = Get_Shape_Data (*file, shape_rec);
+		keep_flag = Get_Shape_Data (file, shape_rec);
 
-		num = file->Num_Nest ();
+		num = file.Num_Nest ();
 		if (num > 0) shape_rec.reserve (num);
 
 		for (i=1; i <= num; i++) {
-			if (!file->Read (true)) {
-				Error (String ("Number of Nested Records for Link %d") % file->Link ());
+			if (!file.Read (true)) {
+				Error (String ("Number of Nested Records for Link %d") % file.Link ());
 			}
 			Show_Progress ();
 
-			Get_Shape_Data (*file, shape_rec);
+			Get_Shape_Data (file, shape_rec);
 		}
 		if (keep_flag) {
 			map_stat = shape_map.insert (Int_Map_Data (shape_rec.Link (), (int) shape_array.size ()));
@@ -53,14 +51,14 @@ void Data_Service::Read_Shapes (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	num = (int) shape_array.size ();
 
 	if (num && num != Progress_Count ()) {
-		Print (1, String ("Number of Link %s Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of Link %s Records = %d") % file.File_ID () % num);
 	}
 	if (num > 0) System_Data_True (SHAPE);
 }

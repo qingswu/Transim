@@ -25,12 +25,13 @@ void Router::Write_Plan_Files (void)
 		Set_Progress ();
 
 		for (i=0, plan_itr = plan_array.begin (); plan_itr != plan_array.end (); plan_itr++, i++) {
-			if (plan_itr->Household () == 0) continue;
+			if (plan_itr->Household () == 0	|| plan_itr->Problem () > 0 || plan_itr->size () == 0) continue;
 			Show_Progress ();
 
 			if (plan_itr->Depart () < 0) {
-				exe->Warning (String ("Plan Record = %d-%d-%d-%d has Negative Departure Time") % 
-					plan_itr->Household () % plan_itr->Person () % plan_itr->Tour () % plan_itr->Trip ());
+				exe->Warning (String ("Plan %d-%d-%d-%d Departs %s vs. Start Time %s") %
+					plan_itr->Household () % plan_itr->Person () % plan_itr->Tour () % plan_itr->Trip () % 
+					plan_itr->Depart ().Time_String () % plan_itr->Start ().Time_String ());
 				plan_itr->Depart (0);
 			}
 			plan_itr->Get_Index (time_index);
@@ -86,7 +87,7 @@ void Router::Write_Plan_Files (void)
 			} else {
 				new_plan_file->Write_Plan (*plan_ptr);
 			}
-		} else {
+		} else if (plan_ptr->Problem () > 0) {
 			Set_Problem ((Problem_Type) plan_ptr->Problem ());
 
 			if (problem_flag) {

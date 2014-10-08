@@ -186,7 +186,9 @@ int Sim_Node_Process::Sum_Path (Sim_Dir_Ptr sim_dir_ptr, int lane, int cell, Tra
 
 				//---- check the vehicle speed ----
 
-				if (abs (traveler) > 1) {
+				traveler = abs (traveler);
+
+				if (traveler > 1) {
 					sim_travel_ptr = &sim->sim_travel_array [traveler];
 
 					if (sim_travel_ptr->Speed () < speed) {

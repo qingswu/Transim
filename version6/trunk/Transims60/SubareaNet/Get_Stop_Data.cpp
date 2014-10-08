@@ -35,8 +35,9 @@ bool SubareaNet::Get_Stop_Data (Stop_File &file, Stop_Data &data)
 				Error (String ("Writing %s") % new_file->File_Type ());
 			}
 			nstop++;
+
+			return (true);
 		}
-		return (true);
 	}
 	return (false);
 }

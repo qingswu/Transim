@@ -8,42 +8,42 @@
 //	Get_Phasing_Data
 //---------------------------------------------------------
 
-int ArcNet::Get_Phasing_Data (Phasing_File &file, Phasing_Data &phasing_rec)
+bool ArcNet::Get_Phasing_Data (Phasing_File &file, Phasing_Record &phasing_rec)
 {
-	int signal = Data_Service::Get_Phasing_Data (file, phasing_rec);
+	if (Data_Service::Get_Phasing_Data (file, phasing_rec)) {
+		Phasing_Data *phasing_ptr = &(phasing_rec.phasing_data);
 
-	if (signal >= 0) {
 		if (arcview_phasing.Is_Open ()) {
 			arcview_phasing.Copy_Fields (file);
 		}
 		if (!file.Nested ()) {
 			if (time_flag) {
-				Signal_Data *signal_ptr = &signal_array [signal];
+				Signal_Data *signal_ptr = &signal_array [phasing_rec.Signal ()];
 
 				Signal_Time_Itr itr;
 				bool keep = false;
 
 				for (itr = signal_ptr->begin (); itr != signal_ptr->end (); itr++) {
-					if (itr->Phasing () == phasing_rec.Phasing () && 
+					if (itr->Phasing () == phasing_ptr->Phasing () && 
 						itr->Start () <= time && time <= itr->End ()) {
 						keep = true;
 						break;
 					}
 				}
 				if (!keep) {
-					phasing_rec.Phasing (0);
-					return (-1);
+					phasing_ptr->Phasing (0);
+					return (false);
 				}
 			}
-			return (signal);
+			return (phasing_rec.Signal () >= 0);
 		}
 		if (arcview_phasing.Is_Open ()) {
 			arcview_phasing.parts.clear ();
 			arcview_phasing.clear ();
 
-			if (phasing_rec.size () == 0) return (-1);
+			if (phasing_ptr->size () == 0) return (false);
 
-			Movement_Itr move_itr = --phasing_rec.end ();
+			Movement_Itr move_itr = --phasing_ptr->end ();
 
 			double side_in, side_out;
 
@@ -115,7 +115,7 @@ int ArcNet::Get_Phasing_Data (Phasing_File &file, Phasing_Data &phasing_rec)
 				Error (String ("Writing %s") % arcview_phasing.File_Type ());
 			}
 		}
-		return (signal);
+		return (phasing_rec.Signal () >= 0);
 	}
-	return (-1);
+	return (false);
 }

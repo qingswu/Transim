@@ -8,10 +8,8 @@
 //	Read_Route_Nodes
 //---------------------------------------------------------
 
-void Data_Service::Read_Route_Nodes (void)
+void Data_Service::Read_Route_Nodes (Route_Nodes_File &file)
 {
-	Route_Nodes_File *file = (Route_Nodes_File *) System_File_Handle (ROUTE_NODES);
-	
 	int i, num;
 	bool keep_flag;
 	Int_Map_Stat map_stat;
@@ -19,30 +17,30 @@ void Data_Service::Read_Route_Nodes (void)
 
 	//---- store the route nodes data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 	
-	Initialize_Route_Nodes (*file);
+	Initialize_Route_Nodes (file);
 
-	while (file->Read (false)) {
+	while (file.Read (false)) {
 		Show_Progress ();
 
 		route_rec.Clear ();
 
-		keep_flag = Get_Route_Nodes_Data (*file, route_rec);
+		keep_flag = Get_Route_Nodes_Data (file, route_rec);
 
-		num = file->Num_Nest ();
+		num = file.Num_Nest ();
 		if (num > 0) route_rec.nodes.reserve (num);
 
-		route_rec.periods.reserve (file->Num_Periods ());
+		route_rec.periods.reserve (file.Num_Periods ());
 	
 		for (i=1; i <= num; i++) {
-			if (!file->Read (true)) {
-				Error (String ("Number of Nested Records for Route %d") % file->Route ());
+			if (!file.Read (true)) {
+				Error (String ("Number of Nested Records for Route %d") % file.Route ());
 			}
 			Show_Progress ();
 
-			Get_Route_Nodes_Data (*file, route_rec);
+			Get_Route_Nodes_Data (file, route_rec);
 		}
 		if (keep_flag) {
 			map_stat = route_map.insert (Int_Map_Data (route_rec.Route (), (int) route_nodes_array.size ()));
@@ -55,9 +53,9 @@ void Data_Service::Read_Route_Nodes (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	num = (int) route_nodes_array.size ();
 

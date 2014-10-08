@@ -12,9 +12,14 @@ void Router::Program_Control (void)
 {
 	String key;
 
-	if (!Set_Control_Flag (UPDATE_FLOW_RATES) && !Set_Control_Flag (UPDATE_TRAVEL_TIMES) && Check_Control_Key (NEW_PERFORMANCE)) {
+	if (!Set_Control_Flag (UPDATE_FLOW_RATES) && !Set_Control_Flag (UPDATE_TRAVEL_TIMES) && System_Control_Empty (NEW_PERFORMANCE)) {
 		Warning ("Flow or Time Updates are required to output a New Performance File");
 		System_File_False (NEW_PERFORMANCE);
+	}
+	if (System_Control_Empty  (TRANSIT_STOP) || System_Control_Empty (TRANSIT_ROUTE) || System_Control_Empty (TRANSIT_SCHEDULE)) {
+		Transit_Paths (false);
+		ParkRide_Paths (false);
+		KissRide_Paths (false);
 	}
 
 	//---- initialize the MPI thread range ----
@@ -26,6 +31,19 @@ void Router::Program_Control (void)
 	Router_Service::Program_Control ();
 
 	Read_Select_Keys ();
+
+	if (!System_File_Flag (TRANSIT_STOP) || !System_File_Flag (TRANSIT_ROUTE) || !System_File_Flag (TRANSIT_SCHEDULE)) {
+		select_modes = true;
+		select_mode [TRANSIT_MODE] = false;
+		select_mode [PNR_IN_MODE] = false;
+		select_mode [PNR_OUT_MODE] = false;
+		select_mode [KNR_IN_MODE] = false;
+		select_mode [KNR_OUT_MODE] = false;
+	}
+	if (select_mode [DRIVE_MODE] || select_mode [PNR_IN_MODE] || select_mode [PNR_OUT_MODE] ||
+		select_mode [KNR_IN_MODE] || select_mode [KNR_OUT_MODE] || select_mode [TAXI_MODE]) {
+		Drive_Paths (true);
+	}
 										
 	Print (2, String ("%s Control Keys:") % Program ());
 
@@ -53,6 +71,10 @@ void Router::Program_Control (void)
 	if (plan_memory_flag) {
 		time_sort_flag = (Trip_Sort () == TIME_SORT);
 		Trip_Sort (TRAVELER_SORT);
+
+		if (trip_memory_flag) {
+			System_Data_Reserve (TRIP, 0);
+		}
 	} else {
 		System_Read_False (PLAN);
 		System_Data_Reserve (PLAN, 0);
@@ -68,6 +90,8 @@ void Router::Program_Control (void)
 		}
 	} else {
 		Memory_Flag (true);
+		System_Read_False (TRIP);
+		System_Data_Reserve (TRIP, 0);
 	}
 
 	//---- check file and selection keys ----
@@ -359,8 +383,5 @@ void Router::Program_Control (void)
 			Turn_Flows (true);
 			turn_flag = true;
 		}
-	}
-	if (select_mode [DRIVE_MODE] || select_mode [PNR_IN_MODE] || select_mode [PNR_OUT_MODE] ||
-		select_mode [KNR_IN_MODE] || select_mode [KNR_OUT_MODE] || select_mode [TAXI_MODE]) {
 	}
 }

@@ -58,12 +58,9 @@ bool Sim_Plan_Step::Sim_Plan_Result (Sim_Trip_Ptr sim_trip_ptr)
 
 			cells = 1;
 
-			if (sim_plan_ptr->Veh_Type () > 0) {
-				map_itr = sim->veh_type_map.find (sim_plan_ptr->Veh_Type ());
-				if (map_itr != sim->veh_type_map.end ()) {
-					veh_type_ptr = &sim->veh_type_array [map_itr->second];
-					cells = veh_type_ptr->Cells ();
-				}
+			if (sim_plan_ptr->Veh_Type () >= 0) {
+				veh_type_ptr = &sim->veh_type_array [sim_plan_ptr->Veh_Type ()];
+				cells = veh_type_ptr->Cells ();
 			}
 			while (cells-- > 0) {
 				sim->sim_veh_array.push_back (sim_veh_data);

@@ -11,7 +11,7 @@
 
 bool Sim_Node_Process::Link_Processing (int link)
 {
-	int i, index, max_exit, exit_count, lane0, lane, cell, traveler, step_size, next_load;
+	int i, max_exit, exit_count, lane0, lane, cell, traveler, step_size, next_load;
 	double max_flow;
 	Dtime time;
 
@@ -69,16 +69,13 @@ bool Sim_Node_Process::Link_Processing (int link)
 			traveler = sim_dir_ptr->Get (lane, cell);
 			if (traveler <= 0) continue;
 
-			step.clear ();
+			step.Clear_Travel ();
 			step.Traveler (traveler);
 			step.sim_travel_ptr = sim_travel_ptr = &sim->sim_travel_array [traveler];
 
 			//---- check if the traveler has already been processed during this time step ----
 
 			if (sim_travel_ptr->Step_Code () == sim->Step_Code ()) continue;
-
-			step.sim_plan_ptr = 0;
-			step.sim_veh_ptr = 0;
 
 			//---- data problem ----
 
@@ -137,15 +134,11 @@ bool Sim_Node_Process::Link_Processing (int link)
 				sim_travel_ptr->Next_Plan ();
 				continue;
 			}
+
 			if (sim_leg_ptr->Type () == STOP_ID) {
 				if (!sim_plan_ptr->Next_Leg ()) {
 					step.sim_veh_ptr->Parked (true);
-					index = sim_dir_ptr->Index (step.sim_veh_ptr->lane, sim->Offset_Cell (step.sim_veh_ptr->offset));
-
-					sim_dir_ptr->Remove (index);
-					sim_travel_ptr->Next_Plan ();
-					sim_travel_ptr->Status (OFF_NET_END);
-					sim_travel_ptr->Next_Event (sim->param.end_time_step);
+					sim->Output_Step (step);
 					stats.num_run_end++;
 					continue;
 				}

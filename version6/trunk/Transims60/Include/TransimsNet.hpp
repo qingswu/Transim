@@ -47,7 +47,7 @@ protected:
 		UPDATE_NODE_RANGE, UPDATE_ZONE_RANGE, UPDATE_LINK_RANGE, 
 		UPDATE_NODE_FILE, UPDATE_NODE_DATA_FLAG, 
 		UPDATE_ZONE_FILE, UPDATE_ZONE_DATA_FLAG, 
-		UPDATE_LINK_FILE, UPDATE_LINK_DATA_FLAG, UPDATE_SHAPE_FILE,
+		UPDATE_LINK_FILE, UPDATE_LINK_DATA_FLAG, UPDATE_SHAPE_FILE, REPAIR_CONNECTIONS,
 		DELETE_NODE_RANGE, DELETE_ZONE_RANGE, DELETE_LINK_RANGE, 
 		DELETE_NODE_FILE, DELETE_ZONE_FILE, DELETE_LINK_FILE,
 		LINK_USE_FILE, LINK_USE_FORMAT, APPROACH_LINK_FILE, APPROACH_LINK_FORMAT,
@@ -66,13 +66,13 @@ protected:
 	virtual bool Get_Access_Data (Access_File &file, Access_Data &data);
 	virtual bool Get_Sign_Data (Sign_File &file, Sign_Data &data);
 	virtual bool Get_Signal_Data (Signal_File &file, Signal_Data &data);
-
+	virtual bool Get_Stop_Data (Stop_File &file, Stop_Data &stop_rec);
 private:
 
 	bool details_flag, link_use_flag, approach_flag, boundary_flag, street_flag, ext_zone_flag, signal_id_flag;
-	bool update_flag, delete_flag, connect_flag, replicate_flag;
+	bool update_flag, delete_flag, connect_flag, replicate_flag, repair_flag, location_flag, parking_flag;
 	bool update_node_flag, update_zone_flag, update_link_flag, update_shape_flag, update_dir_flag;
-	bool node_data_flag, zone_data_flag, link_data_flag;
+	bool node_data_flag, zone_data_flag, link_data_flag, access_flag, control_flag;
 	bool delete_node_flag, delete_zone_flag, delete_link_flag;
 	bool zone_flag, zout_flag, turn_flag, shape_flag, name_flag, collapse_flag, uturn_flag;
 	double max_length_factor;
@@ -84,7 +84,7 @@ private:
 
 	int nnode, nlink, nparking, nactivity, naccess, npocket, nconnect, nsign, nsignal, nuse;
 	int mparking, mactivity, mprocess, mpocket, muse;
-	int xlink, xnode, xzone, xshape, xparking, xlocation, xaccess, xpocket, xconnect, xsign, xsignal, xuse, xturn;
+	int xlink, xnode, xzone, xshape, xparking, xlocation, xaccess, xpocket, xconnect, xsign, xsignal, xuse, xturn, xstop;
 	int nshort, nlength, nexternal, nzone, nzout, max_splits;
 	int nfixed1, nfixed2, nfixed3, nactuated1, nactuated2, nactuated3, nstop, nyield;
 	int nshape, nshapes, nturn;
@@ -149,6 +149,7 @@ private:
 	void Connections (void);
 	void Pocket_Lanes (void);
 	void Traffic_Controls (void);
+	void Repair_Connections (void);
 	void Lane_Ranges (void);
 	void Lane_Use (void);
 };

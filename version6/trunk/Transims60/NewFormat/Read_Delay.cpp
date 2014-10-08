@@ -122,7 +122,7 @@ void NewFormat::Read_Delay (void)
 			perf_rec.Volume (perf_rec.Flow ());
 			perf_rec.Enter (perf_rec.Flow ());
 			perf_rec.Exit (perf_rec.Flow ());
-			perf_rec.Veh_Dist (perf_rec.Flow () * link_ptr->Length ());
+			perf_rec.Veh_Dist (perf_rec.Flow () * UnRound (link_ptr->Length ()));
 			perf_rec.Veh_Time (perf_rec.Flow () * perf_rec.Time ());
 			perf_rec.Veh_Delay (perf_rec.Flow () * perf_rec.Delay ());			
 		} else {
@@ -138,7 +138,7 @@ void NewFormat::Read_Delay (void)
 			perf_rec.Volume (old_delay_file.Volume ());
 			perf_rec.Enter (old_delay_file.Enter ());
 			perf_rec.Exit (old_delay_file.Exit ());
-			perf_rec.Veh_Dist (Round (old_delay_file.Flow_Dist ()));
+			perf_rec.Veh_Dist (old_delay_file.Flow_Dist ());
 			perf_rec.Veh_Time (Round (old_delay_file.Flow_Time ()));
 			perf_rec.Veh_Delay (perf_rec.Volume () * perf_rec.Delay ());
 		}

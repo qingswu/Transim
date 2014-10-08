@@ -89,6 +89,9 @@
     <ClCompile Include="Preload_Transit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Input_Trips.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\Router.hpp">

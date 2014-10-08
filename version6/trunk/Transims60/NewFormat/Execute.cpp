@@ -55,12 +55,12 @@ void NewFormat::Execute (void)
 	//---- process person file ----
 
 	if (System_File_Flag (HOUSEHOLD)) {
-		Read_Households ();
+		Read_Households (*((Household_File *) System_File_Handle (HOUSEHOLD)));
 		if (person_flag) Read_Persons ();
 
 		if (System_File_Flag (NEW_HOUSEHOLD)) Write_Households ();
 
-		Household_Array ().swap (hhold_array);
+		hhold_array.clear ();
 	}
 
 	//---- write the data files ----
@@ -105,7 +105,7 @@ void NewFormat::Execute (void)
 	//---- convert trip file ----
 
 	if (System_File_Flag (TRIP) && new_trip_flag) {
-		Read_Trips ();
+		Read_Trips (*((Trip_File *) System_File_Handle (TRIP)));
 
 		Trip_File *file = (Trip_File *) System_File_Handle (NEW_TRIP);
 		
@@ -170,7 +170,7 @@ void NewFormat::Execute (void)
 	//---- convert skim file ----
 
 	if (System_File_Flag (SKIM) && System_File_Flag (NEW_SKIM)) {
-		Read_Skims ();
+		Read_Skims (*((Skim_File *) System_File_Handle (SKIM)));
 
 		Skim_File *file = (Skim_File *) System_File_Handle (NEW_SKIM);
 		
@@ -181,7 +181,6 @@ void NewFormat::Execute (void)
 	//---- convert the route nodes ----
 
 	if (route_flag) {
-		Read_Route_Nodes ();
 		Write_Route_Nodes ();
 	} else if (new_route_flag) {
 		if (!System_File_Flag (ROUTE_NODES)) {

@@ -11,6 +11,7 @@
 Equiv_Data::Equiv_Data (string _type) : Db_File ()
 {
 	time_flag = false;
+	sort_flag = true;
 
 	Type (_type);
 
@@ -135,13 +136,17 @@ bool Equiv_Data::Read (bool report_flag)
 					}
 				}
 				for (num = (int) low; num <= high; num++) {
-					list_stat = group_ptr->list.insert (num);
-					if (!list_stat.second) {
-						if (*list_stat.first == num) {
-							exe->Warning (String ("Duplicate Equivalence Value %d in Group %d") % num % group);
-						} else {
-							goto mem_error;
+					if (sort_flag) {
+						list_stat = group_ptr->list.insert (num);
+						if (!list_stat.second) {
+							if (*list_stat.first == num) {
+								exe->Warning (String ("Duplicate Equivalence Value %d in Group %d") % num % group);
+							} else {
+								goto mem_error;
+							}
 						}
+					} else {
+						group_ptr->order.push_back (num);
 					}
 				}
 			}
@@ -170,9 +175,16 @@ int Equiv_Data::Get_Group (int id)
 			if (group_itr->second.period.Period ((Dtime) id) >= 0) {
 				return (group_itr->first);
 			}
-		} else {
+		} else if (sort_flag) {
 			Int_Set_Itr itr;
 			for (itr = group_itr->second.list.begin (); itr != group_itr->second.list.end (); itr++) {
+				if (*itr == id) {
+					return (group_itr->first);
+				}
+			}
+		} else {
+			Int_Itr itr;
+			for (itr = group_itr->second.order.begin (); itr != group_itr->second.order.end (); itr++) {
 				if (*itr == id) {
 					return (group_itr->first);
 				}
@@ -180,6 +192,34 @@ int Equiv_Data::Get_Group (int id)
 		}
 	}
 	return (0);
+}
+
+//---------------------------------------------------------
+//	First_Group
+//---------------------------------------------------------
+
+int Equiv_Data::First_Group (void)
+{
+	group_itr = group_map.begin ();
+	if (group_itr != group_map.end ()) {
+		return (group_itr->first);
+	} else {
+		return (0);
+	}
+}
+
+//---------------------------------------------------------
+//	Next_Group
+//---------------------------------------------------------
+
+int Equiv_Data::Next_Group (void)
+{
+	group_itr++;
+	if (group_itr != group_map.end ()) {
+		return (group_itr->first);
+	} else {
+		return (0);
+	}
 }
 
 //---------------------------------------------------------
@@ -211,11 +251,24 @@ string Equiv_Data::Group_Label (int group)
 
 Int_Set * Equiv_Data::Group_List (int group)
 {
-	if (time_flag) return (0);
+	if (time_flag || !sort_flag) return (0);
 
 	Group_Map_Itr group_itr = group_map.find (group);
 
 	return ((group_itr == group_map.end ()) ? 0 : &(group_itr->second.list));
+}
+
+//---------------------------------------------------------
+//	Group_Order
+//---------------------------------------------------------
+
+Integers * Equiv_Data::Group_Order (int group)
+{
+	if (time_flag || sort_flag) return (0);
+
+	Group_Map_Itr group_itr = group_map.find (group);
+
+	return ((group_itr == group_map.end ()) ? 0 : &(group_itr->second.order));
 }
 
 //---------------------------------------------------------

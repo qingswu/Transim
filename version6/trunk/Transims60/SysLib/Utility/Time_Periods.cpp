@@ -189,6 +189,8 @@ bool Time_Periods::Add_Label (string label)
 	Dtime low, high;
 	size_t i;
 	String text, low_text, high_text;
+	Units_Type time_format = Time_Format ();
+	if (time_format != SECONDS) time_format = HOUR_MINUTE;
 
 	text = label;
 	text.Trim ();
@@ -203,8 +205,9 @@ bool Time_Periods::Add_Label (string label)
 		low_text = text.substr (0, i);
 		high_text = text.substr (i + 1);
 	}
-	low.Time_Label (low_text);
-	high.Time_Label (high_text);
+
+	low.Time_Label (low_text, time_format);
+	high.Time_Label (high_text, time_format);
 
 	return (Add_Range ((int) low, (int) high - 1, increment));
 
@@ -365,6 +368,9 @@ string Time_Periods::Range_Label (int num, bool pad_flag)
 	if (num >= 0 && num < Num_Periods ()) {
 		Dtime low, high;
 
+		Units_Type time_format = Time_Format ();
+		if (time_format != SECONDS) Time_Format (HOUR_MINUTE);
+
 		if (range_flag) {
 			Range_Data &ref = at (num);
 
@@ -379,6 +385,7 @@ string Time_Periods::Range_Label (int num, bool pad_flag)
 			if (high > end_time) high = end_time;
 		}
 		buffer = low.Time_Label (pad_flag) + "_" + high.Time_Label (pad_flag);
+		Time_Format (time_format);
 	}
 	return (buffer);
 }

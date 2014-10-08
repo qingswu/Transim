@@ -43,7 +43,11 @@ void Simulator::Execute (void)
 	read_status = first = true;
 	input_total = update_total = node_total = output_total = travel_total = 0;
 
-	Show_Message (2, "Processing Time of Day");
+	if (read_all_flag) {
+		Show_Message (2, "Reading Plans into Memory -- Trip");
+	} else {
+		Show_Message (2, "Processing Time of Day");
+	}
 	Set_Progress ();
 
 	//---- process each time step ----
@@ -90,10 +94,14 @@ void Simulator::Execute (void)
 
 			if (read_status) {
 				start = clock ();
-
 				read_status = sim_plan_step.Start_Processing ();
-
 				input_total += (clock () - start);
+
+				if (read_all_flag) {
+					End_Progress ();
+					Show_Message (1, "Processing Time of Day");
+					Set_Progress ();
+				}
 			}
 		}
 		Active (false);
@@ -105,7 +113,7 @@ void Simulator::Execute (void)
 		travel_total += (clock () - start);
 
 		//---- process the network traffic ----
-;
+
 		start = clock ();
 		sim_node_step.Start_Processing ();
 		node_total += (clock () - start);
@@ -115,7 +123,6 @@ void Simulator::Execute (void)
 			max_time = time_step;
 		}
 		if (!Active () && !read_status) break;
-//Write (0, " OK");
 	}
 	if (Master ()) End_Progress (time_step.Time_String ());
 

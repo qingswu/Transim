@@ -46,9 +46,8 @@ void PlanSum::Rider_Group (void)
 		Print (1);
 		Rider_Header ();
 	}
-	num = link_equiv.Max_Group ();
 
-	for (i=1; i <= num; i++) {
+	for (i = link_equiv.First_Group (); i > 0; i = link_equiv.Next_Group ()) {
 
 		group = link_equiv.Group_List (i);
 		if (group == 0) continue;

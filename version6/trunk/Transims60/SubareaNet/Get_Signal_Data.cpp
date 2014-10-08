@@ -16,6 +16,8 @@ bool SubareaNet::Get_Signal_Data (Signal_File &file, Signal_Data &data)
 
 		//---- check the subarea boundary ----
 
+		if (data.nodes.size () == 0) return (false);
+
 		Node_Data *node_ptr = &node_array [data.nodes [0]];
 
 		if (node_ptr->Subarea () == 1) {
@@ -26,7 +28,7 @@ bool SubareaNet::Get_Signal_Data (Signal_File &file, Signal_Data &data)
 
 			new_file->Copy_Fields (file);
 
-			if (!new_file->Write ()) {
+			if (!new_file->Write (file.Nested ())) {
 				Error (String ("Writing %s") % new_file->File_Type ());
 			}
 			nsignal++;

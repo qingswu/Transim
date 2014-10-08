@@ -64,7 +64,7 @@ bool Sim_Control_Update::Traffic_Control (int index, Sim_Signal_Itr signal_itr)
 			connect_ptr->Control (RED_LIGHT);
 		}
 	}
-	signal_itr->Free ();	
+	signal_itr->clear ();	
 
 	//---- identify the time period ----
 	

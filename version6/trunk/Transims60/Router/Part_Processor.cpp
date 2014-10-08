@@ -275,12 +275,12 @@ void Router::Part_Processor::Sum_Ridership (Plan_Data &plan, int part)
 #ifdef THREADS
 	if (Thread_Flag ()) {
 		if (part >= num_processors) return;
-		part_thread [part]->line_array.Sum_Ridership (plan);
+		part_thread [part]->line_array.Sum_Ridership (plan, true);
 	} else {
-		exe->line_array.Sum_Ridership (plan);
+		exe->line_array.Sum_Ridership (plan, true);
 	}
 #else
-	exe->line_array.Sum_Ridership (plan);
+	exe->line_array.Sum_Ridership (plan, true);
 #endif
 }
 

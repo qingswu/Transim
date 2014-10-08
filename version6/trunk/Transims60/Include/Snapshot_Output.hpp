@@ -33,6 +33,7 @@ private:
 	bool cell_flag;
 	bool size_flag;
 	bool compress;
+	bool metric_flag;
 	unsigned max_size;
 	unsigned num_records;
 

@@ -8,13 +8,11 @@
 //	Get_Timing_Data
 //---------------------------------------------------------
 
-int SubareaNet::Get_Timing_Data (Timing_File &file, Timing_Data &data)
+bool SubareaNet::Get_Timing_Data (Timing_File &file, Timing_Record &data)
 {
 	//---- do standard processing ----
 
-	int signal = Data_Service::Get_Timing_Data (file, data);
-
-	if (signal > 0) {
+	if (Data_Service::Get_Timing_Data (file, data)) {
 
 		//---- copy the fields to the subarea file ----
 
@@ -22,10 +20,10 @@ int SubareaNet::Get_Timing_Data (Timing_File &file, Timing_Data &data)
 
 		new_file->Copy_Fields (file);
 
-		if (!new_file->Write ()) {
+		if (!new_file->Write (file.Nested ())) {
 			Error (String ("Writing %s") % new_file->File_Type ());
 		}
 		ntiming++;
 	}
-	return (signal);
+	return (false);
 }

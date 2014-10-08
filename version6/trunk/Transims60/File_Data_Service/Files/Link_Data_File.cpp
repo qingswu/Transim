@@ -75,7 +75,7 @@ bool Link_Data_File::Read_Header (bool stat)
 
 		if (!name.Starts_With ("AB_")) continue;
 		name.erase (0, 3);
-		
+	
 		if (!Add_Label (name)) return (false);
 
 		//---- check for decimal points ----

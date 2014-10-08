@@ -36,9 +36,8 @@ void LinkSum::Link_Group (double min_volume)
 		Print (1);
 		Link_Group_Header ();
 	}
-	num = link_equiv.Max_Group ();
 
-	for (i=1; i <= num; i++) {
+	for (i = link_equiv.First_Group (); i > 0; i = link_equiv.Next_Group ()) {
 
 		group = link_equiv.Group_List (i);
 		if (group == 0) continue;

@@ -57,6 +57,13 @@ public:
 		exit_flag = true;  clear ();
 	}
 
+	void  Clear_Travel (void)
+	{
+		traveler = parking = stop = -1; speed = delay = problem = event_type = 0; 
+		sim_travel_ptr = 0; sim_plan_ptr = 0; sim_leg_ptr = 0; sim_veh_ptr = 0; veh_type_ptr = 0; 
+		clear ();
+	}
+
 private:
 	int   traveler;
 	int   dir_index;

@@ -10,7 +10,7 @@
 
 void PlanSum::Stop_Group_Detail (void)
 {
-	int i, num, stop, total_board, total_alight, tot_board, tot_alight;
+	int i, stop, total_board, total_alight, tot_board, tot_alight;
 	int walk_board, bus_board, rail_board, drive_board;
 	int walk_alight, bus_alight, rail_alight, drive_alight;
 	int tot_walk_on, tot_bus_on, tot_rail_on, tot_drive_on;
@@ -32,12 +32,11 @@ void PlanSum::Stop_Group_Detail (void)
 		Print (1);
 		Stop_Group_Detail_Header ();
 	}
-	num = stop_equiv.Max_Group ();
 
 	tot_walk_on = tot_bus_on = tot_rail_on = tot_drive_on = 0;
 	tot_walk_off = tot_bus_off = tot_rail_off = tot_drive_off = 0;
 
-	for (i=1; i <= num; i++) {
+	for (i = stop_equiv.First_Group (); i > 0; i = stop_equiv.Next_Group ()) {
 		Show_Progress ();
 
 		list = stop_equiv.Group_List (i);

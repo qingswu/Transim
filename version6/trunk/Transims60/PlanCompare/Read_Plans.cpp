@@ -97,7 +97,8 @@ void PlanCompare::Plan_Processing::Read_Plans (int part)
 		if (exe->select_destinations && !exe->des_range.In_Range (plan.Destination ())) continue;
 		if (exe->select_links && !exe->Select_Plan_Links (plan)) continue;
 		if (exe->select_nodes && !exe->Select_Plan_Nodes (plan)) continue;
-		if (exe->select_subarea && !exe->Select_Plan_Subarea (plan)) continue;
+		if (exe->select_subareas && !exe->Select_Plan_Subareas (plan)) continue;
+		if (exe->select_polygon && !exe->Select_Plan_Polygon (plan)) continue;
 
 		//---- check the selection records ----
 

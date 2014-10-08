@@ -50,7 +50,7 @@ public:
 			file_ptr->First_Open (false);
 			file_ptr->Sort_Type (file->Sort_Type ());
 			file_ptr->Open ((part_flag) ? part : 0);
-			push_back (file_ptr);
+			this->push_back (file_ptr);
 		}
 	}
 };

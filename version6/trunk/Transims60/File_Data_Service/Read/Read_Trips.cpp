@@ -8,22 +8,21 @@
 //	Read_Trips
 //---------------------------------------------------------
 
-void Data_Service::Read_Trips (void)
+void Data_Service::Read_Trips (Trip_File &file)
 {
 	int part, num, num_rec, part_num, first;
-	Trip_File *file = (Trip_File *) System_File_Handle (TRIP);
 
 	Trip_Data trip_rec;
 	Trip_Index trip_index;
 	Trip_Map_Stat map_stat;
 
-	Initialize_Trips (*file);
+	Initialize_Trips (file);
 	num_rec = first = 0;
 
 	//---- check the partition number ----
 
-	if (file->Part_Flag () && First_Partition () != file->Part_Number ()) {
-		file->Open (0);
+	if (file.Part_Flag () && First_Partition () != file.Part_Number ()) {
+		file.Open (0);
 	} else if (First_Partition () >= 0) {
 		first = First_Partition ();
 	}
@@ -32,26 +31,26 @@ void Data_Service::Read_Trips (void)
 
 	for (part=0; ; part++) {
 		if (part > 0) {
-			if (!file->Open (part)) break;
+			if (!file.Open (part)) break;
 		}
 
 		//---- store the trip data ----
 
-		if (file->Part_Flag ()) {
-			part_num = file->Part_Number ();
-			Show_Message (String ("Reading %s %d -- Record") % file->File_Type () % part_num);
+		if (file.Part_Flag ()) {
+			part_num = file.Part_Number ();
+			Show_Message (String ("Reading %s %d -- Record") % file.File_Type () % part_num);
 		} else {
 			part_num = part + first;
-			Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+			Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 		}
 		Set_Progress ();
 
-		while (file->Read ()) {
+		while (file.Read ()) {
 			Show_Progress ();
 
 			trip_rec.Clear ();
 
-			if (Get_Trip_Data (*file, trip_rec, part_num)) {
+			if (Get_Trip_Data (file, trip_rec, part_num)) {
 				trip_rec.Internal_IDs ();
 				trip_rec.Get_Index (trip_index);
 				trip_rec.Index ((int) trip_array.size ());
@@ -66,22 +65,22 @@ void Data_Service::Read_Trips (void)
 				} else {
 					trip_array.push_back (trip_rec);
 					trip_array.Max_Partition (trip_rec);
-					file->Add_Trip (trip_index.Household (), trip_index.Person (), trip_index.Tour ());
+					file.Add_Trip (trip_index.Household (), trip_index.Person (), trip_index.Tour ());
 				}
 			}
 		}
 		End_Progress ();
 		num_rec += Progress_Count ();
 	}
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % num_rec);
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % num_rec);
 	if (part > 1) Print (0, String (" (%d files)") % part);
 
 	num = (int) trip_array.size ();
 
 	if (num && num != num_rec) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % num);
 	}
 	if (num > 0) System_Data_True (TRIP);
 }

@@ -9,6 +9,8 @@
 #include "TypeDefs.hpp"
 #include "Attribute_Data.hpp"
 
+#include <math.h>
+
 //---------------------------------------------------------
 //	IPF_Data class definition
 //---------------------------------------------------------

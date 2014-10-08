@@ -29,7 +29,7 @@
 
 void LinkSum::Group_Sum_File (void)
 {
-	int i, j, k, k1, index, use_index, num, link;
+	int i, j, k, k1, index, use_index, link;
 	int text_field, value_field, compare_field;
 	double loaded_time, length, len, value, percent, factor;
 	String buffer, units, vmt, lane_mi;
@@ -62,9 +62,7 @@ void LinkSum::Group_Sum_File (void)
 
 	//---- process each link group ----
 
-	num = link_equiv.Max_Group ();
-
-	for (i=1; i <= num; i++) {
+	for (i = link_equiv.First_Group (); i > 0; i = link_equiv.Next_Group ()) {
 
 		group = link_equiv.Group_List (i);
 		if (group == 0) continue;

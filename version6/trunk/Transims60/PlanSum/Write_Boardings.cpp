@@ -10,7 +10,7 @@
 
 void PlanSum::Write_Boardings (void)
 {
-	int i, num, p, num_periods, stop, total;
+	int i, p, num_periods, stop, total;
 
 	Integers trips;
 	Ints_Itr ints_itr;
@@ -41,9 +41,7 @@ void PlanSum::Write_Boardings (void)
 	}
 	file << endl;
 
-	num = stop_equiv.Max_Group ();
-
-	for (i=1; i <= num; i++) {
+	for (i = stop_equiv.First_Group (); i > 0; i = stop_equiv.Next_Group ()) {
 		Show_Progress ();
 
 		list = stop_equiv.Group_List (i);

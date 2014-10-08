@@ -21,7 +21,7 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 	Path_Ptr path_ptr;
 	Path_Itr path_itr;
 	Line_Data *line_ptr;
-	Line_Stop *line_stop_ptr;
+	Line_Stop *line_stop_ptr, *to_stop_ptr;
 	Line_Run_Itr run_itr;
 	Line_Run_RItr run_ritr;
 	Line_Run *run_ptr;
@@ -105,7 +105,7 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 
 		nstop = (int) line_ptr->size ();
 		line_stop_ptr = &line_ptr->at (s);
-		
+
 		from_offset = line_stop_ptr->Length ();
 
 		if (forward_flag) {
@@ -151,8 +151,8 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 				//---- check legs to alighting stops ----
 
 				for (++s; s < nstop; s++) {
-					line_stop_ptr = &line_ptr->at (s);
-					run_ptr = &line_stop_ptr->at (run);
+					to_stop_ptr = &line_ptr->at (s);
+					run_ptr = &to_stop_ptr->at (run);
 
 					to_time = run_ptr->Schedule ();
 
@@ -173,8 +173,8 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 						}
 					} else if (line_ptr->Mode () == BRT) {
 						if (brt_bias_flag) {
-								imped = DTOI (imped * param.brt_bias + param.brt_const);
-								if (imped < 1) imped = 1;
+							imped = DTOI (imped * param.brt_bias + param.brt_const);
+							if (imped < 1) imped = 1;
 						}
 					} else if (rail_bias_flag) {
 						imped = DTOI (imped * param.rail_bias + param.rail_const);
@@ -182,12 +182,12 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 					}
 					to_imp = wait_imp + imped;
 
-					len = line_stop_ptr->Length () - from_offset;
+					len = to_stop_ptr->Length () - from_offset;
 					to_imp += DTOI (len * param.value_dist);
 
 					if (to_imp >= max_imp) continue;
 
-					to_stop = line_stop_ptr->Stop ();
+					to_stop = to_stop_ptr->Stop ();
 					to_len = from_len + len;
 
 					//---- check for a destintion stop ----
@@ -217,6 +217,7 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 							path_ptr->Dir (0);
 							path_ptr->Path (path);
 							path_ptr->Xfer (xfer);
+							path_ptr->Run (run);
 							path_ptr->Status (1);
 
 							//---- add the wait data ----
@@ -371,8 +372,8 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 				//---- check legs to boarding stops ----
 
 				for (--s; s >= 0; s--) {
-					line_stop_ptr = &line_ptr->at (s);
-					run_ptr = &line_stop_ptr->at (run);
+					to_stop_ptr = &line_ptr->at (s);
+					run_ptr = &to_stop_ptr->at (run);
 
 					to_time = run_ptr->Schedule ();
 
@@ -402,12 +403,12 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 					}
 					to_imp = wait_imp + imped;
 
-					len = from_offset - line_stop_ptr->Length ();
+					len = from_offset - to_stop_ptr->Length ();
 					to_imp += DTOI (len * param.value_dist);
 
 					if (to_imp >= max_imp) continue;
 
-					to_stop = line_stop_ptr->Stop ();
+					to_stop = to_stop_ptr->Stop ();
 					to_len = from_len + len;
 
 					//---- check for a destintion stop ----
@@ -437,6 +438,7 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 							path_ptr->Dir (1);
 							path_ptr->Path (path);
 							path_ptr->Xfer (xfer);
+							path_ptr->Run (run);
 							path_ptr->Status (1);
 
 							//---- add the wait data ----

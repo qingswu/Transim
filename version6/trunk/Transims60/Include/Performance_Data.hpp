@@ -203,8 +203,8 @@ public:
 	double Enter (void)               { return (enter); }
 	double Exit (void)                { return (exit); }
 	double Flow (void)                { return (flow); }
-	int    Speed (void)               { return (speed); }
-	int    Time_Ratio (void)          { return (time_ratio); }
+	double Speed (void)               { return (speed); }
+	double Time_Ratio (void)          { return (time_ratio); }
 	Dtime  Delay (void)               { return (delay); }
 	double Density (void)             { return (density); }
 	double Max_Density (void)         { return (max_density); }
@@ -232,8 +232,8 @@ public:
 	void   Enter (double value)       { enter = (float) value; }
 	void   Exit (double value)        { exit = (float) value; }
 	void   Flow (double value)        { flow = (float) value; }
-	void   Speed (int value)          { speed = value; }
-	void   Time_Ratio (int value)     { time_ratio = value; }
+	void   Speed (double value)       { speed = (float) value; }
+	void   Time_Ratio (double value)  { time_ratio = (float) value; }
 	void   Delay (Dtime value)        { delay = value; }
 	void   Density (double value)     { density = (float) value; }
 	void   Max_Density (double value) { max_density = (float) value; }
@@ -252,10 +252,8 @@ public:
 
 	void   Time (int value)           { time = value; }
 	void   Time (double value)        { time = exe->Round (value); }	
-	void   Speed (double value)       { speed = exe->Round (value); }
 	void   Delay (int value)          { delay = value; }
 	void   Delay (double value)       { delay = exe->Round (value); }
-	void   Time_Ratio (double value)  { time_ratio = exe->Round (value); }
 
 	void   Get_Data (Perf_Data *perf_ptr, int dir_index);
 	void   Get_Data (Perf_Data *perf_ptr, Dir_Data *dir_ptr, Link_Data *link_ptr);
@@ -263,8 +261,8 @@ public:
 
 	void   Clear (void)
 	{
-		dir_index = type = speed = time_ratio = ratios = count = 0; start = end = time = delay = 0; 
-		persons = volume = enter = exit = flow = density = max_density = queue = max_queue = failure = 0.0;   
+		dir_index = type = ratios = count = 0; start = end = time = delay = 0; 
+		persons = volume = enter = exit = flow = density = max_density = queue = max_queue = failure = speed = time_ratio = 0.0;   
 		veh_dist = veh_time = 0.0; veh_delay = lane_len = vc_ratio = ratio_dist = ratio_time = 0; 
 	}
 private:
@@ -278,8 +276,8 @@ private:
 	float  enter;
 	float  exit;
 	float  flow;
-	int    speed;
-	int    time_ratio;
+	float  speed;
+	float  time_ratio;
 	Dtime  delay;
 	float  density;
 	float  max_density;

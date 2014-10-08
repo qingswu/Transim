@@ -135,7 +135,7 @@ public:
 
 	void     Clear_Plan (void)
 	{
-		method = problem = 0; depart = arrive = activity = 0; Zero_Totals (); Free ();
+		method = problem = 0; depart = arrive = activity = 0; Zero_Totals (); clear ();
 	}
 	void     Clear (void)
 	{

@@ -269,13 +269,11 @@ void PlanSum::Program_Control (void)
 	}
 
 	if (line_xfer_flag || access_flag || access_group_flag) {
-		int i, num;
+		int i;
 		Int_Set *list;
 		Int_Set_Itr list_itr;
 
-		num = stop_equiv.Max_Group ();
-
-		for (i=1; i <= num; i++) {
+		for (i = stop_equiv.First_Group (); i > 0; i = stop_equiv.Next_Group ()) {
 			list = stop_equiv.Group_List (i);
 			if (list == NULL) continue;
 

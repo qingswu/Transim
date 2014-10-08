@@ -8,10 +8,8 @@
 //	Read_Travelers
 //---------------------------------------------------------
 
-void Data_Service::Read_Travelers (void)
+void Data_Service::Read_Travelers (Traveler_File &file)
 {
-	Traveler_File *file = (Traveler_File *) System_File_Handle (TRAVELER);
-	
 	int num;
 	Traveler_Data traveler_rec;
 	Traveler_Index traveler_index;
@@ -19,17 +17,17 @@ void Data_Service::Read_Travelers (void)
 
 	//---- store the Traveler data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 	
-	Initialize_Travelers (*file);
+	Initialize_Travelers (file);
 
-	while (file->Read ()) {
+	while (file.Read ()) {
 		Show_Progress ();
 
 		traveler_rec.Clear ();
 
-		if (Get_Traveler_Data (*file, traveler_rec)) {
+		if (Get_Traveler_Data (file, traveler_rec)) {
 			traveler_rec.Get_Traveler_Index (traveler_index);
 
 			map_stat = traveler_map.insert (Traveler_Map_Data (traveler_index, (int) traveler_array.size ()));
@@ -44,14 +42,14 @@ void Data_Service::Read_Travelers (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 	
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	num = (int) traveler_array.size ();
 
 	if (num && num != Progress_Count ()) {
-		Print (1, String ("Number of %d Data Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of %d Data Records = %d") % file.File_ID () % num);
 	}
 	if (num > 0) System_Data_True (EVENT);
 }

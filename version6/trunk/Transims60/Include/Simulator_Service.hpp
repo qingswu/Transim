@@ -95,7 +95,7 @@ protected:
 		MAX_COMFORTABLE_SPEED, TRAVELER_TYPE_FACTORS, PRIORITY_LOADING_TIME, MAXIMUM_LOADING_TIME, 
 		PRIORITY_WAITING_TIME, MAXIMUM_WAITING_TIME, MAX_DEPARTURE_TIME_VARIANCE, 
 		MAX_ARRIVAL_TIME_VARIANCE, RELOAD_CAPACITY_PROBLEMS, COUNT_PROBLEM_WARNINGS, 
-		PRINT_PROBLEM_MESSAGES, NUMBER_OF_TRAVELERS,
+		PRINT_PROBLEM_MESSAGES, READ_ALL_PLANS_INTO_MEMORY, NUMBER_OF_TRAVELERS, AVERAGE_LEGS_PER_TRIP
 	};
 	void Simulator_Service_Keys (int *keys = 0);
 
@@ -107,6 +107,7 @@ protected:
 	void Global_Data (void);
 	Dtime Set_Sim_Period (void);
 	bool Output_Step (Travel_Step &step);
+	void Remove_Vehicle (Travel_Step &step);
 
 	virtual bool Get_Node_Data (Node_File &file, Node_Data &data);
 
@@ -137,7 +138,7 @@ protected:
 	int sim_period, max_method;
 	Time_Periods sim_periods;
 	Shts_Array period_subarea_method;
-	bool random_node_flag;
+	bool random_node_flag, read_all_flag;
 	bool method_time_flag [MICROSCOPIC + 1];
 	Dtime method_time_step [MICROSCOPIC + 1];
 	Dtime time_step, end_period, half_second, one_second, one_minute, one_hour, random_time;
@@ -193,7 +194,7 @@ protected:
 
 private:
 	int num_subareas, max_subarea, num_sims, num_vehicles, transit_id;
-	int num_travelers, step_code;
+	int num_travelers, average_legs, step_code;
 	double avg_cell_per_veh;
 	bool active;
 

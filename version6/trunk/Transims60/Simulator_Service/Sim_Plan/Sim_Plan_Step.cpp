@@ -43,7 +43,8 @@ void Sim_Plan_Step::Initialize (void)
 #ifdef THREADS
 	//---- create processing threads ----
 
-	num_threads = sim->Num_Threads ();
+	num_threads = (sim->read_all_flag) ? 1 : sim->Num_Threads ();
+
 	if (num_threads > 20) num_threads--;
 	num_pools = num_threads;
 
@@ -65,8 +66,10 @@ void Sim_Plan_Step::Initialize (void)
 
 	//---- initialize leg pools ----
 
-	Sim_Leg_Pool sim_leg_pool;
-	sim->sim_leg_array.assign (num_pools, sim_leg_pool);
+	if (!sim->read_all_flag) {
+		Sim_Leg_Pool sim_leg_pool;
+		sim->sim_leg_array.assign (num_pools, sim_leg_pool);
+	}
 }
 
 //---------------------------------------------------------

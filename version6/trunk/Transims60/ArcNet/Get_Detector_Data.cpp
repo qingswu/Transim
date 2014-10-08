@@ -133,7 +133,7 @@ bool ArcNet::Get_Detector_Data (Detector_File &file, Detector_Data &detector_rec
 					Error (String ("Writing %s") % arcview_detector.File_Type ());
 				}
 			} else {
-				Warning (String ("Detector %d cound not be Drawn") % detector_rec.Detector ());
+				Warning (String ("Detector %d could not be Drawn") % detector_rec.Detector ());
 				return (false);
 			}
 		}

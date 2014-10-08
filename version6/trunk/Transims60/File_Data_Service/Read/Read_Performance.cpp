@@ -101,12 +101,11 @@ void Data_Service::Read_Performance (Performance_File &file, Perf_Period_Array &
 				perf_ptr->Sum_Max_Volume (perf_rec.Volume ());
 				perf_ptr->Add_Queue (perf_rec.Queue () * share);
 				perf_ptr->Add_Failure (DTOI (perf_rec.Failure () * share));
-				perf_ptr->Add_Veh_Dist (perf_rec.Veh_Dist () * share);
+				perf_ptr->Add_Veh_Dist (Round (perf_rec.Veh_Dist () * share));
 				perf_ptr->Add_Veh_Time (perf_rec.Veh_Time () * share);
 
-				if (Ratio_Flag () && perf_rec.Time_Ratio () >= Congested_Ratio ()) {
+				if (Ratio_Flag () && Round (perf_rec.Time_Ratio ()) >= Congested_Ratio ()) {
 					perf_ptr->Add_Ratio ();
-
 					perf_ptr->Add_Ratio_Dist (perf_rec.Veh_Dist ());
 					perf_ptr->Add_Ratio_Time (perf_rec.Veh_Time ());
 				}
@@ -269,7 +268,7 @@ bool Data_Service::Get_Performance_Data (Performance_File &file, Performance_Dat
 	perf_rec.Queue (file.Queue ());
 	perf_rec.Max_Queue (file.Max_Queue ());
 	perf_rec.Failure (file.Failure ());
-	perf_rec.Veh_Dist (Round (file.Veh_Dist ()));
+	perf_rec.Veh_Dist (file.Veh_Dist ());
 	perf_rec.Veh_Time (file.Veh_Time ());
 	perf_rec.Veh_Delay (file.Veh_Delay ());
 

@@ -10,7 +10,7 @@
 
 void RiderSum::Stop_Group_Report (void)
 {
-	int n, groups, i, num, stop, index, on, off, board, alight;
+	int n, i, num, stop, index, on, off, board, alight;
 	String label;
 
 	Integers boards, alights, total_on, total_off;
@@ -26,19 +26,18 @@ void RiderSum::Stop_Group_Report (void)
 
 	Header_Number (STOP_GROUP);
 
-	groups = stop_equiv.Num_Groups ();
+	num = stop_equiv.Num_Groups ();
 
-	if (!Break_Check (groups + 7)) {
+	if (!Break_Check (num + 7)) {
 		Print (1);
 		Stop_Group_Header ();
 	}
-	groups = stop_equiv.Max_Group ();
 	num = sum_periods.Num_Periods ();
 
 	total_on.assign (num, 0);
 	total_off.assign (num, 0);
 
-	for (n=1; n <= groups; n++) {
+	for (n = stop_equiv.First_Group (); n > 0; n = stop_equiv.Next_Group ()) {
 
 		group = stop_equiv.Group_List (n);
 		if (group == 0) continue;

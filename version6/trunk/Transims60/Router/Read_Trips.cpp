@@ -26,6 +26,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 	Trip_Gap_Map_Stat map_stat;
 	Trip_Gap_Map *trip_gap_map_ptr;
 	Trip_Itr trip_itr;
+	Trip_Data trip_rec;
 	Plan_Itr plan_itr;
 	
 	Set_Parameters (param);
@@ -155,8 +156,19 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 			if (trip_itr == trip_array.end ()) break;
 			*new_ptr = *trip_itr;
 		} else {
-			if (!file->Read_Trip (*new_ptr)) break;
-			new_ptr->Internal_IDs ();
+			if (!file->Read_Trip (trip_rec)) break;
+
+			if (priority_flag) {
+				trip_rec.Priority (initial_priority);
+			}
+			if (trip_rec.Household () < 1 || !Selection (&trip_rec)) continue;
+
+			if (!trip_rec.Internal_IDs ()) continue;
+			*new_ptr = trip_rec;
+
+			new_ptr->Depart (new_ptr->Start ());
+			new_ptr->Arrive (new_ptr->End ());
+			new_ptr->Activity (new_ptr->Duration ());
 		}
 		if (Master ()) {
 			if (thread_flag) {
@@ -378,6 +390,10 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 
 			if (new_ptr->Depart () >= reroute_time) {
 				new_ptr->Method (BUILD_PATH);
+				new_ptr->Depart (new_ptr->Start ());
+				new_ptr->Arrive (new_ptr->End ());
+				new_ptr->Activity (new_ptr->Duration ());
+
 			} else if (new_ptr->Arrive () < reroute_time) {
 				//if (Link_Flows ()) {
 				//	new_ptr->Method (PATH_FLOWS);

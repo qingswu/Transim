@@ -21,9 +21,8 @@ void Validate::Link_Group_Stats (void)
 	Int_Set_Itr itr;
 	Int_Map_Itr int_itr;
 
-	for (i = 1; i <= link_equiv.Max_Group (); i++) {
+	for (i = link_equiv.First_Group (); i > 0; i = link_equiv.Next_Group ()) {
 		list = link_equiv.Group_List (i);
-
 		if (list == 0) continue;
 
 		for (itr = list->begin (); itr != list->end (); itr++) {

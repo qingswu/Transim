@@ -8,10 +8,8 @@
 //	Read_Veh_Types
 //---------------------------------------------------------
 
-void Data_Service::Read_Veh_Types (void)
+void Data_Service::Read_Veh_Types (Veh_Type_File &file)
 {
-	Veh_Type_File *file = (Veh_Type_File *) System_File_Handle (VEHICLE_TYPE);
-	
 	int num, cell_size;
 	double length, min_len;
 	Veh_Type_Data veh_type_rec;
@@ -20,17 +18,17 @@ void Data_Service::Read_Veh_Types (void)
 
 	//---- store the vehicle type data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 	
-	Initialize_Veh_Types (*file);
+	Initialize_Veh_Types (file);
 
-	while (file->Read ()) {
+	while (file.Read ()) {
 		Show_Progress ();
 
 		veh_type_rec.Clear ();
 
-		if (Get_Veh_Type_Data (*file, veh_type_rec)) {
+		if (Get_Veh_Type_Data (file, veh_type_rec)) {
 			map_stat = veh_type_map.insert (Int_Map_Data (veh_type_rec.Type (), (int) veh_type_array.size ()));
 
 			if (!map_stat.second) {
@@ -42,14 +40,14 @@ void Data_Service::Read_Veh_Types (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 	
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	num = (int) veh_type_array.size ();
 
 	if (num && num != Progress_Count ()) {
-		Print (1, String ("Number of %d Data Records = %d") % file->File_ID () % num);
+		Print (1, String ("Number of %d Data Records = %d") % file.File_ID () % num);
 	}
 	if (num > 0) System_Data_True (VEHICLE_TYPE);
 

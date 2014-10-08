@@ -8,10 +8,8 @@
 //	Read_Signals
 //---------------------------------------------------------
 
-void Data_Service::Read_Signals (void)
+void Data_Service::Read_Signals (Signal_File &file)
 {
-	Signal_File *file = (Signal_File *) System_File_Handle (SIGNAL);
-
 	int i, num, count;
 	bool keep_flag;
 	Signal_Data signal_rec;
@@ -21,33 +19,33 @@ void Data_Service::Read_Signals (void)
 
 	//---- store the signal data ----
 
-	Show_Message (String ("Reading %s -- Record") % file->File_Type ());
+	Show_Message (String ("Reading %s -- Record") % file.File_Type ());
 	Set_Progress ();
 	
-	Initialize_Signals (*file);
+	Initialize_Signals (file);
 	count = 0;
 
-	while (file->Read (false)) {
+	while (file.Read (false)) {
 		Show_Progress ();
 		signal_rec.Clear ();
 
-		keep_flag = Get_Signal_Data (*file, signal_rec);
+		keep_flag = Get_Signal_Data (file, signal_rec);
 
-		num = file->Num_Nest ();
+		num = file.Num_Nest ();
 		if (num > 0) signal_rec.reserve (num);
 
 		for (i=1; i <= num; i++) {
-			if (!file->Read (true)) {
-				Error (String ("Number of Time Records for Signal %d") % file->Signal ());
+			if (!file.Read (true)) {
+				Error (String ("Number of Time Records for Signal %d") % file.Signal ());
 			}
 			Show_Progress ();
 
-			Get_Signal_Data (*file, signal_rec);
+			Get_Signal_Data (file, signal_rec);
 		}
 		if (keep_flag) {
 			map_stat = signal_map.insert (Int_Map_Data (signal_rec.Signal (), (int) signal_array.size ()));
 
-			if (file->Version () <= 40) {
+			if (file.Version () <= 40) {
 				int num, index;
 				Timing40_Map_Stat timing40_stat;
 				Timing40_Map_Itr timing40_itr;
@@ -83,8 +81,8 @@ void Data_Service::Read_Signals (void)
 				}
 				timing40_rec.Signal (index);
 				timing40_rec.Timing (num);
-				timing40_rec.Type (file->Type ());
-				timing40_rec.Offset (file->Offset ());
+				timing40_rec.Type (file.Type ());
+				timing40_rec.Offset (file.Offset ());
 
 				timing40_stat = timing40_map.insert (Timing40_Map_Data (time_itr->Timing (), timing40_rec));
 
@@ -119,12 +117,12 @@ void Data_Service::Read_Signals (void)
 		}
 	}
 	End_Progress ();
-	file->Close ();
+	file.Close ();
 
-	Print (2, String ("Number of %s Records = %d") % file->File_Type () % Progress_Count ());
+	Print (2, String ("Number of %s Records = %d") % file.File_Type () % Progress_Count ());
 
 	if (count && count != Progress_Count ()) {
-		Print (1, String ("Number of %s Data Records = %d") % file->File_ID () % count);
+		Print (1, String ("Number of %s Data Records = %d") % file.File_ID () % count);
 	}
 	if (count > 0) System_Data_True (SIGNAL);
 }

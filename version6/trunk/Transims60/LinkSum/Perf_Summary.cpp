@@ -281,10 +281,10 @@ void LinkSum::Perf_Sum_Report (void)
 
 			Print (0, String (" %13.2lf %13.2lf  (%.2lf%%)") % base % diff % ((base > 0.0) ? (100.0 * diff / base) : 0.0) % FINISH);
 		}
-		Print (1, String ("Average Link Time Ratio         %13.2lf") % (sum_bin [i] [TIME_RATIO] / len));
+		Print (1, String ("Average Link Time Ratio         %13.2lf") % (sum_bin [i] [TIME_RATIO] / (len * 100)));
 		if (compare_flag) {
-			base = sum_bin [i] [TIME_RATIO+PREV] / len;
-			diff = sum_bin [i] [TIME_RATIO] / len - base;
+			base = sum_bin [i] [TIME_RATIO+PREV] / (len * 100.0);
+			diff = sum_bin [i] [TIME_RATIO] / (len * 100.0) - base;
 
 			Print (0, String (" %13.2lf %13.2lf  (%.2lf%%)") % base % diff % ((base > 0.0) ? (100.0 * diff / base) : 0.0) % FINISH);
 		}

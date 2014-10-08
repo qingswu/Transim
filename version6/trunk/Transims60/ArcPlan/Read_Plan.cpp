@@ -107,7 +107,8 @@ void ArcPlan::Read_Plan (void)
 
 		if (select_links && !Select_Plan_Links (plan)) continue;
 		if (select_nodes && !Select_Plan_Nodes (plan)) continue;
-		if (select_subarea && !Select_Plan_Subarea (plan)) continue;
+		if (select_subareas && !Select_Plan_Subareas (plan)) continue;
+		if (select_polygon && !Select_Plan_Polygon (plan)) continue;
 
 		//---- check the selection records ----
 
@@ -159,15 +160,14 @@ void ArcPlan::Read_Plan (void)
 
 					//---- set the origin point and offset ----
 
+					int_itr = location_map.find (plan.Origin ());
+					if (int_itr == location_map.end ()) goto leg_error;
+
+					loc_ptr = &location_array [int_itr->second];
+					offset = UnRound (loc_ptr->Offset ());
+
 					pt_itr = location_pt.find (plan.Origin ());
 					arcview_plan.push_back (pt_itr->second);
-
-					int_itr = location_map.find (plan.Origin ());
-
-					if (int_itr != location_map.end ()) {
-						loc_ptr = &location_array [int_itr->second];
-						offset = UnRound (loc_ptr->Offset ());
-					}
 				}
 
 				if (leg_itr->Type () == LOCATION_ID) {
@@ -177,44 +177,44 @@ void ArcPlan::Read_Plan (void)
 						dir = prev_itr->Link_Dir ();
 
 						int_itr = link_map.find (link);
+						if (int_itr == link_map.end ()) goto leg_error;
 
-						if (int_itr != link_map.end ()) {
-							link_ptr = &link_array [int_itr->second];
+						link_ptr = &link_array [int_itr->second];
 
-							if (link_ptr->AB_Dir () >= 0 && link_ptr->BA_Dir () >= 0) {
-								side = link_offset;
-							} else {
-								side = 0.0;
-							}
-							int_itr = location_map.find (leg_itr->ID ());
-
-							if (int_itr != location_map.end ()) {
-								loc_ptr = &location_array [int_itr->second];
-
-								if (loc_ptr->Dir () == dir) {
-									length = UnRound (loc_ptr->Offset ());
-								} else {
-									length = UnRound (link_ptr->Length () - loc_ptr->Offset ());
-								}
-								if (offset > -1) length -= offset;
-
-								Link_Shape (link_ptr, dir, points, offset, length, side);
-								
-								arcview_plan.insert (arcview_plan.end (), points.begin (), points.end ());
-
-								if (arrow_flag) Add_Arrow (arcview_plan);	
-
-								pt_itr = location_pt.find (leg_itr->ID ());
-
-								arcview_plan.push_back (pt_itr->second);
-
-								if (arrow_flag) Add_Arrow (arcview_plan);	
-
-								arcview_plan.Put_Field (leg_mode_fld, WALK_MODE);
-							}
+						if (link_ptr->AB_Dir () >= 0 && link_ptr->BA_Dir () >= 0) {
+							side = link_offset;
+						} else {
+							side = 0.0;
 						}
+						int_itr = location_map.find (leg_itr->ID ());
+						if (int_itr == location_map.end ()) goto leg_error;
+
+						loc_ptr = &location_array [int_itr->second];
+
+						if (loc_ptr->Dir () == dir) {
+							length = UnRound (loc_ptr->Offset ());
+						} else {
+							length = UnRound (link_ptr->Length () - loc_ptr->Offset ());
+						}
+						if (offset > -1) length -= offset;
+
+						Link_Shape (link_ptr, dir, points, offset, length, side);
+								
+						arcview_plan.insert (arcview_plan.end (), points.begin (), points.end ());
+
+						if (arrow_flag) Add_Arrow (arcview_plan);	
+
+						pt_itr = location_pt.find (leg_itr->ID ());
+
+						arcview_plan.push_back (pt_itr->second);
+
+						if (arrow_flag) Add_Arrow (arcview_plan);	
+
+						arcview_plan.Put_Field (leg_mode_fld, WALK_MODE);
+
 					} else {
 						pt_itr = location_pt.find (leg_itr->ID ());
+						if (pt_itr == location_pt.end ()) goto leg_error;
 
 						arcview_plan.push_back (pt_itr->second);
 
@@ -228,70 +228,70 @@ void ArcPlan::Read_Plan (void)
 						dir = prev_itr->Link_Dir ();
 
 						int_itr = link_map.find (link);
-						if (int_itr != link_map.end ()) {
-							link_ptr = &link_array [int_itr->second];
+						if (int_itr == link_map.end ()) goto leg_error;
 
-							if (link_ptr->AB_Dir () >= 0 && link_ptr->BA_Dir () >= 0) {
-								side = link_offset;
-							} else {
-								side = 0.0;
-							}
-							int_itr = parking_map.find (leg_itr->ID ());
-							if (int_itr != parking_map.end ()) {
-								parking_ptr = &parking_array [int_itr->second];
+						link_ptr = &link_array [int_itr->second];
 
-								if (parking_ptr->Dir () == dir) {
-									length = UnRound (parking_ptr->Offset ());
-								} else {
-									length = UnRound (link_ptr->Length () - parking_ptr->Offset ());
-								}
-								if (offset > -1) length -= offset;
-
-								Link_Shape (link_ptr, dir, points, offset, length, side);
-								
-								arcview_plan.insert (arcview_plan.end (), points.begin (), points.end ());
-
-								if (arrow_flag) Add_Arrow (arcview_plan);	
-
-								pt_itr = parking_pt.find (leg_itr->ID ());
-
-								arcview_plan.push_back (pt_itr->second);
-
-								if (arrow_flag) Add_Arrow (arcview_plan);
-
-								//---- add the parking attributes to the drive leg ----
-
-								count++;
-								time += leg_itr->Time ();
-								distance += leg_itr->Length ();
-								cost += leg_itr->Cost ();
-								imped += leg_itr->Impedance ();
-
-								//---- write the shape record ----
-
-								arcview_plan.Put_Field (num_leg_fld, num_leg);
-								arcview_plan.Put_Field (leg_mode_fld, DRIVE_MODE);
-								arcview_plan.Put_Field (leg_id_fld, count);
-								arcview_plan.Put_Field (leg_time_fld, time);
-								arcview_plan.Put_Field (leg_dist_fld, UnRound (distance));
-								arcview_plan.Put_Field (leg_cost_fld, UnRound (cost));
-								arcview_plan.Put_Field (leg_imp_fld, imped);
-
-								if (!arcview_plan.Write_Record ()) {
-									Error (String ("Writing %s") % arcview_plan.File_Type ());
-								}
-								num_out++;
-								arcview_plan.clear ();
-								time = 0;
-								distance = cost = imped = count = 0;
-
-								arcview_plan.push_back (pt_itr->second);
-
-								arcview_plan.Put_Field (leg_mode_fld, WALK_MODE);
-
-								offset = UnRound (parking_ptr->Offset ());
-							}
+						if (link_ptr->AB_Dir () >= 0 && link_ptr->BA_Dir () >= 0) {
+							side = link_offset;
+						} else {
+							side = 0.0;
 						}
+						int_itr = parking_map.find (leg_itr->ID ());
+						if (int_itr == parking_map.end ()) goto leg_error;
+
+						parking_ptr = &parking_array [int_itr->second];
+
+						if (parking_ptr->Dir () == dir) {
+							length = UnRound (parking_ptr->Offset ());
+						} else {
+							length = UnRound (link_ptr->Length () - parking_ptr->Offset ());
+						}
+						if (offset > -1) length -= offset;
+
+						Link_Shape (link_ptr, dir, points, offset, length, side);
+								
+						arcview_plan.insert (arcview_plan.end (), points.begin (), points.end ());
+
+						if (arrow_flag) Add_Arrow (arcview_plan);	
+
+						pt_itr = parking_pt.find (leg_itr->ID ());
+
+						arcview_plan.push_back (pt_itr->second);
+
+						if (arrow_flag) Add_Arrow (arcview_plan);
+
+						//---- add the parking attributes to the drive leg ----
+
+						count++;
+						time += leg_itr->Time ();
+						distance += leg_itr->Length ();
+						cost += leg_itr->Cost ();
+						imped += leg_itr->Impedance ();
+
+						//---- write the shape record ----
+
+						arcview_plan.Put_Field (num_leg_fld, num_leg);
+						arcview_plan.Put_Field (leg_mode_fld, DRIVE_MODE);
+						arcview_plan.Put_Field (leg_id_fld, count);
+						arcview_plan.Put_Field (leg_time_fld, time);
+						arcview_plan.Put_Field (leg_dist_fld, UnRound (distance));
+						arcview_plan.Put_Field (leg_cost_fld, UnRound (cost));
+						arcview_plan.Put_Field (leg_imp_fld, imped);
+
+						if (!arcview_plan.Write_Record ()) {
+							Error (String ("Writing %s") % arcview_plan.File_Type ());
+						}
+						num_out++;
+						arcview_plan.clear ();
+						time = 0;
+						distance = cost = imped = count = 0;
+
+						arcview_plan.push_back (pt_itr->second);
+
+						arcview_plan.Put_Field (leg_mode_fld, WALK_MODE);
+
+						offset = UnRound (parking_ptr->Offset ());
 						continue;
 
 					} else if (prev_itr->Mode () == WALK_MODE && prev_itr->Link_Type ()) {
@@ -300,69 +300,69 @@ void ArcPlan::Read_Plan (void)
 						dir = prev_itr->Link_Dir ();
 
 						int_itr = link_map.find (link);
+						if (int_itr == link_map.end ()) goto leg_error;
 
-						if (int_itr != link_map.end ()) {
-							link_ptr = &link_array [int_itr->second];
+						link_ptr = &link_array [int_itr->second];
 
-							if (link_ptr->AB_Dir () >= 0 && link_ptr->BA_Dir () >= 0) {
-								side = link_offset;
-							} else {
-								side = 0.0;
-							}
-							int_itr = parking_map.find (leg_itr->ID ());
-
-							if (int_itr != parking_map.end ()) {
-								parking_ptr = &parking_array [int_itr->second];
-
-								if (parking_ptr->Dir () == dir) {
-									length = UnRound (parking_ptr->Offset ());
-								} else {
-									length = UnRound (link_ptr->Length () - parking_ptr->Offset ());
-								}
-								if (offset > -1) length -= offset;
-
-								Link_Shape (link_ptr, dir, points, offset, length, side);
-								
-								arcview_plan.insert (arcview_plan.end (), points.begin (), points.end ());
-
-								if (arrow_flag) Add_Arrow (arcview_plan);	
-
-								pt_itr = parking_pt.find (leg_itr->ID ());
-
-								arcview_plan.push_back (pt_itr->second);
-
-								if (arrow_flag) Add_Arrow (arcview_plan);	
-
-								//---- write the shape record ----
-
-								arcview_plan.Put_Field (num_leg_fld, num_leg);
-								arcview_plan.Put_Field (leg_mode_fld, WALK_MODE);
-								arcview_plan.Put_Field (leg_id_fld, count);
-								arcview_plan.Put_Field (leg_time_fld, time);
-								arcview_plan.Put_Field (leg_dist_fld, UnRound (distance));
-								arcview_plan.Put_Field (leg_cost_fld, UnRound (cost));
-								arcview_plan.Put_Field (leg_imp_fld, imped);
-
-								if (!arcview_plan.Write_Record ()) {
-									Error (String ("Writing %s") % arcview_plan.File_Type ());
-								}
-								num_out++;
-
-								//---- start a new leg ---
-
-								arcview_plan.clear ();
-								time = 0;
-								distance = cost = imped = count = 0;
-
-								arcview_plan.push_back (pt_itr->second);
-
-								offset = UnRound (parking_ptr->Offset ());
-							}
+						if (link_ptr->AB_Dir () >= 0 && link_ptr->BA_Dir () >= 0) {
+							side = link_offset;
+						} else {
+							side = 0.0;
 						}
+						int_itr = parking_map.find (leg_itr->ID ());
+						if (int_itr == parking_map.end ()) goto leg_error;
+
+						parking_ptr = &parking_array [int_itr->second];
+
+						if (parking_ptr->Dir () == dir) {
+							length = UnRound (parking_ptr->Offset ());
+						} else {
+							length = UnRound (link_ptr->Length () - parking_ptr->Offset ());
+						}
+						if (offset > -1) length -= offset;
+
+						Link_Shape (link_ptr, dir, points, offset, length, side);
+								
+						arcview_plan.insert (arcview_plan.end (), points.begin (), points.end ());
+
+						if (arrow_flag) Add_Arrow (arcview_plan);	
+
+						pt_itr = parking_pt.find (leg_itr->ID ());
+
+						arcview_plan.push_back (pt_itr->second);
+
+						if (arrow_flag) Add_Arrow (arcview_plan);	
+
+						//---- write the shape record ----
+
+						arcview_plan.Put_Field (num_leg_fld, num_leg);
+						arcview_plan.Put_Field (leg_mode_fld, WALK_MODE);
+						arcview_plan.Put_Field (leg_id_fld, count);
+						arcview_plan.Put_Field (leg_time_fld, time);
+						arcview_plan.Put_Field (leg_dist_fld, UnRound (distance));
+						arcview_plan.Put_Field (leg_cost_fld, UnRound (cost));
+						arcview_plan.Put_Field (leg_imp_fld, imped);
+
+						if (!arcview_plan.Write_Record ()) {
+							Error (String ("Writing %s") % arcview_plan.File_Type ());
+						}
+						num_out++;
+
+						//---- start a new leg ---
+
+						arcview_plan.clear ();
+						time = 0;
+						distance = cost = imped = count = 0;
+
+						arcview_plan.push_back (pt_itr->second);
+
+						offset = UnRound (parking_ptr->Offset ());
 
 					} else if (prev_itr->Type () == LOCATION_ID || prev_itr->Access_Type ()) {
 
 						pt_itr = parking_pt.find (leg_itr->ID ());
+						if (pt_itr == parking_pt.end ()) goto leg_error;
+
 						arcview_plan.push_back (pt_itr->second);
 
 						if (arrow_flag) Add_Arrow (arcview_plan);	
@@ -391,12 +391,11 @@ void ArcPlan::Read_Plan (void)
 						arcview_plan.push_back (pt_itr->second);
 
 						int_itr = parking_map.find (leg_itr->ID ());
+						if (int_itr == parking_map.end ()) goto leg_error;
 
-						if (int_itr != parking_map.end ()) {
-							parking_ptr = &parking_array [int_itr->second];
+						parking_ptr = &parking_array [int_itr->second];
 
-							offset = UnRound (parking_ptr->Offset ());
-						}
+						offset = UnRound (parking_ptr->Offset ());
 					}
 
 				} else if (leg_itr->Mode () == DRIVE_MODE) {
@@ -408,25 +407,25 @@ void ArcPlan::Read_Plan (void)
 						dir = prev_itr->Link_Dir ();
 
 						int_itr = link_map.find (link);
-						if (int_itr != link_map.end ()) {
-							link_ptr = &link_array [int_itr->second];
+						if (int_itr == link_map.end ()) goto leg_error;
 
-							if (link_ptr->AB_Dir () >= 0 && link_ptr->BA_Dir () >= 0) {
-								side = link_offset;
-							} else {
-								side = 0.0;
-							}
-							Link_Shape (link_ptr, dir, points, offset, length, side);
+						link_ptr = &link_array [int_itr->second];
 
-							if (arrow_flag && arcview_plan.size () == 1 && points.size () > 1) {
-								arcview_plan.push_back (points [0]);
-							
-								if (arrow_flag) Add_Arrow (arcview_plan);
-							}
-							arcview_plan.insert (arcview_plan.end (), points.begin (), points.end ());
-								
-							if (arrow_flag) Add_Arrow (arcview_plan);	
+						if (link_ptr->AB_Dir () >= 0 && link_ptr->BA_Dir () >= 0) {
+							side = link_offset;
+						} else {
+							side = 0.0;
 						}
+						Link_Shape (link_ptr, dir, points, offset, length, side);
+
+						if (arrow_flag && arcview_plan.size () == 1 && points.size () > 1) {
+							arcview_plan.push_back (points [0]);
+							
+							if (arrow_flag) Add_Arrow (arcview_plan);
+						}
+						arcview_plan.insert (arcview_plan.end (), points.begin (), points.end ());
+								
+						if (arrow_flag) Add_Arrow (arcview_plan);	
 						offset = -1.0;
 
 					} else if (prev_itr->Type () == PARKING_ID) {
@@ -434,17 +433,17 @@ void ArcPlan::Read_Plan (void)
 						dir = leg_itr->Link_Dir ();
 
 						int_itr = link_map.find (link);
-						if (int_itr != link_map.end ()) {
-							link_ptr = &link_array [int_itr->second];
+						if (int_itr == link_map.end ()) goto leg_error;
 
-							int_itr = parking_map.find (prev_itr->ID ());
-							if (int_itr != parking_map.end ()) {
-								parking_ptr = &parking_array [int_itr->second];
+						link_ptr = &link_array [int_itr->second];
 
-								if (parking_ptr->Dir () != dir) {
-									offset = UnRound (link_ptr->Length () - parking_ptr->Offset ());
-								}
-							}
+						int_itr = parking_map.find (prev_itr->ID ());
+						if (int_itr == parking_map.end ()) goto leg_error;
+
+						parking_ptr = &parking_array [int_itr->second];
+
+						if (parking_ptr->Dir () != dir) {
+							offset = UnRound (link_ptr->Length () - parking_ptr->Offset ());
 						}
 					}
 
@@ -456,20 +455,20 @@ void ArcPlan::Read_Plan (void)
 						length = -1;
 
 						int_itr = link_map.find (link);
-						if (int_itr != link_map.end ()) {
-							link_ptr = &link_array [int_itr->second];
+						if (int_itr == link_map.end ()) goto leg_error;
 
-							if (link_ptr->AB_Dir () >= 0 && link_ptr->BA_Dir () >= 0) {
-								side = link_offset;
-							} else {
-								side = 0.0;
-							}
-							Link_Shape (link_ptr, dir, points, offset, length, side);
+						link_ptr = &link_array [int_itr->second];
 
-							arcview_plan.insert (arcview_plan.end (), points.begin (), points.end ());
-
-							if (arrow_flag) Add_Arrow (arcview_plan);	
+						if (link_ptr->AB_Dir () >= 0 && link_ptr->BA_Dir () >= 0) {
+							side = link_offset;
+						} else {
+							side = 0.0;
 						}
+						Link_Shape (link_ptr, dir, points, offset, length, side);
+
+						arcview_plan.insert (arcview_plan.end (), points.begin (), points.end ());
+
+						if (arrow_flag) Add_Arrow (arcview_plan);	
 						offset = -1.0;
 
 					} else {
@@ -478,36 +477,36 @@ void ArcPlan::Read_Plan (void)
 						dir = leg_itr->Link_Dir ();
 
 						int_itr = link_map.find (link);
-						if (int_itr != link_map.end ()) {
-							link_ptr = &link_array [int_itr->second];
+						if (int_itr == link_map.end ()) goto leg_error;
 
-							if (prev_itr->Type () == PARKING_ID) {
-								int_itr = parking_map.find (prev_itr->ID ());
-								if (int_itr != parking_map.end ()) {
-									parking_ptr = &parking_array [int_itr->second];
+						link_ptr = &link_array [int_itr->second];
 
-									if (parking_ptr->Dir () != dir) {
-										offset = UnRound (link_ptr->Length () - parking_ptr->Offset ());
-									}
-								}
-							} else if (prev_itr->Type () == LOCATION_ID) {
-								int_itr = location_map.find (prev_itr->ID ());
-								if (int_itr != location_map.end ()) {
-									loc_ptr = &location_array [int_itr->second];
+						if (prev_itr->Type () == PARKING_ID) {
+							int_itr = parking_map.find (prev_itr->ID ());
+							if (int_itr == parking_map.end ()) goto leg_error;
 
-									if (loc_ptr->Dir () != dir) {
-										offset = UnRound (link_ptr->Length () - loc_ptr->Offset ());
-									}
-								}
-							} else if (prev_itr->Type () == STOP_ID) {
-								int_itr = stop_map.find (prev_itr->ID ());
-								if (int_itr != stop_map.end ()) {
-									stop_ptr = &stop_array [int_itr->second];
+							parking_ptr = &parking_array [int_itr->second];
 
-									if (stop_ptr->Dir () != dir) {
-										offset = UnRound (link_ptr->Length () - stop_ptr->Offset ());
-									}
-								}
+							if (parking_ptr->Dir () != dir) {
+								offset = UnRound (link_ptr->Length () - parking_ptr->Offset ());
+							}
+						} else if (prev_itr->Type () == LOCATION_ID) {
+							int_itr = location_map.find (prev_itr->ID ());
+							if (int_itr == location_map.end ()) goto leg_error;
+
+							loc_ptr = &location_array [int_itr->second];
+
+							if (loc_ptr->Dir () != dir) {
+								offset = UnRound (link_ptr->Length () - loc_ptr->Offset ());
+							}
+						} else if (prev_itr->Type () == STOP_ID) {
+							int_itr = stop_map.find (prev_itr->ID ());
+							if (int_itr == stop_map.end ()) goto leg_error;
+
+							stop_ptr = &stop_array [int_itr->second];
+
+							if (stop_ptr->Dir () != dir) {
+								offset = UnRound (link_ptr->Length () - stop_ptr->Offset ());
 							}
 						}
 					}
@@ -519,72 +518,74 @@ void ArcPlan::Read_Plan (void)
 						//---- trace the route ----
 
 						int_itr = line_map.find (prev_itr->ID ());
-						if (int_itr != line_map.end ()) {
-							line_ptr = &line_array [int_itr->second];
+						if (int_itr == line_map.end ()) goto leg_error;
 
-							//---- find the boarding link ----
+						line_ptr = &line_array [int_itr->second];
 
-							int_itr = stop_map.find (prev_stop);
-							if (int_itr != stop_map.end ()) {
-								stop_ptr = &stop_array [int_itr->second];
-								offset = UnRound (stop_ptr->Offset ());
+						//---- find the boarding link ----
 
-								link_ptr = &link_array [stop_ptr->Link ()];
+						int_itr = stop_map.find (prev_stop);
+						if (int_itr == stop_map.end ()) goto leg_error;
 
-								if (stop_ptr->Dir ()) {
-									index = link_ptr->BA_Dir ();
-								} else {
-									index = link_ptr->AB_Dir ();
-								}
-								for (driver_itr = line_ptr->driver_array.begin (); driver_itr != line_ptr->driver_array.end (); driver_itr++) {
-									if (*driver_itr == index) break;
-								}
+						stop_ptr = &stop_array [int_itr->second];
+						offset = UnRound (stop_ptr->Offset ());
 
-								//---- continue to the alighting link ----
+						link_ptr = &link_array [stop_ptr->Link ()];
+
+						if (stop_ptr->Dir ()) {
+							index = link_ptr->BA_Dir ();
+						} else {
+							index = link_ptr->AB_Dir ();
+						}
+						for (driver_itr = line_ptr->driver_array.begin (); driver_itr != line_ptr->driver_array.end (); driver_itr++) {
+							if (*driver_itr == index) break;
+						}
+
+						//---- continue to the alighting link ----
 							
-								int_itr = stop_map.find (leg_itr->ID ());
-								if (int_itr != stop_map.end ()) {
-									stop_ptr = &stop_array [int_itr->second];
+						int_itr = stop_map.find (leg_itr->ID ());
+						if (int_itr == stop_map.end ()) goto leg_error;
 
-									link_ptr = &link_array [stop_ptr->Link ()];
+						stop_ptr = &stop_array [int_itr->second];
 
-									if (stop_ptr->Dir ()) {
-										index = link_ptr->BA_Dir ();
-									} else {
-										index = link_ptr->AB_Dir ();
-									}
-									for (; driver_itr != line_ptr->driver_array.end (); driver_itr++) {
-										dir_ptr = &dir_array [*driver_itr];
-										link_ptr = &link_array [dir_ptr->Link ()];
+						link_ptr = &link_array [stop_ptr->Link ()];
 
-										if (*driver_itr == index) {
-											length = UnRound (stop_ptr->Offset ());
-										} else {
-											length = UnRound (link_ptr->Length ());
-										}
-										if (offset > -1) length -= offset;
+						if (stop_ptr->Dir ()) {
+							index = link_ptr->BA_Dir ();
+						} else {
+							index = link_ptr->AB_Dir ();
+						}
+						for (; driver_itr != line_ptr->driver_array.end (); driver_itr++) {
+							dir_ptr = &dir_array [*driver_itr];
+							link_ptr = &link_array [dir_ptr->Link ()];
 
-										if (link_ptr->AB_Dir () >= 0 && link_ptr->BA_Dir () >= 0) {
-											side = link_offset;
-										} else {
-											side = 0.0;
-										}
-										Link_Shape (link_ptr, dir_ptr->Dir (), points, offset, length, side);
-
-										arcview_plan.insert (arcview_plan.end (), points.begin (), points.end ());
-
-										if (arrow_flag) Add_Arrow (arcview_plan);
-
-										offset = -1;
-										if (*driver_itr == index) break;
-									}
-								}
+							if (*driver_itr == index) {
+								length = UnRound (stop_ptr->Offset ());
+							} else {
+								length = UnRound (link_ptr->Length ());
 							}
+							if (offset > -1) length -= offset;
+
+							if (link_ptr->AB_Dir () >= 0 && link_ptr->BA_Dir () >= 0) {
+								side = link_offset;
+							} else {
+								side = 0.0;
+							}
+							Link_Shape (link_ptr, dir_ptr->Dir (), points, offset, length, side);
+
+							arcview_plan.insert (arcview_plan.end (), points.begin (), points.end ());
+
+							if (arrow_flag) Add_Arrow (arcview_plan);
+
+							offset = -1;
+							if (*driver_itr == index) break;
 						}
 
 						//---- add the stop point and save the leg ----
 
 						pt_itr = stop_pt.find (leg_itr->ID ());
+						if (pt_itr == stop_pt.end ()) goto leg_error;
+
 						arcview_plan.push_back (pt_itr->second);
 
 						if (arrow_flag) Add_Arrow (arcview_plan);	
@@ -619,12 +620,12 @@ void ArcPlan::Read_Plan (void)
 						arcview_plan.push_back (pt_itr->second);
 
 						prev_stop = leg_itr->ID ();
-						int_itr = stop_map.find (prev_stop);
 
-						if (int_itr != stop_map.end ()) {
-							stop_ptr = &stop_array [int_itr->second];
-							offset = UnRound (stop_ptr->Offset ());
-						}
+						int_itr = stop_map.find (prev_stop);
+						if (int_itr == stop_map.end ()) goto leg_error;
+
+						stop_ptr = &stop_array [int_itr->second];
+						offset = UnRound (stop_ptr->Offset ());
 						continue;
 
 					} else if (leg_itr->Mode () == WALK_MODE) {
@@ -633,58 +634,58 @@ void ArcPlan::Read_Plan (void)
 
 						if (!prev_itr->Access_Type ()) {
 							int_itr = stop_map.find (prev_stop);
+							if (int_itr == stop_map.end ()) goto leg_error;
 
-							if (int_itr != stop_map.end ()) {
+							stop_ptr = &stop_array [int_itr->second];
+							link_ptr = &link_array [stop_ptr->Link ()];
 
-								stop_ptr = &stop_array [int_itr->second];
-								link_ptr = &link_array [stop_ptr->Link ()];
+							off = length = UnRound (stop_ptr->Offset ());
 
-								off = length = UnRound (stop_ptr->Offset ());
+							if (abs ((int) (length - offset)) > near_offset) {
+								dir = -1;
 
-								if (abs ((int) (length - offset)) > near_offset) {
-									dir = -1;
+								if (prev_itr->Type () == LOCATION_ID || prev_itr == leg_itr) {
+									id = (prev_itr == leg_itr) ? plan.Origin () : prev_itr->ID ();
+									int_itr = location_map.find (id);
+									if (int_itr == location_map.end ()) goto leg_error;
 
-									if (prev_itr->Type () == LOCATION_ID || prev_itr == leg_itr) {
-										id = (prev_itr == leg_itr) ? plan.Origin () : prev_itr->ID ();
-										int_itr = location_map.find (id);
-										if (int_itr != location_map.end ()) {
-											loc_ptr = &location_array [int_itr->second];
-											if (stop_ptr->Link () == loc_ptr->Link ()) {
-												if (length > offset) {
-													dir = 0;
-												} else {
-													dir = 1;
-												}
-											}
-										}
-									} else if (prev_itr->Link_Type ()) {
-										dir = prev_itr->Link_Dir ();
-									} else if (prev_itr->Type () != STOP_ID) {
-										dir = stop_ptr->Dir ();
-									}
-									if (dir >= 0) {
-										if (link_ptr->AB_Dir () >= 0 && link_ptr->BA_Dir () >= 0) {
-											side = link_offset;
+									loc_ptr = &location_array [int_itr->second];
+									if (stop_ptr->Link () == loc_ptr->Link ()) {
+										if (length > offset) {
+											dir = 0;
 										} else {
-											side = 0.0;
+											dir = 1;
 										}
-
-										if (offset > -1) length -= offset;
-
-										Link_Shape (link_ptr, dir, points, offset, length, side);
-
-										arcview_plan.insert (arcview_plan.end (), points.begin (), points.end ());
-
-										if (arrow_flag) Add_Arrow (arcview_plan);
 									}
+								} else if (prev_itr->Link_Type ()) {
+									dir = prev_itr->Link_Dir ();
+								} else if (prev_itr->Type () != STOP_ID) {
+									dir = stop_ptr->Dir ();
 								}
-								offset = off;
+								if (dir >= 0) {
+									if (link_ptr->AB_Dir () >= 0 && link_ptr->BA_Dir () >= 0) {
+										side = link_offset;
+									} else {
+										side = 0.0;
+									}
+
+									if (offset > -1) length -= offset;
+
+									Link_Shape (link_ptr, dir, points, offset, length, side);
+
+									arcview_plan.insert (arcview_plan.end (), points.begin (), points.end ());
+
+									if (arrow_flag) Add_Arrow (arcview_plan);
+								}
 							}
+							offset = off;
 						}
 
 						//---- add the stop point and save the leg ----
 
 						pt_itr = stop_pt.find (prev_stop);
+						if (pt_itr == stop_pt.end ()) goto leg_error;
+
 						arcview_plan.push_back (pt_itr->second);
 
 						if (arrow_flag) Add_Arrow (arcview_plan);
@@ -729,24 +730,23 @@ void ArcPlan::Read_Plan (void)
 						dir = prev_itr->Link_Dir ();
 
 						int_itr = link_map.find (link);
+						if (int_itr == link_map.end ()) goto leg_error;
 
-						if (int_itr != link_map.end ()) {
-							link_ptr = &link_array [int_itr->second];
+						link_ptr = &link_array [int_itr->second];
 
-							if (link_ptr->AB_Dir () >= 0 && link_ptr->BA_Dir () >= 0) {
-								side = link_offset;
-							} else {
-								side = 0.0;
-							}
-							length = UnRound (link_ptr->Length ());
-							if (offset > -1) length -= offset;
-
-							Link_Shape (link_ptr, dir, points, offset, length, side);
-								
-							arcview_plan.insert (arcview_plan.end (), points.begin (), points.end ());
-
-							if (arrow_flag) Add_Arrow (arcview_plan);
+						if (link_ptr->AB_Dir () >= 0 && link_ptr->BA_Dir () >= 0) {
+							side = link_offset;
+						} else {
+							side = 0.0;
 						}
+						length = UnRound (link_ptr->Length ());
+						if (offset > -1) length -= offset;
+
+						Link_Shape (link_ptr, dir, points, offset, length, side);
+								
+						arcview_plan.insert (arcview_plan.end (), points.begin (), points.end ());
+
+						if (arrow_flag) Add_Arrow (arcview_plan);
 					}
 
 					//---- find the end of the access link ----
@@ -755,48 +755,49 @@ void ArcPlan::Read_Plan (void)
 					dir = leg_itr->Access_Dir ();
 
 					int_itr = access_map.find (acc);
+					if (int_itr == access_map.end ()) goto leg_error;
 
-					if (int_itr != access_map.end ()) {
-						access_ptr = &access_array [int_itr->second];
+					access_ptr = &access_array [int_itr->second];
 
-						if (dir == 1) {
-							index = access_ptr->From_ID ();
-							type = access_ptr->From_Type ();
-						} else {
-							index = access_ptr->To_ID ();
-							type = access_ptr->To_Type ();
-						}
-						if (type == LOCATION_ID) {
-							loc_ptr = &location_array [index];
-							pt_itr = location_pt.find (loc_ptr->Location ());
-							point = pt_itr->second;
-							offset = UnRound (loc_ptr->Offset ());
-						} else if (type == PARKING_ID) {
-							parking_ptr = &parking_array [index];
-							pt_itr = parking_pt.find (parking_ptr->Parking ());
-							point = pt_itr->second;
-							offset = UnRound (parking_ptr->Offset ());
-						} else if (type == STOP_ID) {
-							stop_ptr = &stop_array [index];
-							prev_stop = stop_ptr->Stop ();
-							pt_itr = stop_pt.find (prev_stop);
-							point = pt_itr->second;
-							offset = UnRound (stop_ptr->Offset ());
-						} else if (type == NODE_ID) {
-							node_ptr = &node_array [index];
-							point.x = UnRound (node_ptr->X ());
-							point.y = UnRound (node_ptr->Y ());
-							point.z = 0;
-						} else {
-							continue;
-						}
-						arcview_plan.push_back (point);
-
-						if (arrow_flag) Add_Arrow (arcview_plan);	
+					if (dir == 1) {
+						index = access_ptr->From_ID ();
+						type = access_ptr->From_Type ();
+					} else {
+						index = access_ptr->To_ID ();
+						type = access_ptr->To_Type ();
 					}
+					if (type == LOCATION_ID) {
+						loc_ptr = &location_array [index];
+						pt_itr = location_pt.find (loc_ptr->Location ());
+						point = pt_itr->second;
+						offset = UnRound (loc_ptr->Offset ());
+					} else if (type == PARKING_ID) {
+						parking_ptr = &parking_array [index];
+						pt_itr = parking_pt.find (parking_ptr->Parking ());
+						point = pt_itr->second;
+						offset = UnRound (parking_ptr->Offset ());
+					} else if (type == STOP_ID) {
+						stop_ptr = &stop_array [index];
+						prev_stop = stop_ptr->Stop ();
+						pt_itr = stop_pt.find (prev_stop);
+						point = pt_itr->second;
+						offset = UnRound (stop_ptr->Offset ());
+					} else if (type == NODE_ID) {
+						node_ptr = &node_array [index];
+						point.x = UnRound (node_ptr->X ());
+						point.y = UnRound (node_ptr->Y ());
+						point.z = 0;
+					} else {
+						continue;
+					}
+					arcview_plan.push_back (point);
+
+					if (arrow_flag) Add_Arrow (arcview_plan);	
 
 				} else if (leg_itr->Type () == NODE_ID) {
 					int_itr = node_map.find (leg_itr->ID ());
+					if (int_itr == node_map.end ()) goto leg_error;
+
 					node_ptr = &node_array [int_itr->second];
 					point.x = UnRound (node_ptr->X ());
 					point.y = UnRound (node_ptr->Y ());
@@ -817,14 +818,13 @@ void ArcPlan::Read_Plan (void)
 
 			if (prev_itr->Access_Type () && access_map.size () == 0) {
 				pt_itr = location_pt.find (plan.Destination ());
+				if (pt_itr == location_pt.end ()) goto leg_error;
 
-				if (pt_itr != location_pt.end ()) {
-					arcview_plan.push_back (pt_itr->second);
+				arcview_plan.push_back (pt_itr->second);
 
-					if (arrow_flag) Add_Arrow (arcview_plan);	
+				if (arrow_flag) Add_Arrow (arcview_plan);	
 
-					arcview_plan.Put_Field (leg_mode_fld, WALK_MODE);
-				}
+				arcview_plan.Put_Field (leg_mode_fld, WALK_MODE);
 			}
 
 			//---- write the last leg ----
@@ -843,6 +843,9 @@ void ArcPlan::Read_Plan (void)
 				}
 				num_out++;
 			}
+			continue;
+leg_error:
+			Warning (String ("Plan %d-%d-%d-%d Legs and Network Incompatibility") % plan.Household () % plan.Person () % plan.Tour () % plan.Trip ());
 		}
 
 		//---- summarized path data ----
@@ -855,44 +858,47 @@ void ArcPlan::Read_Plan (void)
 						dir = leg_itr->Link_Dir ();
 
 						int_itr = link_map.find (link);
-						if (int_itr != link_map.end ()) {
-							link_ptr = &link_array [int_itr->second];
-							if (dir) {
-								index = link_ptr->BA_Dir ();
-							} else {
-								index = link_ptr->AB_Dir ();
-							}
-							if (width_flow_flag) {
-								width_data [index] += UnRound (leg_itr->Length ()) / UnRound (link_ptr->Length ());
-							} else {
-								width_data [index] += 1.0;
-							}
+						if (int_itr == link_map.end ()) goto leg_error2;
+
+						link_ptr = &link_array [int_itr->second];
+						if (dir) {
+							index = link_ptr->BA_Dir ();
+						} else {
+							index = link_ptr->AB_Dir ();
+						}
+						if (width_flow_flag) {
+							width_data [index] += UnRound (leg_itr->Length ()) / UnRound (link_ptr->Length ());
+						} else {
+							width_data [index] += 1.0;
 						}
 					}
 				} else if (parking_flag && leg_itr->Type () == PARKING_ID) {
 					int_itr = parking_map.find (leg_itr->ID ());
-					if (int_itr != parking_map.end ()) {
-						if (prev_itr->Mode () != DRIVE_MODE) {
-							parking_out [int_itr->second]++;
-						} else {
-							parking_in [int_itr->second]++;
-						}
+					if (int_itr == parking_map.end ()) goto leg_error;
+
+					if (prev_itr->Mode () != DRIVE_MODE) {
+						parking_out [int_itr->second]++;
+					} else {
+						parking_in [int_itr->second]++;
 					}
 				} else if ((rider_flag || on_off_flag) && leg_itr->Type () == STOP_ID) {
 					int_itr = stop_map.find (leg_itr->ID ());
-					if (int_itr != stop_map.end ()) {
-						if (prev_itr->Type () != ROUTE_ID) {
-							alight_data [int_itr->second]++;
-						} else {
-							board_data [int_itr->second]++;
-						}
-						if (rider_flag) {
-							//---- driver path ----
-							//load_data [index]++;
-						}
+					if (int_itr == stop_map.end ()) goto leg_error2;
+
+					if (prev_itr->Type () != ROUTE_ID) {
+						alight_data [int_itr->second]++;
+					} else {
+						board_data [int_itr->second]++;
+					}
+					if (rider_flag) {
+						//---- driver path ----
+						//load_data [index]++;
 					}
 				}
 				prev_itr = leg_itr;
+				continue;
+leg_error2:
+				Warning (String ("Plan %d-%d-%d-%d Legs and Network Incompatibility") % plan.Household () % plan.Person () % plan.Tour () % plan.Trip ());
 			}
 		}
 

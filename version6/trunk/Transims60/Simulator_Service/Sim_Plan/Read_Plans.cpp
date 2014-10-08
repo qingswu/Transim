@@ -42,7 +42,7 @@ bool Sim_Plan_Step::Read_Plans (void)
 
 		//---- end of the current time step ----
 
-		if (plan_ptr->Depart () > sim->time_step) break;
+		if (plan_ptr->Depart () > sim->time_step && !sim->read_all_flag) break;
 		time = plan_ptr->Depart ();
 
 		//---- convert to simulator plan format ----

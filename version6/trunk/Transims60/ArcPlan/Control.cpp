@@ -99,6 +99,8 @@ void ArcPlan::Program_Control (void)
 			problem_method = 1;
 		} else if (text.Equals ("DES") || text.Equals ("D") || text.Equals ("DESTINATION")) {
 			problem_method = 2;
+		} else if (text.Equals ("LOC") || text.Equals ("L") || text.Equals ("LOCATION")) {
+			problem_method = 3;
 		} else {
 			Error (String ("Problem Display Method %s is Not Recognized") % text);
 		}

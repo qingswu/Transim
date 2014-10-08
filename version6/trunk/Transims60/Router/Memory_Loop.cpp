@@ -14,12 +14,10 @@ bool Router::Memory_Loop (int part, Plan_Processor *plan_process_ptr)
 	bool gap_flag, build_flag;
 
 	Trip_Map_Itr trip_itr, map_itr;
-	Trip_Data *trip_ptr;
 
 	Plan_Ptr_Array *ptr_array;
 	Plan_Data *new_plan_ptr, *plan_ptr;
 	Path_Parameters param;
-	Trip_Index trip_index;
 	
 	Set_Parameters (param);
 
@@ -65,21 +63,17 @@ bool Router::Memory_Loop (int part, Plan_Processor *plan_process_ptr)
 		}
 		if (hhold > max_hhold) break;
 
-		plan_ptr->Get_Index (trip_index);
-		trip_ptr = 0;
-
 		//---- check the priority codes ----
 
-		if (select_priorities) {
-			if (first_iteration) {
-				trip_itr = trip_map.find (trip_index);
-
-				if (trip_itr != trip_map.end ()) {
-					trip_ptr = &trip_array [trip_itr->second];
-					plan_ptr->Priority (trip_ptr->Priority ());
-				}
-			}
+		if (plan_ptr->Priority () == NO_PRIORITY) {
+			plan_ptr->Method (UPDATE_PLAN);
+		} else if (select_priorities) {
 			build_flag = select_priority [plan_ptr->Priority ()];
+
+			if (build_flag && max_percent_flag && percent_selected < 1.0) {
+				double prob = random_select.Probability ();
+				build_flag = (prob <= percent_selected);
+			}
 
 			if (build_flag || plan_ptr->size () == 0 || plan_ptr->Problem () > 0) {
 				plan_ptr->Method (BUILD_PATH);
@@ -97,22 +91,7 @@ bool Router::Memory_Loop (int part, Plan_Processor *plan_process_ptr)
 		} else if (reroute_flag) {
 			if (plan_ptr->Depart () < reroute_time && plan_ptr->Arrive () > reroute_time) {
 				plan_ptr->Method (REROUTE_PATH);
-
-				//---- update the trip data ----
-
-				if (first_iteration && trip_ptr == 0) {
-					trip_itr = trip_map.find (trip_index);
-
-					if (trip_itr != trip_map.end ()) {
-						trip_ptr = &trip_array [trip_itr->second];
-
-						plan_ptr->End (trip_ptr->End ());
-						plan_ptr->Destination (trip_ptr->Destination ());
-						plan_ptr->Type (trip_ptr->Type ());
-
-					}
-					plan_ptr->Constraint (START_TIME);
-				}
+				plan_ptr->Constraint (START_TIME);
 			} else if (plan_ptr->Depart () >= reroute_time) {
 				plan_ptr->Method (BUILD_PATH);
 			} else if (plan_ptr->Arrive () < reroute_time) {

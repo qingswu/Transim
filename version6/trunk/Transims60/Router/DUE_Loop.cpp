@@ -10,15 +10,16 @@
 
 void Router::DUE_Loop (void)
 {
-	int i, num, last_hhold, skip;
+	int i, num, last_hhold;
 	double gap, last_gap;
-	bool converge_flag;
+	bool converge_flag, build_flag;
+
+	clock_t path_time, update_time, total_time;
 
 	Trip_Map_Itr map_itr;
-	Trip_Data *trip_ptr;
-	Plan_Ptr plan_ptr, old_plan_ptr;
+	Plan_Ptr plan_ptr;
 	Plan_Ptr_Array *ptr_array;
-
+	
 	if (max_iteration == 0) max_iteration = 1;
 
 	if (plan_processor == 0) {
@@ -68,7 +69,19 @@ void Router::DUE_Loop (void)
 		}
 		converge_flag = true;
 		last_hhold = -1;
-		total_records = skip = 0;
+
+		if (total_records > 0 && max_percent_flag) {
+			percent_selected = ((double) num_selected / total_records);
+
+			if (percent_selected > max_percent_select) {
+				percent_selected = max_percent_select / percent_selected;
+			} else {
+				percent_selected = 1.0;
+			}
+		} else {
+			percent_selected = 1.0;
+		}
+		total_records = num_selected = 0;
 
 		//---- preload transit vehicles ----
 
@@ -84,54 +97,45 @@ void Router::DUE_Loop (void)
 		ptr_array = new Plan_Ptr_Array ();
 		plan_processor->Start_Processing (true, true);
 
+		path_time = clock ();
+
 		//---- process each trip ----
 
-		for (map_itr = trip_map.begin (); map_itr != trip_map.end (); map_itr++) {
+		for (map_itr = plan_trip_map.begin (); map_itr != plan_trip_map.end (); map_itr++) {
 			Show_Progress ();
 
-			trip_ptr = &trip_array [map_itr->second];
+			plan_ptr = new Plan_Data ();
 
-			//plan_ptr = new Plan_Data ();
-
-			//*plan_ptr = *trip_ptr;
+			*plan_ptr = plan_array [map_itr->second];
 
 			//---- check the household id ----
 
-			if (trip_ptr->Household () < 1) continue;
-			total_records++;
+			if (plan_ptr->Household () < 1) continue;
 
-			if (trip_ptr->Household () != last_hhold) {
+			if (plan_ptr->Household () != last_hhold) {
 				if (last_hhold > 0 && ptr_array->size () > 0) {
 					plan_processor->Plan_Build (ptr_array);
 					ptr_array = new Plan_Ptr_Array ();
 				}
-				last_hhold = trip_ptr->Household ();
+				last_hhold = plan_ptr->Household ();
 			}
 
 			//---- update the selection priority flag ----
 
-			if (!first_iteration && select_priorities) {
-				old_plan_ptr = &plan_array [trip_ptr->Index ()];
-	
-				if (!select_priority [old_plan_ptr->Priority ()]) {
-					skip++;
-					//plan_ptr = old_plan_ptr;
-					//plan_ptr->Method (RESKIM_PLAN);
-					plan_ptr = new Plan_Data ();
-					*plan_ptr = *old_plan_ptr;
+			if (plan_ptr->Priority () == NO_PRIORITY) {
+				plan_ptr->Method (UPDATE_PLAN);
+			} else if (!first_iteration && select_priorities) {
+				build_flag = select_priority [plan_ptr->Priority ()];
 
-					plan_ptr->Method (UPDATE_PLAN);
-				} else {
-					plan_ptr = new Plan_Data ();
-					*plan_ptr = *trip_ptr;
-
-					plan_ptr->Priority (old_plan_ptr->Priority ());
+				if (build_flag && max_percent_flag && percent_selected < 1.0) {
+					build_flag = (random_select.Probability () <= percent_selected);
+				}
+				if (build_flag) {
 					plan_ptr->Method (BUILD_PATH);
+				} else {
+					plan_ptr->Method (UPDATE_PLAN);
 				}
 			} else {
-				plan_ptr = new Plan_Data ();
-				*plan_ptr = *trip_ptr;
-
 				plan_ptr->Method (BUILD_PATH);
 			}
 			ptr_array->push_back (plan_ptr);
@@ -147,11 +151,13 @@ void Router::DUE_Loop (void)
 		plan_processor->Stop_Processing (true);
 
 		End_Progress (false);
-		Show_Message (0, " -- Skip ") << skip;
+		
+		path_time = (clock () - path_time);
 
 		//---- gather flows and update travel times ----
 
 		num = max_speed_updates;
+		update_time = clock ();
 
 		if (num > 0) {
 			Show_Message (0, " -- Reskim");
@@ -168,17 +174,18 @@ void Router::DUE_Loop (void)
 			}
 			End_Progress ();
 
-			Write (1, "Skim Convergence Gap = ") << last_gap;
+			Write (1, "Skim Convergence Gap  = ") << last_gap;
 		} else {
 			Update_Travel_Times ();
 			num_time_updates++;
 		}
+		update_time = (clock () - update_time);
 
 		//---- trip gap ----
 
 		if (save_trip_gap) {
 			gap = Get_Trip_Gap ();
-			Write (1, "Trip Convergence Gap = ") << gap;
+			Write (1, "Trip Convergence Gap  = ") << gap;
 
 			if (trip_gap > 0.0 && gap > trip_gap) converge_flag = false;
 		}
@@ -187,10 +194,27 @@ void Router::DUE_Loop (void)
 
 		if (save_link_gap) {
 			gap = Get_Link_Gap (false);
-			Write (1, "Link Convergence Gap = ") << gap;
+			Write (1, "Link Convergence Gap  = ") << gap;
 
 			if (link_gap > 0.0 && gap > link_gap) converge_flag = false;
 		}
+
+		//---- build count ----
+
+		Write (2, "Number of Paths Built = ") << num_build;
+		num = num_build + num_update;
+		if (num > 0) Write (0, String (" (%.1lf%%)") % (num_build * 100.0 / num) % FINISH);
+
+		//---- processing time summary ----
+	
+		total_time = path_time + update_time;
+		if (total_time == 0) total_time = 1;
+
+		Write (1, String ("Path Building Seconds = %.1lf (%.1lf%%)") % 
+			((double) path_time / CLOCKS_PER_SEC) % (100.0 * path_time / total_time) % FINISH);
+		Write (1, String ("Time Updating Seconds = %.1lf (%.1lf%%)") %
+			((double) update_time / CLOCKS_PER_SEC) % (100.0 * update_time / total_time) % FINISH);
+
 		if (converge_flag) break;
 
 		if (save_trip_gap || save_link_gap) {
@@ -238,6 +262,7 @@ void Router::DUE_Loop (void)
 			if (Report_Flag (ITERATION_PROBLEMS)) {
 				Report_Problems (total_records, false);
 			}
+			num_build = num_reroute = num_reskim = num_update = 0;
 			Reset_Problems ();
 		}
 	}
