@@ -89,7 +89,7 @@ void Router::Execute (void)
 
 	if (System_File_Flag (NEW_PERFORMANCE)) {
 		if (save_iter_flag) {
-			Db_File *file = System_File_Handle (NEW_PERFORMANCE);
+			Performance_File *file = System_Performance_File (true);
 			if (file->Part_Flag ()) {
 				file->Open (0);
 			} else {
@@ -102,7 +102,7 @@ void Router::Execute (void)
 	//---- save the turn time data ----
 
 	if (System_File_Flag (NEW_TURN_DELAY)) {
-		if (save_iter_flag) System_File_Handle (NEW_TURN_DELAY)->Create ();
+		if (save_iter_flag) System_Turn_Delay_File (true)->Create ();
 		Write_Turn_Delays (full_flag);
 	}
 
@@ -110,7 +110,7 @@ void Router::Execute (void)
 
 	if (rider_flag) {
 		part_processor.Save_Riders ();
-		if (save_iter_flag) System_File_Handle (NEW_RIDERSHIP)->Create ();
+		if (save_iter_flag) System_Ridership_File (true)->Create ();
 		Write_Ridership ();
 	}
 
@@ -119,6 +119,26 @@ void Router::Execute (void)
 	if (plan_memory_flag) {
 		if (new_plan_flag) {
 			Write_Plan_Files ();
+		} else {
+			Plan_Itr plan_itr;
+			Reset_Problems ();
+
+			for (plan_itr = plan_array.begin (); plan_itr != plan_array.end (); plan_itr++) {
+				if (plan_itr->Problem () > 0) {
+					Set_Problem ((Problem_Type) plan_itr->Problem ());
+
+					if (problem_flag) {
+						plan_itr->External_IDs ();
+
+						if (problem_set_flag) {
+							i = plan_itr->Partition ();
+							Write_Problem (problem_set [i], &(*plan_itr));
+						} else {
+							Write_Problem (problem_file, &(*plan_itr));
+						}
+					}
+				}
+			}
 		}
 	} else {
 		if (trip_flag && trip_set_flag) {
@@ -185,6 +205,7 @@ void Router::Execute (void)
 		plan_file->Print_Summary ();
 		if (num_reroute > 0) Print (1, "Number of Re-Routed Plans      = ") << num_reroute;
 		if (num_update > 0) Print (1,  "Number of Updated Plans        = ") << num_update;
+		if (num_copied > 0) Print (1,  "Number of Plans Copied         = ") << num_copied;
 	}
 	if (new_plan_flag) {
 		new_plan_file->Print_Summary ();

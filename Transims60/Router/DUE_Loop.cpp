@@ -53,7 +53,7 @@ void Router::DUE_Loop (void)
 			Use_Link_Delays (true);
 		}
 		if (Master ()) {
-			Show_Message (1, String ("Iteration Number %d Record") % iteration);
+			Show_Message (1, String ("Iteration Number %d") % iteration);
 			Print (2, "Iteration Number ") << iteration;
 			Set_Progress ();
 
@@ -88,6 +88,8 @@ void Router::DUE_Loop (void)
 		if (preload_flag) {
 			Preload_Transit ();
 		}
+		Show_Message (0, " -- Trip");
+		Set_Progress ();
 
 		//---- update the speed before each path building iteration ----
 
@@ -123,7 +125,7 @@ void Router::DUE_Loop (void)
 			//---- update the selection priority flag ----
 
 			if (plan_ptr->Priority () == NO_PRIORITY) {
-				plan_ptr->Method (UPDATE_PLAN);
+				plan_ptr->Method (COPY_PLAN);
 			} else if (!first_iteration && select_priorities) {
 				build_flag = select_priority [plan_ptr->Priority ()];
 
@@ -133,7 +135,7 @@ void Router::DUE_Loop (void)
 				if (build_flag) {
 					plan_ptr->Method (BUILD_PATH);
 				} else {
-					plan_ptr->Method (UPDATE_PLAN);
+					plan_ptr->Method (COPY_PLAN);
 				}
 			} else {
 				plan_ptr->Method (BUILD_PATH);
@@ -202,7 +204,7 @@ void Router::DUE_Loop (void)
 		//---- build count ----
 
 		Write (2, "Number of Paths Built = ") << num_build;
-		num = num_build + num_update;
+		num = num_build + num_update + num_copied;
 		if (num > 0) Write (0, String (" (%.1lf%%)") % (num_build * 100.0 / num) % FINISH);
 
 		//---- processing time summary ----
@@ -226,7 +228,7 @@ void Router::DUE_Loop (void)
 		if (iteration < max_iteration) {
 			if (save_iter_flag && save_iter_range.In_Range (iteration)) {
 				if (System_File_Flag (NEW_PERFORMANCE)) {
-					Db_File *file = System_File_Handle (NEW_PERFORMANCE);
+					Performance_File *file = System_Performance_File (true);
 					if (file->Part_Flag ()) {
 						file->Open (iteration);
 					} else {
@@ -262,7 +264,7 @@ void Router::DUE_Loop (void)
 			if (Report_Flag (ITERATION_PROBLEMS)) {
 				Report_Problems (total_records, false);
 			}
-			num_build = num_reroute = num_reskim = num_update = 0;
+			num_build = num_reroute = num_reskim = num_update = num_copied = 0;
 			Reset_Problems ();
 		}
 	}

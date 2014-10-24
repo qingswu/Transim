@@ -60,11 +60,11 @@ void LocationData::Program_Control (void)
 	Data_Service::Program_Control ();
 
 	if (zone_file_flag) {
-		zone_file = (Zone_File *) System_File_Handle (ZONE);
+		zone_file = System_Zone_File ();
 	}
-	input_file = (Location_File *) System_File_Handle (LOCATION);
+	input_file = System_Location_File ();
 
-	output_file = (Location_File *) System_File_Handle (NEW_LOCATION);
+	output_file = System_Location_File (true);
 
 	flag = exe->Notes_Name_Flag ();
 	exe->Notes_Name_Flag (false);

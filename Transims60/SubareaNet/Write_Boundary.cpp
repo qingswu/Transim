@@ -27,9 +27,9 @@ void SubareaNet::Write_Boundary (void)
 
 	access_flag = System_File_Flag (NEW_ACCESS_LINK);
 
-	Location_File *location_file = (Location_File *) System_File_Handle (NEW_LOCATION);
-	Parking_File *parking_file = (Parking_File *) System_File_Handle (NEW_PARKING);
-	Access_File *access_file = (Access_File *) System_File_Handle (NEW_ACCESS_LINK);
+	Location_File *location_file = System_Location_File (true);
+	Parking_File *parking_file = System_Parking_File (true);
+	Access_File *access_file = System_Access_File (true);
 	Zone_File *zone_file;
 	Stop_File *stop_file;
 
@@ -41,7 +41,7 @@ void SubareaNet::Write_Boundary (void)
 
 	if (transit_flag) {
 		max_stop = ((max_stop + 1000) / 1000) * 1000;
-		stop_file = (Stop_File *) System_File_Handle (NEW_TRANSIT_STOP);
+		stop_file = System_Stop_File (true);
 
 		for (line_itr = line_array.begin (); line_itr != line_array.end (); line_itr++) {
 			for (itr = line_itr->driver_array.begin (); itr != line_itr->driver_array.end (); itr++) {
@@ -53,7 +53,7 @@ void SubareaNet::Write_Boundary (void)
 		stop_file = 0;
 	}
 	if (zone_flag) {
-		zone_file = (Zone_File *) System_File_Handle (NEW_ZONE);
+		zone_file = System_Zone_File (true);
 	} else {
 		zone_file = 0;
 	}

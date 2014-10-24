@@ -17,7 +17,7 @@
 void LinkSum::Performance_Report (void)
 {
 	int i, j, k, index, use_index;
-	double time, len, speed, factor, flow_factor;
+	double time, len, speed, factor, flow_factor, person_fac;
 	Dtime low, high, tod;
 	bool connect_flag;
 
@@ -82,6 +82,12 @@ void LinkSum::Performance_Report (void)
 
 				data.Get_Data (&perf_data, dir_ptr, &(*link_itr));
 
+				if (person_flag && data.Volume () > 0) {
+					person_fac = data.Persons () / data.Volume ();
+				} else {
+					person_fac = 1.0;
+				}
+
 				//---- check the time ratio ----
 
 				if (select_ratio) {
@@ -94,9 +100,9 @@ void LinkSum::Performance_Report (void)
 					if (data.VC_Ratio () < vc_ratio) continue;
 				}
 				sum_bin [j] [LANE_MILES] += data.Lane_Len ();
-				sum_bin [j] [VMT] += data.Veh_Dist ();
-				sum_bin [j] [VHT] += data.Veh_Time ();
-				sum_bin [j] [VHD] += data.Veh_Delay ();
+				sum_bin [j] [VMT] += data.Veh_Dist () * person_fac;
+				sum_bin [j] [VHT] += data.Veh_Time () * person_fac;
+				sum_bin [j] [VHD] += data.Veh_Delay () * person_fac;
 			}
 
 			//---- get the turning movements ----
@@ -181,10 +187,18 @@ void LinkSum::Performance_Header (void)
 	Print (1, "Network Performance Summary");
 
 	if (turn_period_array.size () > 0) {
-		Print (2, String ("                   Lane        Vehicle       Vehicle %10.10s     Hours of      Number") % units);
+		if (person_flag) {
+			Print (2, String ("                   Lane        Person        Person  %10.10s     Hours of      Number") % units);
+		} else {
+			Print (2, String ("                   Lane        Vehicle       Vehicle %10.10s     Hours of      Number") % units);
+		}
 		Print (1, String ("Time Period   %10.10s    %10.10s        Hours       /Hour       Delay      of Turns") % units % units);
 	} else {
-		Print (2, String ("                   Lane        Vehicle       Vehicle %10.10s     Hours of") % units);
+		if (person_flag) {
+			Print (2, String ("                   Lane        Person        Person  %10.10s     Hours of") % units);
+		} else {
+			Print (2, String ("                   Lane        Vehicle       Vehicle %10.10s     Hours of") % units);
+		}
 		Print (1, String ("Time Period   %10.10s    %10.10s        Hours       /Hour       Delay    ") % units % units);
 	}
 	Print (1);

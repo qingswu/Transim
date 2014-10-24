@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Ridership (void)
 {
-	Ridership_File *file = (Ridership_File *) System_File_Handle (NEW_RIDERSHIP);
+	Ridership_File *file = System_Ridership_File (true);
 
 	int count = 0;
 	Int_Map_Itr itr;

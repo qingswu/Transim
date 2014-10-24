@@ -28,9 +28,9 @@ bool Path_Builder::Transit_Access (Path_End_Array *from_ptr, Path_End_Array *to_
 
 	//---- initialize the path building ----
 			
-	if (param.sort_method) {
+	if (path_param.sort_method) {
 		if (transit_sort.Max_Size () == 0) {
-			transit_sort.Initialize ((int) ((exe->stop_array.size () + exe->node_array.size ()) * param.max_paths / 2));
+			transit_sort.Initialize ((int) ((exe->stop_array.size () + exe->node_array.size ()) * path_param.max_paths / 2));
 		} else {
 			transit_sort.Reset ();
 		}
@@ -143,7 +143,7 @@ bool Path_Builder::Transit_Access (Path_End_Array *from_ptr, Path_End_Array *to_
 			path_index.Type (to_type);
 			path_index.Path (path);
 
-			if (param.sort_method) {
+			if (path_param.sort_method) {
 				if (path_ptr->Status () == 1) {
 					transit_sort.Update (path_index, to_imp);
 				} else {
@@ -203,14 +203,14 @@ bool Path_Builder::Transit_Access (Path_End_Array *from_ptr, Path_End_Array *to_
 
 				to_walk = from_walk + length;
 
-				if (walk_flag && to_walk >= param.max_walk) {
+				if (walk_flag && to_walk >= path_param.max_walk) {
 					length_flag = true;
 					continue;
 				}
 
 				//---- calculate and check the time ----
 
-				ttime = (int) (length / param.walk_speed + 0.5);
+				ttime = (int) (length / path_param.walk_speed + 0.5);
 
 				if (forward_flag) {
 					to_time = from_time + ttime;
@@ -231,15 +231,15 @@ bool Path_Builder::Transit_Access (Path_End_Array *from_ptr, Path_End_Array *to_
 
 				//---- calculate and check the impedance ----
 
-				imped = DTOI (ttime * param.value_walk);
+				imped = DTOI (ttime * path_param.value_walk);
 				if (imped < 1) imped = 1;
 
-				if (walk_flag && to_walk > param.walk_pen) {
-					factor = (double) to_walk / param.walk_pen;
-					factor = ((factor * factor) - 1) * param.walk_fac + 1;
+				if (walk_flag && to_walk > path_param.walk_pen) {
+					factor = (double) to_walk / path_param.walk_pen;
+					factor = ((factor * factor) - 1) * path_param.walk_fac + 1;
 					imped = DTOI (imped * factor);
 				} else if (random_flag) {
-					imped = DTOI (imped * (1.0 + param.random_imped * (param.random.Probability () - 0.5) / 100.0));
+					imped = DTOI (imped * (1.0 + path_param.random_imped * (path_param.random.Probability () - 0.5) / 100.0));
 				}
 				to_imp = from_imp + imped;
 
@@ -315,14 +315,14 @@ bool Path_Builder::Transit_Access (Path_End_Array *from_ptr, Path_End_Array *to_
 
 			to_walk = from_walk + length;
 
-			if (walk_flag && to_walk >= param.max_walk) {
+			if (walk_flag && to_walk >= path_param.max_walk) {
 				length_flag = true;
 				continue;
 			}
 
 			//---- calculate and check the time ----
 
-			ttim = (int) (length / param.walk_speed + 0.5);
+			ttim = (int) (length / path_param.walk_speed + 0.5);
 
 			//---- check the time schedule ----
 
@@ -346,12 +346,12 @@ bool Path_Builder::Transit_Access (Path_End_Array *from_ptr, Path_End_Array *to_
 		
 			//---- check the impedance ----
 
-			imped = DTOI (ttim * param.value_walk);
+			imped = DTOI (ttim * path_param.value_walk);
 			if (imped < 1) imped = 1;
 
-			if (walk_flag && to_walk > param.walk_pen) {
-				factor = (double) to_walk / param.walk_pen;
-				factor = ((factor * factor) - 1) * param.walk_fac + 1;
+			if (walk_flag && to_walk > path_param.walk_pen) {
+				factor = (double) to_walk / path_param.walk_pen;
+				factor = ((factor * factor) - 1) * path_param.walk_fac + 1;
 				imped = DTOI (imped * factor);
 			}
 			to_imp = from_imp + imped;
@@ -429,7 +429,7 @@ bool Path_Builder::Transit_Access (Path_End_Array *from_ptr, Path_End_Array *to_
 			path_index.Type (STOP_ID);
 			path_index.Path (path);
 
-			if (param.sort_method) {
+			if (path_param.sort_method) {
 				if (path_ptr->Status () == 1) {
 					transit_sort.Update (path_index, to_imp);
 				} else {
@@ -474,14 +474,14 @@ bool Path_Builder::Transit_Access (Path_End_Array *from_ptr, Path_End_Array *to_
 			}
 			to_walk = from_walk + length;
 
-			if (walk_flag && to_walk >= param.max_walk) {
+			if (walk_flag && to_walk >= path_param.max_walk) {
 				length_flag = true;
 				continue;
 			}
 
 			//---- calculate and check the time ----
 
-			ttime = (int) (length / param.walk_speed + 0.5);
+			ttime = (int) (length / path_param.walk_speed + 0.5);
 
 			if (forward_flag) {
 				to_time = from_time + ttime;
@@ -503,15 +503,15 @@ bool Path_Builder::Transit_Access (Path_End_Array *from_ptr, Path_End_Array *to_
 
 			//---- calculate and check the impedance ----
 
-			imped = DTOI (ttime * param.value_walk);
+			imped = DTOI (ttime * path_param.value_walk);
 			if (imped < 1) imped = 1;
 
-			if (walk_flag && to_walk > param.walk_pen) {
-				factor = (double) to_walk / param.walk_pen;
-				factor = ((factor * factor) - 1) * param.walk_fac + 1;
+			if (walk_flag && to_walk > path_param.walk_pen) {
+				factor = (double) to_walk / path_param.walk_pen;
+				factor = ((factor * factor) - 1) * path_param.walk_fac + 1;
 				imped = DTOI (imped * factor);
 			} else if (random_flag) {
-				imped = DTOI (imped * (1.0 + param.random_imped * (param.random.Probability () - 0.5) / 100.0));
+				imped = DTOI (imped * (1.0 + path_param.random_imped * (path_param.random.Probability () - 0.5) / 100.0));
 			}
 			to_imp = from_imp + imped;
 
@@ -588,7 +588,7 @@ bool Path_Builder::Transit_Access (Path_End_Array *from_ptr, Path_End_Array *to_
 			path_index.Type (NODE_ID);
 			path_index.Path (path);
 
-			if (param.sort_method) {
+			if (path_param.sort_method) {
 				if (path_ptr->Status () == 1) {
 					transit_sort.Update (path_index, to_imp);
 				} else {

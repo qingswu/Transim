@@ -15,8 +15,8 @@ void NewFormat::Read_Delay (void)
 	double length, speed;
 	Dtime period;
 
-	Performance_File *perf_file = (Performance_File *) System_File_Handle (NEW_PERFORMANCE);
-	Turn_Delay_File *turn_file = (Turn_Delay_File *) System_File_Handle (NEW_TURN_DELAY);
+	Performance_File *perf_file = System_Performance_File (true);
+	Turn_Delay_File *turn_file = System_Turn_Delay_File (true);
 
 	Link_Data *link_ptr;
 	Dir_Data *dir_ptr;

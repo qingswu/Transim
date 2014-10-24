@@ -12,7 +12,7 @@ void Router_Service::Set_Parameters (Path_Parameters &p, int type, int veh_type)
 {
 	if (type < 0) return;
 
-	memcpy (&p, &param, sizeof (param));
+	memcpy (&p, &path_param, sizeof (path_param));
 
 	p.traveler_type = type;
 

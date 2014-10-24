@@ -32,9 +32,9 @@ void ZoneData::Program_Control (void)
 
 	Data_Service::Program_Control ();
 
-	input_file = (Zone_File *) System_File_Handle (ZONE);
+	input_file = System_Zone_File ();
 
-	output_file = (Zone_File *) System_File_Handle (NEW_ZONE);
+	output_file = System_Zone_File (true);
 
 	flag = exe->Notes_Name_Flag ();
 	exe->Notes_Name_Flag (false);

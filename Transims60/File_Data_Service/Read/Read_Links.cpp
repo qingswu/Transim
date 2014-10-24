@@ -340,7 +340,17 @@ bool Data_Service::Get_Link_Data (Link_File &file, Link_Data &link_rec, Dir_Data
 	ab_in = file.Bearing_A ();
 	ab_out = file.Bearing_B ();
 
-	if (file.Bearing_Flag () && (ab_in != 0 || ab_out != 0)) {
+	if (Bearing_Warnings ()) {
+		int in, out;
+
+		Link_Bearings (link_rec, in, out);
+
+		if (abs (ab_in - in) > 5 || abs (ab_out - out) > 5) {
+			Warning (String ("Link %d Bearings %d vs %d and %d vs %d") % link_rec.Link () % ab_in % in % ab_out % out);
+		}
+	}
+
+	if (file.Bearing_Flag () && (ab_in != 0 || ab_out != 0) && !Update_Bearings ()) {
 		int num_points = compass.Num_Points ();
 
 		//---- adjust the points to the user-specified resolution ----

@@ -42,7 +42,7 @@ void NewFormat::Plan_Processing::operator()()
 	old_plan->Node_Based_Flag (exe->old_plan.Node_Based_Flag ());
 	old_plan->First_Open (false);
 
-	Plan_File *file = (Plan_File *) exe->System_File_Handle (NEW_PLAN);
+	Plan_File *file = exe->System_Plan_File (true);
 
 	new_plan = new Plan_File (file->File_Access (), file->Dbase_Format ());
 	new_plan->File_Type (file->File_Type ());

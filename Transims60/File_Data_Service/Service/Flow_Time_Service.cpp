@@ -157,7 +157,7 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 {
 	int i, num, nrec, type, lanes, lanes0, lanes1, cap, capacity, tod_cap, max_cap, len, index, rec, use_index;
 	Dtime time0, time, time1, tod1, tod, period;
-	double volume, vol_fac;
+	double volume, vol_fac, length, speed;
 
 	Dir_Itr dir_itr;
 	Link_Data *link_ptr;
@@ -178,6 +178,8 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 		link_ptr = &dat->link_array [dir_itr->Link ()];
 
 		len = link_ptr->Length ();
+		length = exe->UnRound (len);
+
 		type = link_ptr->Type ();
 
 		time0 = dir_itr->Time0 ();
@@ -274,6 +276,14 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 			}
 			if (zero_flows) {
 				perf_ptr->Clear_Flows ();
+			} else {
+				time1 = perf_ptr->Time ();
+				if (time1 < 1) time1 = 1;
+
+				speed = length / time1.Seconds ();
+				if (speed < 0.1) speed = 0.1;
+
+				perf_ptr->Veh_Time (perf_ptr->Veh_Dist () / speed);
 			}
 
 			//---- managed lanes ----
@@ -309,6 +319,14 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 				}
 				if (zero_flows) {
 					perf1_ptr->Clear_Flows ();
+				} else {
+					time1 = perf1_ptr->Time ();
+					if (time1 < 1) time1 = 1;
+
+					speed = length / time1.Seconds ();
+					if (speed < 0.1) speed = 0.1;
+
+					perf1_ptr->Veh_Time (perf1_ptr->Veh_Dist () / speed);
 				}
 			}
 		}

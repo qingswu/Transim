@@ -31,26 +31,26 @@ int Path_Builder::Node_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, b
 
 	//---- initialize the mode ----
 
-	if (param.use == WALK) {
+	if (path_param.use == WALK) {
 		if (!exe->walk_path_flag) return (-1);
 		mode = WALK_MODE;
 		flag = walk_flag;
-		max_len = param.max_walk;
-		pen_len = param.walk_pen;
-		pen_fac = param.walk_fac;
-		value = param.value_walk;
-		speed = param.walk_speed;
+		max_len = path_param.max_walk;
+		pen_len = path_param.walk_pen;
+		pen_fac = path_param.walk_fac;
+		value = path_param.value_walk;
+		speed = path_param.walk_speed;
 		mode_list_ptr = &exe->walk_list;
 		mode_link_ptr = &exe->walk_link;
 	} else {
 		if (!exe->bike_path_flag) return (-1);
 		mode = BIKE_MODE;
 		flag = bike_flag;
-		max_len = param.max_bike;
-		pen_len = param.bike_pen;
-		pen_fac = param.bike_fac;
-		value = param.value_bike;
-		speed = param.bike_speed;
+		max_len = path_param.max_bike;
+		pen_len = path_param.bike_pen;
+		pen_fac = path_param.bike_fac;
+		value = path_param.value_bike;
+		speed = path_param.bike_speed;
 		mode_list_ptr = &exe->bike_list;
 		mode_link_ptr = &exe->bike_link;
 	}
@@ -64,7 +64,7 @@ int Path_Builder::Node_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, b
 	} else {
 		array_ptr->Clear ();
 	}
-	if (param.sort_method) {
+	if (path_param.sort_method) {
 		if (imp_sort.Max_Size () == 0) {
 			imp_sort.Initialize ((int) (exe->node_array.size () / 2));
 		} else {
@@ -95,7 +95,7 @@ int Path_Builder::Node_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, b
 
 			//---- add the record to the queue ----
 
-			if (param.sort_method) {
+			if (path_param.sort_method) {
 				if (path_ptr->Status () == 1) {
 					imp_sort.Update (to_node, to_imp);
 				} else {
@@ -126,7 +126,7 @@ int Path_Builder::Node_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, b
 
 		link_ptr = &exe->link_array [from_itr->Index ()];
 
-		if (!Use_Permission (link_ptr->Use (), param.use)) {
+		if (!Use_Permission (link_ptr->Use (), path_param.use)) {
 			use_flag = true;
 			continue;
 		}
@@ -141,7 +141,7 @@ int Path_Builder::Node_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, b
 		from_cost = path_ptr->Cost ();
 		from_walk = path_ptr->Walk ();
 
-		if (param.use != WALK) {
+		if (path_param.use != WALK) {
 			to_walk = from_walk;
 		}
 		to_cost = from_cost;
@@ -184,7 +184,7 @@ int Path_Builder::Node_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, b
 						continue;
 					}
 				}
-				if (param.use == WALK) {
+				if (path_param.use == WALK) {
 					to_walk = from_walk + length;
 				}
 
@@ -198,7 +198,7 @@ int Path_Builder::Node_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, b
 					factor = ((factor * factor) - 1) * pen_fac + 1;
 					imped = DTOI (imped * factor);
 				} else if (random_flag) {
-					imped = DTOI (imped * (1.0 + param.random_imped * (param.random.Probability () - 0.5) / 100.0));
+					imped = DTOI (imped * (1.0 + path_param.random_imped * (path_param.random.Probability () - 0.5) / 100.0));
 				}
 				to_imp = from_imp + imped;
 
@@ -290,7 +290,7 @@ int Path_Builder::Node_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, b
 					continue;
 				}
 			}
-			if (param.use == WALK) {
+			if (path_param.use == WALK) {
 				to_walk = from_walk + length;
 			}
 
@@ -304,7 +304,7 @@ int Path_Builder::Node_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, b
 				factor = ((factor * factor) - 1) * pen_fac + 1;
 				imped = DTOI (imped * factor);
 			} else if (random_flag) {
-				imped = DTOI (imped * (1.0 + param.random_imped * (param.random.Probability () - 0.5) / 100.0));
+				imped = DTOI (imped * (1.0 + path_param.random_imped * (path_param.random.Probability () - 0.5) / 100.0));
 			}
 			to_imp = from_imp + imped;
 
@@ -376,7 +376,7 @@ int Path_Builder::Node_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, b
 
 			//---- add the record to the queue ----
 
-			if (param.sort_method) {
+			if (path_param.sort_method) {
 				if (path_ptr->Status () == 1) {
 					imp_sort.Update (to_node, to_imp);
 				} else {
@@ -400,7 +400,7 @@ int Path_Builder::Node_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, b
 			path_ptr->Status (1);
 		}
 	}
-	if (param.sort_method) {
+	if (path_param.sort_method) {
 		if (imp_sort.List_Size () == 0) return (best_to);
 	} else {
 		if (next_index.empty ()) {
@@ -414,7 +414,7 @@ int Path_Builder::Node_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, b
 		
 		//---- remove the approach link from the processing queue ----
 
-		if (param.sort_method) {
+		if (path_param.sort_method) {
 			if (!imp_sort.Remove (from_node)) break;
 		} else {
 			if (next_index.empty ()) break;
@@ -458,7 +458,7 @@ int Path_Builder::Node_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, b
 
 		to_cost = from_cost = path_ptr->Cost ();
 
-		if (param.use != WALK) {
+		if (path_param.use != WALK) {
 			to_walk = from_walk;
 		}
 
@@ -483,7 +483,7 @@ int Path_Builder::Node_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, b
 			if (imped < 1) imped = 1;
 
 			if (random_flag) {
-				imped = DTOI (imped * (1.0 + param.random_imped * (param.random.Probability () - 0.5) / 100.0));
+				imped = DTOI (imped * (1.0 + path_param.random_imped * (path_param.random.Probability () - 0.5) / 100.0));
 			}
 
 			//---- check for the trip end ----
@@ -528,7 +528,7 @@ int Path_Builder::Node_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, b
 							continue;
 						}
 					}
-					if (param.use == WALK) {
+					if (path_param.use == WALK) {
 						to_walk = from_walk + ttim;
 					}
 				
@@ -619,7 +619,7 @@ int Path_Builder::Node_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, b
 					continue;
 				}
 			}
-			if (param.use == WALK) {
+			if (path_param.use == WALK) {
 				to_walk = from_walk + ttime;
 			}
 
@@ -700,7 +700,7 @@ int Path_Builder::Node_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, b
 
 			//---- add the new path to the queue ----
 
-			if (param.sort_method) {
+			if (path_param.sort_method) {
 				if (path_ptr->Status () == 1) {
 					imp_sort.Update (to_node, to_imp);
 				} else {

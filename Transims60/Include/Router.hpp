@@ -57,8 +57,8 @@ private:
 	bool preload_flag;
 
 	Router_Method_Type method;
-	int total_records, num_file_sets, num_time_updates, num_trip_parts, max_speed_updates, num_selected;
-	int iteration, max_iteration, num_trip_sel, num_trip_rec, num_reroute, num_reskim, num_update, num_build, initial_priority;
+	int total_records, num_file_sets, num_time_updates, num_trip_parts, max_speed_updates, num_selected, initial_priority;
+	int iteration, max_iteration, num_trip_sel, num_trip_rec, num_reroute, num_reskim, num_update, num_build, num_copied;
 	double factor, increment, max_factor, link_gap, trip_gap, transit_gap, min_speed_diff, percent_selected;
 	
 	Trip_File *trip_file;

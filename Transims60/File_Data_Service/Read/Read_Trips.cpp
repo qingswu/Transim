@@ -66,6 +66,7 @@ void Data_Service::Read_Trips (Trip_File &file)
 					trip_array.push_back (trip_rec);
 					trip_array.Max_Partition (trip_rec);
 					file.Add_Trip (trip_index.Household (), trip_index.Person (), trip_index.Tour ());
+
 				}
 			}
 		}

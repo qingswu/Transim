@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Links (void)
 {
-	Link_File *file = (Link_File *) System_File_Handle (NEW_LINK);
+	Link_File *file = System_Link_File (true);
 
 	int count = 0;
 	Int_Map_Itr itr;

@@ -51,10 +51,10 @@ void Sim_Plan_Step::Initialize (void)
 	sim_plan_process = new Sim_Plan_Process * [num_threads];
 
 	if (num_threads > 1) {
-		plan_queue.Max_Records (200 + 50 * num_threads);
+		trip_queue.Max_Records (200 + 50 * num_threads);
 
 		for (int i=0; i < num_threads; i++) {
-			sim_plan_process [i] = new Sim_Plan_Process (&plan_queue, i);
+			sim_plan_process [i] = new Sim_Plan_Process (&trip_queue, i);
 			threads.push_back (thread (ref (*(sim_plan_process [i]))));
 		}
 		save_results.Initialize (this);
@@ -87,11 +87,11 @@ bool Sim_Plan_Step::Start_Processing (void)
 	}
 #ifdef THREADS
 	if (num_threads > 1) {
-		plan_queue.Start_Work ();
+		trip_queue.Start_Work ();
 
 		Read_Plans ();
 
-		plan_queue.Complete_Work ();
+		trip_queue.Complete_Work ();
 		return (stat);
 	}
 #endif
@@ -107,7 +107,7 @@ void Sim_Plan_Step::Stop_Processing (void)
 #ifdef THREADS
 	if (sim_plan_process != 0) {
 		if (num_threads > 1) {
-			plan_queue.End_of_Work ();
+			trip_queue.End_of_Work ();
 			threads.Join_All ();
 		}
 		for (int i=0; i < num_threads; i++) {
@@ -130,11 +130,11 @@ void Sim_Plan_Step::Save_Results::operator()()
 	Sim_Trip_Ptr sim_trip_ptr;
 
 	for (;;) {
-		sim_trip_ptr = step_ptr->plan_queue.Get_Result ();
+		sim_trip_ptr = step_ptr->trip_queue.Get_Result ();
 		if (!sim_trip_ptr) break;
 
 		step_ptr->Sim_Plan_Result (sim_trip_ptr);
-		step_ptr->plan_queue.Finished ();
+		step_ptr->trip_queue.Finished ();
 	}
 }
 #endif

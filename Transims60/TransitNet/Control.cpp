@@ -35,11 +35,11 @@ void TransitNet::Program_Control (void)
 
 	//---- set processing flags ----
 
-	Link_File *link_file = (Link_File *) System_File_Handle (LINK);
+	Link_File *link_file = System_Link_File ();
 
 	at_flag = !link_file->Area_Type_Flag () && System_File_Flag (ZONE);
 
-	Route_Nodes_File *nodes_file = (Route_Nodes_File *) System_File_Handle (ROUTE_NODES);
+	Route_Nodes_File *nodes_file = System_Route_Nodes_File ();
 
 	dwell_flag = nodes_file->Dwell_Flag ();
 	time_flag = nodes_file->Time_Flag ();
@@ -74,7 +74,7 @@ void TransitNet::Program_Control (void)
 			route_data_field = route_data_file.Required_Field (ROUTE_FIELD_NAMES);
 		}
 
-		Line_File *file = (Line_File *) System_File_Handle (NEW_TRANSIT_ROUTE);
+		Line_File *file = System_Line_File (true);
 		Field_Ptr fld;
 
 		for (i=0; i < route_data_file.Num_Fields (); i++) {
@@ -140,7 +140,7 @@ void TransitNet::Program_Control (void)
 	}
 	num_periods = schedule_periods.Num_Periods ();
 
-	Route_Nodes_File *fh = (Route_Nodes_File *) System_File_Handle (ROUTE_NODES);
+	Route_Nodes_File *fh = System_Route_Nodes_File ();
 
 	if (fh->Num_Periods () != num_periods) {
 		Error (String ("Transit Time Periods = %d do not match Route Nodes Periods = %d") % num_periods % fh->Num_Periods ());

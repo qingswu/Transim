@@ -147,6 +147,13 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 	last_hhold = last_person = 0;
 
 	for (first=true; ; first=false) {
+		if (Master ()) {
+			if (thread_flag) {
+				Show_Dot ();
+			} else {
+				Show_Progress ();
+			}
+		}
 		if (trip_memory_flag) {
 			if (first) {
 				trip_itr = trip_array.begin ();
@@ -169,13 +176,6 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 			new_ptr->Depart (new_ptr->Start ());
 			new_ptr->Arrive (new_ptr->End ());
 			new_ptr->Activity (new_ptr->Duration ());
-		}
-		if (Master ()) {
-			if (thread_flag) {
-				Show_Dot ();
-			} else {
-				Show_Progress ();
-			}
 		}
 
 		//---- check the household id ----

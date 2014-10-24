@@ -37,9 +37,9 @@ bool Path_Builder::Array_Processing (Plan_Ptr_Array *array_ptr)
 				if (plan_ptr->Method () == COPY_PLAN || plan_ptr->Method () == PATH_FLOWS) {
 					plan_ptr->Arrive (plan_ptr->Arrive () - plan_ptr->Depart () + last_time);
 				}
-				if (!exe->param.ignore_time) {
+				if (!exe->path_param.ignore_time) {
 					if (plan_ptr->Constraint () == START_TIME || plan_ptr->Constraint () == FIXED_TIME) {
-						if ((last_time - plan_ptr->Depart ()) > param.end_time) {
+						if ((last_time - plan_ptr->Depart ()) > path_param.end_time) {
 							plan_ptr->Problem (TIME_PROBLEM);
 							goto skip;
 						}
@@ -76,6 +76,9 @@ bool Path_Builder::Array_Processing (Plan_Ptr_Array *array_ptr)
 				if (!Plan_Reskim (plan_ptr)) return (false);
 				break;
 			case COPY_PLAN:
+				if (exe->Link_Flows ()) {
+					plan_ptr->Activity (Load_Flow (plan_ptr));
+				}
 			default:
 				break;
 		}
@@ -83,7 +86,7 @@ bool Path_Builder::Array_Processing (Plan_Ptr_Array *array_ptr)
 		//---- check for a problem ----
 
 skip:
-		if (plan_ptr->Problem () > 0 && exe->param.ignore_errors) {
+		if (plan_ptr->Problem () > 0 && exe->path_param.ignore_errors) {
 			last_time = -1;
 			duration_flag = false;
 			problem_flag = true;
@@ -102,15 +105,15 @@ skip:
 
 					//---- earlier than expected ----
 
-					if (!param.adjust_schedule || 
-						(!param.ignore_duration && plan_ptr->Constraint () == FIXED_TIME)) {
+					if (!path_param.adjust_schedule || 
+						(!path_param.ignore_duration && plan_ptr->Constraint () == FIXED_TIME)) {
 						last_time = plan_ptr->End ();
 					}
 				} else if (last_time > plan_ptr->End ()) {
 
 					//---- later than expected ----
 
-					if (param.ignore_duration) {
+					if (path_param.ignore_duration) {
 						plan_ptr->Activity (plan_ptr->End () + plan_ptr->Duration () - last_time);
 						if (plan_ptr->Activity () < minute) plan_ptr->Activity (minute);
 					} 
@@ -122,7 +125,7 @@ skip:
 
 			if (!first && plan_ptr->Constraint () == END_TIME) {
 				prev_ptr = *(itr - 1);
-				if (prev_ptr->Constraint () != DURATION || param.ignore_duration) {
+				if (prev_ptr->Constraint () != DURATION || path_param.ignore_duration) {
 					time_limit = prev_ptr->Arrive () + prev_ptr->Activity ();
 					if (time_limit > plan_ptr->Depart ()) {
 						time_limit = prev_ptr->Activity () + plan_ptr->Depart () - time_limit;

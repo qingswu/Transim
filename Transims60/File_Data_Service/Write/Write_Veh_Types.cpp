@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Veh_Types (void)
 {
-	Veh_Type_File *file = (Veh_Type_File *) System_File_Handle (NEW_VEHICLE_TYPE);
+	Veh_Type_File *file = System_Veh_Type_File (true);
 
 	int count = 0;
 	Int_Map_Itr itr;

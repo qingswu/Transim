@@ -72,7 +72,7 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 		}
 	}
 
-	if (param.sort_method) {
+	if (path_param.sort_method) {
 		if (imp_sort.Max_Size () == 0) {
 			imp_sort.Initialize ((int) (exe->dir_array.size () / 2));
 		} else {
@@ -89,7 +89,7 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 
 		link_ptr = &exe->link_array [link_index];
 
-		if (!Use_Permission (link_ptr->Use (), param.use)) {
+		if (!Use_Permission (link_ptr->Use (), path_param.use)) {
 			use_flag = true;
 			continue;
 		}
@@ -151,8 +151,8 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 
 			//---- adjust the travel time ----
 
-			if (param.grade_flag && link_ptr->Grade (ab_flag) > 0) {
-				ttime = ttime / param.veh_type_ptr->Grade (link_ptr->Grade (ab_flag));
+			if (path_param.grade_flag && link_ptr->Grade (ab_flag) > 0) {
+				ttime = ttime / path_param.veh_type_ptr->Grade (link_ptr->Grade (ab_flag));
 			}
 			ttime += delay;
 
@@ -173,22 +173,22 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 					continue;
 				}
 			}
-			cost += DTOI (param.op_cost_rate * length);
+			cost += DTOI (path_param.op_cost_rate * length);
 
 			//---- calculcate the impedance ----
 
-			imped = DTOI (ttime * param.value_time + length * param.value_dist + cost * param.value_cost);
+			imped = DTOI (ttime * path_param.value_time + length * path_param.value_dist + cost * path_param.value_cost);
 			if (imped < 0) continue;
 
 			if (link_ptr->Type () == FREEWAY) {
-				factor = param.freeway_fac;
+				factor = path_param.freeway_fac;
 			} else if (link_ptr->Type () == EXPRESSWAY) {
-				factor = param.express_fac;
+				factor = path_param.express_fac;
 			} else {
 				factor = 1.0;
 			}
 			if (random_flag) {
-				factor = 1.0 + param.random_imped * (param.random.Probability () - 0.5) / 100.0;
+				factor = 1.0 + path_param.random_imped * (path_param.random.Probability () - 0.5) / 100.0;
 			}
 			if (factor != 1.0) {
 				imped = DTOI (imped * factor);
@@ -296,8 +296,8 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 
 			//---- adjust the travel time ----
 
-			if (param.grade_flag && link_ptr->Grade (ab_flag) > 0) {
-				ttime = ttime / param.veh_type_ptr->Grade (link_ptr->Grade (ab_flag));
+			if (path_param.grade_flag && link_ptr->Grade (ab_flag) > 0) {
+				ttime = ttime / path_param.veh_type_ptr->Grade (link_ptr->Grade (ab_flag));
 			}
 			ttime += delay;
 
@@ -318,22 +318,22 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 					continue;
 				}
 			}
-			cost += DTOI (param.op_cost_rate * length);
+			cost += DTOI (path_param.op_cost_rate * length);
 
 			//---- calculcate the impedance ----
 
-			imped = DTOI (ttime * param.value_time + length * param.value_dist + cost * param.value_cost);
+			imped = DTOI (ttime * path_param.value_time + length * path_param.value_dist + cost * path_param.value_cost);
 			if (imped < 0) continue;
 
 			if (link_ptr->Type () == FREEWAY) {
-				factor = param.freeway_fac;
+				factor = path_param.freeway_fac;
 			} else if (link_ptr->Type () == EXPRESSWAY) {
-				factor = param.express_fac;
+				factor = path_param.express_fac;
 			} else {
 				factor = 1.0;
 			}
 			if (random_flag) {
-				factor = 1.0 + param.random_imped * (param.random.Probability () - 0.5) / 100.0;
+				factor = 1.0 + path_param.random_imped * (path_param.random.Probability () - 0.5) / 100.0;
 			}
 			if (factor != 1.0) {
 				imped = DTOI (imped * factor);
@@ -355,7 +355,7 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 
 			//---- add the record to the queue ----
 
-			if (param.sort_method) {
+			if (path_param.sort_method) {
 				if (path_ptr->Status () == 1) {
 					imp_sort.Update (index, to_imp);
 				} else {
@@ -383,7 +383,7 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 			path_ptr->Status (1);
 		}
 	}
-	if (param.sort_method) {
+	if (path_param.sort_method) {
 		if (imp_sort.List_Size () == 0) {
 			return (best_to);
 		}
@@ -399,7 +399,7 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 
 		//---- calculate the from-to distance ----
 
-		if (param.distance_flag || param.local_flag) {
+		if (path_param.distance_flag || path_param.local_flag) {
 
 			//---- find the composite origin location ----
 
@@ -464,19 +464,19 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 
 			dist1 = UnRound (sqrt (dx * dx + dy * dy));
 
-			max_len = dist1 * (param.max_ratio - 1.0);
+			max_len = dist1 * (path_param.max_ratio - 1.0);
 
-			if (max_len < param.min_distance) {
-				max_len = param.min_distance;
-			} else if (max_len > param.max_distance) {
-				max_len = param.max_distance;
+			if (max_len < path_param.min_distance) {
+				max_len = path_param.min_distance;
+			} else if (max_len > path_param.max_distance) {
+				max_len = path_param.max_distance;
 			}
 			max_len += dist1;
 
 			max_len = Round (max_len);
 			max_len *= max_len;
 
-			max_local = Round (param.local_distance);
+			max_local = Round (path_param.local_distance);
 			max_local *= max_local;
 		}
 
@@ -501,7 +501,7 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 		
 		//---- remove the approach link from the processing queue ----
 		
-		if (param.sort_method) {
+		if (path_param.sort_method) {
 			if (!imp_sort.Remove (approach)) break;
 		} else {
 			if (next_index.empty ()) break;
@@ -532,7 +532,7 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 				continue;
 			}
 		}
-		if (param.turn_delay_flag) {
+		if (path_param.turn_delay_flag) {
 			turn_period_ptr = exe->turn_period_array.Period_Ptr (from_time);
 		}
 		from_len = path_ptr->Length ();
@@ -543,13 +543,13 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 
 		//---- check the circuity, local access and restrictions ----
 
-		if (plan_flag && (param.distance_flag || param.local_flag || restrict_flag)) {
+		if (plan_flag && (path_param.distance_flag || path_param.local_flag || restrict_flag)) {
 			link_ptr = &exe->link_array [app_ptr->Link ()];
 
 			if (restrict_flag) {
 				restrict_in = Use_Permission (link_ptr->Use (), RESTRICTED);
 			}
-			if (param.distance_flag || param.local_flag) {
+			if (path_param.distance_flag || path_param.local_flag) {
 				if (app_ptr->Dir () == 0) {
 					if (forward_flag) {
 						node_ptr = &exe->node_array [link_ptr->Bnode ()];
@@ -576,11 +576,11 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 
 				dist2 = dx * dx + dy * dy;
 
-				if (param.distance_flag && (dist1 + dist2) > max_len) {
+				if (path_param.distance_flag && (dist1 + dist2) > max_len) {
 					dist_flag = true;
 					continue;
 				}
-				if (param.local_flag) {
+				if (path_param.local_flag) {
 					if (dist1 < dist2) {
 						local_flag = (dist1 <= max_local);
 					} else {
@@ -588,11 +588,11 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 						dist1 = dist2;
 					}
 					if (!local_flag) {
-						if (param.local_factor == 0.0) {
+						if (path_param.local_factor == 0.0) {
 							local_factor = 0.0;
 						} else {
 							dist1 = dist1 / max_local;
-							local_factor = ((dist1 * dist1) - 1) * param.local_factor + 1;
+							local_factor = ((dist1 * dist1) - 1) * path_param.local_factor + 1;
 							if (local_factor < 1.0) local_factor = 1.0;
 							if (local_factor > 25.0) local_factor = 25.0;
 						}
@@ -625,10 +625,10 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 					if (turn_pen_ptr->Dir_Index () != connect_ptr->Dir_Index ()) continue;
 				}
 				if (turn_pen_ptr->Start () <= from_time && from_time < turn_pen_ptr->End ()) {
-					if (param.veh_type < 0 || turn_pen_ptr->Min_Veh_Type () < 0 || 
-						(turn_pen_ptr->Min_Veh_Type () <= param.veh_type && param.veh_type <= turn_pen_ptr->Max_Veh_Type ())) {
+					if (path_param.veh_type < 0 || turn_pen_ptr->Min_Veh_Type () < 0 || 
+						(turn_pen_ptr->Min_Veh_Type () <= path_param.veh_type && path_param.veh_type <= turn_pen_ptr->Max_Veh_Type ())) {
 
-						if (turn_pen_ptr->Use () == 0 || Use_Permission (turn_pen_ptr->Use (), param.use)) break;
+						if (turn_pen_ptr->Use () == 0 || Use_Permission (turn_pen_ptr->Use (), path_param.use)) break;
 					}
 				}
 			}
@@ -653,7 +653,7 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 
 			//---- check the vehicle type ----
 
-			if (!Use_Permission (link_ptr->Use (), param.use)) {
+			if (!Use_Permission (link_ptr->Use (), path_param.use)) {
 				use_flag = true;
 				continue;
 			}
@@ -667,24 +667,24 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 
 			//---- get the travel time ----
 
-			if (param.turn_delay_flag && period >= 0) {
+			if (path_param.turn_delay_flag && period >= 0) {
 				penalty += turn_ptr->Time ();
 			}
-			if (param.grade_flag && link_ptr->Grade (ab_flag) > 0) {
-				ttime = ttime / param.veh_type_ptr->Grade (link_ptr->Grade (ab_flag));
+			if (path_param.grade_flag && link_ptr->Grade (ab_flag) > 0) {
+				ttime = ttime / path_param.veh_type_ptr->Grade (link_ptr->Grade (ab_flag));
 			}
 			ttime += delay;
-			pen_imp = DTOI (penalty * param.value_time);
+			pen_imp = DTOI (penalty * path_param.value_time);
 
 			//---- add turn impedance penalty ----
 
 			if (turn_flag) {
 				if (connect_ptr->Type () == LEFT) {
-					imp = param.left_imped;
+					imp = path_param.left_imped;
 				} else if (connect_ptr->Type () == RIGHT) {
-					imp = param.right_imped;
+					imp = path_param.right_imped;
 				} else if (connect_ptr->Type () == UTURN) {
-					imp = param.uturn_imped;
+					imp = path_param.uturn_imped;
 				} else {
 					imp = 0;
 				}
@@ -695,18 +695,18 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 				}
 			}
 			cst = cost;
-			op_cost = DTOI (param.op_cost_rate * link_ptr->Length ());
+			op_cost = DTOI (path_param.op_cost_rate * link_ptr->Length ());
 			cost += op_cost;
 
 			//---- calculate the link impedance ----
 
-			imped = DTOI (ttime * param.value_time + link_ptr->Length () * param.value_dist + cost * param.value_cost);
+			imped = DTOI (ttime * path_param.value_time + link_ptr->Length () * path_param.value_dist + cost * path_param.value_cost);
 			if (imped < 0) continue;
 
 			if (link_ptr->Type () == FREEWAY) {
-				factor = param.freeway_fac;
+				factor = path_param.freeway_fac;
 			} else if (link_ptr->Type () == EXPRESSWAY) {
-				factor = param.express_fac;
+				factor = path_param.express_fac;
 			} else {
 				factor = 1.0;
 			}
@@ -716,7 +716,7 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 
 			//---- check the local access restrictions ----
 
-			if (!local_flag && link_ptr->Type () >= param.local_type && link_ptr->Type () <= LOCAL) {
+			if (!local_flag && link_ptr->Type () >= path_param.local_type && link_ptr->Type () <= LOCAL) {
 				if (local_factor == 0.0) {
 					local_acc_flag = true;
 					continue;
@@ -732,8 +732,8 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 				imp = 1;
 			}
 			if (random_flag) {
-				imped = DTOI (imped * (1.0 + param.random_imped * (param.random.Probability () - 0.5) / 100.0));
-				pen_imp = DTOI (pen_imp * (1.0 + param.random_imped * (param.random.Probability () - 0.5) / 100.0));
+				imped = DTOI (imped * (1.0 + path_param.random_imped * (path_param.random.Probability () - 0.5) / 100.0));
+				pen_imp = DTOI (pen_imp * (1.0 + path_param.random_imped * (path_param.random.Probability () - 0.5) / 100.0));
 			}
 			to_walk = from_walk;
 
@@ -898,7 +898,7 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 
 			//---- add the new path to the queue ----
 
-			if (param.sort_method) {
+			if (path_param.sort_method) {
 				if (path_ptr->Status () == 1) {
 					imp_sort.Update (index, to_imp);
 				} else {

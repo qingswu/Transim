@@ -15,7 +15,7 @@ bool NewFormat::Get_Skim_Data (Skim_File &file, Skim_Record &skim_rec, int parti
 
 	if (part_num != partition) {
 		part_num = partition;
-		out_file = (Skim_File *) System_File_Handle (NEW_SKIM);
+		out_file = System_Skim_File (true);
 
 		if (out_file->Part_Flag () && part_num > 1) {
 			if (!out_file->Open (part_num)) {

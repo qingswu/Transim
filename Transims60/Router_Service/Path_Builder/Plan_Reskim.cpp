@@ -30,7 +30,7 @@ bool Path_Builder::Plan_Reskim (Plan_Ptr plan_ptr)
 
 	//---- set the traveler parameters ----
 	
-	exe->Set_Parameters (param, plan_ptr->Type (), plan_ptr->Veh_Type ());
+	exe->Set_Parameters (path_param, plan_ptr->Type (), plan_ptr->Veh_Type ());
 
 	time = drive = 0;
 	dir_index = -1;
@@ -88,11 +88,11 @@ bool Path_Builder::Plan_Reskim (Plan_Ptr plan_ptr)
 				} else {
 					len_factor = len / link_ptr->Length ();
 				}
-				time = perf_period_array_ptr->Flow_Time (index, tod, len_factor, link_ptr->Length (), param.pce, param.occupancy);
+				time = perf_period_array_ptr->Flow_Time (index, tod, len_factor, link_ptr->Length (), path_param.pce, path_param.occupancy);
 
 				diff = time - leg_itr->Time ();
 				leg_itr->Time (time);
-				imped += Resolve (diff * param.value_time);
+				imped += Resolve (diff * path_param.value_time);
 				leg_itr->Impedance (imped);
 
 				if (dir_index >= 0 && turn_flag) {
@@ -102,7 +102,7 @@ bool Path_Builder::Plan_Reskim (Plan_Ptr plan_ptr)
 
 						if (turn_period_ptr != 0) {
 							turn_ptr = turn_period_ptr->Data_Ptr (map2_itr->second);
-							turn_ptr->Add_Turn (param.pce);
+							turn_ptr->Add_Turn (path_param.pce);
 						}
 					}
 				}
@@ -166,11 +166,11 @@ bool Path_Builder::Plan_Reskim (Plan_Ptr plan_ptr)
 				} else {
 					len_factor = len / link_ptr->Length ();
 				}
-				time = perf_period_array_ptr->Flow_Time (index, tod, len_factor, link_ptr->Length (), param.pce, param.occupancy, false);
+				time = perf_period_array_ptr->Flow_Time (index, tod, len_factor, link_ptr->Length (), path_param.pce, path_param.occupancy, false);
 
 				diff = time - leg_ritr->Time ();
 				leg_ritr->Time (time);
-				imped += Resolve (diff * param.value_time);
+				imped += Resolve (diff * path_param.value_time);
 				leg_ritr->Impedance (imped);
 
 				if (dir_index >= 0 && turn_flag) {
@@ -180,7 +180,7 @@ bool Path_Builder::Plan_Reskim (Plan_Ptr plan_ptr)
 
 						if (turn_period_ptr != 0) {
 							turn_ptr = turn_period_ptr->Data_Ptr (map2_itr->second);
-							turn_ptr->Add_Turn (param.pce);
+							turn_ptr->Add_Turn (path_param.pce);
 						}
 					}
 				}

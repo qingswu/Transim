@@ -172,6 +172,7 @@ public:
 	Dtime Travel_Time (int dir_index, Dtime time, double len_factor, bool forward_flag);
 
 	Dtime Flow_Time (int dir_index, Dtime time, double len_factor, double len, double pce, double occ, bool forward_flag = true);
+	Dtime Load_Flow (int dir_index, Dtime time, Dtime ttime, double len_factor, double len, double pce, double occ);
 
 	Perf_Period * Period_Ptr (Dtime time);
 	Perf_Period * Period_Ptr (int period)      { return (&at (period)); }

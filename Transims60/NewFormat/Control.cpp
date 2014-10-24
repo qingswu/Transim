@@ -31,13 +31,13 @@ void NewFormat::Program_Control (void)
 
 	if (copy_flag) {
 		if (System_File_Flag (LOCATION) && System_File_Flag (NEW_LOCATION)) {
-			Location_File *file = (Location_File *) System_File_Handle (LOCATION);
-			new_loc_file = (Location_File *) System_File_Handle (NEW_LOCATION);
+			Location_File *file = System_Location_File ();
+			new_loc_file = System_Location_File (true);
 			new_loc_file->Add_User_Fields (file);
 		}
 		if (System_File_Flag (ZONE) && System_File_Flag (NEW_ZONE)) {
-			Zone_File *file = (Zone_File *) System_File_Handle (ZONE);
-			new_zone_file = (Zone_File *) System_File_Handle (NEW_ZONE);
+			Zone_File *file = System_Zone_File ();
+			new_zone_file = System_Zone_File (true);
 			new_zone_file->Add_User_Fields (file);
 		}
 	}
@@ -129,7 +129,7 @@ void NewFormat::Program_Control (void)
 		if (activity_flag) {
 			Error ("A Vehicle file is required to convert an Activity file");
 		} else if (new_trip_flag && System_File_Flag (TRIP)) {
-			Trip_File *file = (Trip_File *) System_File_Handle (TRIP);
+			Trip_File *file = System_Trip_File ();
 
 			if (file->Version () < 40) {
 				Error ("A Vehicle file is required to convert an old Trip file");

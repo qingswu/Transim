@@ -13,7 +13,7 @@ void Data_Service::Write_Selections (void)
 {
 	int part, num_part, count;
 
-	Selection_File *file = (Selection_File *) System_File_Handle (NEW_SELECTION);
+	Selection_File *file = System_Selection_File (true);
 
 	Select_Data *data_ptr;
 	Select_Map_Itr itr;

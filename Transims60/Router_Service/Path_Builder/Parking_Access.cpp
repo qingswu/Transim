@@ -75,9 +75,9 @@ bool Path_Builder::Origin_Parking (Trip_End_Array *org_ptr, Path_End_Array *from
 				//--- save the access link attributes ----
 
 				ttime = access_ptr->Time ();
-				length = (int) (ttime * param.walk_speed + 0.5);
+				length = (int) (ttime * path_param.walk_speed + 0.5);
 				cost = Round (access_ptr->Cost ());
-				imped = DTOI (ttime * param.value_walk + cost * param.value_cost);
+				imped = DTOI (ttime * path_param.value_walk + cost * path_param.value_cost);
 
 				path_data.Add_Imped (imped);
 				path_data.Add_Time ((forward_flag) ? ttime : -ttime);
@@ -98,7 +98,7 @@ bool Path_Builder::Origin_Parking (Trip_End_Array *org_ptr, Path_End_Array *from
 
 				for (park_itr = lot_ptr->begin (); park_itr != lot_ptr->end (); park_itr++) {
 					if (park_itr->Start () <= path_data.Time () && path_data.Time () <= park_itr->End ()) {
-						if (park_itr->Use () == 0 || Use_Permission (park_itr->Use (), param.use)) {
+						if (park_itr->Use () == 0 || Use_Permission (park_itr->Use (), path_param.use)) {
 							if (forward_flag) {
 								ttime = park_itr->Time_Out ();
 							} else {
@@ -115,11 +115,11 @@ bool Path_Builder::Origin_Parking (Trip_End_Array *org_ptr, Path_End_Array *from
 						}
 					}
 				}
-				imped = DTOI (ttime * param.value_park + cost * param.value_cost);
+				imped = DTOI (ttime * path_param.value_park + cost * path_param.value_cost);
 
 				//---- add the parking penalty ----
 
-				if (!forward_flag && param.park_pen_flag) {
+				if (!forward_flag && path_param.park_pen_flag) {
 					imped += exe->park_penalty [lot];
 				}
 
@@ -201,10 +201,10 @@ bool Path_Builder::Origin_Parking (Trip_End_Array *org_ptr, Path_End_Array *from
 		length = loc_ptr->Setback ();
 		if (length < 1) length = 1;
 
-		if (!param.walk_detail && diff > near_offset) length += diff;
+		if (!path_param.walk_detail && diff > near_offset) length += diff;
 
-		ttime = (int) (length / param.walk_speed + 0.5);
-		imped = DTOI (ttime * param.value_walk);
+		ttime = (int) (length / path_param.walk_speed + 0.5);
+		imped = DTOI (ttime * path_param.value_walk);
 
 		path_data.Add_Imped (imped);
 		path_data.Add_Time ((forward_flag) ? ttime : -ttime);
@@ -219,11 +219,11 @@ bool Path_Builder::Origin_Parking (Trip_End_Array *org_ptr, Path_End_Array *from
 
 		//---- walk along the link ----
 
-		if (param.walk_detail && diff > near_offset) {
+		if (path_param.walk_detail && diff > near_offset) {
 			length = diff;
 
-			ttime = (int) (length / param.walk_speed + 0.5);
-			imped = DTOI (ttime * param.value_walk);
+			ttime = (int) (length / path_param.walk_speed + 0.5);
+			imped = DTOI (ttime * path_param.value_walk);
 
 			path_data.Add_Imped (imped);
 			path_data.Add_Time ((forward_flag) ? ttime : -ttime);
@@ -249,7 +249,7 @@ bool Path_Builder::Origin_Parking (Trip_End_Array *org_ptr, Path_End_Array *from
 
 		for (park_itr = lot_ptr->begin (); park_itr != lot_ptr->end (); park_itr++) {
 			if (park_itr->Start () <= path_data.Time () && path_data.Time () <= park_itr->End ()) {
-				if (park_itr->Use () == 0 || Use_Permission (park_itr->Use (), param.use)) {
+				if (park_itr->Use () == 0 || Use_Permission (park_itr->Use (), path_param.use)) {
 					if (forward_flag) {
 						ttime = park_itr->Time_Out ();
 					} else {
@@ -266,11 +266,11 @@ bool Path_Builder::Origin_Parking (Trip_End_Array *org_ptr, Path_End_Array *from
 				}
 			}
 		}
-		imped = DTOI (ttime * param.value_park + cost * param.value_cost);
+		imped = DTOI (ttime * path_param.value_park + cost * path_param.value_cost);
 
 		//---- add the parking penalty ----
 
-		if (!forward_flag && param.park_pen_flag) {
+		if (!forward_flag && path_param.park_pen_flag) {
 			imped += exe->park_penalty [lot];
 		}
 
@@ -366,9 +366,9 @@ bool Path_Builder::Destination_Parking (Trip_End_Array *des_ptr, Path_End_Array 
 				//--- save the access link attributes ----
 
 				ttime = access_ptr->Time ();
-				length = (int) (ttime * param.walk_speed + 0.5);
+				length = (int) (ttime * path_param.walk_speed + 0.5);
 				cost = Round (access_ptr->Cost ());
-				imped = DTOI (ttime * param.value_walk + cost * param.value_cost);
+				imped = DTOI (ttime * path_param.value_walk + cost * path_param.value_cost);
 
 				tot_imp += imped;
 				tod += ((!forward_flag) ? ttime : -ttime);
@@ -391,7 +391,7 @@ bool Path_Builder::Destination_Parking (Trip_End_Array *des_ptr, Path_End_Array 
 
 				for (park_itr = lot_ptr->begin (); park_itr != lot_ptr->end (); park_itr++) {
 					if (park_itr->Start () <= tod && tod <= park_itr->End ()) {
-						if (park_itr->Use () == 0 || Use_Permission (park_itr->Use (), param.use)) {
+						if (park_itr->Use () == 0 || Use_Permission (park_itr->Use (), path_param.use)) {
 							if (!forward_flag) {
 								ttime = park_itr->Time_Out ();
 							} else {
@@ -409,11 +409,11 @@ bool Path_Builder::Destination_Parking (Trip_End_Array *des_ptr, Path_End_Array 
 						}
 					}
 				}
-				imped = DTOI (ttime * param.value_park + cost * param.value_cost);
+				imped = DTOI (ttime * path_param.value_park + cost * path_param.value_cost);
 
 				//---- add the parking penalty ----
 
-				if (forward_flag && param.park_pen_flag) {
+				if (forward_flag && path_param.park_pen_flag) {
 					imped += exe->park_penalty [lot];
 				}
 				tot_imp += imped;
@@ -505,10 +505,10 @@ bool Path_Builder::Destination_Parking (Trip_End_Array *des_ptr, Path_End_Array 
 		length = loc_ptr->Setback ();
 		if (length < 1) length = 1;
 
-		if (!param.walk_detail && diff > near_offset) length += diff;
+		if (!path_param.walk_detail && diff > near_offset) length += diff;
 
-		ttime = (int) (length / param.walk_speed + 0.5);
-		imped = DTOI (ttime * param.value_walk);
+		ttime = (int) (length / path_param.walk_speed + 0.5);
+		imped = DTOI (ttime * path_param.value_walk);
 
 		tot_imp += imped;
 		tod += (!forward_flag) ? ttime : -ttime;		
@@ -525,11 +525,11 @@ bool Path_Builder::Destination_Parking (Trip_End_Array *des_ptr, Path_End_Array 
 
 		//---- walk along the link ----
 
-		if (param.walk_detail && diff > near_offset) {
+		if (path_param.walk_detail && diff > near_offset) {
 			length = diff;
 
-			ttime = (int) (length / param.walk_speed + 0.5);
-			imped = DTOI (ttime * param.value_walk);
+			ttime = (int) (length / path_param.walk_speed + 0.5);
+			imped = DTOI (ttime * path_param.value_walk);
 
 			tot_imp += imped;
 			tod += (!forward_flag) ? ttime : -ttime;		
@@ -555,7 +555,7 @@ bool Path_Builder::Destination_Parking (Trip_End_Array *des_ptr, Path_End_Array 
 
 		for (park_itr = lot_ptr->begin (); park_itr != lot_ptr->end (); park_itr++) {
 			if (park_itr->Start () <= tod && tod <= park_itr->End ()) {
-				if (park_itr->Use () == 0 || Use_Permission (park_itr->Use (), param.use)) {
+				if (park_itr->Use () == 0 || Use_Permission (park_itr->Use (), path_param.use)) {
 					if (!forward_flag) {
 						ttime = park_itr->Time_Out ();
 					} else {
@@ -573,11 +573,11 @@ bool Path_Builder::Destination_Parking (Trip_End_Array *des_ptr, Path_End_Array 
 				}
 			}
 		}
-		imped = DTOI (ttime * param.value_park + cost * param.value_cost);
+		imped = DTOI (ttime * path_param.value_park + cost * path_param.value_cost);
 
 		//---- add the parking penalty ----
 
-		if (forward_flag && param.park_pen_flag) {
+		if (forward_flag && path_param.park_pen_flag) {
 			imped += exe->park_penalty [lot];
 		}
 		tot_imp += imped;

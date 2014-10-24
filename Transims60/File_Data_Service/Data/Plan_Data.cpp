@@ -76,19 +76,13 @@ bool Plan_Leg::Internal_IDs (void)
 			} else {
 				dir = link_ptr->AB_Dir ();
 			}
-			if (dir < 0) {
-				if (Link_Dir ()) {
-					id = -map_itr->second;
-				} else {
-					id = map_itr->second;
-				}
+			if (dir < 0) return (false);
+
+			id = dir;
+			if (Use_Type ()) {
+				Type (USE_ID);
 			} else {
-				id = dir;
-				if (Use_Type ()) {
-					Type (USE_ID);
-				} else {
-					Type (DIR_ID);
-				}
+				Type (DIR_ID);
 			}
 			break;
 		case NODE_ID:

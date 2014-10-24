@@ -45,7 +45,7 @@ private:
 #ifdef THREADS
 	int num_threads;
 	Threads threads;
-	Plan_Queue plan_queue;
+	Trip_Queue trip_queue;
 	Sim_Plan_Process **sim_plan_process;
 
 	//---------------------------------------------------------

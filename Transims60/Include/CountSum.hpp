@@ -73,7 +73,7 @@ private:
 	List_Array node_list;
 	Link_Data_File link_data_file, *min_data_file, *max_data_file;
 
-	Vol_Spd_Period_Array  count_day_array;
+	Vol_Spd_Period_Array  count_day_array, vol_spd_array;
 
 	Int_Map id_map;
 

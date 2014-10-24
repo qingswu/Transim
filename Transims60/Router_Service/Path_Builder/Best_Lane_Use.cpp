@@ -22,7 +22,7 @@ bool Path_Builder::Best_Lane_Use (int index, Dtime time, double len_factor, Dtim
 
 	dir_ptr = &exe->dir_array [index];
 
-	if (param.delay_flag) {
+	if (path_param.delay_flag) {
 		ttimes [0] = exe->perf_period_array.Travel_Time (index, time, len_factor, forward_flag);
 		if (dir_ptr->Use_Index () >= 0) {
 			ttimes [1] = exe->perf_period_array.Travel_Time (dir_ptr->Use_Index (), time, len_factor, forward_flag);
@@ -54,7 +54,7 @@ bool Path_Builder::Best_Lane_Use (int index, Dtime time, double len_factor, Dtim
 	use_type [0] = (period_ptr->Lanes (0) == 0) ? PROHIBIT : APPLY;
 	use_type [1] = (period_ptr->Lanes (1) == 0) ? PROHIBIT : APPLY;
 
-	type = param.traveler_type;
+	type = path_param.traveler_type;
 
 	num = period_ptr->Records ();
 	index = period_ptr->Index ();
@@ -69,24 +69,24 @@ bool Path_Builder::Best_Lane_Use (int index, Dtime time, double len_factor, Dtim
 		lanes = use_ptr->High_Lane () - use_ptr->Low_Lane () + 1;
 
 		if (lanes >= period_ptr->Lanes (grp)) {
-			if (param.veh_type < 0 || use_ptr->Min_Veh_Type () < 0 || 
-				(use_ptr->Min_Veh_Type () <= param.veh_type && param.veh_type <= use_ptr->Max_Veh_Type ())) {
+			if (path_param.veh_type < 0 || use_ptr->Min_Veh_Type () < 0 || 
+				(use_ptr->Min_Veh_Type () <= path_param.veh_type && path_param.veh_type <= use_ptr->Max_Veh_Type ())) {
 
 				if (type == 0 || use_ptr->Min_Traveler () < 0 || 
 					(use_ptr->Min_Traveler () <= type && type <= use_ptr->Max_Traveler ())) {
 
-					if (Use_Permission (use_ptr->Use (), param.use)) {
+					if (Use_Permission (use_ptr->Use (), path_param.use)) {
 						if (use_ptr->Type () == APPLY) {
 							cst = use_ptr->Toll ();
 							tt = use_ptr->Min_Delay ();
 							if (use_ptr->Max_Delay () > use_ptr->Min_Delay ()) {
 								map_stat = lane_use_delay.insert (Int_Map_Data (use_index->Link_Dir (), 0));
 								if (map_stat.second) {
-									map_stat.first->second = DTOI ((use_ptr->Max_Delay () - use_ptr->Min_Delay ()) * param.random.Probability ());
+									map_stat.first->second = DTOI ((use_ptr->Max_Delay () - use_ptr->Min_Delay ()) * path_param.random.Probability ());
 								}
 								tt += map_stat.first->second;
 							}
-							imp = Resolve (tt * param.value_time + cst * param.value_cost);
+							imp = Resolve (tt * path_param.value_time + cst * path_param.value_cost);
 							if (imp < best [grp] || best [grp] == 0) {
 								delays [grp] = tt;
 								costs [grp] = cst;
@@ -113,11 +113,11 @@ bool Path_Builder::Best_Lane_Use (int index, Dtime time, double len_factor, Dtim
 	if (use_type [0] == PROHIBIT && use_type [1] == PROHIBIT) return (false);
 
 	if (use_type [0] == APPLY && use_type [1] == APPLY) {
-		best [0] += Resolve (ttimes [0] * param.value_time);
-		best [1] += Resolve (ttimes [1] * param.value_time);
+		best [0] += Resolve (ttimes [0] * path_param.value_time);
+		best [1] += Resolve (ttimes [1] * path_param.value_time);
 
 		if (random_flag) {
-			factor = 1.0 + param.random_imped * (param.random.Probability () - 0.5) / 100.0;
+			factor = 1.0 + path_param.random_imped * (path_param.random.Probability () - 0.5) / 100.0;
 			best [1] = DTOI (best [1] * factor);
 		}
 		group = (best [1] < best [0]) ? 1 : 0;

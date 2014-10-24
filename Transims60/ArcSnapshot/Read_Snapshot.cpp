@@ -145,11 +145,16 @@ void ArcSnapshot::Read_Snapshot (void)
 			arcview_snapshot.Put_Field (square_field, size);
 		}
 		if (compress_flag) {
+			Link_Data *link_ptr = &link_array [snapshot_file.Link ()];
+			int index = (snapshot_file.Dir () == 0) ? link_ptr->AB_Dir () : link_ptr->BA_Dir ();
+			Dir_Data *dir_ptr = &dir_array [index];
+			int lane = Make_Lane_ID (dir_ptr, snapshot_file.Lane ());
+
 			dummy_snapshot.Household (snapshot_file.Household ());
 			dummy_snapshot.Time (end_time);
 			dummy_snapshot.Link (snapshot_file.Link ());
 			dummy_snapshot.Dir (snapshot_file.Dir ());
-			dummy_snapshot.Lane (snapshot_file.Lane ());
+			dummy_snapshot.Lane (lane);
 			dummy_snapshot.Offset (snapshot_file.Offset ());
 			dummy_snapshot.Speed (snapshot_file.Speed ());
 			dummy_snapshot.Passengers (snapshot_file.Passengers ());

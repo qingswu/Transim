@@ -36,7 +36,8 @@ public:
 protected:
 	enum LinkSum_Keys { 
 		COMPARE_PERFORMANCE_FILE = 1, COMPARE_PERFORMANCE_FORMAT, MINIMUM_LINK_VOLUME,
-		SELECT_BY_LINK_GROUP,  COMPARE_TURN_DELAY_FILE, COMPARE_TURN_DELAY_FORMAT, 
+		PERSON_BASED_STATISTICS, SELECT_BY_LINK_GROUP,  
+		COMPARE_TURN_DELAY_FILE, COMPARE_TURN_DELAY_FORMAT, 
 		TURN_NODE_RANGE, NEW_LINK_ACTIVITY_FILE, NEW_LINK_ACTIVITY_FORMAT, 
 		COPY_LOCATION_FIELDS, NEW_ZONE_TRAVEL_FILE, NEW_ZONE_TRAVEL_FORMAT, 
 		NEW_GROUP_TRAVEL_FILE, NEW_GROUP_TRAVEL_FORMAT, 
@@ -56,7 +57,7 @@ private:
 		TIME_DISTRIB, VC_RATIOS, TIME_CHANGE, VOLUME_CHANGE, TRAVEL_TIME,
 		PERF_REPORT, PERF_SUMMARY, GROUP_REPORT, GROUP_SUMMARY, RELATIVE_GAP };
 
-	bool select_flag, activity_flag, zone_flag, group_flag;
+	bool select_flag, activity_flag, zone_flag, group_flag, person_flag;
 	bool compare_flag, group_select, summary_flag, group_sum_flag, turn_flag, turn_compare_flag;
 	int increment, num_inc, nerror;
 	double header_value, cap_factor, minimum_volume, congested_ratio;

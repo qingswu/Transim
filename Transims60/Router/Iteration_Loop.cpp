@@ -182,7 +182,7 @@ void Router::Iteration_Loop (void)
 		//---- build count ----
 
 		Write (1, "Number of Paths Built = ") << num_build;
-		num = num_build + num_update;
+		num = num_build + num_update + num_copied;
 		if (num > 0) Write (0, String (" (%.1lf%%)") % (num_build * 100.0 / num) % FINISH);
 
 		//---- processing time summary ----
@@ -237,7 +237,7 @@ void Router::Iteration_Loop (void)
 		if (!last_flag) {
 			if (save_flag) {
 				if (System_File_Flag (NEW_PERFORMANCE)) {
-					Db_File *file = System_File_Handle (NEW_PERFORMANCE);
+					Performance_File *file = System_Performance_File (true);
 					if (file->Part_Flag ()) {
 						file->Open (iteration);
 					} else {
@@ -251,7 +251,7 @@ void Router::Iteration_Loop (void)
 					}
 				}
 				if (rider_flag) {
-					System_File_Handle (NEW_RIDERSHIP)->Create ();
+					System_Ridership_File (true)->Create ();
 					Write_Ridership ();
 				}
 			}
@@ -277,7 +277,7 @@ void Router::Iteration_Loop (void)
 					plan_file->Reset_Counters ();
 				}
 			}
-			num_build = num_reroute = num_reskim = num_update = 0;
+			num_build = num_reroute = num_reskim = num_update = num_copied = 0;
 			Reset_Problems ();
 		}
 	}

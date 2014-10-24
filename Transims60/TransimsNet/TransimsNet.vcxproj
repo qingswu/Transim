@@ -237,7 +237,7 @@
       <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -317,16 +317,19 @@
     <ClCompile Include="Execute.cpp" />
     <ClCompile Include="Get_Access_Data.cpp" />
     <ClCompile Include="Get_Connect_Data.cpp" />
+    <ClCompile Include="Get_Detector_Data.cpp" />
     <ClCompile Include="Get_Lane_Use_Data.cpp" />
     <ClCompile Include="Get_Link_Data.cpp" />
     <ClCompile Include="Get_Location_Data.cpp" />
     <ClCompile Include="Get_Node_Data.cpp" />
     <ClCompile Include="Get_Parking_Data.cpp" />
+    <ClCompile Include="Get_Phasing_Data.cpp" />
     <ClCompile Include="Get_Pocket_Data.cpp" />
     <ClCompile Include="Get_Shape_Data.cpp" />
     <ClCompile Include="Get_Signal_Data.cpp" />
     <ClCompile Include="Get_Sign_Data.cpp" />
     <ClCompile Include="Get_Stop_Data.cpp" />
+    <ClCompile Include="Get_Timing_Data.cpp" />
     <ClCompile Include="Get_Turn_Pen_Data.cpp" />
     <ClCompile Include="Get_Zone_Data.cpp" />
     <ClCompile Include="Lane_Ranges.cpp" />

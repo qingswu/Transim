@@ -43,8 +43,10 @@ bool ArcNet::Get_Parking_Data (Parking_File &file, Parking_Data &parking_rec)
 						return (false);
 					}
 				}
-				if (!arcview_parking.Write_Record ()) {
-					Error (String ("Writing %s") % arcview_parking.File_Type ());
+				if (arcview_parking.size () == 0) {
+					Warning (String ("Parking Lot %d could not be drawn") % parking_rec.Parking ());
+				} else if (!arcview_parking.Write_Record ()) {
+					Error (String ("Writing %s Lot=%d") % arcview_parking.File_Type () % parking_rec.Parking ());
 				}
 				parking_rec.clear ();
 			}

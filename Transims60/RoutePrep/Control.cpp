@@ -53,7 +53,7 @@ void RoutePrep::Program_Control (void)
 	//---- transit route data ----
 
 	if (new_route_flag) {
-		new_route_nodes = (Route_Nodes_File *) System_File_Handle (NEW_ROUTE_NODES);
+		new_route_nodes = System_Route_Nodes_File (true);
 		new_route_nodes->File_ID ("NewRoute");
 	}
 

@@ -11,17 +11,11 @@
 Router::Router (void) : Router_Service (), Select_Service ()
 {
 	Program ("Router");
-	Version (52);
+	Version (57);
 	Title ("Network Path Building");
 
-	System_File_Type required_files [] = {
-		NODE, LINK, CONNECTION, LOCATION, END_FILE
-	};
 	System_File_Type optional_files [] = {
-		POCKET, LANE_USE, TURN_PENALTY, PARKING, ACCESS_LINK, 
-		TRANSIT_STOP, TRANSIT_FARE, TRANSIT_ROUTE, TRANSIT_SCHEDULE, TRANSIT_DRIVER, 
-		HOUSEHOLD, SELECTION, TRIP, PERFORMANCE, TURN_DELAY, VEHICLE_TYPE, PLAN, 
-		RIDERSHIP, NEW_PLAN, NEW_PROBLEM, NEW_PERFORMANCE, NEW_TURN_DELAY, NEW_RIDERSHIP, END_FILE
+		TRIP, PLAN, NEW_TURN_DELAY, NEW_RIDERSHIP, END_FILE
 	};
 	int file_service_keys [] = {
 		NOTES_AND_NAME_FIELDS, SAVE_LANE_USE_FLOWS, 0
@@ -72,7 +66,6 @@ Router::Router (void) : Router_Service (), Select_Service ()
 		"ITERATION_PROBLEMS", 
 		""
 	};
-	Required_System_Files (required_files);
 	Optional_System_Files (optional_files);
 	File_Service_Keys (file_service_keys);
 	Data_Service_Keys (data_service_keys);
@@ -103,7 +96,7 @@ Router::Router (void) : Router_Service (), Select_Service ()
 	initial_priority = CRITICAL;
 
 	num_file_sets = 1;
-	total_records = num_time_updates = num_trip_parts = num_reroute = num_reskim = num_update = num_build = num_selected = 0;
+	total_records = num_time_updates = num_trip_parts = num_reroute = num_reskim = num_update = num_build = num_copied = num_selected = 0;
 	trip_flag = plan_flag = new_plan_flag = problem_flag = false;
 	percent_selected = 0.0;
 

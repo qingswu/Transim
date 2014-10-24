@@ -32,9 +32,9 @@ bool Path_Builder::Plan_Build (Plan_Data *plan_data)
 
 	//---- set the traveler parameters ----
 
-	exe->Set_Parameters (param, plan_ptr->Type (), plan_ptr->Veh_Type ());
+	exe->Set_Parameters (path_param, plan_ptr->Type (), plan_ptr->Veh_Type ());
 
-	param.mode = (Mode_Type) plan_ptr->Mode (),
+	path_param.mode = (Mode_Type) plan_ptr->Mode (),
 	parking_duration = plan_ptr->Duration ();
 	forward_flag = (plan_ptr->Constraint () != END_TIME);
 	time_limit = (forward_flag) ? MAX_INTEGER : 0;
@@ -76,7 +76,7 @@ bool Path_Builder::Plan_Build (Plan_Data *plan_data)
 	if (stat < 0) return (false);
 
 	if (stat > 0) {
-		if (!param.ignore_errors) {
+		if (!path_param.ignore_errors) {
 			//skip = true;
 		}
 		plan_ptr->Problem (stat);

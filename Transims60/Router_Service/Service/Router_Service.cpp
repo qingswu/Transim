@@ -11,6 +11,18 @@
 Router_Service::Router_Service (void) : Data_Service (), Flow_Time_Service ()
 {
 	Service_Level (ROUTER_SERVICE);
+	
+	System_File_Type required_files [] = {
+		NODE, LINK, CONNECTION, LOCATION, END_FILE
+	};
+	System_File_Type optional_files [] = {
+		POCKET, LANE_USE, TURN_PENALTY, PARKING, ACCESS_LINK, 
+		TRANSIT_STOP, TRANSIT_FARE, TRANSIT_ROUTE, TRANSIT_SCHEDULE, TRANSIT_DRIVER, 
+		HOUSEHOLD, SELECTION, PERFORMANCE, TURN_DELAY, VEHICLE_TYPE,  
+		RIDERSHIP, NEW_PLAN, NEW_PROBLEM, NEW_PERFORMANCE, END_FILE
+	};
+	Required_System_Files (required_files);
+	Optional_System_Files (optional_files);
 
 	walk_path_flag = bike_path_flag = drive_path_flag = access_link_flag = true;
 	transit_path_flag = parkride_path_flag = kissride_path_flag = skim_check_flag = true;

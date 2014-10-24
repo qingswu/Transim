@@ -52,7 +52,7 @@ void ConvertTrips::Program_Control (void)
 	}
 	if (System_File_Flag (NEW_PROBLEM)) {
 		problem_flag = true;
-		problem_file = (Problem_File *) System_File_Handle (NEW_PROBLEM);
+		problem_file = System_Problem_File (true);
 		problem_file->Router_Data ();
 	}
 

@@ -12,7 +12,7 @@ void Data_Service::Write_Pockets (void)
 {
 	int dir, count, index;
 
-	Pocket_File *file = (Pocket_File *) System_File_Handle (NEW_POCKET);
+	Pocket_File *file = System_Pocket_File (true);
 
 	Link_Data *link_ptr;
 	Int_Map_Itr itr;

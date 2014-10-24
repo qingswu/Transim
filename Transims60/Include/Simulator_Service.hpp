@@ -5,8 +5,12 @@
 #ifndef SIMULATOR_SERVICE_HPP
 #define SIMULATOR_SERVICE_HPP
 
-//#include "Router_Service.hpp"
+#ifdef ROUTING
+#include "Router_Service.hpp"
+#else
 #include "Data_Service.hpp"
+#endif
+
 #include "Select_Service.hpp"
 #include "TypeDefs.hpp"
 #include "Dtime.hpp"
@@ -46,8 +50,11 @@
 //	Simulator_Service - simulation service class definition
 //---------------------------------------------------------
 
-//class SYSLIB_API Simulator_Service : public Router_Service, public Select_Service
+#ifdef ROUTING
+class SYSLIB_API Simulator_Service : public Router_Service, public Select_Service
+#else
 class SYSLIB_API Simulator_Service : public Data_Service, public Select_Service
+#endif
 {
 	friend class Sim_Update_Step;
 	friend class Sim_Update_Data;
@@ -90,7 +97,7 @@ protected:
 		UNSIMULATED_TIME_STEPS, MACROSCOPIC_TIME_STEPS, MESOSCOPIC_TIME_STEPS, MICROSCOPIC_TIME_STEPS,
 		CELL_SIZE, PLAN_FOLLOWING_DISTANCE, LOOK_AHEAD_DISTANCE, LOOK_AHEAD_LANE_FACTOR, 
 		LOOK_AHEAD_TIME_FACTOR, LOOK_AHEAD_VEHICLE_FACTOR, MAXIMUM_SWAPPING_SPEED, 
-		MAXIMUM_SPEED_DIFFERENCE, CAPACITY_FACTOR, ENFORCE_PARKING_LANES, 
+		MAXIMUM_SPEED_DIFFERENCE, CAPACITY_FACTOR, ENFORCE_PARKING_LANES, IGNORE_TRANSIT_CONNECTIONS,
 		DRIVER_REACTION_TIME, PERMISSION_PROBABILITY, SLOW_DOWN_PROBABILITY, SLOW_DOWN_PERCENTAGE, 
 		MAX_COMFORTABLE_SPEED, TRAVELER_TYPE_FACTORS, PRIORITY_LOADING_TIME, MAXIMUM_LOADING_TIME, 
 		PRIORITY_WAITING_TIME, MAXIMUM_WAITING_TIME, MAX_DEPARTURE_TIME_VARIANCE, 

@@ -35,18 +35,18 @@ int Path_Builder::Transit_Parking (Trip_End_Array *org_ptr, Trip_End_Array *des_
 	from_parking.clear ();
 	to_parking.clear ();
 
-	if (param.mode == PNR_OUT_MODE || param.mode == PNR_IN_MODE) {
+	if (path_param.mode == PNR_OUT_MODE || path_param.mode == PNR_IN_MODE) {
 		lot_array = &exe->park_ride;
-		max_ratio = param.max_parkride;
+		max_ratio = path_param.max_parkride;
 		park_flag = true;
-		out_flag = (param.mode == PNR_OUT_MODE && forward_flag);
-		exit_flag = (param.mode == PNR_OUT_MODE);
-	} else if (param.mode == KNR_OUT_MODE || param.mode == KNR_IN_MODE) {
+		out_flag = (path_param.mode == PNR_OUT_MODE && forward_flag);
+		exit_flag = (path_param.mode == PNR_OUT_MODE);
+	} else if (path_param.mode == KNR_OUT_MODE || path_param.mode == KNR_IN_MODE) {
 		lot_array = &exe->kiss_ride;
-		max_ratio = param.max_kissride;
+		max_ratio = path_param.max_kissride;
 		park_flag = false;
-		out_flag = (param.mode == KNR_OUT_MODE && forward_flag);
-		exit_flag = (param.mode == KNR_OUT_MODE);
+		out_flag = (path_param.mode == KNR_OUT_MODE && forward_flag);
+		exit_flag = (path_param.mode == KNR_OUT_MODE);
 	} else {
 		return (0);
 	}
@@ -150,11 +150,11 @@ int Path_Builder::Transit_Parking (Trip_End_Array *org_ptr, Trip_End_Array *des_
 					}
 				}
 			}
-			imped = DTOI (ttime * param.value_park + cost * param.value_cost);
+			imped = DTOI (ttime * path_param.value_park + cost * path_param.value_cost);
 
 			//---- add the parking penalty ----
 
-			if (out_flag && param.park_pen_flag) {
+			if (out_flag && path_param.park_pen_flag) {
 				imped += exe->park_penalty [lot_itr->Lot ()];
 			}
 		}
@@ -212,9 +212,9 @@ int Path_Builder::Transit_Parking (Trip_End_Array *org_ptr, Trip_End_Array *des_
 
 				path_data.Clear ();
 
-				if (!forward_flag && param.min_wait > 0) {
-					ttime = param.min_wait;
-					imped = DTOI (ttime * param.value_wait);
+				if (!forward_flag && path_param.min_wait > 0) {
+					ttime = path_param.min_wait;
+					imped = DTOI (ttime * path_param.value_wait);
 
 					path_data.Imped (imped);
 					//path_data.Time (-ttime);
@@ -232,8 +232,8 @@ int Path_Builder::Transit_Parking (Trip_End_Array *org_ptr, Trip_End_Array *des_
 				//--- save the access link attributes ----
 
 				ttime = access_ptr->Time ();
-				length = (int) (ttime * param.walk_speed + 0.5);
-				imped = DTOI (ttime * param.value_walk);
+				length = (int) (ttime * path_param.walk_speed + 0.5);
+				imped = DTOI (ttime * path_param.value_walk);
 
 				path_data.Clear ();
 				path_data.Imped (imped);
@@ -278,9 +278,9 @@ int Path_Builder::Transit_Parking (Trip_End_Array *org_ptr, Trip_End_Array *des_
 
 		path_data.Clear ();
 
-		if (!forward_flag && param.min_wait > 0) {
-			ttime = param.min_wait;
-			imped = DTOI (ttime * param.value_wait);
+		if (!forward_flag && path_param.min_wait > 0) {
+			ttime = path_param.min_wait;
+			imped = DTOI (ttime * path_param.value_wait);
 
 			path_data.Imped (imped);
 			//path_data.Time (-ttime);
@@ -314,7 +314,7 @@ int Path_Builder::Transit_Parking (Trip_End_Array *org_ptr, Trip_End_Array *des_
 
 	//---- set the destination flags ----
 
-	//if (param.mode == PNR_IN_MODE || param.mode == KNR_IN_MODE) {
+	//if (path_param.mode == PNR_IN_MODE || path_param.mode == KNR_IN_MODE) {
 	if (!out_flag) {
 		link_to_flag = node_to_flag = stop_to_flag = false;
 

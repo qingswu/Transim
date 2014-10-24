@@ -25,8 +25,11 @@ bool ArcNet::Get_Location_Data (Location_File &file, Location_Data &location_rec
 
 			Point_Offset (location_rec.Link (), location_rec.Dir (), location_rec.Offset (), side, arcview_location);
 
-			if (!arcview_location.Write_Record ()) {
-				Error (String ("Writing %s") % arcview_location.File_Type ());
+			if (arcview_location.size () == 0) {
+				Warning (String ("Location %d could not be drawn") % location_rec.Location ());
+				return (false);
+			} else if (!arcview_location.Write_Record ()) {
+				Error (String ("Writing %s Location=%d") % arcview_location.File_Type () % location_rec.Location ());
 			}
 
 			//---- save the location point data ----

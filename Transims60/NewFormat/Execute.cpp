@@ -55,7 +55,7 @@ void NewFormat::Execute (void)
 	//---- process person file ----
 
 	if (System_File_Flag (HOUSEHOLD)) {
-		Read_Households (*((Household_File *) System_File_Handle (HOUSEHOLD)));
+		Read_Households (*(System_Household_File ()));
 		if (person_flag) Read_Persons ();
 
 		if (System_File_Flag (NEW_HOUSEHOLD)) Write_Households ();
@@ -97,7 +97,7 @@ void NewFormat::Execute (void)
 	if (activity_flag && new_trip_flag) {
 		Read_Activity ();
 
-		Trip_File *file = (Trip_File *) System_File_Handle (NEW_TRIP);
+		Trip_File *file = System_Trip_File (true);
 		
 		Print (1, String ("%s Records = %d") % file->File_Type () % num_new_act);
 	}
@@ -105,9 +105,9 @@ void NewFormat::Execute (void)
 	//---- convert trip file ----
 
 	if (System_File_Flag (TRIP) && new_trip_flag) {
-		Read_Trips (*((Trip_File *) System_File_Handle (TRIP)));
+		Read_Trips (*(System_Trip_File ()));
 
-		Trip_File *file = (Trip_File *) System_File_Handle (NEW_TRIP);
+		Trip_File *file = System_Trip_File (true);
 		
 		Print (1, String ("%s Records = %d") % file->File_Type () % num_new_trip);
 		if (max_trip_part > 1) Print (0, String (" (%d files)") % max_trip_part);
@@ -170,9 +170,9 @@ void NewFormat::Execute (void)
 	//---- convert skim file ----
 
 	if (System_File_Flag (SKIM) && System_File_Flag (NEW_SKIM)) {
-		Read_Skims (*((Skim_File *) System_File_Handle (SKIM)));
+		Read_Skims (*(System_Skim_File ()));
 
-		Skim_File *file = (Skim_File *) System_File_Handle (NEW_SKIM);
+		Skim_File *file = System_Skim_File (true);
 		
 		Print (1, String ("%s Records = %d") % file->File_Type () % num_new_skim);
 		if (max_skim_part > 1) Print (0, String (" (%d files)") % max_skim_part);

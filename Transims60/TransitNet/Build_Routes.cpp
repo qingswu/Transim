@@ -379,7 +379,7 @@ void TransitNet::Build_Routes (void)
 			Warning (String ("Route %d has Missing Node Records") % route);
 			continue;
 		}
-		if (connect_flag) continue;
+		if (connect_flag && !ignore_errors_flag) continue;
 
 		//---- assign stops to route links ----
 

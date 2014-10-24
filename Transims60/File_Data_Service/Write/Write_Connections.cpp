@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Connections (void)
 {
-	Connect_File *file = (Connect_File *) System_File_Handle (NEW_CONNECTION);
+	Connect_File *file = System_Connect_File (true);
 	
 	int dir, index, count;
 

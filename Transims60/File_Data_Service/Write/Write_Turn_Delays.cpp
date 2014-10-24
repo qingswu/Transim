@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Turn_Delays (bool fill_flag)
 {
-	Turn_Delay_File *file = (Turn_Delay_File *) System_File_Handle (NEW_TURN_DELAY);
+	Turn_Delay_File *file = System_Turn_Delay_File (true);
 
 	Write_Turn_Delays (*file, turn_period_array, fill_flag);
 }

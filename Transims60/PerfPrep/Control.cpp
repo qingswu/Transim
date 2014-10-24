@@ -11,6 +11,8 @@
 void PerfPrep::Program_Control (void)
 {
 	String key;
+	Strings list;
+	Str_Itr str_itr;
 
 	//---- open network files ----
 
@@ -101,10 +103,20 @@ void PerfPrep::Program_Control (void)
 
 			Error ("Transit Network Files are Required for Transit Loading");
 		}
-		if (!System_File_Flag (VEHICLE_TYPE)) {
+		key.Parse (list);
+		for (str_itr = list.begin (); str_itr != list.end (); str_itr++) {
+			if (str_itr->Starts_With ("VEH")) {
+				transit_veh_flag = true;
+			} else if (str_itr->Starts_With ("PER")) {
+				transit_person_flag = true;
+			} else if (str_itr->Starts_With ("PCE") || str_itr->Starts_With ("CAR_EQ")) {
+				transit_pce_flag = true;
+			}
+		}
+		if (!System_File_Flag (VEHICLE_TYPE) && transit_pce_flag) {
 			Warning ("Vehicle Type File is Required for Transit PCE Loading");
 		}
-		if (!System_File_Flag (RIDERSHIP)) {
+		if (!System_File_Flag (RIDERSHIP) && transit_person_flag) {
 			Warning ("Ridership File is Required for Transit Person Loading");
 		}
 		if (!merge_flag) {

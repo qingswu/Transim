@@ -11,7 +11,7 @@
 NetPrep::NetPrep (void) : Data_Service ()
 {
 	Program ("NetPrep");
-	Version (16);
+	Version (17);
 	Title ("Network Preparation Utility");
 
 	System_File_Type optional_files [] = {
@@ -20,7 +20,9 @@ NetPrep::NetPrep (void) : Data_Service ()
 	int file_service_keys [] = {
 		NOTES_AND_NAME_FIELDS, 0
 	};
-
+	int data_service_keys [] = {
+		UPDATE_LINK_BEARINGS, LINK_BEARING_WARNINGS, 0
+	};
 	Control_Key netprep_keys [] = { //--- code, key, level, status, type, default, range, help ----
 		{ INPUT_LINK_FILE, "INPUT_LINK_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		{ INPUT_LINK_FORMAT, "INPUT_LINK_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, FORMAT_HELP },
@@ -90,6 +92,7 @@ NetPrep::NetPrep (void) : Data_Service ()
 	};
 	Optional_System_Files (optional_files);
 	File_Service_Keys (file_service_keys);
+	Data_Service_Keys (data_service_keys);
 
 	Key_List (netprep_keys);
 	Report_List (reports);

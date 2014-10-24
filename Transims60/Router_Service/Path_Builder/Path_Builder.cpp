@@ -24,7 +24,7 @@ Path_Builder::Path_Builder (Plan_Queue *queue, Router_Service *exe) : Static_Ser
 	} else {
 		Initialize (exe);
 		plan_queue = queue;
-		param.one_to_many = false;
+		path_param.one_to_many = false;
 		plan_flag = true;
 	}
 }
@@ -36,7 +36,7 @@ Path_Builder::Path_Builder (Skim_Queue *queue, Router_Service *exe) : Static_Ser
 	} else {
 		Initialize (exe);
 		skim_queue = queue;
-		param.one_to_many = true;
+		path_param.one_to_many = true;
 		plan_flag = false;
 	}
 }
@@ -49,7 +49,7 @@ void Path_Builder::operator()()
 {
 	int number = 0;
 
-	if (param.one_to_many) {
+	if (path_param.one_to_many) {
 		One_To_Many *skim_ptr;
 
 		for (;;) {
@@ -106,7 +106,7 @@ void Path_Builder::Save_Flows (void)
 		}
 	}
 
-	if (param.turn_flow_flag) {
+	if (path_param.turn_flow_flag) {
 		Turn_Period_Itr period_itr;
 		Turn_Period *period_ptr;
 		Turn_Itr turn_itr;
@@ -151,7 +151,7 @@ void Path_Builder::Update_Times (void)
 			}
 		}
 	}
-	if (zero_flows_flag && param.turn_flow_flag) {
+	if (zero_flows_flag && path_param.turn_flow_flag) {
 		turn_period_array_ptr->Zero_Turns ();
 	}
 	zero_flows_flag = false;
@@ -186,7 +186,7 @@ void Path_Builder::Initialize (Router_Service *_exe)
 	time_limit = min_time_limit = 0;
 	data_ptr = 0;
 	parking_duration = 0;
-	param.op_cost_rate = 0.0;
+	path_param.op_cost_rate = 0.0;
 	parking_lot = -1;
 
 	mode_path_flag [WALK_MODE] = exe->walk_path_flag;
@@ -206,12 +206,12 @@ void Path_Builder::Initialize (Router_Service *_exe)
 
 	near_offset = Round (Internal_Units (10.0, FEET));	
 
-	exe->Set_Parameters (param);
-	plan_flag = !param.one_to_many;
+	exe->Set_Parameters (path_param);
+	plan_flag = !path_param.one_to_many;
 
 	Reset_Skim_Gap ();
 
-	if (param.flow_flag) {
+	if (path_param.flow_flag) {
 		if (exe->Num_Threads () < 2) {
 			perf_period_array_ptr = &exe->perf_period_array;
 			turn_period_array_ptr = &exe->turn_period_array;
@@ -220,7 +220,7 @@ void Path_Builder::Initialize (Router_Service *_exe)
 			perf_period_array_ptr = &perf_period_array;
 			perf_period_array.Replicate (exe->perf_period_array);
 
-			if (param.turn_flow_flag) {
+			if (path_param.turn_flow_flag) {
 				turn_period_array_ptr = &turn_period_array;
 				turn_period_array.Replicate (exe->turn_period_array);
 			}
@@ -237,7 +237,7 @@ void Path_Builder::Zero_Flows (void)
 {
 	perf_period_array_ptr->Zero_Flows ();
 
-	if (param.turn_flow_flag) {
+	if (path_param.turn_flow_flag) {
 		turn_period_array_ptr->Zero_Turns ();
 	}
 	zero_flows_flag = false;

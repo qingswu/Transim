@@ -335,6 +335,7 @@
     <ClCompile Include="Path_Builder\Drive_Path.cpp" />
     <ClCompile Include="Path_Builder\Drive_Plan.cpp" />
     <ClCompile Include="Path_Builder\Drive_Transit.cpp" />
+    <ClCompile Include="Path_Builder\Load_Flow.cpp" />
     <ClCompile Include="Path_Builder\Location_Access.cpp" />
     <ClCompile Include="Path_Builder\Magic_Move.cpp" />
     <ClCompile Include="Path_Builder\Node_Path.cpp" />

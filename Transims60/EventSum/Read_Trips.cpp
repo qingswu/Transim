@@ -21,7 +21,7 @@ void EventSum::Read_Trips (void)
 	Trip_Map_Itr trip_itr;
 	Int_Map_Itr map_itr;
 
-	trip_file = (Trip_File *) System_File_Handle (TRIP);
+	trip_file = System_Trip_File ();
 	
 	//----- initialize the summary memory ----
 	

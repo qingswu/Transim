@@ -22,7 +22,7 @@ void Router::Preload_Transit (void)
 	Dir_Data *dir_ptr;
 	Veh_Type_Data *veh_type_ptr;
 
-	Show_Message (1, "Preloading Transit Vehicles -- Line");
+	Show_Message (1, "Preloading Transit Route");
 	Set_Progress ();
 
 	//---- process each transit route ----
@@ -58,5 +58,5 @@ void Router::Preload_Transit (void)
 			}
 		}
 	}
-	End_Progress ();
+	End_Progress (false);
 }

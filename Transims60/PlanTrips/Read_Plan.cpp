@@ -20,8 +20,8 @@ void PlanTrips::Read_Plan (void)
 	Trip_Data *trip_ptr, trip_rec;
 	Trip_Map_Stat map_stat;
 
-	plan_file = (Plan_File *) System_File_Handle (PLAN);
-	trip_file = (Trip_File *) System_File_Handle (NEW_TRIP);
+	plan_file = System_Plan_File ();
+	trip_file = System_Trip_File (true);
 
 	num_update = num_trips = 0;
 

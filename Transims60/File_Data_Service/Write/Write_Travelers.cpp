@@ -12,7 +12,7 @@ void Data_Service::Write_Travelers (void)
 {
 	int count = 0;
 
-	Traveler_File *file = (Traveler_File *) System_File_Handle (NEW_TRAVELER);
+	Traveler_File *file = System_Traveler_File (true);
 
 	Traveler_Map_Itr itr;
 

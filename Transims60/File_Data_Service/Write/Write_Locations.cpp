@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Locations (void)
 {
-	Location_File *file = (Location_File *) System_File_Handle (NEW_LOCATION);
+	Location_File *file = System_Location_File (true);
 
 	int count = 0;
 	Int_Map_Itr itr;

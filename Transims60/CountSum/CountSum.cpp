@@ -11,7 +11,7 @@
 CountSum::CountSum (void) : Data_Service ()
 {
 	Program ("CountSum");
-	Version (7);
+	Version (8);
 	Title ("Traffic Count Processing");
 
 	System_File_Type required_files [] = {

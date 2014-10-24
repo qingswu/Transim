@@ -78,7 +78,7 @@ private:
 	bool initialized, forward_flag, plan_flag;
 	bool walk_path_flag, bike_path_flag, transit_path_flag, access_link_flag, reroute_flag;
 
-	Path_Parameters param;
+	Path_Parameters path_param;
 
 	Plan_Data *plan_ptr;
 	Plan_Data plan;
@@ -109,6 +109,7 @@ private:
 	bool Plan_ReRoute (Plan_Ptr plan_ptr);
 	bool Plan_Flow (Plan_Ptr plan_ptr);
 	bool Plan_Reskim (Plan_Ptr plan_ptr);
+	Dtime Load_Flow (Plan_Ptr plan_ptr);
 
 	int  Build_Path (int lot = 0);
 

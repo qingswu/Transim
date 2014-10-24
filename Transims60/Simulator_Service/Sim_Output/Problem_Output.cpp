@@ -13,7 +13,7 @@ Problem_Output::Problem_Output () : Sim_Output_Data ()
 {
 	Type (PROBLEM_OUTPUT_OFFSET);
 
-	file = (Problem_File *) sim->System_File_Handle (NEW_PROBLEM);
+	file = sim->System_Problem_File (true);
 }
 
 Problem_Output::~Problem_Output () 

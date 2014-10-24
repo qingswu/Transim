@@ -15,7 +15,7 @@ double Router::Reskim_Plans (bool average_flag)
 	Plan_Ptr_Array *ptr_array;
 	Plan_Itr plan_itr;
 
-	//---- averageupdate travel times ----
+	//---- average update travel times ----
 
 	Update_Travel_Times (average_flag, true);
 	num_time_updates++;

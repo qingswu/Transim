@@ -261,7 +261,7 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 
 	if (num_sec > 0) {
 		spd1 = spd2 = speed;
-		min_distance = max_distance = 0;
+		min_distance = max_distance = 1;
 
 		for (i=0; i < num_sec; i++) {
 			spd0 = spd1;
@@ -277,8 +277,8 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 			max_distance += (spd0 + spd2) / 2;
 		}
 	} else {
-		min_distance = sim->Resolve (min_speed * step_size);
-		max_distance = sim->Resolve (max_speed * step_size);
+		min_distance = sim->Resolve (min_speed * step_size) + 1;
+		max_distance = sim->Resolve (max_speed * step_size) + 1;
 	}
 	max_move = max_distance / sim->param.cell_size;
 
@@ -645,7 +645,7 @@ make_move:
 		sim_veh = step.back ();
 		step.pop_back ();
 		distance -= move_size;
-		if (distance < 0) distance = 0;
+		if (distance < 1) distance = 1;
 	}
 
 	//---- place the vehicle at the new location ----
@@ -726,8 +726,10 @@ output:
 	sim->Output_Step (step);
 
 	if (sim_travel_ptr->Speed () == 0 && speed == 0) {
-		sim_travel_ptr->Add_Wait (step_size);
-	} else if (move) {
+		if (sim_travel_ptr->Next_Event () <= sim->time_step) {
+			sim_travel_ptr->Add_Wait (step_size);
+		}
+	} else if (move > 0 || distance > 1) {
 		sim_travel_ptr->Wait (0);
 		sim_travel_ptr->Priority (0);
 	}

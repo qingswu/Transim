@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Stops (void)
 {
-	Stop_File *file = (Stop_File *) System_File_Handle (NEW_TRANSIT_STOP);
+	Stop_File *file = System_Stop_File (true);
 
 	int count = 0;
 	Int_Map_Itr itr;

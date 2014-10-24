@@ -28,7 +28,10 @@ void Control_Service::Add_Control_Key (Control_Key key)
 	if (key.code == 0) return;
 
 	for (Control_Key_Itr itr = keys.begin (); itr != keys.end (); itr++) {
-		if (key.key.Equals (itr->key)) return;
+		if (key.key.Equals (itr->key)) {
+			*itr = key;
+			return;
+		}
 	}
 	keys.push_back (key);
 }

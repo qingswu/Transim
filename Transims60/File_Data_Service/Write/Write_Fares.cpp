@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Fares (void)
 {
-	Fare_File *file = (Fare_File *) System_File_Handle (NEW_TRANSIT_FARE);
+	Fare_File *file = System_Fare_File (true);
 
 	int count = 0;
 	Fare_Map_Itr itr;

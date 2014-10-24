@@ -16,15 +16,15 @@ int Path_Builder::Drive_Transit_Plan (int lot)
 	bool out_flag;
 	Problem_Type problem;
 
-	if (param.mode == PNR_OUT_MODE || param.mode == PNR_IN_MODE) {
+	if (path_param.mode == PNR_OUT_MODE || path_param.mode == PNR_IN_MODE) {
 		problem = PARK_PROBLEM;
 		if (exe->park_ride.size () == 0) return (problem);
 	} else {
 		problem = KISS_PROBLEM;
-		if (param.use < HOV2) param.use = HOV2;
+		if (path_param.use < HOV2) path_param.use = HOV2;
 		if (exe->kiss_ride.size () == 0) return (problem);
 	}
-	out_flag = ((param.mode == PNR_OUT_MODE || param.mode == KNR_OUT_MODE) && forward_flag);
+	out_flag = ((path_param.mode == PNR_OUT_MODE || path_param.mode == KNR_OUT_MODE) && forward_flag);
 
 	if (forward_flag) {
 		from_ptr = &trip_org;

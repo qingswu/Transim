@@ -30,7 +30,7 @@ void PathSkim::Program_Control (void)
 
 	if (System_File_Flag (NEW_SKIM)) {
 		skim_flag = true;
-		skim_file = (Skim_File *) System_File_Handle (NEW_SKIM);
+		skim_file = System_Skim_File (true);
 
 		zone_skim_flag = (skim_file->OD_Units () == ZONE_OD);
 		district_flag = (skim_file->OD_Units () == DISTRICT_OD);
@@ -39,11 +39,11 @@ void PathSkim::Program_Control (void)
 	}
 	if (System_File_Flag (NEW_PLAN)) {
 		plan_flag = true;
-		plan_file = (Plan_File *) System_File_Handle (NEW_PLAN);
+		plan_file = System_Plan_File (true);
 	}
 	if (System_File_Flag (NEW_PROBLEM)) {
 		problem_flag = true;
-		problem_file = (Problem_File *) System_File_Handle (NEW_PROBLEM);
+		problem_file = System_Problem_File (true);
 		problem_file->Router_Data ();
 	}
 	if (!skim_flag && !plan_flag && !problem_flag && !System_File_Flag (NEW_PERFORMANCE)) {

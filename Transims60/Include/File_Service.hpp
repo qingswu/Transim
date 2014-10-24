@@ -135,6 +135,41 @@ public:
 
 	Zone_Location_Map zone_loc_map;
 
+	Node_File *        System_Node_File (bool new_flag = false)         { return ((Node_File *) System_File_Handle ((new_flag) ? NEW_NODE : NODE)); }
+	Zone_File *        System_Zone_File (bool new_flag = false)         { return ((Zone_File *) System_File_Handle ((new_flag) ? NEW_ZONE : ZONE)); }
+	Shape_File *       System_Shape_File (bool new_flag = false)        { return ((Shape_File *) System_File_Handle ((new_flag) ? NEW_SHAPE : SHAPE)); }
+	Link_File *        System_Link_File (bool new_flag = false)         { return ((Link_File *) System_File_Handle ((new_flag) ? NEW_LINK : LINK)); }
+	Pocket_File *      System_Pocket_File (bool new_flag = false)       { return ((Pocket_File *) System_File_Handle ((new_flag) ? NEW_POCKET : POCKET)); }
+	Lane_Use_File *    System_Lane_Use_File (bool new_flag = false)     { return ((Lane_Use_File *) System_File_Handle ((new_flag) ? NEW_LANE_USE : LANE_USE)); }
+	Connect_File *     System_Connect_File (bool new_flag = false)      { return ((Connect_File *) System_File_Handle ((new_flag) ? NEW_CONNECTION : CONNECTION)); }
+	Turn_Pen_File *    System_Turn_Pen_File (bool new_flag = false)     { return ((Turn_Pen_File *) System_File_Handle ((new_flag) ? NEW_TURN_PENALTY : TURN_PENALTY)); }
+	Parking_File *     System_Parking_File (bool new_flag = false)      { return ((Parking_File *) System_File_Handle ((new_flag) ? NEW_PARKING : PARKING)); }
+	Location_File *    System_Location_File (bool new_flag = false)     { return ((Location_File *) System_File_Handle ((new_flag) ? NEW_LOCATION : LOCATION)); }
+	Access_File *      System_Access_File (bool new_flag = false)       { return ((Access_File *) System_File_Handle ((new_flag) ? NEW_ACCESS_LINK : ACCESS_LINK)); }
+	Sign_File *        System_Sign_File (bool new_flag = false)         { return ((Sign_File *) System_File_Handle ((new_flag) ? NEW_SIGN : SIGN)); }
+	Signal_File *      System_Signal_File (bool new_flag = false)       { return ((Signal_File *) System_File_Handle ((new_flag) ? NEW_SIGNAL : SIGNAL)); }
+	Timing_File *      System_Timing_File (bool new_flag = false)       { return ((Timing_File *) System_File_Handle ((new_flag) ? NEW_TIMING_PLAN : TIMING_PLAN)); }
+	Phasing_File *     System_Phasing_File (bool new_flag = false)      { return ((Phasing_File *) System_File_Handle ((new_flag) ? NEW_PHASING_PLAN : PHASING_PLAN)); }
+	Detector_File *    System_Detector_File (bool new_flag = false)     { return ((Detector_File *) System_File_Handle ((new_flag) ? NEW_DETECTOR : DETECTOR)); }
+	Stop_File *        System_Stop_File (bool new_flag = false)         { return ((Stop_File *) System_File_Handle ((new_flag) ? NEW_TRANSIT_STOP : TRANSIT_STOP)); }
+	Fare_File *        System_Fare_File (bool new_flag = false)         { return ((Fare_File *) System_File_Handle ((new_flag) ? NEW_TRANSIT_FARE : TRANSIT_FARE)); }
+	Line_File *        System_Line_File (bool new_flag = false)         { return ((Line_File *) System_File_Handle ((new_flag) ? NEW_TRANSIT_ROUTE : TRANSIT_ROUTE)); }
+	Schedule_File *    System_Schedule_File (bool new_flag = false)     { return ((Schedule_File *) System_File_Handle ((new_flag) ? NEW_TRANSIT_SCHEDULE : TRANSIT_SCHEDULE)); }
+	Driver_File *      System_Driver_File (bool new_flag = false)       { return ((Driver_File *) System_File_Handle ((new_flag) ? NEW_TRANSIT_DRIVER : TRANSIT_DRIVER)); }
+	Route_Nodes_File * System_Route_Nodes_File (bool new_flag = false)  { return ((Route_Nodes_File *) System_File_Handle ((new_flag) ? NEW_ROUTE_NODES : ROUTE_NODES)); }
+	Selection_File *   System_Selection_File (bool new_flag = false)    { return ((Selection_File *) System_File_Handle ((new_flag) ? NEW_SELECTION : SELECTION)); }
+	Household_File *   System_Household_File (bool new_flag = false)    { return ((Household_File *) System_File_Handle ((new_flag) ? NEW_HOUSEHOLD : HOUSEHOLD)); }
+	Performance_File * System_Performance_File (bool new_flag = false)  { return ((Performance_File *) System_File_Handle ((new_flag) ? NEW_PERFORMANCE : PERFORMANCE)); }
+	Turn_Delay_File *  System_Turn_Delay_File (bool new_flag = false)   { return ((Turn_Delay_File *) System_File_Handle ((new_flag) ? NEW_TURN_DELAY : TURN_DELAY)); }
+	Ridership_File *   System_Ridership_File (bool new_flag = false)    { return ((Ridership_File *) System_File_Handle ((new_flag) ? NEW_RIDERSHIP : RIDERSHIP)); }
+	Veh_Type_File *    System_Veh_Type_File (bool new_flag = false)     { return ((Veh_Type_File *) System_File_Handle ((new_flag) ? NEW_VEHICLE_TYPE : VEHICLE_TYPE)); }
+	Trip_File *        System_Trip_File (bool new_flag = false)         { return ((Trip_File *) System_File_Handle ((new_flag) ? NEW_TRIP : TRIP)); }
+	Problem_File *     System_Problem_File (bool new_flag = false)      { return ((Problem_File *) System_File_Handle ((new_flag) ? NEW_PROBLEM : PROBLEM)); }
+	Plan_File *        System_Plan_File (bool new_flag = false)         { return ((Plan_File *) System_File_Handle ((new_flag) ? NEW_PLAN : PLAN)); }
+	Skim_File *        System_Skim_File (bool new_flag = false)         { return ((Skim_File *) System_File_Handle ((new_flag) ? NEW_SKIM : SKIM)); }
+	Event_File *       System_Event_File (bool new_flag = false)        { return ((Event_File *) System_File_Handle ((new_flag) ? NEW_EVENT : EVENT)); }
+	Traveler_File *    System_Traveler_File (bool new_flag = false)     { return ((Traveler_File *) System_File_Handle ((new_flag) ? NEW_TRAVELER : TRAVELER)); }
+
 protected:
 	virtual void Program_Control (void);
 

@@ -12,7 +12,7 @@ void Data_Service::Read_Performance (Performance_File &file, Perf_Period_Array &
 {
 	int i, num, start, end, link, dir, count, index, size;
 	double factor, p1, p2, share, speed, occ_fac;
-	Dtime time;
+	Dtime time, in_period;
 	bool sum_flag;
 
 	Time_Periods *period_ptr;
@@ -30,6 +30,7 @@ void Data_Service::Read_Performance (Performance_File &file, Perf_Period_Array &
 	
 	Initialize_Performance (file, perf_period_array);
 	count = 0;
+	in_period = 0;
 
 	period_ptr = perf_period_array.periods;
 
@@ -39,6 +40,10 @@ void Data_Service::Read_Performance (Performance_File &file, Perf_Period_Array &
 		perf_rec.Clear ();
 
 		if (!Get_Performance_Data (file, perf_rec)) continue;
+
+		if (in_period == 0) {
+			in_period = perf_rec.End () - perf_rec.Start ();
+		}
 
 		//---- get the time period ----
 
@@ -63,7 +68,7 @@ void Data_Service::Read_Performance (Performance_File &file, Perf_Period_Array &
 				} else {
 					share = factor;
 				}
-			
+		
 				//---- process the link record ----
 
 				perf_period_ptr = perf_period_array.Period_Ptr (i);
@@ -77,6 +82,8 @@ void Data_Service::Read_Performance (Performance_File &file, Perf_Period_Array &
 					index = dir_ptr->Use_Index ();
 					sum_flag = false;
 				}
+				if (index < 0) continue;
+
 				perf_ptr = perf_period_ptr->Data_Ptr (index);
 
 				if (!sum_flag && num == 0 && perf_ptr->Volume () > 0) {
@@ -106,8 +113,8 @@ void Data_Service::Read_Performance (Performance_File &file, Perf_Period_Array &
 
 				if (Ratio_Flag () && Round (perf_rec.Time_Ratio ()) >= Congested_Ratio ()) {
 					perf_ptr->Add_Ratio ();
-					perf_ptr->Add_Ratio_Dist (perf_rec.Veh_Dist ());
-					perf_ptr->Add_Ratio_Time (perf_rec.Veh_Time ());
+					perf_ptr->Add_Ratio_Dist (Round (perf_rec.Veh_Dist () * share));
+					perf_ptr->Add_Ratio_Time (perf_rec.Veh_Time () * share);
 				}
 				count++;
 			}
@@ -127,6 +134,12 @@ void Data_Service::Read_Performance (Performance_File &file, Perf_Period_Array &
 	if (count > 0) System_Data_True (PERFORMANCE);
 
 	//---- calculate the travel times ----
+
+	if (in_period > 0) {
+		count = (period_ptr->Increment () + in_period / 2) / in_period;
+	} else {
+		count = 1;
+	}
 
 	link = dir = start = end = 0;
 	size = (int) dir_array.size ();
@@ -164,6 +177,9 @@ void Data_Service::Read_Performance (Performance_File &file, Perf_Period_Array &
 			
 			if (Clear_Flow_Flag ()) perf_itr->Clear_Flows ();
 
+			if (perf_itr->Count () < count) {
+				perf_itr->Count (count);
+			}
 			if (perf_itr->Count () > 0) {
 				perf_itr->Queue (perf_itr->Queue () / perf_itr->Count ());
 				//if (!Ratio_Flag ()) perf_itr->Occupancy (1);

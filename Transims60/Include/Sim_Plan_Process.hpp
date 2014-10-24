@@ -14,7 +14,7 @@
 #ifdef THREADS
 #include "Ordered_Work.hpp"
 
-typedef Ordered_Work <Plan_Data, Sim_Trip_Data> Plan_Queue;
+typedef Ordered_Work <Plan_Data, Sim_Trip_Data> Trip_Queue;
 #endif
 
 //---------------------------------------------------------
@@ -27,9 +27,9 @@ public:
 	Sim_Plan_Process ();
 
 #ifdef THREADS
-	Sim_Plan_Process (Plan_Queue *queue, int id = 0);
+	Sim_Plan_Process (Trip_Queue *queue, int id = 0);
 
-	Plan_Queue *plan_queue;
+	Trip_Queue *trip_queue;
 
 	void operator()();
 #endif

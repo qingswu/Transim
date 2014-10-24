@@ -4,6 +4,8 @@
 
 #include "Simulator.hpp"
 
+#include "Plan_Processor.hpp"	
+
 //---------------------------------------------------------
 //	Execute
 //---------------------------------------------------------
@@ -16,10 +18,89 @@ void Simulator::Execute (void)
 	Sim_Statistics *stats;
 
 	clock_t start, input_total, update_total, travel_total, output_total, node_total;
-	
+
 	//---- read the network data ----
 
 	Simulator_Service::Execute ();
+
+#ifdef ROUTING
+
+	//---- read trips into memory ----
+
+	Read_Trips ();
+
+	//---- build paths ----
+
+	Show_Message ("Build Plans");
+	Set_Progress ();
+
+	bool build_flag, first_iteration = true;
+	int last_hhold = -1;
+	Trip_Map_Itr map_itr;
+	Plan_Ptr plan_ptr;
+	Plan_Ptr_Array *plan_ptr_array;
+	Plan_Processor plan_processor;
+
+	plan_processor.Initialize (this);
+
+	plan_processor.Start_Processing ();
+	plan_ptr_array = new Plan_Ptr_Array ();
+
+	//---- process each trip ----
+	
+	for (map_itr = plan_trip_map.begin (); map_itr != plan_trip_map.end (); map_itr++) {
+	//for (map_itr = trip_map.begin (); map_itr != trip_map.end (); map_itr++) {
+		Show_Progress ();
+
+		plan_ptr = new Plan_Data ();
+
+		*plan_ptr = plan_array [map_itr->second];
+		//Trip_Data *trip_ptr = &trip_array [map_itr->second];
+		//*plan_ptr = *trip_ptr;
+
+		//---- check the household id ----
+
+		if (plan_ptr->Household () < 1) continue;
+
+		if (plan_ptr->Household () != last_hhold) {
+			if (last_hhold > 0 && plan_ptr_array->size () > 0) {
+				plan_processor.Plan_Build (plan_ptr_array);
+				plan_ptr_array = new Plan_Ptr_Array ();
+			}
+			last_hhold = plan_ptr->Household ();
+		}
+
+		//---- update the selection priority flag ----
+
+		if (plan_ptr->Priority () == NO_PRIORITY) {
+			plan_ptr->Method (UPDATE_PLAN);
+		} else if (!first_iteration && select_priorities) {
+			build_flag = select_priority [plan_ptr->Priority ()];
+
+			//if (build_flag && max_percent_flag && percent_selected < 1.0) {
+			//	build_flag = (random_select.Probability () <= percent_selected);
+			//}
+			if (build_flag) {
+				plan_ptr->Method (BUILD_PATH);
+			} else {
+				plan_ptr->Method (UPDATE_PLAN);
+			}
+		} else {
+			plan_ptr->Method (BUILD_PATH);
+		}
+		plan_ptr_array->push_back (plan_ptr);
+	}
+
+	//---- process the last household ----
+
+	if (last_hhold > 0 && plan_ptr_array->size () > 0) {
+		plan_processor.Plan_Build (plan_ptr_array);
+	} else {
+		delete plan_ptr_array;
+	}
+	plan_processor.Stop_Processing ();
+	End_Progress ();
+#endif
 
 	//---- initialize the global data structures ----
 
@@ -43,11 +124,15 @@ void Simulator::Execute (void)
 	read_status = first = true;
 	input_total = update_total = node_total = output_total = travel_total = 0;
 
+#ifdef ROUTING
+	Show_Message (2, "Plan Processing -- Trip");
+#else
 	if (read_all_flag) {
 		Show_Message (2, "Reading Plans into Memory -- Trip");
 	} else {
 		Show_Message (2, "Processing Time of Day");
 	}
+#endif
 	Set_Progress ();
 
 	//---- process each time step ----
@@ -93,6 +178,7 @@ void Simulator::Execute (void)
 			//---- read plans ----
 
 			if (read_status) {
+
 				start = clock ();
 				read_status = sim_plan_step.Start_Processing ();
 				input_total += (clock () - start);
@@ -146,9 +232,9 @@ void Simulator::Execute (void)
 		((double) node_total / CLOCKS_PER_SEC) % (100.0 * node_total / start) % FINISH);
 
 	//---- write summary statistics ----
-
+#ifndef ROUTING
 	plan_file->Print_Summary ();
-
+#endif
 	Break_Check (4);
 	Write (2, "Number of Person Trips Processed = ") << stats->num_trips;
 	Write (1, "Number of Person Trips Started   = ") << stats->num_start;

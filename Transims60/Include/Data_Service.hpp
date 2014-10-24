@@ -141,6 +141,10 @@ public:
 	void Max_Zone_Number (int value)    { max_zone = value; }
 
 	int  Bearing_Offset (void)          { return (bearing_offset); }
+	void Update_Bearings (bool flag)    { update_bearings = flag; }
+	bool Update_Bearings (void)         { return (update_bearings); }
+	void Bearing_Warnings (bool flag)   { bearing_warnings = flag; }
+	bool Bearing_Warnings (void)        { return (bearing_warnings); }
 
 	Compass_Points compass;
 	Time_Periods sum_periods;
@@ -263,7 +267,8 @@ public:
 
 	enum Data_Service_Keys { 
 		DAILY_WRAP_FLAG = DATA_SERVICE_OFFSET, SUMMARY_TIME_RANGES, SUMMARY_TIME_INCREMENT, 
-		PERIOD_CONTROL_POINT, CONGESTED_TIME_RATIO, TRIP_SORT_TYPE, PLAN_SORT_TYPE, HIGHEST_ZONE_NUMBER
+		PERIOD_CONTROL_POINT, CONGESTED_TIME_RATIO, TRIP_SORT_TYPE, PLAN_SORT_TYPE, HIGHEST_ZONE_NUMBER,
+		UPDATE_LINK_BEARINGS, LINK_BEARING_WARNINGS
 	};
 	void Data_Service_Keys (int *keys = 0);
 
@@ -367,6 +372,13 @@ protected:
 
 	void Lane_Map (Connect_Data *connect_ptr, Lane_Map_Array &lane_map);
 
+	int  Fix_Lane_ID (Dir_Data *dir_ptr, int lane_id);
+	int  Fix_Lane_ID (int dir_index, int lane_id)           { return (Fix_Lane_ID (&dir_array [dir_index], lane_id)); }
+
+	void Fix_Lane_Range (Dir_Data *dir_ptr, int range, int &low, int &high);
+	void Fix_Lane_Range (int dir_index, int range, int &low, int &high) 
+	                                                        { Fix_Lane_Range (&dir_array [dir_index], range, low, high); }
+
 	bool Link_Shape (Link_Data *link_ptr, int dir, Points &points, double offset = -1.0, double length = -1.0, double side = 0.0);
 	bool Turn_Shape (int dir_in, int dir_out, Points &points, double setback = 0.0, bool curve_flag = false, double side_in = 0.0, double side_out = 0.0, double offset = -1.0, double length = -1.0);
 
@@ -418,7 +430,7 @@ protected:
 private:
 
 	bool ratio_flag, loc_xy_flag, sum_flow_flag, clear_flow_flag, time_table_flag, transit_veh_flag;
-	bool person_map_flag, lane_use_flows;
+	bool person_map_flag, lane_use_flows, update_bearings, bearing_warnings;
 	int bearing_offset, num_fare_zone, congested_ratio, max_zone, num_lane_flows;
 
 	Trip_Sort_Type trip_sort;

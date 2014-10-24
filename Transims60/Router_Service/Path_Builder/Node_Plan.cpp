@@ -55,7 +55,7 @@ int Path_Builder::Node_Plan ()
 int Path_Builder::Set_Node_Error ()
 {
 	if (length_flag) {
-		return ((param.use == WALK) ? WALK_PROBLEM : BIKE_PROBLEM);
+		return ((path_param.use == WALK) ? WALK_PROBLEM : BIKE_PROBLEM);
 	} else if (time_flag) {
 		return (TIME_PROBLEM);
 	} else if (use_flag) {

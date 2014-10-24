@@ -13,7 +13,7 @@ void Data_Service::Write_Problems (void)
 {
 	int part, num_part, count;
 
-	Problem_File *file = (Problem_File *) System_File_Handle (NEW_PROBLEM);
+	Problem_File *file = System_Problem_File (true);
 
 	Problem_Itr itr;
 	Partition_Files <Problem_File> new_file_set;

@@ -13,7 +13,7 @@ void Data_Service::Write_Trips (void)
 {
 	int part, num_part, count;
 
-	Trip_File *file = (Trip_File *) System_File_Handle (NEW_TRIP);
+	Trip_File *file = System_Trip_File (true);
 
 	Int_Itr int_itr;
 	Trip_Map_Itr itr;

@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Drivers (void)
 {
-	Driver_File *file = (Driver_File *) System_File_Handle (NEW_TRANSIT_DRIVER);
+	Driver_File *file = System_Driver_File (true);
 
 	int count = 0;
 	Int_Map_Itr itr;

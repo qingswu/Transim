@@ -66,14 +66,18 @@ protected:
 	virtual bool Get_Access_Data (Access_File &file, Access_Data &data);
 	virtual bool Get_Sign_Data (Sign_File &file, Sign_Data &data);
 	virtual bool Get_Signal_Data (Signal_File &file, Signal_Data &data);
+	virtual bool Get_Timing_Data (Timing_File &file, Timing_Record &data);
+	virtual bool Get_Phasing_Data (Phasing_File &file, Phasing_Record &data);
+	virtual bool Get_Detector_Data (Detector_File &file, Detector_Data &data);
 	virtual bool Get_Stop_Data (Stop_File &file, Stop_Data &stop_rec);
+
 private:
 
 	bool details_flag, link_use_flag, approach_flag, boundary_flag, street_flag, ext_zone_flag, signal_id_flag;
 	bool update_flag, delete_flag, connect_flag, replicate_flag, repair_flag, location_flag, parking_flag;
 	bool update_node_flag, update_zone_flag, update_link_flag, update_shape_flag, update_dir_flag;
 	bool node_data_flag, zone_data_flag, link_data_flag, access_flag, control_flag;
-	bool delete_node_flag, delete_zone_flag, delete_link_flag;
+	bool delete_node_flag, delete_zone_flag, delete_link_flag, repair_signals;
 	bool zone_flag, zout_flag, turn_flag, shape_flag, name_flag, collapse_flag, uturn_flag;
 	double max_length_factor;
 
@@ -85,7 +89,7 @@ private:
 	int nnode, nlink, nparking, nactivity, naccess, npocket, nconnect, nsign, nsignal, nuse;
 	int mparking, mactivity, mprocess, mpocket, muse;
 	int xlink, xnode, xzone, xshape, xparking, xlocation, xaccess, xpocket, xconnect, xsign, xsignal, xuse, xturn, xstop;
-	int nshort, nlength, nexternal, nzone, nzout, max_splits;
+	int nshort, nlength, nexternal, nzone, nzout, max_splits, xdetector;
 	int nfixed1, nfixed2, nfixed3, nactuated1, nactuated2, nactuated3, nstop, nyield;
 	int nshape, nshapes, nturn;
 	int min_length, link_setback, loc_setback, external_offset;

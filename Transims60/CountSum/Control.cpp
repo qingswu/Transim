@@ -564,7 +564,7 @@ void CountSum::Program_Control (void)
 	day_flag = Get_Control_Flag (OUTPUT_DAY_DATA);
 
 	if (day_flag && System_File_Flag (NEW_PERFORMANCE)) {
-		Performance_File *file = (Performance_File *) System_File_Handle (NEW_PERFORMANCE);
+		Performance_File *file = System_Performance_File (true);
 
 		perf_name = file->Filename ();
 		perf_name.Split_Last (perf_ext, ".");
@@ -578,7 +578,7 @@ void CountSum::Program_Control (void)
 	min_max_flag = Get_Control_Flag (OUTPUT_MIN_MAX_DATA);
 
 	if (min_max_flag && System_File_Flag (NEW_PERFORMANCE)) {
-		Performance_File *file = (Performance_File *) System_File_Handle (NEW_PERFORMANCE);
+		Performance_File *file = System_Performance_File (true);
 
 		perf_name = file->Filename ();
 		perf_name.Split_Last (perf_ext, ".");

@@ -13,7 +13,7 @@ void Data_Service::Write_Plans (void)
 	int part, num_part, count;
 	bool first;
 
-	Plan_File *file = (Plan_File *) System_File_Handle (NEW_PLAN);
+	Plan_File *file = System_Plan_File (true);
 
 	Int_Itr int_itr;
 	Trip_Map_Itr trip_itr;

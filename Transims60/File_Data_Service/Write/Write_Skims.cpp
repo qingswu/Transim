@@ -13,7 +13,7 @@ void Data_Service::Write_Skims (int period)
 	int part, max_part, count, total, org, des, p, max_period;
 	bool period_flag;
 
-	Skim_File *file = (Skim_File *) System_File_Handle (NEW_SKIM);
+	Skim_File *file = System_Skim_File (true);
 
 	Int_Map *org_map, *des_map;
 	Int_Map_Itr org_itr, des_itr;

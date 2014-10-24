@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Timing_Plans (void)
 {
-	Timing_File *file = (Timing_File *) System_File_Handle (NEW_TIMING_PLAN);
+	Timing_File *file = System_Timing_File (true);
 
 	int count = 0;
 	Int_Map_Itr map_itr;

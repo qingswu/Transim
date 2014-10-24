@@ -42,19 +42,19 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 
 	from_imp = path_ptr->Imped ();
 
-	if (param.stop_imped > 0 || param.station_imped > 0) {
+	if (path_param.stop_imped > 0 || path_param.station_imped > 0) {
 		stop_ptr = &exe->stop_array [stop];
 
 		if (stop_ptr->Type () == STOP) {
-			from_imp += param.stop_imped;
+			from_imp += path_param.stop_imped;
 		} else if (stop_ptr->Type () == STATION) {
-			from_imp += param.station_imped;
+			from_imp += path_param.station_imped;
 		}
 	}
 	xfer = path_ptr->Xfer () + 1;
 
 	if (xfer > 0) {
-		from_imp += param.xfer_imped;
+		from_imp += path_param.xfer_imped;
 	}
 	if (from_imp >= max_imp) return (exit_flag);
 
@@ -67,28 +67,28 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 			time_flag = true;
 			return (exit_flag);
 		}
-		min_time = from_time + param.min_wait;
+		min_time = from_time + path_param.min_wait;
 	} else {
 		if (from_time <= time_limit) {
 			time_flag = true;
 			return (exit_flag);
 		}
 		min_time = from_time;
-		if (xfer > 0) min_time -= param.min_wait;
+		if (xfer > 0) min_time -= path_param.min_wait;
 	}
 
 	//---- check max walk ----
 
 	from_walk = path_ptr->Walk ();
 
-	if (walk_flag && from_walk >= param.max_walk) {
+	if (walk_flag && from_walk >= path_param.max_walk) {
 		length_flag = true;
 		return (exit_flag);
 	}
 	from_len = path_ptr->Length ();
 	from_cost = path_ptr->Cost ();
 
-	if (xfer >= param.max_xfers) {
+	if (xfer >= path_param.max_xfers) {
 		transfer_flag = true;
 		return (exit_flag);
 	}
@@ -122,18 +122,18 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 					break;
 				}
 				wait = wait_time - from_time;
-				if (wait_flag && wait > param.max_wait) {
+				if (wait_flag && wait > path_param.max_wait) {
 					wait_time_flag = true;
 					break;
 				}
 				if (xfer > 0) {
-					imped = DTOI (wait * param.value_xfer);
+					imped = DTOI (wait * path_param.value_xfer);
 				} else {
-					imped = DTOI (wait * param.value_wait);
+					imped = DTOI (wait * path_param.value_wait);
 				}
-				if (wait_flag && wait > param.wait_pen) {
-					factor = (double) wait / param.wait_pen;
-					factor = ((factor * factor) - 1) * param.wait_fac + 1;
+				if (wait_flag && wait > path_param.wait_pen) {
+					factor = (double) wait / path_param.wait_pen;
+					factor = ((factor * factor) - 1) * path_param.wait_fac + 1;
 					imped = DTOI (imped * factor);
 				}
 				wait_imp = from_imp + imped;
@@ -162,28 +162,28 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 					}
 					ttime = to_time - wait_time;
 
-					imped = DTOI (ttime * param.value_time);
+					imped = DTOI (ttime * path_param.value_time);
 
 					//---- apply mode bias ----
 
 					if (line_ptr->Mode () <= EXPRESS_BUS) {
 						if (bus_bias_flag) {
-							imped = DTOI (imped * param.bus_bias + param.bus_const);
+							imped = DTOI (imped * path_param.bus_bias + path_param.bus_const);
 							if (imped < 1) imped = 1;
 						}
 					} else if (line_ptr->Mode () == BRT) {
 						if (brt_bias_flag) {
-							imped = DTOI (imped * param.brt_bias + param.brt_const);
+							imped = DTOI (imped * path_param.brt_bias + path_param.brt_const);
 							if (imped < 1) imped = 1;
 						}
 					} else if (rail_bias_flag) {
-						imped = DTOI (imped * param.rail_bias + param.rail_const);
+						imped = DTOI (imped * path_param.rail_bias + path_param.rail_const);
 						if (imped < 1) imped = 1;
 					}
 					to_imp = wait_imp + imped;
 
 					len = to_stop_ptr->Length () - from_offset;
-					to_imp += DTOI (len * param.value_dist);
+					to_imp += DTOI (len * path_param.value_dist);
 
 					if (to_imp >= max_imp) continue;
 
@@ -279,7 +279,7 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 					path_index.Type (ROUTE_ID);
 					path_index.Path (path);
 
-					if (param.sort_method) {
+					if (path_param.sort_method) {
 						if (path_ptr->Status () == 1) {
 							transit_sort.Update (path_index, to_imp);
 						} else {
@@ -343,18 +343,18 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 				}
 				wait = from_time - wait_time;
 
-				if (wait_flag && wait > param.max_wait) {
+				if (wait_flag && wait > path_param.max_wait) {
 					wait_time_flag = true;
 					break;
 				}
 				if (xfer > 0) {
-					imped = DTOI (wait * param.value_xfer);
+					imped = DTOI (wait * path_param.value_xfer);
 				} else {
-					imped = DTOI (wait * param.value_wait);
+					imped = DTOI (wait * path_param.value_wait);
 				}
-				if (wait_flag && wait > param.wait_pen) {
-					factor = (double) wait / param.wait_pen;
-					factor = ((factor * factor) - 1) * param.wait_fac + 1;
+				if (wait_flag && wait > path_param.wait_pen) {
+					factor = (double) wait / path_param.wait_pen;
+					factor = ((factor * factor) - 1) * path_param.wait_fac + 1;
 					imped = DTOI (imped * factor);
 				}
 				wait_imp = from_imp + imped;
@@ -377,34 +377,34 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 
 					to_time = run_ptr->Schedule ();
 
-					if ((to_time - param.min_wait) < time_limit) {
+					if ((to_time - path_param.min_wait) < time_limit) {
 						time_flag = true;
 						continue;
 					}
 					ttime = run_ritr->Schedule () - to_time; 
 
-					imped = DTOI (ttime * param.value_time);
+					imped = DTOI (ttime * path_param.value_time);
 
 					//---- apply mode bias ----
 
 					if (line_ptr->Mode () <= EXPRESS_BUS) {
 						if (bus_bias_flag) {
-							imped = DTOI (imped * param.bus_bias + param.bus_const);
+							imped = DTOI (imped * path_param.bus_bias + path_param.bus_const);
 							if (imped < 1) imped = 1;
 						}
 					} else if (line_ptr->Mode () == BRT) {
 						if (brt_bias_flag) {
-								imped = DTOI (imped * param.brt_bias + param.brt_const);
+								imped = DTOI (imped * path_param.brt_bias + path_param.brt_const);
 								if (imped < 1) imped = 1;
 						}
 					} else if (rail_bias_flag) {
-						imped = DTOI (imped * param.rail_bias + param.rail_const);
+						imped = DTOI (imped * path_param.rail_bias + path_param.rail_const);
 						if (imped < 1) imped = 1;
 					}
 					to_imp = wait_imp + imped;
 
 					len = from_offset - to_stop_ptr->Length ();
-					to_imp += DTOI (len * param.value_dist);
+					to_imp += DTOI (len * path_param.value_dist);
 
 					if (to_imp >= max_imp) continue;
 
@@ -500,7 +500,7 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 					path_index.Type (ROUTE_ID);
 					path_index.Path (path);
 
-					if (param.sort_method) {
+					if (path_param.sort_method) {
 						if (path_ptr->Status () == 1) {
 							transit_sort.Update (path_index, to_imp);
 						} else {

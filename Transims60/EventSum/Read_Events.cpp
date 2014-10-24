@@ -21,7 +21,7 @@ void EventSum::Read_Events (void)
 	Trip_Map_Itr time_map_itr;
 	Trip_Map_Stat time_map_stat;
 
-	Event_File *event_file = (Event_File *) System_File_Handle (EVENT);
+	Event_File *event_file = System_Event_File ();
 
 	//----- initialize the time summary memory ----
 

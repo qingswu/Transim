@@ -13,8 +13,8 @@ void EventSum::Update_Plans (void)
 	int nfile;
 	Dtime time, diff;
 
-	Plan_File *plan_file = (Plan_File *) System_File_Handle (PLAN);
-	Plan_File *new_plan_file = (Plan_File *) System_File_Handle (NEW_PLAN);
+	Plan_File *plan_file = System_Plan_File ();
+	Plan_File *new_plan_file = System_Plan_File (true);
 
 	Trip_Index trip_index;
 	Trip_Map_Itr map_itr;

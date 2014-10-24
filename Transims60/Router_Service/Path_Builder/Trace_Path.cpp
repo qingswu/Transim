@@ -34,9 +34,9 @@ int Path_Builder::Trace_Path (Trip_End *org, Path_End_Array *from, Path_End *to)
 	Stop_Data *stop_ptr;
 	Access_Data *access_ptr;
 
-	mode = param.mode;
+	mode = path_param.mode;
 	park_flag = (mode == PNR_OUT_MODE || mode == PNR_IN_MODE || mode == KNR_OUT_MODE || mode == KNR_IN_MODE);
-	flow_flag = (param.flow_flag && mode != WAIT_MODE && mode != WALK_MODE && mode != BIKE_MODE && 
+	flow_flag = (path_param.flow_flag && mode != WAIT_MODE && mode != WALK_MODE && mode != BIKE_MODE && 
 				mode != TRANSIT_MODE && mode != RIDE_MODE && mode != OTHER_MODE && to->Index () >= 0);
 
 	path_itr = to->begin ();
@@ -64,7 +64,7 @@ int Path_Builder::Trace_Path (Trip_End *org, Path_End_Array *from, Path_End *to)
 		if (plan_ptr->Arrive () > plan_ptr->End () && plan_ptr->Duration () > 0 &&
 			plan_ptr->Constraint () != FIXED_TIME && plan_ptr->Constraint () != DURATION) {
 
-			duration = DTOI (plan_ptr->Duration () * param.duration_factor [plan_ptr->Priority ()]);
+			duration = DTOI (plan_ptr->Duration () * path_param.duration_factor [plan_ptr->Priority ()]);
 			time = plan_ptr->End () + plan_ptr->Duration ();
 			if (time > plan_ptr->Arrive () + duration.Round_Seconds ()) {
 				plan_ptr->Activity (time - plan_ptr->Arrive ());
@@ -89,7 +89,7 @@ int Path_Builder::Trace_Path (Trip_End *org, Path_End_Array *from, Path_End *to)
 
 	//---- all walk path with no detail ----
 
-	if (mode == WALK_MODE && !param.walk_detail) {
+	if (mode == WALK_MODE && !path_param.walk_detail) {
 		plan_ptr->Walk (plan_ptr->Arrive () - plan_ptr->Depart ());
 		return (0);
 	}
@@ -101,7 +101,7 @@ int Path_Builder::Trace_Path (Trip_End *org, Path_End_Array *from, Path_End *to)
 	} else {
 		leg_ptr = plan_ptr;
 	}
-	if (!param.skim_only) leg_ptr->clear ();
+	if (!path_param.skim_only) leg_ptr->clear ();
 
 	prev_time = wait_time = 0;
 	prev_imp = prev_len = wait_imp = 0;
@@ -119,8 +119,8 @@ next_mode:
 		//---- don't write parking ID twice ----
 
 		if (to->End_Type () == PARKING_ID && type == PARKING_ID && 
-			(((param.mode == PNR_IN_MODE || param.mode == KNR_IN_MODE) && forward_flag) || 
-			((param.mode == PNR_OUT_MODE || param.mode == KNR_OUT_MODE) && !forward_flag))) {
+			(((path_param.mode == PNR_IN_MODE || path_param.mode == KNR_IN_MODE) && forward_flag) || 
+			((path_param.mode == PNR_OUT_MODE || path_param.mode == KNR_OUT_MODE) && !forward_flag))) {
 			to_ptr = from_ptr;
 			continue;
 		}
@@ -154,7 +154,7 @@ next_mode:
 	//----- trace the path ----
 
 	for (; from_type != FROM_ID; to_ptr = from_ptr) {
-		if ((int) leg_ptr->size () > param.leg_check) {
+		if ((int) leg_ptr->size () > path_param.leg_check) {
 			plan_ptr->Problem (TRACE_PROBLEM);
 			return (0);
 		}
@@ -224,7 +224,7 @@ next_mode:
 #endif
 			access_ptr = &exe->access_array [from_index];
 
-			if (param.walk_detail) {
+			if (path_param.walk_detail) {
 				if (forward_flag || to_type == NODE_ID) {
 					Add_Leg (mode, to_type, to_index, to_dir);
 				} else {
@@ -278,7 +278,7 @@ next_mode:
 
 		//---- save the plan leg or flow data ----
 
-		if (!param.skim_only || (flow_flag && mode == DRIVE_MODE)) {
+		if (!path_param.skim_only || (flow_flag && mode == DRIVE_MODE)) {
 			if (forward_flag) {
 				type = to_type;
 				index = in_index = to_index;
@@ -314,7 +314,10 @@ next_mode:
 							continue;
 						}
 					}
-				} else if (param.walk_detail && (from_type == NODE_ID || from_type == FROM_ID)) {
+				} else if (path_param.walk_detail && (from_type == NODE_ID || from_type == FROM_ID)) {
+#ifdef CHECK
+					if (leg_ptr->size () == 0) exe->Error ("Path_Builder::Trace: prev_leg");
+#endif
 #ifdef CHECK
 					if (leg_ptr->size () == 0) exe->Error ("Path_Builder::Trace: prev_leg");
 #endif
@@ -326,7 +329,10 @@ next_mode:
 				}
 			} else if (type == NODE_ID) {
 				if (from_type == NODE_ID) {
-					if (param.walk_detail) {
+					if (path_param.walk_detail) {
+#ifdef CHECK
+						if (leg_ptr->size () == 0) exe->Error ("Path_Builder::Trace: prev_leg");
+#endif
 #ifdef CHECK
 						if (leg_ptr->size () == 0) exe->Error ("Path_Builder::Trace: prev_leg");
 #endif
@@ -382,7 +388,10 @@ next_mode:
 					}
 				} else if (from_type == STOP_ID) {
 					if (from_index < 0) return (0);
-					if (param.walk_detail) {
+					if (path_param.walk_detail) {
+#ifdef CHECK
+						if (leg_ptr->size () == 0) exe->Error ("Path_Builder::Trace: prev_leg");
+#endif
 #ifdef CHECK
 						if (leg_ptr->size () == 0) exe->Error ("Path_Builder::Trace: prev_leg");
 #endif
@@ -413,7 +422,8 @@ next_mode:
 			} else if (type == STOP_ID) {
 
 				if (forward_flag) {
-					if (param.walk_detail && (from_type == NODE_ID || from_type == FROM_ID)) {
+					if (path_param.walk_detail && (from_type == NODE_ID || from_type == FROM_ID)) {
+
 
 						Add_Leg (mode, type, index, dir);
 						if (from_type == FROM_ID && time == 0) continue;
@@ -428,7 +438,7 @@ next_mode:
 					} else {
 						if (time == 0 && from_type == to_type && from_index == to_index) continue;
 
-						if (param.walk_detail && time > 0 && from_type == STOP_ID && to_type == STOP_ID) {
+						if (path_param.walk_detail && time > 0 && from_type == STOP_ID && to_type == STOP_ID) {
 							Add_Leg (mode, type, index, dir);
 #ifdef CHECK
 							if (index < 0 || index >= (int) exe->stop_array.size ()) exe->Error ("Path_Builder::Trace: stop_array index");
@@ -522,9 +532,9 @@ next_mode:
 				} else {
 					len_factor = (double) len / link_ptr->Length ();
 				}
-				perf_period_array_ptr->Flow_Time (use_index, to_ptr->Time (), len_factor, link_ptr->Length (), param.pce, param.occupancy, forward_flag);
+				perf_period_array_ptr->Flow_Time (use_index, to_ptr->Time (), len_factor, link_ptr->Length (), path_param.pce, path_param.occupancy, forward_flag);
 
-				if (out_index >= 0 && param.turn_flow_flag) {
+				if (out_index >= 0 && path_param.turn_flow_flag) {
 					if (forward_flag) {
 						map2_itr = exe->connect_map.find (Int2_Key (in_index, out_index));
 						tod = to_ptr->Time ();
@@ -537,7 +547,7 @@ next_mode:
 
 						if (turn_period_ptr != 0) {
 							turn_ptr = turn_period_ptr->Data_Ptr (map2_itr->second);
-							turn_ptr->Add_Turn (param.pce);
+							turn_ptr->Add_Turn (path_param.pce);
 						}
 					}
 				}
@@ -579,7 +589,7 @@ next_mode:
 		to = &to_parking [parking_end->Best ()];
 		path_itr = to->begin ();
 
-		if (to_ptr->Type () == PARKING_ID && (param.mode == PNR_OUT_MODE || param.mode == KNR_OUT_MODE)) goto next_mode;
+		if (to_ptr->Type () == PARKING_ID && (path_param.mode == PNR_OUT_MODE || path_param.mode == KNR_OUT_MODE)) goto next_mode;
 
 		if (forward_flag) {
 			time = to_ptr->Time () - path_itr->Time ();
@@ -613,7 +623,7 @@ next_mode:
 
 	//---- reverse the legs and add to the plan record ----
 
-	if (!param.skim_only && forward_flag) {
+	if (!path_param.skim_only && forward_flag) {
 		if (reroute_flag) {
 			leg_itr = leg_ptr->rbegin ();
 			if (leg_itr != leg_ptr->rend ()) {
@@ -671,7 +681,7 @@ bool Path_Builder::Add_Leg (int mode, int type, int index, int dir, int imped, i
 
 	//---- save the plan leg or flow data ----
 
-	if (!param.skim_only || (flow_flag && mode == DRIVE_MODE)) {
+	if (!path_param.skim_only || (flow_flag && mode == DRIVE_MODE)) {
 		switch (type) {
 			case DIR_ID:
 			case USE_ID:
@@ -734,7 +744,10 @@ bool Path_Builder::Add_Leg (int mode, int type, int index, int dir, int imped, i
 
 		//---- accumulate walk data ----
 				
-		if (mode == WALK && !param.walk_detail && leg_ptr->size () > 0) {
+		if (mode == WALK && !path_param.walk_detail && leg_ptr->size () > 0) {
+#ifdef CHECK
+			if (leg_ptr->size () == 0) exe->Error ("Path_Builder::Add_Leg: leg_ptr");
+#endif
 #ifdef CHECK
 			if (leg_ptr->size () == 0) exe->Error ("Path_Builder::Add_Leg: leg_ptr");
 #endif

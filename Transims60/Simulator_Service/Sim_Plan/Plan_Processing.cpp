@@ -14,6 +14,7 @@ Sim_Trip_Ptr Sim_Plan_Process::Plan_Processing (Plan_Data *plan_ptr)
 	int mode, last_leg;
 	bool drive_flag;
 
+	Link_Data *link_ptr;
 	Plan_Leg_Itr leg_itr;
 	Sim_Trip_Ptr sim_trip_ptr;
 	Sim_Travel_Ptr sim_travel_ptr;
@@ -58,8 +59,9 @@ Sim_Trip_Ptr Sim_Plan_Process::Plan_Processing (Plan_Data *plan_ptr)
 	}
 	if (plan_ptr->Depart () < sim->param.start_time_step) return (sim_trip_ptr);
 
+#ifndef ROUTING
 	if (!plan_ptr->Internal_IDs ()) return (sim_trip_ptr);
-
+#endif
 	//---- process a new travel plan ----
 
 	sim_travel_ptr = &sim_trip_ptr->sim_travel_data;
@@ -95,7 +97,34 @@ Sim_Trip_Ptr Sim_Plan_Process::Plan_Processing (Plan_Data *plan_ptr)
 	last_leg = -1;
 
 	for (leg_itr = plan_ptr->begin (); leg_itr != plan_ptr->end (); leg_itr++) {
+		if (leg_itr->ID () < 0) {
+			sim_travel_ptr->Household (0);
+			return (sim_trip_ptr);
+		}
+		switch (leg_itr->Type ()) {
+			case LINK_AB:
+			case USE_AB:
+			case LINK_BA:
+			case USE_BA:
+				link_ptr = &sim->link_array [leg_itr->ID ()];
 
+				if (leg_itr->Link_Dir ()) {
+					leg_itr->ID (link_ptr->BA_Dir ());
+				} else {
+					leg_itr->ID (link_ptr->AB_Dir ());
+				}
+				if (leg_itr->ID () < 0) {
+					sim_travel_ptr->Household (0);
+					return (sim_trip_ptr);
+				}
+				leg_itr->Type (DIR_ID);
+				break;
+			case USE_ID:
+				leg_itr->Type (DIR_ID);
+				break;
+			default:
+				break;
+		}
 		sim_leg.Mode (leg_itr->Mode ());
 		if (sim_leg.Mode () == DRIVE_MODE) drive_flag = true;
 

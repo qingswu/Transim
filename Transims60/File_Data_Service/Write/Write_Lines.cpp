@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Lines (void)
 {
-	Line_File *file = (Line_File *) System_File_Handle (NEW_TRANSIT_ROUTE);
+	Line_File *file = System_Line_File (true);
 
 	int count = 0;
 	Int_Map_Itr itr;

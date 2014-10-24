@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Phasing_Plans (void)
 {
-	Phasing_File *file = (Phasing_File *) System_File_Handle (NEW_PHASING_PLAN);
+	Phasing_File *file = System_Phasing_File (true);
 
 	int count = 0;	
 	Int_Map_Itr map_itr;

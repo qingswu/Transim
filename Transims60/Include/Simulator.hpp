@@ -23,6 +23,7 @@ public:
 
 protected:
 	virtual void Program_Control (void);
+	virtual bool Save_Plans (Plan_Ptr_Array *array_ptr, int part=0);
 
 private:
 	//enum Simulator_Reports { FIRST_REPORT = 1, SECOND_REPORT };
@@ -33,5 +34,7 @@ private:
 	int lane_change_levels, max_vehicles;
 	
 	Plan_File *plan_file;
+
+	void Read_Trips (void);
 };
 #endif

@@ -21,6 +21,8 @@ Data_Service::Data_Service (void) : File_Service ()
 	Time_Table_Flag (false);
 	Transit_Veh_Flag (false);
 	Person_Map_Flag (false);
+	Update_Bearings (false);
+	Bearing_Warnings (false);
 
 	Congested_Ratio (Round (300));
 	compass.Set_Points (360);
@@ -49,6 +51,8 @@ void Data_Service::Data_Service_Keys (int *keys)
 		{ TRIP_SORT_TYPE, "TRIP_SORT_TYPE", LEVEL0, OPT_KEY, TEXT_KEY, "DO_NOT_SORT", "DO_NOT_SORT, TRAVELER_SORT, TIME_SORT", NO_HELP },
 		{ PLAN_SORT_TYPE, "PLAN_SORT_TYPE", LEVEL0, OPT_KEY, TEXT_KEY, "DO_NOT_SORT", "DO_NOT_SORT, TRAVELER_SORT, TIME_SORT", NO_HELP },
 		{ HIGHEST_ZONE_NUMBER, "HIGHEST_ZONE_NUMBER", LEVEL0, OPT_KEY, INT_KEY, "0", "0..32000", NO_HELP },
+		{ UPDATE_LINK_BEARINGS, "UPDATE_LINK_BEARINGS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
+		{ LINK_BEARING_WARNINGS, "LINK_BEARING_WARNINGS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		END_CONTROL
 	};
 
@@ -163,6 +167,18 @@ void Data_Service::Program_Control (void)
 		Max_Zone_Number (Get_Control_Integer (HIGHEST_ZONE_NUMBER));
 	}
 
+	//---- update link bearings ----
+
+	if (Control_Key_Status (UPDATE_LINK_BEARINGS)) {
+		Update_Bearings (Get_Control_Flag (UPDATE_LINK_BEARINGS));
+	}
+
+	//---- link bearing warnings ----
+
+	if (Control_Key_Status (LINK_BEARING_WARNINGS)) {
+		Bearing_Warnings (Get_Control_Flag (LINK_BEARING_WARNINGS));
+	}
+
 	//---- set the turn shape setback based on internal units ----
 
 	turn_shape_setback = Internal_Units ((double) TURN_SHAPE_SETBACK, FEET);
@@ -183,172 +199,172 @@ void Data_Service::Execute (void)
 	//---- nodes ----
 
 	file = System_File (NODE);
-	if (file->flag && file->read) Read_Nodes (*((Node_File *) file->file));
+	if (file->flag && file->read) Read_Nodes (*(System_Node_File ()));
 
 	//---- zones ----
 
 	file = System_File (ZONE);
-	if (file->flag && file->read) Read_Zones (*((Zone_File *) file->file));
+	if (file->flag && file->read) Read_Zones (*(System_Zone_File ()));
 
 	//---- shapes ----
 
 	file = System_File (SHAPE);
-	if (file->flag && file->read) Read_Shapes (*((Shape_File *) file->file));
+	if (file->flag && file->read) Read_Shapes (*(System_Shape_File ()));
 
 	//---- links ----
 
 	file = System_File (LINK);
-	if (file->flag && file->read) Read_Links (*((Link_File *) file->file));
+	if (file->flag && file->read) Read_Links (*(System_Link_File ()));
 
 	//---- pocket lanes ----
 
 	file = System_File (POCKET);
-	if (file->flag && file->read) Read_Pockets (*((Pocket_File *) file->file));
+	if (file->flag && file->read) Read_Pockets (*(System_Pocket_File ()));
 
 	//---- vehicle types ----
 
 	file = System_File (VEHICLE_TYPE);
-	if (file->flag && file->read) Read_Veh_Types (*((Veh_Type_File *) file->file));
+	if (file->flag && file->read) Read_Veh_Types (*(System_Veh_Type_File ()));
 
 	//---- lane use ----
 
 	file = System_File (LANE_USE);
-	if (file->flag && file->read) Read_Lane_Uses (*((Lane_Use_File *) file->file));
+	if (file->flag && file->read) Read_Lane_Uses (*(System_Lane_Use_File ()));
 
 	//---- connections ----
 
 	file = System_File (CONNECTION);
-	if (file->flag && file->read) Read_Connections (*((Connect_File *) file->file));
+	if (file->flag && file->read) Read_Connections (*(System_Connect_File ()));
 
 	//---- turn penalties ----
 
 	file = System_File (TURN_PENALTY);
-	if (file->flag && file->read) Read_Turn_Pens (*((Turn_Pen_File *) file->file));
+	if (file->flag && file->read) Read_Turn_Pens (*(System_Turn_Pen_File ()));
 
 	//---- parking lots ----
 
 	file = System_File (PARKING);
-	if (file->flag && file->read) Read_Parking_Lots (*((Parking_File *) file->file));
+	if (file->flag && file->read) Read_Parking_Lots (*(System_Parking_File ()));
 
 	//---- locations ----
 
 	file = System_File (LOCATION);
-	if (file->flag && file->read) Read_Locations (*((Location_File *) file->file));
+	if (file->flag && file->read) Read_Locations (*(System_Location_File()));
 
 	//---- transit stops ----
 
 	file = System_File (TRANSIT_STOP);
-	if (file->flag && file->read) Read_Stops (*((Stop_File *) file->file));
+	if (file->flag && file->read) Read_Stops (*(System_Stop_File ()));
 
 	//---- access links ----
 
 	file = System_File (ACCESS_LINK);
-	if (file->flag && file->read) Read_Access_Links (*((Access_File *) file->file));
-
-	//---- signs ----
-
-	file = System_File (SIGN);
-	if (file->flag && file->read) Read_Signs (*((Sign_File *) file->file));
+	if (file->flag && file->read) Read_Access_Links (*(System_Access_File ()));
 
 	//---- signals ----
 
 	file = System_File (SIGNAL);
-	if (file->flag && file->read) Read_Signals (*((Signal_File *) file->file));
+	if (file->flag && file->read) Read_Signals (*(System_Signal_File ()));
 
 	//---- detectors ----
 
 	file = System_File (DETECTOR);
-	if (file->flag && file->read) Read_Detectors (*((Detector_File *) file->file));
+	if (file->flag && file->read) Read_Detectors (*(System_Detector_File ()));
 
 	//---- timing plans ----
 
 	file = System_File (TIMING_PLAN);
-	if (file->flag && file->read) Read_Timing_Plans (*((Timing_File *) file->file));
+	if (file->flag && file->read) Read_Timing_Plans (*(System_Timing_File ()));
 
 	//---- phasing plans ----
 
 	file = System_File (PHASING_PLAN);
-	if (file->flag && file->read) Read_Phasing_Plans (*((Phasing_File *) file->file));
+	if (file->flag && file->read) Read_Phasing_Plans (*(System_Phasing_File ()));
+
+	//---- signs ----
+
+	file = System_File (SIGN);
+	if (file->flag && file->read) Read_Signs (*(System_Sign_File ()));
 
 	//---- transit fares ----
 
 	file = System_File (TRANSIT_FARE);
-	if (file->flag && file->read) Read_Fares (*((Fare_File *) file->file));
+	if (file->flag && file->read) Read_Fares (*(System_Fare_File ()));
 
 	//---- transit routes ----
 
 	file = System_File (TRANSIT_ROUTE);
-	if (file->flag && file->read) Read_Lines (*((Line_File *) file->file));
+	if (file->flag && file->read) Read_Lines (*(System_Line_File ()));
 
 	//---- transit schedules ----
 
 	file = System_File (TRANSIT_SCHEDULE);
-	if (file->flag && file->read) Read_Schedules (*((Schedule_File *) file->file));
+	if (file->flag && file->read) Read_Schedules (*(System_Schedule_File ()));
 
 	//---- transit drivers ----
 
 	file = System_File (TRANSIT_DRIVER);
-	if (file->flag && file->read) Read_Drivers (*((Driver_File *) file->file));
+	if (file->flag && file->read) Read_Drivers (*(System_Driver_File ()));
 
 	//---- route nodes ----
 
 	file = System_File (ROUTE_NODES);
-	if (file->flag && file->read) Read_Route_Nodes (*((Route_Nodes_File *) file->file));
+	if (file->flag && file->read) Read_Route_Nodes (*(System_Route_Nodes_File ()));
 
 	//---- selections ----
 
 	file = System_File (SELECTION);
-	if (file->flag && file->read) Read_Selections (*((Selection_File *) file->file));
+	if (file->flag && file->read) Read_Selections (*(System_Selection_File ()));
 
 	//---- households ----
 
 	file = System_File (HOUSEHOLD);
-	if (file->flag && file->read) Read_Households (*((Household_File *) file->file));
+	if (file->flag && file->read) Read_Households (*(System_Household_File ()));
 
 	//---- performance ----
 
 	file = System_File (PERFORMANCE);
-	if (file->flag && file->read) Read_Performance (*((Performance_File *) file->file), perf_period_array);
+	if (file->flag && file->read) Read_Performance (*(System_Performance_File ()), perf_period_array);
 
 	//---- turn_delay ----
 
 	file = System_File (TURN_DELAY);
-	if (file->flag && file->read) Read_Turn_Delays (*((Turn_Delay_File *) file->file), turn_period_array);
+	if (file->flag && file->read) Read_Turn_Delays (*(System_Turn_Delay_File ()), turn_period_array);
 
 	//---- ridership ----
 
 	file = System_File (RIDERSHIP);
-	if (file->flag && file->read) Read_Ridership (*((Ridership_File *) file->file));
+	if (file->flag && file->read) Read_Ridership (*(System_Ridership_File ()));
 	
 	//---- trips ----
 
 	file = System_File (TRIP);
-	if (file->flag && file->read) Read_Trips (*((Trip_File *) file->file));
+	if (file->flag && file->read) Read_Trips (*(System_Trip_File ()));
 
 	//---- problems ----
 
 	file = System_File (PROBLEM);
-	if (file->flag && file->read) Read_Problems (*((Problem_File *) file->file));
+	if (file->flag && file->read) Read_Problems (*(System_Problem_File ()));
 
 	//---- plans ----
 
 	file = System_File (PLAN);
-	if (file->flag && file->read) Read_Plans (*((Plan_File *) file->file));
+	if (file->flag && file->read) Read_Plans (*(System_Plan_File ()));
 
 	//---- skims ----
 
 	file = System_File (SKIM);
-	if (file->flag && file->read) Read_Skims (*((Skim_File *) file->file));
+	if (file->flag && file->read) Read_Skims (*(System_Skim_File ()));
 
 	//---- events ----
 
 	file = System_File (EVENT);
-	if (file->flag && file->read) Read_Events (*((Event_File *) file->file));
+	if (file->flag && file->read) Read_Events (*(System_Event_File ()));
 	
 	//---- travelers ----
 
 	file = System_File (TRAVELER);
-	if (file->flag && file->read) Read_Travelers (*((Traveler_File *) file->file));
+	if (file->flag && file->read) Read_Travelers (*(System_Traveler_File ()));
 
 	//---- zone location map file ----
 
@@ -547,6 +563,63 @@ int Data_Service::Make_Lane_Range (Dir_Data *dir_ptr, int low, int high)
 		return (low);
 	} else {
 		return (high + (low << 8));
+	}
+}
+
+//-----------------------------------------------------------
+//	Fix_Lane_ID
+//-----------------------------------------------------------
+
+int Data_Service::Fix_Lane_ID (Dir_Data *dir_ptr, int lane_id)
+{
+	int code, lane;
+
+	lane = lane_id & 0x3F;
+	code = (lane_id & 0x00C0) >> 6;
+
+	if (code == LEFT_POCKET) {
+		if (lane < 1 || lane > dir_ptr->Left ()) {
+			lane = dir_ptr->Left ();
+		}
+		lane = dir_ptr->Left () - lane;
+	} else if (code == RIGHT_POCKET) {
+		if (lane < 1 || lane > dir_ptr->Right ()) {
+			lane = dir_ptr->Right ();
+		}
+		lane += dir_ptr->Lanes () + dir_ptr->Left () - 1;
+	} else {
+		if (lane == 0) return (-1);
+		if (lane < 1 || lane > dir_ptr->Lanes ()) {
+			lane = dir_ptr->Lanes ();
+		}
+		lane = dir_ptr->Lanes () - lane + dir_ptr->Left ();
+	}
+	return (lane);
+}
+
+//-----------------------------------------------------------
+//	Fix_Lane_Range
+//-----------------------------------------------------------
+
+void Data_Service::Fix_Lane_Range (Dir_Data *dir_ptr, int lane_range, int &low, int &high)
+{
+	if (lane_range == 0) {
+		low = 0;
+		high = dir_ptr->Left () + dir_ptr->Lanes () + dir_ptr->Right () - 1;
+		return;
+	}
+	high = Fix_Lane_ID (dir_ptr, lane_range);
+
+	low = (lane_range >> 8);
+	if (low == 0) {
+		low = high;
+	} else {
+		low = Fix_Lane_ID (dir_ptr, low);
+		if (low > high) {
+			int temp = low;
+			low = high;
+			high = temp;
+		}
 	}
 }
 

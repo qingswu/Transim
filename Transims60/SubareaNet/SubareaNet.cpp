@@ -11,7 +11,7 @@
 SubareaNet::SubareaNet (void) : Data_Service ()
 {
 	Program ("SubareaNet");
-	Version (3);
+	Version (4);
 	Title ("Subarea Network Files");
 
 	System_File_Type required_files [] = {

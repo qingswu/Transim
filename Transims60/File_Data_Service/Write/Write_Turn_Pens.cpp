@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Turn_Pens (void)
 {
-	Turn_Pen_File *file = (Turn_Pen_File *) System_File_Handle (NEW_TURN_PENALTY);
+	Turn_Pen_File *file = System_Turn_Pen_File (true);
 	
 	int dir, index, count;
 
