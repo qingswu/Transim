@@ -63,7 +63,7 @@ void Path_Builder::Initialize_Transit (void)
 
 	//---- allocate/initialize path building memory ----
 
-	for (int i=0; i <= param.max_paths; i++) {
+	for (int i=0; i <= path_param.max_paths; i++) {
 		array_ptr = &node_path [i];
 
 		if (array_ptr->size () == 0) {
@@ -71,7 +71,7 @@ void Path_Builder::Initialize_Transit (void)
 		} else {
 			array_ptr->Clear ();
 		}
-		if (i == param.max_paths) continue;
+		if (i == path_param.max_paths) continue;
 
 		array_ptr = &board_path [i];
 

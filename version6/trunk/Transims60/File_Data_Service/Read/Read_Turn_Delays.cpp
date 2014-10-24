@@ -169,9 +169,9 @@ bool Data_Service::Get_Turn_Delay_Data (Turn_Delay_File &file, Turn_Delay_Data &
 		}
 
 		if (to_link_ptr->Anode () == nod) {
-			turn_rec.To_Index (link_ptr->AB_Dir ());
+			turn_rec.To_Index (to_link_ptr->AB_Dir ());
 		} else if (link_ptr->Bnode () == nod) {
-			turn_rec.To_Index (link_ptr->BA_Dir ());
+			turn_rec.To_Index (to_link_ptr->BA_Dir ());
 		} else {
 			Warning (String ("Turn Time Node %d Not Found on Link %d") % node % to_link);
 			return (false);

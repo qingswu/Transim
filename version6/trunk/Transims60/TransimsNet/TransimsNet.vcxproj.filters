@@ -119,6 +119,15 @@
     <ClCompile Include="Repair_Connections.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Get_Detector_Data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Get_Phasing_Data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Get_Timing_Data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\Access_Warrant.hpp">

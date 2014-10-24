@@ -19,29 +19,46 @@ void Router::Write_Plan_Files (void)
 	Time_Map_Stat time_stat;
 	Time_Map_Itr time_itr;
 	Trip_Map_Itr trip_itr;
+	
+	Reset_Problems ();
 
 	if (time_sort_flag) {
 		Show_Message ("Sorting Plans by Time -- Record");
 		Set_Progress ();
 
-		for (i=0, plan_itr = plan_array.begin (); plan_itr != plan_array.end (); plan_itr++, i++) {
+		for (index=0, plan_itr = plan_array.begin (); plan_itr != plan_array.end (); plan_itr++, index++) {
 			if (plan_itr->Household () == 0	|| plan_itr->Problem () > 0 || plan_itr->size () == 0) continue;
 			Show_Progress ();
 
-			if (plan_itr->Depart () < 0) {
-				exe->Warning (String ("Plan %d-%d-%d-%d Departs %s vs. Start Time %s") %
-					plan_itr->Household () % plan_itr->Person () % plan_itr->Tour () % plan_itr->Trip () % 
-					plan_itr->Depart ().Time_String () % plan_itr->Start ().Time_String ());
-				plan_itr->Depart (0);
-			}
-			plan_itr->Get_Index (time_index);
+			if (plan_itr->Problem () > 0) {
+				Set_Problem ((Problem_Type) plan_itr->Problem ());
 
-			time_stat = plan_time_map.insert (Time_Map_Data (time_index, i));
+				if (problem_flag) {
+					plan_itr->External_IDs ();
 
-			if (!time_stat.second) {
-				Warning (String ("Duplicate Plan Index = %s-%d-%d") % 
-					time_index.Start ().Time_String () % 
-					time_index.Household () % time_index.Person ());
+					if (problem_set_flag) {
+						i = plan_itr->Partition ();
+						Write_Problem (problem_set [i], &(*plan_itr));
+					} else {
+						Write_Problem (problem_file, &(*plan_itr));
+					}
+				}
+			} else if (plan_itr->size () > 0) {
+				if (plan_itr->Depart () < 0) {
+					exe->Warning (String ("Plan %d-%d-%d-%d Departs %s vs. Start Time %s") %
+						plan_itr->Household () % plan_itr->Person () % plan_itr->Tour () % plan_itr->Trip () % 
+						plan_itr->Depart ().Time_String () % plan_itr->Start ().Time_String ());
+					plan_itr->Depart (0);
+				}
+				plan_itr->Get_Index (time_index);
+
+				time_stat = plan_time_map.insert (Time_Map_Data (time_index, index));
+
+				if (!time_stat.second) {
+					Warning (String ("Duplicate Plan Index = %s-%d-%d") % 
+						time_index.Start ().Time_String () % 
+						time_index.Household () % time_index.Person ());
+				}
 			}
 		}
 		End_Progress ();
@@ -53,7 +70,6 @@ void Router::Write_Plan_Files (void)
 		Show_Message (String ("Writing %s -- Record") % new_plan_file->File_Type ());
 	}
 	Set_Progress ();
-	Reset_Problems ();
 
 	for (first = true; ; first = false) {
 		if (time_sort_flag) {

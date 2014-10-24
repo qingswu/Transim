@@ -423,6 +423,12 @@ void Performance_Output::Write_Summary (void)
 		data.Start (sim->time_step - increment);
 		data.End (sim->time_step);
 
+		if (perf_itr->Veh_Dist () > 0) {
+			perf_itr->Time ((int) (link_ptr->Length () * perf_itr->Veh_Time () / perf_itr->Veh_Dist ()));
+		} else {
+			perf_itr->Time (dir_ptr->Time0 ());
+		}
+
 		data.Get_Data (&(*perf_itr), dir_ptr, link_ptr);
 		perf_itr->Clear ();
 

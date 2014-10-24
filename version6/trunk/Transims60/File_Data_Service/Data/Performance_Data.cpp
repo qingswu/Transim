@@ -679,6 +679,78 @@ link_end:
 }
 
 //---------------------------------------------------------
+//	Load_Flow
+//---------------------------------------------------------
+
+Dtime Perf_Period_Array::Load_Flow (int dir_index, Dtime time, Dtime ttime, double len_factor, double len, double pce, double occ)
+{
+	int period, num_periods;
+	Dtime low, high, end_time, ttim, perf_time;
+	double factor, tt;
+	bool first;
+
+	num_periods = periods->Num_Periods ();
+	len *= pce;
+	perf_time = 0;
+
+	first = true;
+
+	for (period = periods->Period (time); period >= 0 && period < num_periods; first = false) {
+		periods->Period_Range (period, low, high);
+
+		Perf_Period *period_ptr = &at (period);
+
+		Perf_Data *perf_ptr = period_ptr->Data_Ptr (dir_index);
+
+		if (len_factor <= 0.0) goto link_end;
+
+		perf_time += (int) (perf_ptr->Time () * len_factor + 0.5);
+
+		tt = ttime * len_factor;
+		ttim = (int) (tt + 0.5);
+		if (ttim < 1) ttim = 1;
+
+		end_time = time + ttim;
+		if (end_time <= high) {
+			perf_ptr->Add_Persons (occ);
+			perf_ptr->Add_Volume (pce);
+			if (first) perf_ptr->Add_Enter (pce);
+			perf_ptr->Add_Max_Volume (pce);
+			perf_ptr->Add_Veh_Time (tt * pce);
+			perf_ptr->Add_Veh_Dist (len * len_factor);
+
+			if (len == 0.0) {
+				perf_ptr->Add_Queue (len * len_factor);
+			}
+			goto link_end;
+		} else {
+			ttim = high - time;
+			if (ttime > 0) {
+				factor = (double) ttim / ttime;
+			} else {
+				factor = 0.001;
+			}
+			perf_ptr->Add_Persons (occ);
+			perf_ptr->Add_Volume (pce);
+			if (first) perf_ptr->Add_Enter (pce);
+			perf_ptr->Add_Max_Volume (pce);
+			perf_ptr->Add_Veh_Time (tt * pce);
+			perf_ptr->Add_Veh_Dist (len * factor);
+
+			len_factor -= factor;
+			if (len_factor <= 0) goto link_end;
+			time = high + 1;
+			period++;
+		}
+		continue;
+link_end:
+		perf_ptr->Add_Exit (pce);
+		break;
+	}
+	return (perf_time);
+}
+
+//---------------------------------------------------------
 //	Get_Data
 //---------------------------------------------------------
 
@@ -715,11 +787,11 @@ void Performance_Data::Get_Data (Perf_Data *perf_ptr, Dir_Data *dir_ptr, Link_Da
 		speed = length / dir_ptr->Time0 ();
 	}
 	if (speed < 0.1) speed = 0.1;
-	Speed (speed);
+    Speed (speed);
 
 	time = (int) (length / speed + 0.5);
 	if (time < 1) time = 1;
-
+	
 	Time (time);
 	Delay (time - dir_ptr->Time0 ());
 
@@ -780,7 +852,8 @@ void Performance_Data::Get_Data (Perf_Data *perf_ptr, Dir_Data *dir_ptr, Link_Da
 	} else {
 		VC_Ratio (0.0);
 	}
-	Ratio_Dist (perf_ptr->Ratio_Dist ());
+
+	Ratio_Dist (exe->UnRound (perf_ptr->Ratio_Dist ()));
 	Ratio_Time (perf_ptr->Ratio_Time ());
 	Ratios (perf_ptr->Ratios ());
 	Count (perf_ptr->Count ());

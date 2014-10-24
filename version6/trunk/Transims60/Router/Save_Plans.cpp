@@ -43,6 +43,8 @@ bool Router::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 				num_reroute++;
 			} else if (new_ptr->Method () == UPDATE_PLAN) {
 				num_update++;
+			} else if (new_ptr->Method () == COPY_PLAN) {
+				num_copied++;
 			} else {
 				num_build++;
 			}
@@ -57,12 +59,20 @@ bool Router::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 			plan_ptr = &plan_array [new_ptr->Index ()];
 
 			keep_new = (plan_ptr->Household () <= 0 || plan_ptr->size () == 0 || plan_ptr->Problem () > 0);
+			time1 = 0;
+			priority = CRITICAL;
 
 			if (plan_ptr->Priority () == NO_PRIORITY) {
 				priority = NO_PRIORITY;
 				keep_new = true;
-			} else {
-				priority = CRITICAL;
+			} else if (new_ptr->Method () == COPY_PLAN) {
+				time1 = new_ptr->Activity ();
+				new_ptr->Activity (new_ptr->Duration ());
+
+				if (!time_diff_flag && !trip_diff_flag) {
+					priority = HIGH;
+					goto select_plans;
+				}
 			}
 			if (!keep_new && new_ptr->Problem () == 0) {
 
@@ -74,7 +84,9 @@ bool Router::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 					//---- compare plan times ----
 
 					if (time_diff_flag) {
-						time1 = new_ptr->Arrive () - new_ptr->Depart ();
+						if (new_ptr->Method () != COPY_PLAN) {
+							time1 = new_ptr->Arrive () - new_ptr->Depart ();
+						}
 						time2 = plan_ptr->Arrive () - plan_ptr->Depart ();
 
 						time_diff = time1 - time2;
@@ -124,7 +136,9 @@ bool Router::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 					//---- compare trip times ----
 
 					if (trip_diff_flag) {
-						time1 = new_ptr->Arrive () - new_ptr->Depart ();
+						if (new_ptr->Method () != COPY_PLAN) {
+							time1 = new_ptr->Arrive () - new_ptr->Depart ();
+						}
 						time2 = new_ptr->End () - new_ptr->Start ();
 
 						time_diff = time1 - time2;
@@ -163,6 +177,7 @@ bool Router::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 				plan_ptr->clear ();
 				*plan_ptr = *new_ptr;
 			}
+select_plans:
 			plan_ptr->Priority (priority);
 
 			if (select_priorities && select_priority [plan_ptr->Priority ()]) {
@@ -175,6 +190,12 @@ bool Router::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 				gap_ptr = &gap_data_array [plan_ptr->Index ()];
 				gap_ptr->current = (int) plan_ptr->Impedance ();
 
+				if (new_ptr->Method () == COPY_PLAN) {
+					time2 = plan_ptr->Arrive () - plan_ptr->Depart ();
+					if (time2 > 0) {
+						gap_ptr->current = (int) ((double) gap_ptr->current * time1 / time2 + 0.5);
+					}
+				}
 				if (plan_ptr->Constraint () == END_TIME) {
 					gap_ptr->time = plan_ptr->End ();
 				} else {

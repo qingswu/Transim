@@ -41,9 +41,9 @@ bool Path_Builder::Plan_Flow (Plan_Data *plan_data)
 
 	//---- set the traveler parameters ----
 
-	exe->Set_Parameters (param, plan_ptr->Type (), plan_ptr->Veh_Type ());
+	exe->Set_Parameters (path_param, plan_ptr->Type (), plan_ptr->Veh_Type ());
 
-	param.mode = (Mode_Type) mode;
+	path_param.mode = (Mode_Type) mode;
 
 	//---- trace the path ----
 
@@ -91,7 +91,7 @@ bool Path_Builder::Plan_Flow (Plan_Data *plan_data)
 			use_index = index = -1;
 		}
 		if (use_index >= 0) {
-			if (param.flow_flag) {
+			if (path_param.flow_flag) {
 				len = leg_itr->Length ();
 				if (len >= link_ptr->Length ()) {
 					len = link_ptr->Length ();
@@ -99,16 +99,16 @@ bool Path_Builder::Plan_Flow (Plan_Data *plan_data)
 				} else {
 					len_factor = len / link_ptr->Length ();
 				}
-				ttime = perf_period_array_ptr->Flow_Time (use_index, time, len_factor, link_ptr->Length (), param.pce, param.occupancy);
+				ttime = perf_period_array_ptr->Flow_Time (use_index, time, len_factor, link_ptr->Length (), path_param.pce, path_param.occupancy);
 			}
-			if (dir_index >= 0 && param.turn_flow_flag) {
+			if (dir_index >= 0 && path_param.turn_flow_flag) {
 				map2_itr = exe->connect_map.find (Int2_Key (dir_index, index));
 				if (map2_itr != exe->connect_map.end ()) {
 					turn_period_ptr = exe->turn_period_array.Period_Ptr (time);
 
 					if (turn_period_ptr != 0) {
 						turn_ptr = turn_period_ptr->Data_Ptr (map2_itr->second);
-						turn_ptr->Add_Turn (param.pce);
+						turn_ptr->Add_Turn (path_param.pce);
 					}
 				}
 			}

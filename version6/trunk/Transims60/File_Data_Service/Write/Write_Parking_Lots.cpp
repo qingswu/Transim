@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Parking_Lots (void)
 {
-	Parking_File *file = (Parking_File *) System_File_Handle (NEW_PARKING);
+	Parking_File *file = System_Parking_File (true);
 
 	int count = 0;
 	Int_Map_Itr itr;

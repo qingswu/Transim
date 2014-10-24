@@ -30,7 +30,7 @@ int Path_Builder::Magic_Move ()
 	path_data.Imped (0);
 	path_data.Time (from_ptr->Time ());
 
-	path_data.Mode (param.mode);
+	path_data.Mode (path_param.mode);
 	path_data.Type (LOCATION_ID);
 	path_data.Status (1);
 
@@ -46,7 +46,7 @@ int Path_Builder::Magic_Move ()
 	path_end.End_Type (LOCATION_ID);
 
 	ttime = plan_ptr->End () - plan_ptr->Start ();
-	imped = DTOI (ttime * param.value_time);
+	imped = DTOI (ttime * path_param.value_time);
 
 	if (forward_flag) {
 		ttime += from_ptr->Time ();
@@ -57,7 +57,7 @@ int Path_Builder::Magic_Move ()
 	path_data.Clear ();	
 	path_data.Imped (imped);
 	path_data.Time (ttime);
-	path_data.Mode (param.mode);
+	path_data.Mode (path_param.mode);
 	path_data.Type (LOCATION_ID);
 	path_data.Status (1);
 

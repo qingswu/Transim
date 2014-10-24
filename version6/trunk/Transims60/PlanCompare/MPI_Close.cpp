@@ -77,7 +77,7 @@ void PlanCompare::MPI_Close (void)
 			select_map.swap (selected);
 			Write_Selections ();
 
-			Selection_File *file = (Selection_File *) System_File_Handle (NEW_SELECTION);
+			Selection_File *file = System_Selection_File (true);
 
 			if (Partition_Range ()) {
 				Send_MPI_Message (String ("Slave %d Wrote %ss %d..%d") % MPI_Rank () % file->File_Type () % First_Partition () % Last_Partition ());

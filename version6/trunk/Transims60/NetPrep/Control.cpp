@@ -514,7 +514,7 @@ void NetPrep::Program_Control (void)
 		String_List str_list;
 		Str_Itr str_itr;
 
-		Route_Nodes_File *route_nodes = (Route_Nodes_File *) System_File_Handle (NEW_ROUTE_NODES);
+		Route_Nodes_File *route_nodes = System_Route_Nodes_File (true);
 
 		Print (1);
 

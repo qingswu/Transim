@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Signs (void)
 {
-	Sign_File *file = (Sign_File *) System_File_Handle (NEW_SIGN);
+	Sign_File *file = System_Sign_File (true);
 
 	int dir, index, count;
 

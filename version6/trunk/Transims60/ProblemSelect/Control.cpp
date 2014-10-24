@@ -25,13 +25,13 @@ void ProblemSelect::Program_Control (void)
 	type_flag = false;
 
 	if (System_File_Flag (SELECTION)) {
-		file = (Selection_File *) System_File_Handle (SELECTION);
+		file = System_Selection_File ();
 		if (file->Part_Flag () || file->Partition_Flag ()) {
 			partition_flag = true;
 		}
 		type_flag = (file->Type_Flag ());
 	}
-	file = (Selection_File *) System_File_Handle (NEW_SELECTION);
+	file = System_Selection_File (true);
 	if (!file->Part_Flag ()) partition_flag = true;
 
 	if (partition_flag || type_flag) {

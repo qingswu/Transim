@@ -50,7 +50,7 @@ int Path_Builder::Save_Skims ()
 			}
 			continue;
 		}
-		if (param.skim_total_time && !param.flow_flag) {
+		if (path_param.skim_total_time && !path_param.flow_flag) {
 			if (forward_flag) {
 				time = path_itr->Time () - from_itr->Time ();
 			} else {

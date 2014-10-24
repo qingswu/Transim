@@ -110,7 +110,7 @@ void Router::Program_Control (void)
 
 	if (System_File_Flag (TRIP)) {
 		trip_flag = true;
-		trip_file = (Trip_File *) System_File_Handle (TRIP);
+		trip_file = System_Trip_File ();
 
 		if (trip_file->Version () < 60) {
 			Error (String ("Convert Version %.1lf Trip File to Version 6.0 using NewFormat") % (trip_file->Version () / 10.0));
@@ -124,7 +124,7 @@ void Router::Program_Control (void)
 	}
 	if (System_File_Flag (PLAN)) {
 		plan_flag = true;
-		plan_file = (Plan_File *) System_File_Handle (PLAN);
+		plan_file = System_Plan_File ();
 
 		if (plan_file->Time_Sort () && !plan_memory_flag) {
 			Error ("Plan Files should be Traveler Sorted");
@@ -136,7 +136,7 @@ void Router::Program_Control (void)
 
 	if (System_File_Flag (NEW_PLAN)) {
 		new_plan_flag = true;
-		new_plan_file = (Plan_File *) System_File_Handle (NEW_PLAN);
+		new_plan_file = System_Plan_File (true);
 
 		if (time_sort_flag) {
 			new_plan_file->Sort_Type (TIME_SORT);
@@ -170,7 +170,7 @@ void Router::Program_Control (void)
 	}
 	if (System_File_Flag (NEW_PROBLEM)) {
 		problem_flag = true;
-		problem_file = (Problem_File *) System_File_Handle (NEW_PROBLEM);
+		problem_file = System_Problem_File (true);
 		problem_file->Router_Data ();
 
 		if (new_set_flag) {

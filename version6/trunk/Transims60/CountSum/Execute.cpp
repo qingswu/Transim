@@ -50,8 +50,10 @@ void CountSum::Execute (void)
 
 	if (sum_periods.Num_Periods () > 0) {
 		count_day_array.Initialize (&sum_periods, (int) offset_index_map.size ());
+		vol_spd_array.Initialize (&sum_periods, (int) dir_array.size ());
 	} else {
 		count_day_array.Initialize (&time_periods, (int) offset_index_map.size ());
+		vol_spd_array.Initialize (&time_periods, (int) dir_array.size ());
 	}
 
 	Read_Data ();
@@ -61,10 +63,10 @@ void CountSum::Execute (void)
 	Combine_Data ();
 
 	if (System_File_Flag (NEW_PERFORMANCE)) {
-		Write_Performance (count_day_array);
+		Write_Performance (vol_spd_array);
 	}
 	if (link_data_flag) {
-		Write_Link_Data (link_data_file, count_day_array);
+		Write_Link_Data (link_data_file, vol_spd_array);
 	}
 
 	//---- output each day ----
@@ -75,14 +77,14 @@ void CountSum::Execute (void)
 			Combine_Data (AVERAGE, day_itr->second);
 
 			if (System_File_Flag (NEW_PERFORMANCE)) {
-				Performance_File *file = (Performance_File *) System_File_Handle (NEW_PERFORMANCE);
+				Performance_File *file = System_Performance_File (true);
 
 				filename ("%s_%s.%s") % perf_name % day_itr->first % perf_ext;
 				file->File_Type (String ("New Performance File %s") % day_itr->first);
 
 				file->Create (filename);
 
-				Write_Performance (count_day_array);
+				Write_Performance (vol_spd_array);
 			}
 			if (link_data_flag) {
 				filename ("%s_%s.%s") % link_data_name % day_itr->first % link_data_ext;
@@ -91,7 +93,7 @@ void CountSum::Execute (void)
 				link_data_file.Create (filename);
 				link_data_file.Write_Header ();
 
-				Write_Link_Data (link_data_file, count_day_array);
+				Write_Link_Data (link_data_file, vol_spd_array);
 			}
 		}
 	}
@@ -105,14 +107,14 @@ void CountSum::Execute (void)
 		Combine_Data (MINIMUM);
 
 		if (System_File_Flag (NEW_PERFORMANCE)) {
-			Performance_File *file = (Performance_File *) System_File_Handle (NEW_PERFORMANCE);
+			Performance_File *file = System_Performance_File (true);
 
 			filename ("%s_MIN.%s") % perf_name % perf_ext;
 			file->File_Type ("New Minimum Performance File");
 
 			file->Create (filename);
 
-			Write_Performance (count_day_array);
+			Write_Performance (vol_spd_array);
 		}
 		if (link_data_flag) {
 			filename ("%s_MIN.%s") % link_data_name % link_data_ext;
@@ -121,7 +123,7 @@ void CountSum::Execute (void)
 			link_data_file.Create (filename);
 			link_data_file.Write_Header ();
 
-			Write_Link_Data (link_data_file, count_day_array);
+			Write_Link_Data (link_data_file, vol_spd_array);
 		}
 
 		//---- maximum counts ----
@@ -129,14 +131,14 @@ void CountSum::Execute (void)
 		Combine_Data (MAXIMUM);
 
 		if (System_File_Flag (NEW_PERFORMANCE)) {
-			Performance_File *file = (Performance_File *) System_File_Handle (NEW_PERFORMANCE);
+			Performance_File *file = System_Performance_File (true);
 
 			filename ("%s_MAX.%s") % perf_name % perf_ext;
 			file->File_Type ("New Maximum Performance File");
 
 			file->Create (filename);
 
-			Write_Performance (count_day_array);
+			Write_Performance (vol_spd_array);
 		}
 		if (link_data_flag) {
 			filename ("%s_MAX.%s") % link_data_name % link_data_ext;
@@ -145,7 +147,7 @@ void CountSum::Execute (void)
 			link_data_file.Create (filename);
 			link_data_file.Write_Header ();
 
-			Write_Link_Data (link_data_file, count_day_array);
+			Write_Link_Data (link_data_file, vol_spd_array);
 		}
 
 	}

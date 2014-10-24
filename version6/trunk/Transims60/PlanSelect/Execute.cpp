@@ -18,7 +18,7 @@ void PlanSelect::Execute (void)
 	//---- set the processing queue ----
 
 	int part, num;
-	Plan_File *file = (Plan_File *) System_File_Handle (PLAN);
+	Plan_File *file = System_Plan_File ();
 
 	num = file->Num_Parts ();
 

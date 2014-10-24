@@ -27,7 +27,7 @@ void ArcPlan::Program_Control (void)
 	plan_flag = System_File_Flag (PLAN);
 
 	if (plan_flag) {
-		plan_file = (Plan_File *) System_File_Handle (PLAN);
+		plan_file = System_Plan_File ();
 	}
 
 	//---- set the transit options ----

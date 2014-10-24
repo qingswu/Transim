@@ -11,9 +11,47 @@
 
 bool Sim_Plan_Step::Read_Plans (void)
 {
-	int i, j, num;
+
 	Dtime time = 0;
 
+#ifdef ROUTING
+	Plan_Data *plan_ptr;
+	Time_Map_Itr time_itr;
+
+	for (time_itr = sim->plan_time_map.begin (); time_itr != sim->plan_time_map.end (); time_itr++) {
+		plan_ptr = &sim->plan_array [time_itr->second];
+
+		if (plan_ptr == 0 || plan_ptr->Problem () > 0) continue;
+
+		sim->Show_Progress ();
+
+		if (plan_ptr->Depart () > sim->param.end_time_step) {
+			stat = false;
+			break;
+		}
+		if (plan_ptr->Depart () < time) {
+			sim->Error (String ("Plans are Not Time Sorted (%s < %s)") % plan_ptr->Depart ().Time_String () % time.Time_String ());
+			return (false);
+		}
+		time = plan_ptr->Depart ();
+
+		//---- convert to simulator plan format ----
+
+#ifdef THREADS
+		if (num_threads > 1) {
+			trip_queue.Put_Work (plan_ptr);
+			plan_set [first_num] = plan_ptr = new Plan_Data ();
+		} else {
+			Sim_Plan_Result ((*sim_plan_process)->Plan_Processing (plan_ptr));
+		}
+#else
+		Sim_Plan_Result (sim_plan_process.Plan_Processing (plan_ptr));
+#endif
+
+	}
+	stat = false;
+#else
+	int i, j, num;
 	Plan_Data *plan_ptr;
 	Time_Index *time_ptr;
 
@@ -49,7 +87,7 @@ bool Sim_Plan_Step::Read_Plans (void)
 
 #ifdef THREADS
 		if (num_threads > 1) {
-			plan_queue.Put_Work (plan_ptr);
+			trip_queue.Put_Work (plan_ptr);
 			plan_set [first_num] = plan_ptr = new Plan_Data ();
 		} else {
 			Sim_Plan_Result ((*sim_plan_process)->Plan_Processing (plan_ptr));
@@ -97,7 +135,7 @@ bool Sim_Plan_Step::Read_Plans (void)
 	//---- aggregate the plan file statistics ----
 
 	if (num_files > 0) {
-		Plan_File *plan_file = (Plan_File *) sim->System_File_Handle (PLAN);
+		Plan_File *plan_file = sim->System_Plan_File ();
 
 		plan_file->Reset_Counters ();
 
@@ -105,6 +143,7 @@ bool Sim_Plan_Step::Read_Plans (void)
 			plan_file->Add_Counters (file_set [i]);
 		}
 	}
+#endif
 	first = false;
 	return (stat);
 }

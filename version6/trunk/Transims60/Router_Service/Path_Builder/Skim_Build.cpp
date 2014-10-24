@@ -36,10 +36,10 @@ bool Path_Builder::Skim_Build (One_To_Many *data)
 
 	//---- set the traveler parameters ----
 
-	exe->Set_Parameters (param, data_ptr->Type (), data_ptr->Veh_Type ());
+	exe->Set_Parameters (path_param, data_ptr->Type (), data_ptr->Veh_Type ());
 
-	param.mode = (Mode_Type) data_ptr->Mode ();
-	param.use = (Use_Type) data_ptr->Use ();
+	path_param.mode = (Mode_Type) data_ptr->Mode ();
+	path_param.use = (Use_Type) data_ptr->Use ();
 
 	parking_duration = 0;
 	plan_flag = false;

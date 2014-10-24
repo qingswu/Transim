@@ -32,7 +32,7 @@ void RandomSelect::Program_Control (void)
 	//---- check the selection file ----
 
 	if (num_parts > 1) {
-		Selection_File *file = (Selection_File *) System_File_Handle (NEW_SELECTION);
+		Selection_File *file = System_Selection_File (true);
 
 		if (!file->Part_Flag ()) {
 			file->Clear_Fields ();

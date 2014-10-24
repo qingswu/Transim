@@ -93,13 +93,24 @@ void TransimsNet::Execute (void)
 	//---- create traffic controls ----
 
 	if (control_flag) {
-		Traffic_Controls ();
-
+		if (!repair_signals) {
+			Traffic_Controls ();
+		}
 		if (System_File_Flag (NEW_SIGN)) {
 			Write_Signs ();
 		}
 		if (System_File_Flag (NEW_SIGNAL)) {
 			Write_Signals ();
+
+			if (System_File_Flag (DETECTOR) && System_File_Flag (NEW_DETECTOR)) {
+				Read_Detectors (*(System_Detector_File ()));
+			}
+			if (System_File_Flag (TIMING_PLAN) && System_File_Flag (NEW_TIMING_PLAN)) {
+				Read_Timing_Plans (*(System_Timing_File ()));
+			}
+			if (System_File_Flag (PHASING_PLAN) && System_File_Flag (NEW_PHASING_PLAN)) {
+				Read_Phasing_Plans (*(System_Phasing_File ()));
+			}
 		}
 	}
 
@@ -158,7 +169,7 @@ void TransimsNet::Execute (void)
 
 	//---- write the turn penalties ----
 
-	if (turn_flag && Network_File_Flag (NEW_TURN_PENALTY)) {
+	if (turn_flag && System_File_Flag (NEW_TURN_PENALTY)) {
 		Write_Turn_Pens ();
 	}
 

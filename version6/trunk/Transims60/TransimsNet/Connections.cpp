@@ -100,6 +100,13 @@ void TransimsNet::Connections (void)
 			dir_ptr = &dir_array [dir_index];
 			link_ptr = &link_array [dir_ptr->Link ()];
 
+			if (dir_ptr->Dir () == 0) {
+				num = link_ptr->Bnode ();
+			} else {
+				num = link_ptr->Anode ();
+			}
+			node_ptr = &node_array [num];
+
 			//---- process all links leaving the node ----
 
 			bear_in = dir_ptr->Out_Bearing ();
@@ -119,7 +126,7 @@ void TransimsNet::Connections (void)
 				if (abs (change) <= max_angle) {
 					bear_stat = bear_map.insert (Int_Map_Data (change, to_index));
 					if (!bear_stat.second) {
-						Warning ("Duplicate Connection Angle between Link ") << link_ptr->Link () << " and " << link_array [to_ptr->Link ()].Link ();
+						Warning ("Duplicate Connection Angle between Link ") << link_ptr->Link () << " and " << link_array [to_ptr->Link ()].Link () << " at Node " << node_ptr->Node ();
 						to_ptr->In_Bearing (++bear_out);
 						bear_map.insert (Int_Map_Data (++change, to_index));
 					}
@@ -134,12 +141,6 @@ void TransimsNet::Connections (void)
 				if (uturn_flag && index >= 0 && num_out == 1) {
 					bear_map.insert (Int_Map_Data (uturn_angle, index));
 				} else {
-					if (dir_ptr->Dir () == 0) {
-						num = link_ptr->Bnode ();
-					} else {
-						num = link_ptr->Anode ();
-					}
-					node_ptr = &node_array [num];
 					Warning ("No Exit from Link ") << link_ptr->Link () << " at Node " << node_ptr->Node ();
 					continue;
 				}

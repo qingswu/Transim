@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Route_Nodes (void)
 {
-	Route_Nodes_File *file = (Route_Nodes_File *) System_File_Handle (NEW_ROUTE_NODES);
+	Route_Nodes_File *file = System_Route_Nodes_File (true);
 
 	int count = 0;
 	Int_Map_Itr itr;

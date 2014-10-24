@@ -21,7 +21,7 @@
 #define CONG_VHT	14
 #define CONG_TIME	15
 #define COUNT		16
-#define PREV		14
+#define PREV		17
 
 //---------------------------------------------------------
 //	Perf_Sum_Report
@@ -30,10 +30,10 @@
 void LinkSum::Perf_Sum_Report (void)
 {
 	int i, j, k, k1, index, use_index;
-	double length, len, base, diff, value, percent, factor, time;
-	Dtime low, high, tod;
+	double length, base, diff, value, percent, factor, time, person_fac, lane_len, inc_per_hour;
+	Dtime low, high, tod, period;
 	bool connect_flag;
-	String units, vmt, lane_mi;
+	String units, vmt, lane_mi, label, type;
 
 	Link_Itr link_itr;
 	Dir_Data *dir_ptr;
@@ -56,6 +56,9 @@ void LinkSum::Perf_Sum_Report (void)
 		itr->assign (NUM_SUM_BINS, 0.0);
 	}	
 	connect_flag = System_Data_Flag (CONNECTION) && (turn_period_array.size () > 0) && (compare_turn_array.size () > 0);
+
+	type = (person_flag) ? "Person" : "Vehicle";
+	inc_per_hour = 0.0;
 
 	//---- process each link ----
 
@@ -90,6 +93,13 @@ void LinkSum::Perf_Sum_Report (void)
 
 				data.Get_Data (&perf_data, dir_ptr, &(*link_itr));
 
+				if (person_flag && data.Volume () > 0) {
+					person_fac = data.Persons () / data.Volume ();
+				} else {
+					person_fac = 1.0;
+				}
+				inc_per_hour = data.Count ();
+
 				//---- check the time ratio ----
 
 				if (select_ratio) {
@@ -101,24 +111,26 @@ void LinkSum::Perf_Sum_Report (void)
 				if (select_vc) {
 					if (data.VC_Ratio () < vc_ratio) continue;
 				}
+				lane_len = data.Lane_Len ();
+
 				sum_bin [j] [LINKS] += 1;
 				sum_bin [j] [LENGTH] += length;
-				sum_bin [j] [LANES] += data.Lane_Len ();
-				sum_bin [j] [VMT] += data.Veh_Dist ();
-				sum_bin [j] [VHT] += data.Veh_Time ();
-				sum_bin [j] [VHD] += data.Veh_Delay ();
-				sum_bin [j] [TIME_RATIO] += data.Time_Ratio ();
-				sum_bin [j] [DENSITY] += data.Density ();
-				sum_bin [j] [MAX_DEN] = MAX (sum_bin [j] [MAX_DEN], data.Max_Density ());
-				sum_bin [j] [QUEUE] += data.Queue ();
-				sum_bin [j] [MAX_QUEUE] = MAX (sum_bin [j] [MAX_QUEUE], data.Max_Queue ());
-				sum_bin [j] [FAILURE] += data.Failure ();
+				sum_bin [j] [LANES] += lane_len;
+				sum_bin [j] [VMT] += data.Veh_Dist () * person_fac;
+				sum_bin [j] [VHT] += data.Veh_Time () * person_fac;
+				sum_bin [j] [VHD] += data.Veh_Delay () * person_fac;
+				sum_bin [j] [TIME_RATIO] += data.Time_Ratio () * lane_len;
+				sum_bin [j] [DENSITY] += data.Density () * person_fac;
+				sum_bin [j] [MAX_DEN] = MAX (sum_bin [j] [MAX_DEN], data.Max_Density () * person_fac);
+				sum_bin [j] [QUEUE] += data.Queue () * person_fac;
+				sum_bin [j] [MAX_QUEUE] = MAX (sum_bin [j] [MAX_QUEUE], data.Max_Queue () * person_fac);
+				sum_bin [j] [FAILURE] += data.Failure () * person_fac;
 
 				if (Ratio_Flag ()) {
-					sum_bin [j] [CONG_VMT] += data.Ratio_Dist ();
-					sum_bin [j] [CONG_VHT] += data.Ratio_Time ();
-					sum_bin [j] [CONG_TIME] += data.Ratios ();
-					sum_bin [j] [COUNT] += data.Count ();
+					sum_bin [j] [CONG_VMT] += data.Ratio_Dist () * person_fac;
+					sum_bin [j] [CONG_VHT] += data.Ratio_Time () * person_fac;
+					sum_bin [j] [CONG_TIME] += data.Ratios () * lane_len;
+					sum_bin [j] [COUNT] += data.Count () * lane_len;
 				}
 
 				if (compare_flag) {
@@ -127,21 +139,31 @@ void LinkSum::Perf_Sum_Report (void)
 
 					data.Get_Data (&perf_data, dir_ptr, &(*link_itr));
 
-					sum_bin [j] [VMT+PREV] += data.Veh_Dist ();
-					sum_bin [j] [VHT+PREV] += data.Veh_Time ();
-					sum_bin [j] [VHD+PREV] += data.Veh_Delay ();
-					sum_bin [j] [TIME_RATIO+PREV] += data.Time_Ratio ();
-					sum_bin [j] [DENSITY+PREV] += data.Density ();
-					sum_bin [j] [MAX_DEN+PREV] = MAX (sum_bin [j] [MAX_DEN+PREV], data.Max_Density ());
-					sum_bin [j] [QUEUE+PREV] += data.Queue ();
-					sum_bin [j] [MAX_QUEUE+PREV] = MAX (sum_bin [j] [MAX_QUEUE+PREV], data.Max_Queue ());
-					sum_bin [j] [FAILURE+PREV] += data.Failure ();
+					if (person_flag && data.Volume () > 0) {
+						person_fac = data.Persons () / data.Volume ();
+					} else {
+						person_fac = 1.0;
+					}
+					lane_len = data.Lane_Len ();
+
+					sum_bin [j] [LINKS+PREV] += 1;
+					sum_bin [j] [LENGTH+PREV] += length;
+					sum_bin [j] [LANES+PREV] += lane_len;
+					sum_bin [j] [VMT+PREV] += data.Veh_Dist () * person_fac;
+					sum_bin [j] [VHT+PREV] += data.Veh_Time () * person_fac;
+					sum_bin [j] [VHD+PREV] += data.Veh_Delay () * person_fac;
+					sum_bin [j] [TIME_RATIO+PREV] += data.Time_Ratio () * lane_len;
+					sum_bin [j] [DENSITY+PREV] += data.Density () * person_fac;
+					sum_bin [j] [MAX_DEN+PREV] = MAX (sum_bin [j] [MAX_DEN+PREV], data.Max_Density () * person_fac);
+					sum_bin [j] [QUEUE+PREV] += data.Queue () * person_fac;
+					sum_bin [j] [MAX_QUEUE+PREV] = MAX (sum_bin [j] [MAX_QUEUE+PREV], data.Max_Queue () * person_fac);
+					sum_bin [j] [FAILURE+PREV] += data.Failure () * person_fac;
 
 					if (Ratio_Flag ()) {
-						sum_bin [j] [CONG_VMT+PREV] += data.Ratio_Dist ();
-						sum_bin [j] [CONG_VHT+PREV] += data.Ratio_Time ();
-						sum_bin [j] [CONG_TIME+PREV] += data.Ratios ();
-						sum_bin [j] [COUNT+PREV] += data.Count ();
+						sum_bin [j] [CONG_VMT+PREV] += data.Ratio_Dist () * person_fac;
+						sum_bin [j] [CONG_VHT+PREV] += data.Ratio_Time () * person_fac;
+						sum_bin [j] [CONG_TIME+PREV] += data.Ratios () * lane_len;
+						sum_bin [j] [COUNT+PREV] += data.Count () * lane_len;
 					}
 				}
 			}
@@ -177,26 +199,30 @@ void LinkSum::Perf_Sum_Report (void)
 
 	Header_Number (PERF_SUMMARY);
 
-	if (!Break_Check (num_inc * 16)) {
+	if (!Break_Check (num_inc * 21)) {
 		Print (1);
 		Perf_Sum_Header ();
 	}
 	if (Metric_Flag ()) {
 		factor = 1.0 / 1000.0;
 		units = "Kilometers";
-		vmt = "VKT";
+		vmt = (person_flag) ? "PKT" : "VKT";
 		lane_mi = "km";
 	} else {
 		factor = 1.0 / MILETOFEET;
 		units = "Miles";
-		vmt = "VMT";
+		vmt = (person_flag) ? "PMT" : "VMT";
 		lane_mi = "mi";
 	}
 	tod.Hours (1);
+	sum_bin [num_inc] [LANES+PREV] = 0;
+
+	period = perf_period_array.periods->Increment ();
+	inc_per_hour = (inc_per_hour * period) / tod;
+	if (inc_per_hour < 0) inc_per_hour = 1.0;
 
 	for (i=0; i <= num_inc; i++) {
-		len = sum_bin [i] [LINKS];
-		if (len == 0.0) continue;
+		if (sum_bin [i] [LINKS] == 0.0) continue;
 
 		if (i < num_inc) {
 			for (k = 0; k <= COUNT; k++) {
@@ -204,7 +230,9 @@ void LinkSum::Perf_Sum_Report (void)
 				if (k < VMT) {
 					sum_bin [num_inc] [k] = MAX (sum_bin [i] [k], sum_bin [num_inc] [k]);
 
-					if (compare_flag) {
+					if (k == LANES) {
+						sum_bin [num_inc] [k1] += sum_bin [i] [k];
+					} else if (compare_flag) {
 						sum_bin [num_inc] [k1] = MAX (sum_bin [i] [k1], sum_bin [num_inc] [k1]);
 					}
 				} else {
@@ -223,44 +251,52 @@ void LinkSum::Perf_Sum_Report (void)
 			}
 		}
 		Print (1, String ("Time Period%22c") % BLANK);
+
 		if (i == num_inc) {
 			Print (0, "       Total");
-			len *= num_inc;
+			lane_len = sum_bin [i] [LANES+PREV];
 		} else {
+			lane_len = sum_bin [i] [LANES];
 			Print (0, String ("%12.12s") % sum_periods.Range_Format (i));
 		}
 		Print (1, String ("Number of Links                 %13.2lf") % sum_bin [i] [LINKS]);
 		Print (1, String ("Number of Roadway %-10.10s    %13.2lf") % units % (sum_bin [i] [LENGTH] * factor));
 		Print (1, String ("Number of Lane %-10.10s       %13.2lf") % units % (sum_bin [i] [LANES] * factor));
-		Print (1, String ("Vehicle %-20.20s    %13.2lf") % (units + " of Travel") % (sum_bin [i] [VMT] * factor));
+
+		label = type + " " + units + " of Travel";
+		Print (1, String ("%-32.32s%13.2lf") % label % (sum_bin [i] [VMT] * factor));
 		if (compare_flag) {
 			base = sum_bin [i] [VMT+PREV] * factor;
 			diff = sum_bin [i] [VMT] * factor - base;
 
 			Print (0, String (" %13.2lf %13.2lf  (%.2lf%%)") % base % diff % ((base > 0.0) ? (100.0 * diff / base) : 0.0) % FINISH);
 		}
-		Print (1, String ("Vehicle Hours of Travel         %13.2lf") % (sum_bin [i] [VHT] / tod));
+		label = type + " Hours of Travel";
+		Print (1, String ("%-32.32s%13.2lf") % label % (sum_bin [i] [VHT] / tod));
 		if (compare_flag) {
 			base = sum_bin [i] [VHT+PREV] / tod;
 			diff = sum_bin [i] [VHT] / tod - base;
 
 			Print (0, String (" %13.2lf %13.2lf  (%.2lf%%)") % base % diff % ((base > 0.0) ? (100.0 * diff / base) : 0.0) % FINISH);
 		}	
-		Print (1, String ("Vehicle Hours of Delay          %13.2lf") % (sum_bin [i] [VHD] / tod));
+		label = type + " Hours of Delay";
+		Print (1, String ("%-32.32s%13.2lf") % label % (sum_bin [i] [VHD] / tod));
 		if (compare_flag) {
 			base = sum_bin [i] [VHD+PREV] / tod;
 			diff = sum_bin [i] [VHD] / tod - base;
 
 			Print (0, String (" %13.2lf %13.2lf  (%.2lf%%)") % base % diff % ((base > 0.0) ? (100.0 * diff / base) : 0.0) % FINISH);
 		}
-		Print (1, String ("Number of Queued Vehicles       %13.2lf") % UnRound (sum_bin [i] [QUEUE]));
+		label = String ("Number of Queued %ss") % type;
+		Print (1, String ("%-32.32s%13.2lf") % label % UnRound (sum_bin [i] [QUEUE]));
 		if (compare_flag) {
 			base = sum_bin [i] [QUEUE+PREV];
 			diff = sum_bin [i] [QUEUE] - base;
 
 			Print (0, String (" %13.2lf %13.2lf  (%.2lf%%)") % base % diff % ((base > 0.0) ? (100.0 * diff / base) : 0.0) % FINISH);
 		}
-		Print (1, String ("Maximum Queued Vehicles         %13.2lf") % sum_bin [i] [MAX_QUEUE]);
+		label = String ("Maximum Queued %ss") % type;
+		Print (1, String ("%-32.32s%13.2lf") % label % sum_bin [i] [MAX_QUEUE]);
 		if (compare_flag) {
 			base = sum_bin [i] [MAX_QUEUE+PREV];
 			diff = sum_bin [i] [MAX_QUEUE] - base;
@@ -281,17 +317,23 @@ void LinkSum::Perf_Sum_Report (void)
 
 			Print (0, String (" %13.2lf %13.2lf  (%.2lf%%)") % base % diff % ((base > 0.0) ? (100.0 * diff / base) : 0.0) % FINISH);
 		}
-		Print (1, String ("Average Link Time Ratio         %13.2lf") % (sum_bin [i] [TIME_RATIO] / (len * 100)));
+
+		Print (1, String ("Average Link Time Ratio         %13.2lf") % (sum_bin [i] [TIME_RATIO] / (lane_len * 100)));
 		if (compare_flag) {
-			base = sum_bin [i] [TIME_RATIO+PREV] / (len * 100.0);
-			diff = sum_bin [i] [TIME_RATIO] / (len * 100.0) - base;
+			base = sum_bin [i] [TIME_RATIO+PREV] / (lane_len * 100.0);
+			diff = sum_bin [i] [TIME_RATIO] / (lane_len * 100.0) - base;
 
 			Print (0, String (" %13.2lf %13.2lf  (%.2lf%%)") % base % diff % ((base > 0.0) ? (100.0 * diff / base) : 0.0) % FINISH);
 		}
-		Print (1, String ("Average Link Density (/ln-%s)   %13.2lf") % lane_mi % UnRound (sum_bin [i] [DENSITY] / len));
+		if (i == num_inc) {
+			value = sum_bin [i] [LINKS] * num_inc;
+		} else {
+			value = sum_bin [i] [LINKS];
+		}
+		Print (1, String ("Average Link Density (/ln-%s)   %13.2lf") % lane_mi % UnRound (sum_bin [i] [DENSITY] / value));
 		if (compare_flag) {
-			base = UnRound (sum_bin [i] [DENSITY+PREV] / len);
-			diff = UnRound (sum_bin [i] [DENSITY] / len) - base;
+			base = UnRound (sum_bin [i] [DENSITY+PREV] / value);
+			diff = UnRound (sum_bin [i] [DENSITY] / value) - base;
 
 			Print (0, String (" %13.2lf %13.2lf  (%.2lf%%)") % base % diff % ((base > 0.0) ? (100.0 * diff / base) : 0.0) % FINISH);
 		}
@@ -324,6 +366,15 @@ void LinkSum::Perf_Sum_Report (void)
 		}
 
 		if (Ratio_Flag ()) {
+			label = "Congested " + type + " " + units;
+			Print (1, String ("%-32.32s%13.2lf") % label % (sum_bin [i] [CONG_VMT] * factor));
+			if (compare_flag) {
+				base = sum_bin [i] [CONG_VMT+PREV] * factor;
+				diff = sum_bin [i] [CONG_VMT] * factor - base;
+
+				Print (0, String (" %13.2lf %13.2lf  (%.2lf%%)") % base % diff % ((base > 0.0) ? (100.0 * diff / base) : 0.0) % FINISH);
+			}
+
 			value = sum_bin [i] [VMT];
 			if (value == 0.0) value = 1.0;
 			percent = 100.0 * sum_bin [i] [CONG_VMT] / value;
@@ -337,11 +388,22 @@ void LinkSum::Perf_Sum_Report (void)
 
 				Print (0, String (" %13.2lf %13.2lf  (%.2lf%%)") % base % diff % ((base > 0.0) ? (100.0 * diff / base) : 0.0) % FINISH);
 			}
+
+
+			label = "Congested " + type + " Hours";
+			Print (1, String ("%-32.32s%13.2lf") % label % (sum_bin [i] [CONG_VHT] / tod));
+			if (compare_flag) {
+				base = sum_bin [i] [CONG_VHT+PREV] / tod;
+				diff = sum_bin [i] [CONG_VHT] / tod - base;
+
+				Print (0, String (" %13.2lf %13.2lf  (%.2lf%%)") % base % diff % ((base > 0.0) ? (100.0 * diff / base) : 0.0) % FINISH);
+			}
+
 			value = sum_bin [i] [VHT];
 			if (value == 0.0) value = 1.0;
 			percent = 100.0 * sum_bin [i] [CONG_VHT] / value;
 
-			Print (1, String ("Percent VHT Congested           %13.2lf") % percent);
+			Print (1, String ("Percent %sHT Congested           %13.2lf") % ((person_flag) ? "P" : "V") % percent);
 			if (compare_flag) {
 				value = sum_bin [i] [VHT+PREV];
 				if (value == 0.0) value = 1.0;
@@ -350,8 +412,26 @@ void LinkSum::Perf_Sum_Report (void)
 
 				Print (0, String (" %13.2lf %13.2lf  (%.2lf%%)") % base % diff % ((base > 0.0) ? (100.0 * diff / base) : 0.0) % FINISH);
 			}
+
+			if (i == num_inc) {
+				value = num_inc;
+			} else {
+				value = 1.0;
+			}
+			value /= (lane_len * inc_per_hour);
+
+			label = "Congested Duration (hours)";
+			Print (1, String ("%-32.32s%13.2lf") % label % (sum_bin [i] [CONG_TIME] * value));
+
+			if (compare_flag) {
+				base = sum_bin [i] [CONG_TIME+PREV] * value;
+				diff = sum_bin [i] [CONG_TIME] * value - base;
+
+				Print (0, String (" %13.2lf %13.2lf  (%.2lf%%)") % base % diff % ((base > 0.0) ? (100.0 * diff / base) : 0.0) % FINISH);
+			}
 			value = sum_bin [i] [COUNT];
 			if (value == 0.0) value = 1.0;
+
 			percent = 100.0 * sum_bin [i] [CONG_TIME] / value;
 
 			Print (1, String ("Percent Time Congested          %13.2lf") % percent);
@@ -403,8 +483,11 @@ void LinkSum::Perf_Sum_Header (void)
 	Average Link Density             fffffffff.ff  fffffffff.ff  fffffffff.ff  (f.ff%)
 	Average Link Max Density         fffffffff.ff  fffffffff.ff  fffffffff.ff  (f.ff%)
 	Average Miles Per Hour           fffffffff.ff  fffffffff.ff  fffffffff.ff  (f.ff%)
+	Congested Vehicle Miles          fffffffff.ff  fffffffff.ff  fffffffff.ff  (f.ff%)
 	Percent of VMT Congested         fffffffff.ff  fffffffff.ff  fffffffff.ff  (f.ff%)
+	Congested Vehicle Hours          fffffffff.ff  fffffffff.ff  fffffffff.ff  (f.ff%)
 	Percent of VHT Congested         fffffffff.ff  fffffffff.ff  fffffffff.ff  (f.ff%)
+	Congestion Duration (Hours)      fffffffff.ff  fffffffff.ff  fffffffff.ff  (f.ff%)
 	Percent of Time Congested        fffffffff.ff  fffffffff.ff  fffffffff.ff  (f.ff%)
 
 **********************************************|***********************************************/ 

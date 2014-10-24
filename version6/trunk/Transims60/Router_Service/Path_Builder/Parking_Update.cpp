@@ -52,7 +52,7 @@ int Path_Builder::Parking_Update (void)
 			to_cost += path_ritr->Cost ();
 			to_walk += path_ritr->Walk ();
 
-			if (walk_flag && to_walk > param.max_walk) {
+			if (walk_flag && to_walk > path_param.max_walk) {
 				to_imped = MAX_IMPEDANCE;
 				length_flag = true;
 				break;
@@ -116,7 +116,7 @@ int Path_Builder::Parking_Update (void)
 				to_cost += path_itr->Cost ();
 				to_walk += path_itr->Walk ();
 
-				if (walk_flag && to_walk > param.max_walk) {
+				if (walk_flag && to_walk > path_param.max_walk) {
 					to_imped = MAX_IMPEDANCE;
 					length_flag = true;
 				}

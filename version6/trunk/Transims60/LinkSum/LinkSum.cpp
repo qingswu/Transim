@@ -13,7 +13,7 @@ int	LinkSum::percent_break [NUM_PERCENTILES] = {50, 65, 70, 75, 80, 85, 90, 95, 
 LinkSum::LinkSum (void) : Data_Service (), Select_Service ()
 {
 	Program ("LinkSum");
-	Version (12);
+	Version (16);
 	Title ("Summarize Link Performance Data");
 
 	System_File_Type required_files [] = {
@@ -35,6 +35,7 @@ LinkSum::LinkSum (void) : Data_Service (), Select_Service ()
 		{ COMPARE_PERFORMANCE_FILE, "COMPARE_PERFORMANCE_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		{ COMPARE_PERFORMANCE_FORMAT, "COMPARE_PERFORMANCE_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, NO_HELP },
 		{ MINIMUM_LINK_VOLUME, "MINIMUM_LINK_VOLUME", LEVEL0, OPT_KEY, FLOAT_KEY, "2.0", ">= 0", NO_HELP },
+		{ PERSON_BASED_STATISTICS, "PERSON_BASED_STATISTICS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ SELECT_BY_LINK_GROUP, "SELECT_BY_LINK_GROUP", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ COMPARE_TURN_DELAY_FILE, "COMPARE_TURN_DELAY_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		{ COMPARE_TURN_DELAY_FORMAT, "COMPARE_TURN_DELAY_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, NO_HELP },
@@ -95,7 +96,7 @@ LinkSum::LinkSum (void) : Data_Service (), Select_Service ()
 	Report_List (reports);
 
 	compare_flag = group_select = summary_flag = group_sum_flag = turn_flag = turn_compare_flag = false;
-	select_flag = activity_flag = zone_flag = group_flag = false;
+	select_flag = activity_flag = zone_flag = group_flag = person_flag = false;
 
 	nerror = 0;
 	minimum_volume = 2.0;

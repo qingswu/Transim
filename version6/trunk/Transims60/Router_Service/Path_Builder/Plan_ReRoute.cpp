@@ -30,9 +30,9 @@ bool Path_Builder::Plan_ReRoute (Plan_Data *plan_data)
 
 	//---- set the traveler parameters ----
 
-	exe->Set_Parameters (param, plan_ptr->Type (), plan_ptr->Veh_Type ());
+	exe->Set_Parameters (path_param, plan_ptr->Type (), plan_ptr->Veh_Type ());
 
-	param.mode = (Mode_Type) plan_ptr->Mode (),
+	path_param.mode = (Mode_Type) plan_ptr->Mode (),
 	parking_duration = plan_ptr->Duration ();
 	forward_flag = true;
 	reroute_flag = false;
@@ -57,7 +57,7 @@ bool Path_Builder::Plan_ReRoute (Plan_Data *plan_data)
 			if (leg_itr->Mode () == DRIVE_MODE) break;
 
 			if (start_flag) {
-				//if (param.flow_flag) {
+				//if (path_param.flow_flag) {
 				//	return (Plan_Flow (plan_data));
 				//} else {
 					return (true);
@@ -163,7 +163,7 @@ bool Path_Builder::Plan_ReRoute (Plan_Data *plan_data)
 	if (++leg_itr != plan_ptr->end ()) {
 		plan_ptr->erase (leg_itr, plan_ptr->end ());
 	}
-	//if (param.flow_flag) {
+	//if (path_param.flow_flag) {
 	//	Plan_Flow (plan_data);
 	//}
 
@@ -179,7 +179,7 @@ bool Path_Builder::Plan_ReRoute (Plan_Data *plan_data)
 
 	if (stat < 0) return (false);
 	if (stat > 0) {
-		if (!param.ignore_errors) {
+		if (!path_param.ignore_errors) {
 			//skip = true;
 		}
 		plan_ptr->Problem (stat);

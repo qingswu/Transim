@@ -11,18 +11,9 @@
 Simulator::Simulator (void) : Simulator_Service ()
 {
 	Program ("Simulator");
-	Version (14);
+	Version (16);
 	Title ("Simulate Travel Plans");
 
-	System_File_Type required_files [] = {
-		NODE, LINK, POCKET, CONNECTION, PARKING, LOCATION, 
-		VEHICLE_TYPE, PLAN, END_FILE
-	};
-	System_File_Type optional_files [] = {
-		ACCESS_LINK, LANE_USE, TURN_PENALTY, SIGN, SIGNAL, TIMING_PLAN, PHASING_PLAN, DETECTOR, 
-		TRANSIT_STOP, TRANSIT_FARE, TRANSIT_ROUTE, TRANSIT_SCHEDULE, TRANSIT_DRIVER, 
-		HOUSEHOLD, NEW_PROBLEM, END_FILE
-	};
 	Control_Key msim_keys [] = { //--- code, key, level, status, type, help ----
 		END_CONTROL
 	};
@@ -31,10 +22,7 @@ Simulator::Simulator (void) : Simulator_Service ()
 		"HOUSEHOLD_TYPE_STACK",
 		""
 	};
-	Required_System_Files (required_files);
-	Optional_System_Files (optional_files);
 
-	//Router_Service_Keys ();
 	Simulator_Service_Keys ();
 	Key_List (msim_keys);
 	Report_List (reports);
@@ -46,8 +34,8 @@ Simulator::Simulator (void) : Simulator_Service ()
 	time_step = max_time = 0;
 	signal_update_time = timing_update_time = transit_update_time = 0;
 
-	System_Read_False (PLAN);
-	System_Data_Reserve (PLAN, 0);
+	//System_Read_False (PLAN);
+	//System_Data_Reserve (PLAN, 0);
 	Transit_Veh_Flag (true);
 }
 

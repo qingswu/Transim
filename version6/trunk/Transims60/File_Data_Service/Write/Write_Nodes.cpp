@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Nodes (void)
 {
-	Node_File *file = (Node_File *) System_File_Handle (NEW_NODE);
+	Node_File *file = System_Node_File (true);
 
 	int count = 0;
 	Int_Map_Itr itr;

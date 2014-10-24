@@ -10,10 +10,39 @@ Simulator_Service *sim = 0;
 //	Simulator_Service constructor
 //---------------------------------------------------------
 
-//Simulator_Service::Simulator_Service (void) : Router_Service (), Select_Service ()
+#ifdef ROUTING
+Simulator_Service::Simulator_Service (void) : Router_Service (), Select_Service ()
+#else
 Simulator_Service::Simulator_Service (void) : Data_Service (), Select_Service ()
+#endif
 {
 	Service_Level (SIMULATOR_SERVICE);
+
+#ifdef ROUTING	
+	System_File_Type required_files [] = {
+		NODE, LINK, POCKET, CONNECTION, PARKING, LOCATION, 
+		VEHICLE_TYPE, END_FILE
+	};
+	System_File_Type optional_files [] = {
+		ACCESS_LINK, LANE_USE, TURN_PENALTY, SIGN, SIGNAL, TIMING_PLAN, PHASING_PLAN, DETECTOR, 
+		TRANSIT_STOP, TRANSIT_FARE, TRANSIT_ROUTE, TRANSIT_SCHEDULE, TRANSIT_DRIVER, 
+		HOUSEHOLD, TRIP, PLAN, NEW_PROBLEM, END_FILE
+	};
+#else
+	System_File_Type required_files [] = {
+		NODE, LINK, POCKET, CONNECTION, PARKING, LOCATION, 
+		VEHICLE_TYPE, PLAN, END_FILE
+	};
+	System_File_Type optional_files [] = {
+		ACCESS_LINK, LANE_USE, TURN_PENALTY, SIGN, SIGNAL, TIMING_PLAN, PHASING_PLAN, DETECTOR, 
+		TRANSIT_STOP, TRANSIT_FARE, TRANSIT_ROUTE, TRANSIT_SCHEDULE, TRANSIT_DRIVER, 
+		HOUSEHOLD, NEW_PROBLEM, END_FILE
+	};
+#endif
+
+	Required_System_Files (required_files);
+	Optional_System_Files (optional_files);
+
 	max_subarea = num_vehicles = 0;
 	num_subareas = num_sims = 1;
 	max_method = 0;
@@ -61,6 +90,7 @@ void Simulator_Service::Simulator_Service_Keys (int *keys)
 		{ MAXIMUM_SPEED_DIFFERENCE, "MAXIMUM_SPEED_DIFFERENCE", LEVEL0, OPT_KEY, FLOAT_KEY, "20 mph", "0..20 mph", NO_HELP },
 		{ CAPACITY_FACTOR, "CAPACITY_FACTOR", LEVEL0, OPT_KEY, FLOAT_KEY, "1.0", "0.5..3.0", NO_HELP },
 		{ ENFORCE_PARKING_LANES, "ENFORCE_PARKING_LANES", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
+		{ IGNORE_TRANSIT_CONNECTIONS, "IGNORE_TRANSIT_CONNECTIONS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ DRIVER_REACTION_TIME, "DRIVER_REACTION_TIME", LEVEL1, OPT_KEY, LIST_KEY, "1.0 seconds", "0.0..5.0 seconds", NO_HELP },
 		{ PERMISSION_PROBABILITY, "PERMISSION_PROBABILITY", LEVEL1, OPT_KEY, LIST_KEY, "50 percent", "0..100 percent", NO_HELP },
 		{ SLOW_DOWN_PROBABILITY, "SLOW_DOWN_PROBABILITY", LEVEL1, OPT_KEY, LIST_KEY, "0 percent", "0..100 percent", NO_HELP },
@@ -81,6 +111,9 @@ void Simulator_Service::Simulator_Service_Keys (int *keys)
 		{ AVERAGE_LEGS_PER_TRIP, "AVERAGE_LEGS_PER_TRIP", LEVEL0, OPT_KEY, INT_KEY, "1000", "0..10000", NO_HELP },
 		END_CONTROL
 	};
+#ifdef ROUTING
+	Router_Service_Keys ();
+#endif
 	if (keys == 0) {
 		Key_List (control_keys);
 	} else {

@@ -23,7 +23,7 @@ void TripSum::Program_Control (void)
 
 	Read_Select_Keys ();
 
-	trip_file = (Trip_File *) System_File_Handle (TRIP);
+	trip_file = System_Trip_File ();
 	if (!trip_file->Part_Flag ()) Num_Threads (1);
 
 	select_flag = System_File_Flag (SELECTION);

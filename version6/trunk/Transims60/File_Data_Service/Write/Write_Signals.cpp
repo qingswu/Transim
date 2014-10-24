@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Signals (void)
 {
-	Signal_File *file = (Signal_File *) System_File_Handle (NEW_SIGNAL);
+	Signal_File *file = System_Signal_File (true);
 
 	int count = 0;
 	Int_Map_Itr map_itr;

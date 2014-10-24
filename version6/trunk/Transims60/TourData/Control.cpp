@@ -28,7 +28,7 @@ void TourData::Program_Control (void)
 
 	Print (2, String ("%s Control Keys:") % Program ());	
 
-	zone_file = (Zone_File *) System_File_Handle (ZONE);
+	zone_file = System_Zone_File ();
 
 	//---- zone group field ----
 

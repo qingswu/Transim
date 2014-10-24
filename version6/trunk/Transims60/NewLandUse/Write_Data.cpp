@@ -18,8 +18,8 @@ void NewLandUse::Write_Data (void)
 	Int_Map_Itr map_itr;
 	Int_Itr int_itr;
 
-	file = (Zone_File *) System_File_Handle (ZONE);
-	new_file = (Zone_File *) System_File_Handle (NEW_ZONE);
+	file = System_Zone_File ();
+	new_file = System_Zone_File (true);
 
 	file->Open ();
 

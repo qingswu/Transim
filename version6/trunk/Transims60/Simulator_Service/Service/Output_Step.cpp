@@ -10,14 +10,14 @@
 
 bool Simulator_Service::Output_Step (Travel_Step &step)
 {
-	bool new_plan, problem_flag;
+	bool new_plan, problem_flag, no_veh_flag;
 
 	Sim_Plan_Ptr sim_plan_ptr;
-	Sim_Leg_Itr leg_itr;
 	Sim_Dir_Ptr sim_dir_ptr;
 	Sim_Veh_Data sim_veh;
-	Sim_Veh_Ptr sim_veh_ptr;
+	Sim_Veh_Ptr sim_veh_ptr = 0;
 	Problem_Data problem_data;
+	Sim_Leg_Ptr sim_leg_ptr;
 
 	//---- check the traveler data ----
 
@@ -36,8 +36,15 @@ bool Simulator_Service::Output_Step (Travel_Step &step)
 	}
 	sim_plan_ptr = step.sim_plan_ptr;
 #ifdef CHECK
-	if (sim_plan_ptr == 0) sim->Error ("Simulator_Service::Output_Step: sim_plan_ptr");
+	if (sim_plan_ptr == 0) sim->Error (String ("Simulator_Service::Output_Step: sim_plan_ptr, Household=%d, Problem=%d") % step.sim_travel_ptr->Household () % step.Problem ());
 #endif
+
+	if (step.sim_leg_ptr == 0) {
+		step.sim_leg_ptr = sim_plan_ptr->Get_Leg ();
+	}
+	sim_leg_ptr = step.sim_leg_ptr;
+	no_veh_flag = ((sim_leg_ptr == 0 && step.sim_travel_ptr->Vehicle () == 0) || 
+		(sim_leg_ptr != 0 && sim_leg_ptr->Mode () != DRIVE_MODE && sim_leg_ptr->Type () != STOP_ID));
 
 	new_plan = false;
 
@@ -53,12 +60,12 @@ bool Simulator_Service::Output_Step (Travel_Step &step)
 
 			if (step.sim_travel_ptr->Person () == 0) {
 				stats.num_run_lost++;
-			} else {
+			} else if (!no_veh_flag) {
 				stats.num_veh_lost++;
 
 				//---- check the lost vehicle event ----
 
-				if (step.sim_travel_ptr->Vehicle () >= 0) {
+				if (step.sim_travel_ptr->Vehicle () > 0) {
 					step.Event_Type (VEH_LOST_EVENT);
 					sim->sim_output_step.Event_Check (step);
 				}
@@ -78,7 +85,7 @@ bool Simulator_Service::Output_Step (Travel_Step &step)
 		if (problem_flag && sim->param.problem_flag && sim_plan_ptr != 0) {
 			if ((int) step.size () > 0) {
 				sim_veh = step.back ();
-			} else {
+			} else if (!no_veh_flag) {
 #ifdef CHECK
 				if (step.sim_travel_ptr->Vehicle () < 1) sim->Error ("Simulator_Service::Output_Step: Vehicle");
 #endif
@@ -123,6 +130,11 @@ bool Simulator_Service::Output_Step (Travel_Step &step)
 				if (map_itr != sim->line_map.end ()) {
 					problem_data.Route (map_itr->second);
 				}
+			} else if (no_veh_flag && sim_leg_ptr != 0 && sim_leg_ptr->Type () == ROUTE_ID) {
+				Int_Map_Itr map_itr = sim->line_map.find (sim_leg_ptr->Index ());
+				if (map_itr != sim->line_map.end ()) {
+					problem_data.Route (map_itr->second);
+				}
 			}
 			sim->sim_output_step.Output_Problem (problem_data);
 		}
@@ -131,7 +143,7 @@ bool Simulator_Service::Output_Step (Travel_Step &step)
 
 	//---- process vehicle movement ----
 
-	if (step.size () > 0) {
+	if (step.size () > 0 && !no_veh_flag) {
 		sim->sim_output_step.Output_Check (step);
 	}
 	if (sim_plan_ptr->First_Leg () < 0) {
@@ -140,54 +152,57 @@ bool Simulator_Service::Output_Step (Travel_Step &step)
 
 	//---- check the vehicle data ----
 
-	if (step.sim_veh_ptr == 0) {
+	if (!no_veh_flag) {
+		if (step.sim_veh_ptr == 0) {
 #ifdef CHECK
-		if (step.sim_travel_ptr->Vehicle () < 1) sim->Error ("Simulator_Service::Output_Step: Vehicle");
+			if (step.sim_travel_ptr->Vehicle () < 1) sim->Error (String ("Simulator_Service::Output_Step: Vehicle %d, Household=%d") % step.sim_travel_ptr->Vehicle () % step.sim_travel_ptr->Household ());
 #endif
-		step.sim_veh_ptr = &sim->sim_veh_array [step.sim_travel_ptr->Vehicle ()];
+			step.sim_veh_ptr = &sim->sim_veh_array [step.sim_travel_ptr->Vehicle ()];
 #ifdef CHECK
-	} else {
-		sim_veh_ptr = &sim->sim_veh_array [step.sim_travel_ptr->Vehicle ()];
+		} else {
+			sim_veh_ptr = &sim->sim_veh_array [step.sim_travel_ptr->Vehicle ()];
 
-		if (sim_veh_ptr != step.sim_veh_ptr) {
-			sim->Error ("Simulator_Service::Output_Step: Vehicle Pointer");
+			if (sim_veh_ptr != step.sim_veh_ptr) {
+				sim->Error ("Simulator_Service::Output_Step: Vehicle Pointer");
+			}
+#endif
 		}
-#endif
-	}
-	sim_veh_ptr = step.sim_veh_ptr;
+		sim_veh_ptr = step.sim_veh_ptr;
 #ifdef CHECK
-	if (sim_veh_ptr == 0) sim->Error ("Simulator_Service::Output_Step: sim_veh_ptr");
+		if (sim_veh_ptr == 0) sim->Error ("Simulator_Service::Output_Step: sim_veh_ptr");
 #endif
 
-	//---- park the vehicle ----
+		//---- park the vehicle ----
 
-	if (new_plan || sim_veh_ptr->Parked ()) {
-		step.veh_type_ptr = &sim->veh_type_array [sim_plan_ptr->Veh_Type ()];
-		Remove_Vehicle (step);
-	}
+		if (new_plan || sim_veh_ptr->Parked ()) {
+			step.veh_type_ptr = &sim->veh_type_array [sim_plan_ptr->Veh_Type ()];
+			Remove_Vehicle (step);
+		}
 
 #ifdef THREADS
 
-	if (Num_Threads () > 0 && (int) step.size () > 1) {
-		int index = step.Dir_Index ();
-		Sim_Veh_Itr sim_veh_itr;
+		if (Num_Threads () > 0 && (int) step.size () > 1) {
+			int index = step.Dir_Index ();
+			Sim_Veh_Itr sim_veh_itr;
 
-		//---- release link locks ----
+			//---- release link locks ----
 
-		for (sim_veh_itr = step.begin (); sim_veh_itr != step.end (); sim_veh_itr++) {
-			if (sim_veh_itr->link != index && sim_veh_itr->lane > -1) {
-				index = sim_veh_itr->link;
-				sim_dir_ptr = &sim->sim_dir_array [index];
-				sim->sim_dir_array.UnLock (sim_dir_ptr, step.Process_ID ());
+			for (sim_veh_itr = step.begin (); sim_veh_itr != step.end (); sim_veh_itr++) {
+				if (sim_veh_itr->link != index && sim_veh_itr->lane > -1) {
+					index = sim_veh_itr->link;
+					sim_dir_ptr = &sim->sim_dir_array [index];
+					sim->sim_dir_array.UnLock (sim_dir_ptr, step.Process_ID ());
+				}
 			}
 		}
-	}
 #endif
+	}
 
 	//---- move to the next plan ----
 
 	if (new_plan) {
-		sim_veh_ptr->Parked (true);
+		if (!no_veh_flag) sim_veh_ptr->Parked (true);
+
 
 		step.sim_travel_ptr->Vehicle (0);
 		step.sim_travel_ptr->Next_Load (-1);
@@ -208,10 +223,15 @@ bool Simulator_Service::Output_Step (Travel_Step &step)
 		}
 		return (true);
 	}
-	if (sim_veh_ptr->Parked ()) {
+	if (no_veh_flag) {
 		step.sim_travel_ptr->Status (OFF_NET_MOVE);
-	} else if (step.sim_travel_ptr->Status () == ON_OFF_DRIVE) {
-		step.sim_travel_ptr->Status (OFF_NET_DRIVE);
+		return (true);
+	} else {
+		if (sim_veh_ptr->Parked ()) {
+			step.sim_travel_ptr->Status (OFF_NET_MOVE);
+		} else if (step.sim_travel_ptr->Status () == ON_OFF_DRIVE) {
+			step.sim_travel_ptr->Status (OFF_NET_DRIVE);
+		}
+		return (!sim_veh_ptr->Parked ());
 	}
-	return (!sim_veh_ptr->Parked ());
 }

@@ -303,13 +303,13 @@ Static_Service::Code_Text  Static_Service::detector_codes [] = {
 //---- use restriction codes ----
 
 Static_Service::Code_Text  Static_Service::use_codes [] = {
-	{ ANY, "ANY" }, { WALK, "WALK" }, { BIKE, "BICYCLE" }, { CAR, "AUTO" }, { TRUCK, "TRUCK" }, 
+	{ ANY, "ANY" }, { WALK, "WALK" }, { BIKE, "BIKE" }, { CAR, "CAR" }, { TRUCK, "TRUCK" }, 
 	{ BUS, "BUS" }, { RAIL, "RAIL" }, { SOV, "SOV" }, { HOV2, "HOV2" }, { HOV3, "HOV3" }, 
-	{ HOV4, "HOV4" }, { LIGHTTRUCK, "LIGHTTRUCK" }, { HEAVYTRUCK, "HEAVYTRUCK" }, { RESTRICTED, "RESTRICTED" }, 
-	{ NONE, "NONE" }, { CAR, "CAR" }, { BIKE, "BIKE" }, { TAXI, "TAXI" }, { BUS, "LOCAL" }, { BUS, "EXPRESS" },
-	{ BUS, "LOCAL_BUS" }, { BUS, "EXPRESS_BUS" }, { BUS, "BRT" }, { BUS, "TROLLEY" }, { RAIL, "STREETCAR" }, 
-	{ RAIL, "LIGHTRAIL" }, { RAIL, "LRT" }, { RAIL, "RAPIDRAIL" }, { RAIL, "METRORAIL"}, { RAIL, "REGIONRAIL" }, 
-	{ RAIL, "AMTRAK" }, { 0, 0 }
+	{ HOV4, "HOV4" }, { LIGHTTRUCK, "LIGHTTRUCK" }, { HEAVYTRUCK, "HEAVYTRUCK" }, { TAXI, "TAXI" }, 
+	{ RESTRICTED, "RESTRICTED" }, { NONE, "NONE" }, { CAR, "AUTO" }, { BIKE, "BICYCLE" }, { BUS, "LOCAL" }, 
+	{ BUS, "EXPRESS" },	{ BUS, "LOCAL_BUS" }, { BUS, "EXPRESS_BUS" }, { BUS, "BRT" }, { BUS, "TROLLEY" }, 
+	{ RAIL, "STREETCAR" }, { RAIL, "LIGHTRAIL" }, { RAIL, "LRT" }, { RAIL, "RAPIDRAIL" }, { RAIL, "METRORAIL"}, 
+	{ RAIL, "REGIONRAIL" }, { RAIL, "AMTRAK" }, { 0, 0 }
 };
 //---- system file codes ----
 
@@ -643,23 +643,23 @@ Static_Service::Static_Service (void)
 {
 	if (use_mask [0] == -1) {
 		static const char *use_map [] = {
-		//---WB1234LHBRXXN---
-			"1111111111100",		//---- any ----
-			"1000000000000",		//---- walk ----
-			"0100000000000",		//---- bike ----
-			"0011110000000",		//---- car ----
-			"0000001100000",		//---- truck ----
-			"0000000010000",		//---- bus ----
-			"0000000001000",		//---- rail ----
-			"0010000000100",		//---- sov ----
-			"0001000000000",		//---- hov2 ----
-			"0000100000000",		//---- hov3 ----
-			"0000010000000",		//---- hov4 ----
-			"0000001000000",		//---- lighttruck ----
-			"0000000100000",		//---- heavytruck ----
-			"0000000000100",		//---- taxi ----
-			"0000000000010",		//---- restricted ----
-			"0000000000001"			//---- none ----
+		//---WB1234LHBRSTRN---
+			"11111111111100",		//---- any ----
+			"10000000000000",		//---- walk ----
+			"01000000000000",		//---- bike ----
+			"00111100000100",		//---- car ----
+			"00000011000000",		//---- truck ----
+			"00000000100000",		//---- bus ----
+			"00000000010000",		//---- rail ----
+			"00100000001000",		//---- sov ----
+			"00010000000000",		//---- hov2 ----
+			"00001000000000",		//---- hov3 ----
+			"00000100000000",		//---- hov4 ----
+			"00000010000000",		//---- lighttruck ----
+			"00000001000000",		//---- heavytruck ----
+			"00000000000100",		//---- taxi ----
+			"00000000000010",		//---- restricted ----
+			"00000000000001"		//---- none ----
 		};
 
 		//---- calculate the access mask values ----

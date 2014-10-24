@@ -54,6 +54,7 @@ void Sim_Parameters::Clear_Parameters (void)
 	count_warnings = false;
 	print_problems = false;
 	parking_lanes = false;
+	transit_connect = false;
 
 	problem_flag = false;
 	control_flag = false;

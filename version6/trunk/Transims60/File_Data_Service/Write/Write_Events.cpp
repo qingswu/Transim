@@ -12,7 +12,7 @@ void Data_Service::Write_Events (void)
 {
 	int count = 0;
 
-	Event_File *file = (Event_File *) System_File_Handle (NEW_EVENT);
+	Event_File *file = System_Event_File (true);
 
 	Event_Map_Itr itr;
 

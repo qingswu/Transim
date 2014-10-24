@@ -32,9 +32,10 @@ private:
 	Performance_File merge_file;
 	Turn_Delay_File turn_file;
 
-	int method, transit_data;
+	int method;
 	double factor, time_ratio;	
-	bool smooth_flag, merge_flag, ratio_flag, turn_flag, turn_merge_flag, min_time_flag, transit_flag;
+	bool smooth_flag, merge_flag, ratio_flag, turn_flag, turn_merge_flag, min_time_flag;
+	bool transit_flag, transit_veh_flag, transit_pce_flag, transit_person_flag;
 
 	Smooth_Data smooth_data;
 	

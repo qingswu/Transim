@@ -14,14 +14,8 @@ PathSkim::PathSkim (void) : Router_Service ()
 	Version (9);
 	Title ("Build and Skim Network Paths");
 
-	System_File_Type required_files [] = {
-		NODE, LINK, CONNECTION, LOCATION, END_FILE
-	};
 	System_File_Type optional_files [] = {
-		ZONE, POCKET, LANE_USE, TURN_PENALTY, PARKING, ACCESS_LINK,
-		TRANSIT_STOP, TRANSIT_FARE, TRANSIT_ROUTE, TRANSIT_SCHEDULE, TRANSIT_DRIVER,
-		HOUSEHOLD, SELECTION, PERFORMANCE, RIDERSHIP, VEHICLE_TYPE, 
-		NEW_SKIM, NEW_PLAN, NEW_PROBLEM, NEW_PERFORMANCE, END_FILE
+		ZONE, NEW_SKIM, END_FILE
 	};
 	int file_service_keys [] = {
 		NOTES_AND_NAME_FIELDS, SAVE_LANE_USE_FLOWS, SKIM_OD_UNITS, SKIM_TIME_PERIODS, 
@@ -60,7 +54,6 @@ PathSkim::PathSkim (void) : Router_Service ()
 		"ZONE_EQUIVALENCE",
 		""
 	};
-	Required_System_Files (required_files);
 	Optional_System_Files (optional_files);
 	File_Service_Keys (file_service_keys);
 	Data_Service_Keys (data_service_keys);

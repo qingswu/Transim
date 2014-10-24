@@ -215,7 +215,7 @@ void ArcPerf::Program_Control (void)
 
 		//---- copy the link fields ----
 
-		perf_file = (Performance_File *) System_File_Handle (PERFORMANCE);
+		perf_file = System_Performance_File ();
 
 		binary = (perf_file->Record_Format () == BINARY);
 		nfield = perf_file->Num_Fields ();
@@ -293,7 +293,7 @@ void ArcPerf::Program_Control (void)
 
 		//---- copy the turn delay fields ----
 
-		turn_file = (Turn_Delay_File *) System_File_Handle (TURN_DELAY);
+		turn_file = System_Turn_Delay_File ();
 
 		binary = (turn_file->Record_Format () == BINARY);
 		nfield = turn_file->Num_Fields ();
@@ -346,7 +346,7 @@ void ArcPerf::Program_Control (void)
 		arcview_turn.Z_Flag (z_flag);
 		arcview_turn.M_Flag (m_flag);
 
-		turn_file = (Turn_Delay_File *) System_File_Handle (TURN_DELAY);
+		turn_file = System_Turn_Delay_File ();
 		
 		binary = (turn_file->Record_Format () == BINARY);
 		nfield = turn_file->Num_Fields ();
@@ -415,7 +415,7 @@ void ArcPerf::Program_Control (void)
 
 		//---- copy the link fields ----
 
-		perf_file = (Performance_File *) System_File_Handle (PERFORMANCE);
+		perf_file = System_Performance_File ();
 
 		binary = (perf_file->Record_Format () == BINARY);
 		nfield = perf_file->Num_Fields ();

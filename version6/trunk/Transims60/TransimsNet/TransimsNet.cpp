@@ -11,19 +11,23 @@
 TransimsNet::TransimsNet (void) : Data_Service ()
 {
 	Program ("TransimsNet");
-	Version (17);
+	Version (20);
 	Title ("Network Conversion Utility");
 
 	System_File_Type required_files [] = {
 		NODE, LINK, END_FILE
 	};
 	System_File_Type optional_files [] = {
-		SHAPE, ZONE, LOCATION, PARKING, POCKET, CONNECTION, SIGN, SIGNAL, TURN_PENALTY, LANE_USE, ACCESS_LINK, TRANSIT_STOP, 
-		NEW_NODE, NEW_ZONE, NEW_LINK, NEW_SHAPE, NEW_LOCATION, NEW_PARKING, NEW_POCKET, NEW_CONNECTION, NEW_SIGN, NEW_SIGNAL,
+		SHAPE, ZONE, LOCATION, PARKING, POCKET, CONNECTION, SIGN, SIGNAL, TIMING_PLAN, PHASING_PLAN, DETECTOR, 
+		TURN_PENALTY, LANE_USE, ACCESS_LINK, TRANSIT_STOP, NEW_NODE, NEW_ZONE, NEW_LINK, NEW_SHAPE, NEW_LOCATION, 
+		NEW_PARKING, NEW_POCKET, NEW_CONNECTION, NEW_SIGN, NEW_SIGNAL, NEW_TIMING_PLAN, NEW_PHASING_PLAN, NEW_DETECTOR, 
 		NEW_TURN_PENALTY, NEW_LANE_USE, NEW_ACCESS_LINK, NEW_TRANSIT_STOP, END_FILE
 	};
 	int file_service_keys [] = {
 		NOTES_AND_NAME_FIELDS, 0
+	};
+	int data_service_keys [] = {
+		UPDATE_LINK_BEARINGS, LINK_BEARING_WARNINGS, 0
 	};
 	Control_Key transimsnet_keys [] = { //--- code, key, level, status, type, default, range, help ----
 		{ DEFAULT_LINK_SETBACK, "DEFAULT_LINK_SETBACK", LEVEL0, OPT_KEY, FLOAT_KEY, "15 feet", "0..60 feet", NO_HELP },
@@ -71,6 +75,7 @@ TransimsNet::TransimsNet (void) : Data_Service ()
 	Required_System_Files (required_files);
 	Optional_System_Files (optional_files);
 	File_Service_Keys (file_service_keys);
+	Data_Service_Keys (data_service_keys);
 
 	Key_List (transimsnet_keys);
 	Report_List (reports);
@@ -80,7 +85,7 @@ TransimsNet::TransimsNet (void) : Data_Service ()
 	zone_flag = zout_flag, turn_flag = shape_flag = name_flag = uturn_flag = signal_id_flag = false;
 	update_flag = delete_flag = connect_flag = replicate_flag = boundary_flag = false;
 	update_link_flag = update_node_flag = update_zone_flag = update_shape_flag = update_dir_flag = false;
-	delete_link_flag = delete_node_flag = delete_zone_flag = false;
+	delete_link_flag = delete_node_flag = delete_zone_flag = repair_signals = false;
 	link_data_flag = node_data_flag = zone_data_flag = repair_flag = access_flag = control_flag = false;
 	ext_zone_flag = false;
 
@@ -89,7 +94,7 @@ TransimsNet::TransimsNet (void) : Data_Service ()
 	location_base = parking_base = 0;
 
 	nnode = nlink = nparking = nactivity = naccess = npocket = nconnect = nsign = nsignal = nuse = 0;
-	mparking = mactivity = mprocess = mpocket = muse = 0;
+	mparking = mactivity = mprocess = mpocket = muse = xdetector = 0;
 	xlink = xnode = xzone = xshape = xparking = xlocation = xaccess = xpocket = xconnect = xsign = xsignal = xuse = xturn = xstop = 0;
 	nshort = nlength = nexternal = nzone = nzout = max_splits = 0;
 	nfixed1 = nfixed2 = nfixed3 = nactuated1 = nactuated2 = nactuated3 = nstop = nyield = 0;
@@ -103,6 +108,10 @@ TransimsNet::TransimsNet (void) : Data_Service ()
 	short_length = Round (200.0);							//---- 200 meters ----
 	external_offset = Round (30.0);							//---- 30 meters ----
 	loc_setback = Round (30.0);								//---- 30 meters ----
+
+	System_Read_False (TIMING_PLAN);
+	System_Read_False (PHASING_PLAN);
+	System_Read_False (DETECTOR);
 }
 
 #ifdef _CONSOLE

@@ -50,7 +50,7 @@ void PlanSum::Program_Control (void)
 	Read_Select_Keys ();
 	Read_Flow_Time_Keys ();
 
-	plan_file = (Plan_File *) System_File_Handle (PLAN);
+	plan_file = System_Plan_File ();
 	if (!plan_file->Part_Flag ()) Num_Threads (1);
 
 	zone_file_flag = System_File_Flag (ZONE);

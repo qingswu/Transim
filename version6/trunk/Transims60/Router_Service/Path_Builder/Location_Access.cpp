@@ -62,8 +62,8 @@ bool Path_Builder::Origin_Location (Trip_End_Array *org_ptr, Path_End_Array *fro
 				//--- save the access link attributes ----
 
 				ttime = access_ptr->Time ();
-				length = (int) (ttime * param.walk_speed + 0.5);
-				imped = DTOI (ttime * param.value_walk);
+				length = (int) (ttime * path_param.walk_speed + 0.5);
+				imped = DTOI (ttime * path_param.value_walk);
 
 				path_data.Add_Imped (imped);
 				path_data.Add_Time ((forward_flag) ? ttime : -ttime);
@@ -107,8 +107,8 @@ bool Path_Builder::Origin_Location (Trip_End_Array *org_ptr, Path_End_Array *fro
 		length = loc_ptr->Setback ();
 		if (length < 1) length = 1;
 
-		ttime = (int) (length / param.walk_speed + 0.5);
-		imped = DTOI (ttime * param.value_walk);
+		ttime = (int) (length / path_param.walk_speed + 0.5);
+		imped = DTOI (ttime * path_param.value_walk);
 
 		path_data.Add_Imped (imped);
 		path_data.Add_Time ((forward_flag) ? ttime : -ttime);
@@ -185,9 +185,9 @@ bool Path_Builder::Destination_Location (Trip_End_Array *des_ptr, Path_End_Array
 				tot_imp = 0;
 				path_data.Clear ();	
 
-				if (!forward_flag && param.min_wait > 0) {
-					ttime = param.min_wait;
-					tot_imp += imped = DTOI (ttime * param.value_wait);
+				if (!forward_flag && path_param.min_wait > 0) {
+					ttime = path_param.min_wait;
+					tot_imp += imped = DTOI (ttime * path_param.value_wait);
 
 					path_data.Imped (imped);
 					path_data.Time (ttime);
@@ -203,8 +203,8 @@ bool Path_Builder::Destination_Location (Trip_End_Array *des_ptr, Path_End_Array
 				//--- save the access link attributes ----
 
 				ttime = access_ptr->Time ();
-				length = (int) (ttime * param.walk_speed + 0.5);
-				tot_imp += imped = DTOI (ttime * param.value_walk);
+				length = (int) (ttime * path_param.walk_speed + 0.5);
+				tot_imp += imped = DTOI (ttime * path_param.value_walk);
 
 				path_data.Imped (imped);
 				path_data.Time (ttime);
@@ -254,9 +254,9 @@ bool Path_Builder::Destination_Location (Trip_End_Array *des_ptr, Path_End_Array
 		tot_imp = 0;
 		path_data.Clear ();
 
-		if (!forward_flag && param.min_wait > 0) {
-			ttime = param.min_wait;
-			tot_imp += imped = DTOI (ttime * param.value_wait);
+		if (!forward_flag && path_param.min_wait > 0) {
+			ttime = path_param.min_wait;
+			tot_imp += imped = DTOI (ttime * path_param.value_wait);
 
 			path_data.Imped (imped);
 			path_data.Time (ttime);
@@ -274,8 +274,8 @@ bool Path_Builder::Destination_Location (Trip_End_Array *des_ptr, Path_End_Array
 		length = loc_ptr->Setback ();
 		if (length < 1) length = 1;
 
-		ttime = (int) (length / param.walk_speed + 0.5);
-		tot_imp += imped = DTOI (ttime * param.value_walk);
+		ttime = (int) (length / path_param.walk_speed + 0.5);
+		tot_imp += imped = DTOI (ttime * path_param.value_walk);
 
 		path_data.Imped (imped);
 		path_data.Time (ttime);

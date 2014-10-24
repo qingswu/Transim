@@ -20,8 +20,11 @@ void Simulator_Service::Execute (void)
 	Shorts subareas;
 	Integers subarea_group;
 
-	//Router_Service::Execute ();
+#ifdef ROUTING
+	Router_Service::Execute ();
+#else
 	Data_Service::Execute ();
+#endif
 
 	if (!Control_Flag ()) {
 		Error ("Simulator_Service::Program_Control has Not Been Called");

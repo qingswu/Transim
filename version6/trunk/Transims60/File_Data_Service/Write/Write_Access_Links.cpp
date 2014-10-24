@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Access_Links (void)
 {
-	Access_File *file = (Access_File *) System_File_Handle (NEW_ACCESS_LINK);
+	Access_File *file = System_Access_File (true);
 
 	int count = 0;
 	Int_Map_Itr itr;

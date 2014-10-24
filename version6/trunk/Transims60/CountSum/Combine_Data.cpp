@@ -15,8 +15,8 @@ void CountSum::Combine_Data (Processing_Methods method, int day_num)
 
 	Count_Days_Itr count_itr; 
 	Vol_Spd_Period_Itr period_itr;
-	Vol_Spd_Period *period_ptr;
-	Vol_Spd_Data *vol_spd_ptr, *count_ptr;
+	Vol_Spd_Period *period_ptr, *vol_spd_period_ptr;
+	Vol_Spd_Data *vol_spd_ptr, *count_ptr, *result_ptr;
 
 	Offset_Index_Itr offset_itr, index_itr;
 	Int2_Key dir_offset;
@@ -33,12 +33,14 @@ void CountSum::Combine_Data (Processing_Methods method, int day_num)
 	Set_Progress ();
 
 	count_day_array.Zero_Data ();
+	vol_spd_array.Zero_Data ();
 
 	//---- process counts for each count day by time period ----
 
 	for (period=0, period_itr = count_day_array.begin (); period_itr != count_day_array.end (); period_itr++, period++) {
 
 		index = -1;
+		vol_spd_period_ptr = vol_spd_array.Period_Ptr (period);
 
 		for (offset_itr = offset_index_map.begin (); offset_itr != offset_index_map.end (); offset_itr++) {
 			dir_offset = offset_itr->first;
@@ -47,7 +49,7 @@ void CountSum::Combine_Data (Processing_Methods method, int day_num)
 			
 			index = dir_offset.first;
 
-			vol_spd_ptr = period_itr->Data_Ptr (index);
+			result_ptr = period_itr->Data_Ptr (offset_itr->second);
 			count = 0;
 
 			for (day=0, count_itr = count_days.begin (); count_itr != count_days.end (); count_itr++, day++) {
@@ -86,26 +88,33 @@ void CountSum::Combine_Data (Processing_Methods method, int day_num)
 				}
 
 				if (method == AVERAGE) {
-					if (vol_spd_ptr->Volume () > 0) {
-						vol_spd_ptr->Volume ((vol_spd_ptr->Volume () * count + volume) / (count + 1));
-						vol_spd_ptr->Speed ((vol_spd_ptr->Speed () * count + speed) / (count + 1));
+					if (result_ptr->Volume () > 0) {
+						result_ptr->Volume ((result_ptr->Volume () * count + volume) / (count + 1));
+						result_ptr->Speed ((result_ptr->Speed () * count + speed) / (count + 1));
 					} else {
-						vol_spd_ptr->Volume (volume);
-						vol_spd_ptr->Speed (speed);
+						result_ptr->Volume (volume);
+						result_ptr->Speed (speed);
 					}
 					count++;
 				} else if (method == MINIMUM) {
-					if (vol_spd_ptr->Volume () == 0 || vol_spd_ptr->Volume () > volume) {
-						vol_spd_ptr->Volume (volume);
-						vol_spd_ptr->Speed (speed);
+					if (result_ptr->Volume () == 0 || result_ptr->Volume () > volume) {
+						result_ptr->Volume (volume);
+						result_ptr->Speed (speed);
 					}
 				} else if (method == MAXIMUM) {
-					if (vol_spd_ptr->Volume () == 0 || vol_spd_ptr->Volume () < volume) {
-						vol_spd_ptr->Volume (volume);
-						vol_spd_ptr->Speed (speed);
+					if (result_ptr->Volume () == 0 || result_ptr->Volume () < volume) {
+						result_ptr->Volume (volume);
+						result_ptr->Speed (speed);
 					}
 				}
 			}
+
+			//----- store the result by dir index -----
+				
+			vol_spd_ptr = vol_spd_period_ptr->Data_Ptr (index);
+
+			vol_spd_ptr->Volume (result_ptr->Volume ());
+			vol_spd_ptr->Speed (result_ptr->Speed ());
 		}
 	}
 	End_Progress ();

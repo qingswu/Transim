@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Zones (void)
 {
-	Zone_File *file = (Zone_File *) System_File_Handle (NEW_ZONE);
+	Zone_File *file = System_Zone_File (true);
 
 	int num, count, max_zone;
 	Int_Map_Itr itr;

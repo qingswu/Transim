@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Lane_Uses (void)
 {
-	Lane_Use_File *file = (Lane_Use_File *) System_File_Handle (NEW_LANE_USE);
+	Lane_Use_File *file = System_Lane_Use_File (true);
 
 	int i, num, dir, index, period, count;
 

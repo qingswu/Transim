@@ -29,7 +29,7 @@ void LinkSum::Write_Turn_Data (void)
 	Turn_Delay_File *turn_file;
 	Turn_Delay_Data turn_data;
 
-	turn_file = (Turn_Delay_File *) System_File_Handle (NEW_TURN_DELAY);
+	turn_file = System_Turn_Delay_File (true);
 
 	Show_Message (String ("Writing %s -- Record") % turn_file->File_Type ());
 	Set_Progress ();

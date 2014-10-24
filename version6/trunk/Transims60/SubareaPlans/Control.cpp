@@ -16,10 +16,10 @@ void SubareaPlans::Program_Control (void)
 
 	Read_Select_Keys ();
 	
-	plan_file = (Plan_File *) System_File_Handle (PLAN);
+	plan_file = System_Plan_File ();
 	if (!plan_file->Part_Flag ()) Num_Threads (1);
 
-	new_plan_file = (Plan_File *) System_File_Handle (NEW_PLAN);
+	new_plan_file = System_Plan_File (true);
 	new_plan_file->Sort_Type (plan_file->Sort_Type ());
 	//new_plan_file->Close ();
 
@@ -30,7 +30,7 @@ void SubareaPlans::Program_Control (void)
 	access_flag = System_File_Flag (ACCESS_LINK);
 	trip_flag = System_File_Flag (NEW_TRIP);
 
-	new_trip_file = (Trip_File *) System_File_Handle (NEW_TRIP);
+	new_trip_file = System_Trip_File (true);
 
 	if (System_File_Flag (TRANSIT_STOP) || System_File_Flag (TRANSIT_ROUTE) ||
 		System_File_Flag (TRANSIT_SCHEDULE) || System_File_Flag (TRANSIT_DRIVER)) {

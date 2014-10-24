@@ -50,7 +50,7 @@ int Path_Builder::Best_Destination (Path_End_Array *to_ptr, Trip_End_Array *des_
 			to_cost += path_ritr->Cost ();
 			to_walk += path_ritr->Walk ();
 
-			if (walk_flag && to_walk > param.max_walk) {
+			if (walk_flag && to_walk > path_param.max_walk) {
 				to_imped = MAX_IMPEDANCE;
 				length_flag = true;
 				break;

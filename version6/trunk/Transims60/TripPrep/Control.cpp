@@ -22,11 +22,11 @@ void TripPrep::Program_Control (void)
 
 	Read_Select_Keys ();
 
-	trip_file = (Trip_File *) System_File_Handle (TRIP);
+	trip_file = System_Trip_File ();
 	if (!trip_file->Part_Flag ()) Num_Threads (1);
 
 	if (System_File_Flag (NEW_TRIP)) {
-		new_trip_file = (Trip_File *) System_File_Handle (NEW_TRIP);
+		new_trip_file = System_Trip_File (true);
 		if (Trip_Sort () == UNKNOWN_SORT) {
 			new_trip_file->Sort_Type (trip_file->Sort_Type ());
 		} else {
@@ -104,7 +104,7 @@ void TripPrep::Program_Control (void)
 			Error ("The New Trip File must be Partitioned to be Updated");
 		}
 		if (select_flag) {
-			Selection_File *file = (Selection_File *) System_File_Handle (SELECTION);
+			Selection_File *file = System_Selection_File ();
 			if (!file->Partition_Flag () && !file->Part_Flag ()) {
 				Error ("A Partition Field or File was Not Found on the Selection File");
 			}
@@ -118,7 +118,7 @@ void TripPrep::Program_Control (void)
 			part_count.assign (num_parts, 0);
 
 			if (num_parts > 1 && System_File_Flag (NEW_SELECTION)) {
-				Selection_File *file = (Selection_File *) System_File_Handle (NEW_SELECTION);
+				Selection_File *file = System_Selection_File (true);
 				
 				if (!file->Part_Flag ()) {
 					file->Clear_Fields ();
@@ -148,7 +148,7 @@ void TripPrep::Program_Control (void)
 
 	if (type_flag && !script_flag) {
 		if (select_flag) {
-			Selection_File *file = (Selection_File *) System_File_Handle (SELECTION);
+			Selection_File *file = System_Selection_File ();
 			if (!file->Type_Flag ()) {
 				Error ("A Type Field was Not Found in the Selection File");
 			}

@@ -25,12 +25,12 @@ void PlanSelect::Program_Control (void)
 	delay_flag = System_File_Flag (PERFORMANCE);
 	turn_flag = System_File_Flag (TURN_DELAY);
 
-	plan_file = (Plan_File *) System_File_Handle (PLAN);
+	plan_file = System_Plan_File ();
 	if (!plan_file->Part_Flag ()) Num_Threads (1);
 
 	new_plan_flag = System_File_Flag (NEW_PLAN);
 	if (new_plan_flag) {
-		new_plan_file = (Plan_File *) System_File_Handle (NEW_PLAN);
+		new_plan_file = System_Plan_File (true);
 		new_plan_file->Sort_Type (plan_file->Sort_Type ());
 		new_plan_file->Close ();
 
@@ -39,7 +39,7 @@ void PlanSelect::Program_Control (void)
 		}
 	}
 	if (plan_file->Part_Flag ()) {
-		Selection_File *file = (Selection_File *) System_File_Handle (NEW_SELECTION);
+		Selection_File *file = System_Selection_File (true);
 
 		if (!file->Part_Flag ()) {
 			if (Master ()) {

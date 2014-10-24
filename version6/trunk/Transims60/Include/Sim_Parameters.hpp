@@ -61,6 +61,7 @@ public:
 	bool   count_warnings;
 	bool   print_problems;
 	bool   parking_lanes;
+	bool   transit_connect;
 
 	bool   problem_flag;
 	bool   control_flag;

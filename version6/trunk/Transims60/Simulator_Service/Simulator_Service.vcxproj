@@ -236,7 +236,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Bin|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>..\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_MSC_EXTENSIONS;CHECK</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_MSC_EXTENSIONS;CHECK;</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader />
       <WarningLevel>Level4</WarningLevel>
@@ -407,6 +407,9 @@
   <ItemGroup>
     <ProjectReference Include="..\File_Data_Service\File_Data_Service.vcxproj">
       <Project>{34c8daaa-8bc6-4e4d-a8ac-fb86e62e79e7}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Router_Service\Router_Service.vcxproj">
+      <Project>{c8c9fb65-5c0f-453f-ba81-7f8f28bf5d79}</Project>
     </ProjectReference>
     <ProjectReference Include="..\SysLib\SysLib.vcxproj">
       <Project>{80b715b5-d1b7-4b64-a8bd-bfa768bfbee3}</Project>

@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Schedules (void)
 {
-	Schedule_File *file = (Schedule_File *) System_File_Handle (NEW_TRANSIT_SCHEDULE);
+	Schedule_File *file = System_Schedule_File (true);
 
 	int count = 0;
 	Int_Map_Itr itr;

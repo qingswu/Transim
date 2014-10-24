@@ -16,7 +16,7 @@ void SimSubareas::Program_Control (void)
 
 	Data_Service::Program_Control ();
 	
-	Node_File *file = (Node_File *) System_File_Handle (NEW_NODE);
+	Node_File *file = System_Node_File (true);
 	file->Subarea_Flag (true);
 	file->Clear_Fields ();
 	file->Create_Fields ();

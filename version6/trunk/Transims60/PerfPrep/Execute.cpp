@@ -44,7 +44,7 @@ void PerfPrep::Execute (void)
 
 	if (transit_flag) {
 		if (!merge_flag) {
-			merge_perf_array.Replicate (perf_period_array);
+			merge_perf_array.Copy_Time_Data (perf_period_array);
 		}
 		Load_Transit_Data ();
 

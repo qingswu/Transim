@@ -11,7 +11,7 @@
 PerfPrep::PerfPrep (void) : Data_Service ()
 {
 	Program ("PerfPrep");
-	Version (1);
+	Version (2);
 	Title ("Manipulate the Performance File");
 
 	System_File_Type required_files [] = {
@@ -49,6 +49,7 @@ PerfPrep::PerfPrep (void) : Data_Service ()
 	smooth_data.Add_Keys ();
 
 	smooth_flag = merge_flag = turn_merge_flag = ratio_flag = min_time_flag = false;
+	transit_flag = transit_veh_flag = transit_pce_flag = transit_person_flag = false;
 
 	method = SIMPLE_LINK_AVG;
 	factor = 1.0;

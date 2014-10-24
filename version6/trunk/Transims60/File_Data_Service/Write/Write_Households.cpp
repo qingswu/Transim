@@ -13,7 +13,7 @@ void Data_Service::Write_Households (void)
 {
 	int part, num_part, count;
 
-	Household_File *file = (Household_File *) System_File_Handle (NEW_HOUSEHOLD);
+	Household_File *file = System_Household_File (true);
 
 	Int_Map_Itr itr;
 	Household_Data *hhold_ptr;

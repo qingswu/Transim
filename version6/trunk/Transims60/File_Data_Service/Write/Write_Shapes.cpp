@@ -10,7 +10,7 @@
 
 int Data_Service::Write_Shapes (void)
 {
-	Shape_File *file = (Shape_File *) System_File_Handle (NEW_SHAPE);
+	Shape_File *file = System_Shape_File (true);
 
 	int count = 0;
 	Int_Map_Itr itr;

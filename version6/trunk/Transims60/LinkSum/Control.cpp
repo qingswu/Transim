@@ -61,6 +61,10 @@ void LinkSum::Program_Control (void)
 	
 	minimum_volume = Get_Control_Double (MINIMUM_LINK_VOLUME);
 
+	//---- person-based statistics ----
+
+	person_flag = Get_Control_Flag (PERSON_BASED_STATISTICS);
+
 	//---- get the select by link group flag ----
 
 	group_select = Get_Control_Flag (SELECT_BY_LINK_GROUP);
@@ -104,7 +108,7 @@ void LinkSum::Program_Control (void)
 		if (!System_File_Flag (LOCATION)) {
 			Error ("A Location File is needed for the Link Activity File");
 		}
-		location_file = (Location_File *) System_File_Handle (LOCATION);
+		location_file = System_Location_File ();
 		binary = (location_file->Record_Format () == BINARY);
 
 		Print (1);

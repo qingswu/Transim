@@ -43,17 +43,17 @@ bool Path_Builder::Plan_Update (Plan_Data *plan_data)
 
 	//---- set the traveler parameters ----
 
-	exe->Set_Parameters (param, plan_ptr->Type (), plan_ptr->Veh_Type ());
+	exe->Set_Parameters (path_param, plan_ptr->Type (), plan_ptr->Veh_Type ());
 
-	random_flag = (param.random_imped > 0);
-	turn_flag = (param.left_imped > 0 || param.right_imped > 0 || param.uturn_imped > 0);
+	random_flag = (path_param.random_imped > 0);
+	turn_flag = (path_param.left_imped > 0 || path_param.right_imped > 0 || path_param.uturn_imped > 0);
 
 	parking_duration = plan_ptr->Duration ();
 	forward_flag = (plan_ptr->Constraint () != END_TIME);
 	reroute_flag = false;
 
 	mode = plan_ptr->Mode ();
-	param.mode = (Mode_Type) mode;
+	path_param.mode = (Mode_Type) mode;
 	group = 0;
 
 	//---- trace the path ----
@@ -114,26 +114,26 @@ bool Path_Builder::Plan_Update (Plan_Data *plan_data)
 					if (!Best_Lane_Use (index, time, factor, ttime, delay, cost, group)) {
 						//---- problem ----
 					}
-					cost += DTOI (param.op_cost_rate * len);
+					cost += DTOI (path_param.op_cost_rate * len);
 
-					if (param.flow_flag) {
+					if (path_param.flow_flag) {
 						if (group == 1) {
 							use_index = dir_ptr->Use_Index (); 
 						} else {
 							use_index = index;
 						}
-						perf_period_array_ptr->Flow_Time (use_index, time, factor, link_ptr->Length (), param.pce, param.occupancy, forward_flag);
+						perf_period_array_ptr->Flow_Time (use_index, time, factor, link_ptr->Length (), path_param.pce, path_param.occupancy, forward_flag);
 					}
 					imp = 0;
 
-					if (param.grade_flag) {
+					if (path_param.grade_flag) {
 						if (dir_ptr->Dir ()) {
 							ab_flag = false;
 						} else {
 							ab_flag = true;
 						}
 						if (link_ptr->Grade (ab_flag) > 0) {
-							ttime = ttime / param.veh_type_ptr->Grade (link_ptr->Grade (ab_flag));
+							ttime = ttime / path_param.veh_type_ptr->Grade (link_ptr->Grade (ab_flag));
 						}
 					}
 					ttime += delay;
@@ -145,40 +145,40 @@ bool Path_Builder::Plan_Update (Plan_Data *plan_data)
 							map2_itr = exe->connect_map.find (Int2_Key (index, dir_index));
 						}
 						if (map2_itr != exe->connect_map.end ()) {
-							if (param.turn_delay_flag) {
+							if (path_param.turn_delay_flag) {
 								turn_period_ptr = exe->turn_period_array.Period_Ptr (time);
 								ttime += turn_period_ptr->Time (map2_itr->second);
 								if (ttime < 1) ttime = 1;
 							}
-							if (param.turn_flow_flag) {
+							if (path_param.turn_flow_flag) {
 								turn_period_ptr = turn_period_array_ptr->Period_Ptr (time);
 								turn_ptr = turn_period_ptr->Data_Ptr (map2_itr->second);
-								turn_ptr->Add_Turn (param.pce);
+								turn_ptr->Add_Turn (path_param.pce);
 							}
 							if (turn_flag) {
 								connect_ptr = &exe->connect_array [map2_itr->second];
 
 								if (connect_ptr->Type () == LEFT) {
-									imp += param.left_imped;
+									imp += path_param.left_imped;
 								} else if (connect_ptr->Type () == RIGHT) {
-									imp += param.right_imped;
+									imp += path_param.right_imped;
 								} else if (connect_ptr->Type () == UTURN) {
-									imp += param.uturn_imped;
+									imp += path_param.uturn_imped;
 								}
 							}
 						}
 					}
-					imp += Resolve (ttime * param.value_time + len * param.value_dist + cost * param.value_cost);
+					imp += Resolve (ttime * path_param.value_time + len * path_param.value_dist + cost * path_param.value_cost);
 
 					if (link_ptr->Type () == FREEWAY) {
-						imp = DTOI (imp * param.freeway_fac);
+						imp = DTOI (imp * path_param.freeway_fac);
 					} else if (link_ptr->Type () == EXPRESSWAY) {
-						imp = DTOI (imp * param.express_fac);
+						imp = DTOI (imp * path_param.express_fac);
 					}
 					dir_index = index;
 
 					if (random_flag) {
-						imp = DTOI (imp * (1.0 + param.random_imped * (param.random.Probability () - 0.5) / 100.0));
+						imp = DTOI (imp * (1.0 + path_param.random_imped * (path_param.random.Probability () - 0.5) / 100.0));
 					}
 				}
 			}
@@ -192,12 +192,12 @@ bool Path_Builder::Plan_Update (Plan_Data *plan_data)
 
 				ttime = access_ptr->Time ();
 				cost = Round (access_ptr->Cost ());
-				imp = Resolve (ttime * param.value_walk + cost * param.value_cost);
+				imp = Resolve (ttime * path_param.value_walk + cost * path_param.value_cost);
 			} else {
-				imp = Resolve (ttime * param.value_walk);
+				imp = Resolve (ttime * path_param.value_walk);
 			}
 			if (random_flag) {
-				imp = DTOI (imp * (1.0 + param.random_imped * (param.random.Probability () - 0.5) / 100.0));
+				imp = DTOI (imp * (1.0 + path_param.random_imped * (path_param.random.Probability () - 0.5) / 100.0));
 			}
 			plan_ptr->Add_Walk (ttime);
 		} else if (mode == WAIT_MODE) {
@@ -218,7 +218,7 @@ bool Path_Builder::Plan_Update (Plan_Data *plan_data)
 
 				if (parking_ptr->size () > 0) {
 					for (park_itr = parking_ptr->begin (); park_itr != parking_ptr->end (); park_itr++) {
-						if (exe->Use_Permission (park_itr->Use (), param.use) &&
+						if (exe->Use_Permission (park_itr->Use (), path_param.use) &&
 							park_itr->Start () <= time && time < park_itr->End ()) {
 
 							if (forward_flag && first_park) {
@@ -233,10 +233,10 @@ bool Path_Builder::Plan_Update (Plan_Data *plan_data)
 						}
 					}
 				}
-				imp = Resolve (ttime * param.value_park + cost * param.value_cost);
+				imp = Resolve (ttime * path_param.value_park + cost * path_param.value_cost);
 
 				if (random_flag) {
-					imp = DTOI (imp * (1.0 + param.random_imped * (param.random.Probability () - 0.5) / 100.0));
+					imp = DTOI (imp * (1.0 + path_param.random_imped * (path_param.random.Probability () - 0.5) / 100.0));
 				}
 				first_park = !first_park;
 			}
@@ -265,7 +265,7 @@ bool Path_Builder::Plan_Update (Plan_Data *plan_data)
 		if (plan_ptr->Arrive () > plan_ptr->End () && plan_ptr->Duration () > 0 && 
 			plan_ptr->Constraint () != FIXED_TIME && plan_ptr->Constraint () != DURATION) {
 
-			delay = DTOI (plan_ptr->Duration () * param.duration_factor [plan_ptr->Priority ()]);
+			delay = DTOI (plan_ptr->Duration () * path_param.duration_factor [plan_ptr->Priority ()]);
 			time = plan_ptr->End () + plan_ptr->Duration ();
 			if (time > plan_ptr->Arrive () + delay.Round_Seconds ()) {
 				plan_ptr->Activity (time - plan_ptr->Arrive ());

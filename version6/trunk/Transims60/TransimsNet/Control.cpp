@@ -58,8 +58,8 @@ void TransimsNet::Program_Control (void)
 		if (!zone_flag) {
 			Print (2, "Zone Centroids Copied from Node File");
 		} else {
-			Zone_File *file = (Zone_File *) System_File_Handle (ZONE);
-			Zone_File *new_file = (Zone_File *) System_File_Handle (NEW_ZONE);
+			Zone_File *file = System_Zone_File ();
+			Zone_File *new_file = System_Zone_File (true);
 
 			new_file->Clear_Fields ();
 			new_file->Replicate_Fields (file);
@@ -69,6 +69,8 @@ void TransimsNet::Program_Control (void)
 
 	access_flag = (System_File_Flag (NEW_LOCATION) || System_File_Flag (NEW_PARKING));
 	control_flag = (System_File_Flag (NEW_SIGN) || System_File_Flag (NEW_SIGNAL));
+	repair_signals = (System_File_Flag (SIGNAL) && System_File_Flag (TIMING_PLAN) && System_File_Flag (PHASING_PLAN) && 
+		System_File_Flag (NEW_SIGNAL) && System_File_Flag (NEW_TIMING_PLAN) && System_File_Flag (NEW_PHASING_PLAN));
 
 	Print (2, String ("%s Control Keys:") % Program ());	
 

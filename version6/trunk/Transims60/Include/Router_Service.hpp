@@ -38,19 +38,19 @@ public:
 	void Transit_Paths (bool flag)                { transit_path_flag = flag; }
 	void ParkRide_Paths (bool flag)               { parkride_path_flag = flag; }
 	void KissRide_Paths (bool flag)               { kissride_path_flag = flag; }
-	void Use_Link_Delays (bool flag)              { param.delay_flag = flag; }
-	void Link_Flows (bool flag)                   { param.flow_flag = flag; }
-	void Turn_Flows (bool flag)                   { param.turn_flow_flag = flag; }
-	void Skim_Total_Time (bool flag)              { param.skim_total_time = flag; }
+	void Use_Link_Delays (bool flag)              { path_param.delay_flag = flag; }
+	void Link_Flows (bool flag)                   { path_param.flow_flag = flag; }
+	void Turn_Flows (bool flag)                   { path_param.turn_flow_flag = flag; }
+	void Skim_Total_Time (bool flag)              { path_param.skim_total_time = flag; }
 	void Skim_Check_Flag (bool flag)              { skim_check_flag = flag; }
 	void Save_Trip_Gap (bool flag)                { save_trip_gap = flag; }
 	void Reset_Skim_Gap (void)                    { skim_gap = skim_time = 0; }
 
-	bool Link_Flows (void)                        { return (param.flow_flag); }
-	bool Turn_Flows (void)                        { return (param.turn_flow_flag); }
+	bool Link_Flows (void)                        { return (path_param.flow_flag); }
+	bool Turn_Flows (void)                        { return (path_param.turn_flow_flag); }
 	bool Skim_Check_Flag (void)                   { return (skim_check_flag); }
 	bool Save_Trip_Gap (void)                     { return (save_trip_gap); }
-	bool Cap_Penalty_Flag (void)                  { return (param.cap_penalty_flag); }
+	bool Cap_Penalty_Flag (void)                  { return (path_param.cap_penalty_flag); }
 
 	double Skim_Gap (void);
 
@@ -139,6 +139,6 @@ private:
 
 	Int2_Map ab_link;
 
-	Path_Parameters param;
+	Path_Parameters path_param;
 };
 #endif

@@ -77,7 +77,7 @@ SYSLIB_API extern const char * CSV_DELIMITERS;
 #define NUM_SCHEDULE_COLUMNS      8
 #define TURN_SHAPE_SETBACK        25		//---- feet ----
 #define NUM_CURVE_POINTS          15
-#define ANY_USE_CODE              2047
+#define ANY_USE_CODE              4095
 
 //---- standard field names ----
 

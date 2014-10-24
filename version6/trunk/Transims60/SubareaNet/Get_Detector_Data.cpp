@@ -31,10 +31,8 @@ bool SubareaNet::Get_Detector_Data (Detector_File &file, Detector_Data &data)
 				Error (String ("Writing %s") % new_file->File_Type ());
 			}
 			ndetector++;
+			return (true);
 		}
 	}
-		
-	//---- don't save the record ----
-
 	return (false);
 }

@@ -22,11 +22,11 @@ void PlanPrep::Program_Control (void)
 
 	Read_Select_Keys ();
 
-	plan_file = (Plan_File *) System_File_Handle (PLAN);
+	plan_file = System_Plan_File ();
 	if (!plan_file->Part_Flag ()) Num_Threads (1);
 
 	if (System_File_Flag (NEW_PLAN)) {
-		new_plan_file = (Plan_File *) System_File_Handle (NEW_PLAN);
+		new_plan_file = System_Plan_File (true);
 		if (Trip_Sort () == UNKNOWN_SORT) {
 			new_plan_file->Sort_Type (plan_file->Sort_Type ());
 		} else {

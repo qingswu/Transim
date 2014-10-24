@@ -11,11 +11,15 @@
 
 bool Sim_Plan_Step::First_Plan (void)
 {
+#ifdef ROUTING
+	first = stat = true;
+	return (stat);
+#endif
 	first = true;
 	stat = false;
 
 	if (sim->System_File_Flag (PLAN)) {
-		Plan_File *plan_file = (Plan_File *) sim->System_File_Handle (PLAN);
+		Plan_File *plan_file = sim->System_Plan_File ();
 
 		if (plan_file) {
 			int i, j, num;

@@ -33,7 +33,11 @@ bool TransimsNet::Get_Link_Data (Link_File &file, Link_Data &data, Dir_Data &ab,
 	}
 	if (link_data_flag) {
 		if (link_data_array.Read_Record (link)) {
+			Data_Service::Get_Link_Data (file, data, ab, ba);
 			file.Copy_Fields (link_data_array);
+
+			file.Bearing_A (ab.In_Bearing ());
+			file.Bearing_B (ab.Out_Bearing ());
 		}
 	}
 	return (Data_Service::Get_Link_Data (file, data, ab, ba));

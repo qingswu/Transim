@@ -39,8 +39,16 @@ bool Sim_Plan_Process::Best_Lanes (Sim_Trip_Ptr sim_trip_ptr, Integers &leg_list
 	org_off = des_off = dir_index = offset = 0;
 	length = 1;
 
+#ifdef CHECK
+	if (sim_trip_ptr == 0) sim->Error ("Sim_Plan_Process::Best_Lanes: sim_trip_ptr");
+#endif
+
 	sim_travel_ptr = &sim_trip_ptr->sim_travel_data;
 	sim_plan_ptr = &sim_trip_ptr->sim_plan_data;
+
+#ifdef CHECK
+	if (sim_travel_ptr == 0 || sim_plan_ptr == 0) sim->Error ("Sim_Plan_Process::Best_Lanes: sim_travel_ptr or sim_plan_ptr");
+#endif
 
 	veh_type_ptr = &sim->veh_type_array [sim_plan_ptr->Veh_Type ()];
 
@@ -64,14 +72,23 @@ bool Sim_Plan_Process::Best_Lanes (Sim_Trip_Ptr sim_trip_ptr, Integers &leg_list
 	leg_pool_ptr = &sim->sim_leg_array [sim_plan_ptr->Leg_Pool ()];
 
 	for (int_itr = leg_list.begin (); int_itr != leg_list.end (); int_itr++, last_leg = leg_ptr) {
+
+#ifdef CHECK
+		if (*int_itr < 0) sim->Error ("Sim_Plan_Process::Best_Lanes: int_itr");
+#endif
 		leg_ptr = leg_pool_ptr->Record_Pointer (*int_itr);
 
+#ifdef CHECK
+		if (leg_ptr == 0) sim->Error ("Sim_Plan_Process::Best_Lanes: leg_ptr");
+#endif
 		if (first_leg) {
 			last_leg = leg_ptr;
 			first_leg = false;
 		}
 		index = leg_ptr->Index ();
-
+#ifdef CHECK
+		if (index < 0) sim->Error (String ("Sim_Plan_Process::Best_Lanes: leg index, type=%d") % leg_ptr->Type ());
+#endif
 		//---- destination parking lot ----
 
 		if (leg_ptr->Type () == PARKING_ID && !first_lot) {

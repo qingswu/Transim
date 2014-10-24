@@ -23,7 +23,7 @@ void Gravity::Program_Control (void)
 
 	Data_Service::Program_Control ();
 
-	zone_file = (Zone_File *) System_File_Handle (ZONE);
+	zone_file = System_Zone_File ();
 
 	Print (2, String ("%s Control Keys:") % Program ());
 

@@ -17,7 +17,7 @@ bool NewFormat::Get_Trip_Data (Trip_File &file, Trip_Data &trip_rec, int partiti
 		part_num = partition;
 
 		if (new_trip_flag) {
-			out_file = (Trip_File *) System_File_Handle (NEW_TRIP);
+			out_file = System_Trip_File (true);
 
 			if (out_file != 0 && out_file->Part_Flag () && part_num > 1) {
 				if (!out_file->Open (part_num)) {

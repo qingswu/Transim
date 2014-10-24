@@ -16,7 +16,7 @@ void NewFormat::Read_Activity (void)
 	Vehicle_Map_Itr veh_itr;
 	Trip_Data trip_rec;
 
-	Trip_File *out_file = (Trip_File *) System_File_Handle (NEW_TRIP);
+	Trip_File *out_file = System_Trip_File (true);
 
 	//---- process the person file ----
 

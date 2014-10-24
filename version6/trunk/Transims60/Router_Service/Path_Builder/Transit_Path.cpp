@@ -22,7 +22,7 @@ int Path_Builder::Transit_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr
 		
 		//---- remove the approach data from the processing queue ----
 
-		if (param.sort_method) {
+		if (path_param.sort_method) {
 			if (!transit_sort.Remove (path_index)) break;
 		} else {
 			if (next_index.empty ()) break;

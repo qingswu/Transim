@@ -78,14 +78,17 @@ void Simulator_Service::Program_Control (void)
 
 	//---- process the data controls ----
 
-	//Router_Service::Program_Control ();
+#ifdef ROUTING
+	Router_Service::Program_Control ();
+#else
 	Data_Service::Program_Control ();
+#endif
 
 	Read_Select_Keys ();
 
 	if (System_File_Flag (NEW_PROBLEM)) {
 		param.problem_flag = true;
-		Problem_File *problem_file = (Problem_File *) System_File_Handle (NEW_PROBLEM);
+		Problem_File *problem_file = System_Problem_File (true);
 		problem_file->Simulator_Data ();
 	}
 	Print (2, String ("%s Control Keys:") % Program ());
@@ -252,6 +255,10 @@ void Simulator_Service::Program_Control (void)
 	//---- enforce parking lanes -----
 
 	param.parking_lanes = Get_Control_Flag (ENFORCE_PARKING_LANES);
+	
+	//---- ignore transit connections -----
+
+	param.transit_connect = Get_Control_Flag (IGNORE_TRANSIT_CONNECTIONS);
 
 	//---- driver reaction time ----
 

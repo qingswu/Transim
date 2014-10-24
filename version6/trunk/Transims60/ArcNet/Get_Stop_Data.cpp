@@ -18,8 +18,11 @@ bool ArcNet::Get_Stop_Data (Stop_File &file, Stop_Data &stop_rec)
 
 			Point_Offset (stop_rec.Link (), stop_rec.Dir (), stop_rec.Offset (), stop_side, arcview_stop);
 
-			if (!arcview_stop.Write_Record ()) {
-				Error (String ("Writing %s") % arcview_stop.File_Type ());
+			if (arcview_stop.size () == 0) {
+				Warning (String ("Transit Stop %d could not be drawn") % stop_rec.Stop ());
+				return (false);
+			} else if (!arcview_stop.Write_Record ()) {
+				Error (String ("Writing %s Stop=%d") % arcview_stop.File_Type () % stop_rec.Stop ());
 			}
 
 			//---- save the location point data ----

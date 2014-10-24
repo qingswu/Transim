@@ -166,5 +166,8 @@
     <ClCompile Include="Path_Builder\Plan_Reskim.cpp">
       <Filter>Path_Builder\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Path_Builder\Load_Flow.cpp">
+      <Filter>Path_Builder\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

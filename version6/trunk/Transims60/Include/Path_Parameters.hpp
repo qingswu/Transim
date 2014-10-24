@@ -1,5 +1,5 @@
 //*********************************************************
-//	Path_Parameters.hpp - path building parameters
+//	Path_Parameters.hpp - path building path_parameters
 //*********************************************************
 
 #ifndef PATH_PARAMETERS_HPP

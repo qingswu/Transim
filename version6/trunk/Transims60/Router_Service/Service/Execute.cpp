@@ -307,7 +307,7 @@ void Router_Service::Execute (void)
 			Show_Progress ();
 
 			if (link_itr->Grade () != 0) {
-				param.grade_flag = true;
+				path_param.grade_flag = true;
 				break;
 			}
 		}
@@ -433,7 +433,7 @@ void Router_Service::Execute (void)
 				flag = false;
 
 				for (stop_itr = stop_array.begin (); stop_itr != stop_array.end (); stop_itr++) {
-					if (!param.kissride_type [stop_itr->Type ()]) continue;
+					if (!path_param.kissride_type [stop_itr->Type ()]) continue;
 
 					link_ptr = &link_array [stop_itr->Link ()];
 
@@ -454,7 +454,7 @@ void Router_Service::Execute (void)
 
 					distance = abs (ax) + abs (ay);
 
-					if (Resolve (distance) < param.kissride_walk) {
+					if (Resolve (distance) < path_param.kissride_walk) {
 						flag = true;
 						break;
 					}
@@ -466,7 +466,7 @@ void Router_Service::Execute (void)
 
 		//---- stop penalty file ----
 
-		if (param.stop_pen_flag) {
+		if (path_param.stop_pen_flag) {
 			Line_Data *line_ptr;
 			Line_Run_Itr run_itr;
 
@@ -556,7 +556,7 @@ void Router_Service::Execute (void)
 
 	//---- parking penalty file ----
 
-	if (param.park_pen_flag) {
+	if (path_param.park_pen_flag) {
 		int parking, penalty, park_field, pen_field, num_penalty;
 
 		park_field = park_pen_file.Required_Field ("PARKING", "LOT", "ID", "NUMBER", "LOT_ID");

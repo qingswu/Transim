@@ -15,7 +15,7 @@ int Validate::volume_level [] = {
 Validate::Validate (void) : Data_Service ()
 {
 	Program ("Validate");
-	Version (12);
+	Version (13);
 	Title ("Compare Volumes to Counts");
 
 	System_File_Type required_files [] = {
@@ -32,7 +32,7 @@ Validate::Validate (void) : Data_Service ()
 		STOP_EQUIVALENCE_FILE, LINE_EQUIVALENCE_FILE, 0
 	};
 	int data_service_keys [] = {
-		DAILY_WRAP_FLAG, SUMMARY_TIME_RANGES, SUMMARY_TIME_INCREMENT, 0
+		DAILY_WRAP_FLAG, SUMMARY_TIME_RANGES, SUMMARY_TIME_INCREMENT, LINK_BEARING_WARNINGS, 0
 	};
 	Control_Key validate_keys [] = { //--- code, key, level, status, type, default, range, help ----
 		{ INPUT_VOLUME_FILE, "INPUT_VOLUME_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },

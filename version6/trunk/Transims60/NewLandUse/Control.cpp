@@ -21,8 +21,8 @@ void NewLandUse::Program_Control (void)
 
 	Data_Service::Program_Control ();
 
-	zone_file = (Zone_File *) System_File_Handle (ZONE);
-	new_file = (Zone_File *) System_File_Handle (NEW_ZONE);
+	zone_file = System_Zone_File ();
+	new_file = System_Zone_File (true);
 
 	new_file->Clear_Fields ();
 	new_file->Replicate_Fields (zone_file);

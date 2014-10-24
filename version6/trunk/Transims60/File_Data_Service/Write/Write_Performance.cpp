@@ -10,7 +10,7 @@
 
 void Data_Service::Write_Performance (bool fill_flag)
 {
-	Performance_File *file = (Performance_File *) System_File_Handle (NEW_PERFORMANCE);
+	Performance_File *file = System_Performance_File (true);
 
 	Write_Performance (*file, perf_period_array, fill_flag);
 }
@@ -148,7 +148,7 @@ void Data_Service::Write_Performance (Vol_Spd_Period_Array &array, bool fill_fla
 	Vol_Spd_Period_Itr period_itr;
 	Performance_Data perf_rec;
 	
-	Performance_File *file = (Performance_File *) System_File_Handle (NEW_PERFORMANCE);
+	Performance_File *file = System_Performance_File (true);
 
 	Show_Message (String ("Writing %s -- Record") % file->File_Type ());
 	Set_Progress ();
