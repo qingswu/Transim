@@ -91,5 +91,17 @@ void Relocate::Execute (void)
 	}
 	Write (2, "Number of Plans with Link Problems = ") << num_problems;
 
+
+	//---- performance ----
+
+	if (System_File_Flag (NEW_PERFORMANCE) && System_File_Flag (PERFORMANCE)) {
+		Read_Performance (*(System_Performance_File ()), perf_period_array);
+	}
+
+	//---- turn_delay ----
+
+	if (System_File_Flag (NEW_TURN_DELAY) && System_File_Flag (TURN_DELAY)) {
+		Read_Turn_Delays (*(System_Turn_Delay_File ()), turn_period_array);
+	}
 	Exit_Stat (DONE);
 }

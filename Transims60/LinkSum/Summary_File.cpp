@@ -117,12 +117,12 @@ void LinkSum::Summary_File (void)
 				sum_bin [j] [QUEUE] += data.Queue () * person_fac;
 				sum_bin [j] [MAX_QUEUE] = MAX (sum_bin [j] [MAX_QUEUE], data.Max_Queue () * person_fac);
 				sum_bin [j] [FAILURE] += data.Failure () * person_fac;
+				sum_bin [j] [COUNT] += data.Count () * lane_len;
 
 				if (Ratio_Flag ()) {
 					sum_bin [j] [CONG_VMT] += data.Ratio_Dist () * person_fac;
 					sum_bin [j] [CONG_VHT] += data.Ratio_Time () * person_fac;
 					sum_bin [j] [CONG_TIME] += data.Ratios () * lane_len;
-					sum_bin [j] [COUNT] += data.Count () * lane_len;
 				}
 
 				if (compare_flag) {
@@ -148,12 +148,12 @@ void LinkSum::Summary_File (void)
 					sum_bin [j] [QUEUE+PREV] += data.Queue () * person_fac;
 					sum_bin [j] [MAX_QUEUE+PREV] = MAX (sum_bin [j] [MAX_QUEUE+PREV], data.Max_Queue () * person_fac);
 					sum_bin [j] [FAILURE+PREV] += data.Failure () * person_fac;
+					sum_bin [j] [COUNT+PREV] += data.Count () * lane_len;
 
 					if (Ratio_Flag ()) {
 						sum_bin [j] [CONG_VMT+PREV] += data.Ratio_Dist () * person_fac;
 						sum_bin [j] [CONG_VHT+PREV] += data.Ratio_Time () * person_fac;
 						sum_bin [j] [CONG_TIME+PREV] += data.Ratios () * lane_len;
-						sum_bin [j] [COUNT+PREV] += data.Count () * lane_len;
 					}
 				}
 			}
@@ -210,7 +210,6 @@ void LinkSum::Summary_File (void)
 
 		if (j == num_inc) {
 			buffer = "Time Period Total";
-			lane_len = sum_bin [j] [LANES+PREV];
 		} else {
 			buffer = String ("Time Period %12.12s") % sum_periods.Range_Format (j);
 
@@ -234,6 +233,9 @@ void LinkSum::Summary_File (void)
 			}
 			lane_len = sum_bin [j] [LANES];
 		}
+		lane_len = sum_bin [j] [COUNT];
+		if (lane_len == 0) lane_len = 1.0;
+
 		summary_file.Put_Field (text_field, buffer);
 		summary_file.Put_Field (value_field, 0.0);
 		if (compare_flag) summary_file.Put_Field (compare_field, 0.0);
@@ -294,14 +296,12 @@ void LinkSum::Summary_File (void)
 
 		summary_file.Put_Field (text_field, String ("Average Link Time Ratio"));
 		summary_file.Put_Field (value_field, sum_bin [j] [TIME_RATIO] / (lane_len * 100.0));
-		if (compare_flag) summary_file.Put_Field (compare_field, sum_bin [j] [TIME_RATIO+PREV] / (lane_len * 100.0));
+		if (compare_flag) summary_file.Put_Field (compare_field, sum_bin [j] [TIME_RATIO+PREV] / (sum_bin [j] [COUNT+PREV] * 100.0));
 		summary_file.Write ();
 
-		if (j == num_inc) {
-			value = sum_bin [j] [LINKS] * num_inc;
-		} else {
-			value = sum_bin [j] [LINKS];
-		}
+		value = sum_bin [j] [LINKS];
+		if (j == num_inc) value *= num_inc;
+
 		buffer = "Average Link Density (/ln-" + lane_mi;
 		summary_file.Put_Field (text_field, buffer);
 		summary_file.Put_Field (value_field, UnRound (sum_bin [j] [DENSITY] / value));
@@ -382,12 +382,7 @@ void LinkSum::Summary_File (void)
 			}
 			summary_file.Write ();
 
-			if (j == num_inc) {
-				value = num_inc;
-			} else {
-				value = 1.0;
-			}
-			value /= (lane_len * inc_per_hour);
+			value = (double) period / (lane_len * tod);
 
 			buffer = "Congested Duration (hours)";
 			summary_file.Put_Field (text_field, buffer);

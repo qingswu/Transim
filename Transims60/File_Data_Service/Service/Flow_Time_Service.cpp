@@ -4,6 +4,8 @@
 
 #include "Flow_Time_Service.hpp"
 
+#include <math.h>
+
 //---------------------------------------------------------
 //	Flow_Time_Service constructor
 //---------------------------------------------------------
@@ -11,7 +13,6 @@
 Flow_Time_Service::Flow_Time_Service (void)
 {
 	flow_updates = turn_updates = time_updates = false;
-	first_update = true;
 	update_rate = 0;
 	flow_factor = 1.0;
 }
@@ -331,19 +332,94 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 			}
 		}
 	}
-	if (first_update) {
-		first_update = false;
 
-		if (turn_updates) {
-			Turn_Period_Itr per_itr;
-			Turn_Itr turn_itr;
-			tod = tod1;
+	if (turn_updates && dat->System_File_Flag (SIGNAL) && dat->System_File_Flag (CONNECTION)) {
+		int index, node, lanes, cycle, green, min_green;
+		double red, sf, gc, vc, cap, max_flow, max_cap, flow, delay;
 
-			for (per_itr = dat->turn_period_array.begin (); per_itr != dat->turn_period_array.end (); per_itr++, tod += period) {
-				if (tod < first_time) continue;
+		Turn_Period_Itr per_itr;
+		Turn_Itr turn_itr;
+		Connect_Data *connect_ptr;
+		Dir_Data *dir_ptr;
+		Link_Data *link_ptr;
+		Node_Data *node_ptr;
+		Signal_Data *signal_ptr;
+		Signal_Time_Itr signal_time_itr;
+		Timing_Itr timing_itr;
+		Timing_Phase_Itr phase_itr;
+		Phasing_Itr phasing_itr;
+		Movement_Itr move_itr;
 
-				for (turn_itr = per_itr->begin (); turn_itr != per_itr->end (); turn_itr++) {
-					turn_itr->Time (0);
+		tod = tod1;
+
+		for (per_itr = dat->turn_period_array.begin (); per_itr != dat->turn_period_array.end (); per_itr++, tod += period) {
+			if (tod < first_time) continue;
+
+			for (index=0, turn_itr = per_itr->begin (); turn_itr != per_itr->end (); turn_itr++, index++) {
+				turn_itr->Time (0);
+				if (turn_itr->Turn () == 0) continue;
+
+				connect_ptr = &dat->connect_array [index];
+
+				dir_ptr = &dat->dir_array [connect_ptr->Dir_Index ()];
+
+				if (dir_ptr->Sign () == STOP_SIGN) {
+					turn_itr->Time  (200);
+				} else if (dir_ptr->Sign () == ALL_STOP) {
+					turn_itr->Time  (100);
+				} else if (dir_ptr->Sign () == YIELD_SIGN) {
+					turn_itr->Time  (50);
+				} else {
+					link_ptr = &dat->link_array [dir_ptr->Link ()];
+
+					node = (dir_ptr->Dir () == 1) ? link_ptr->Anode () : link_ptr->Bnode ();
+					node_ptr = &dat->node_array [node];
+					if (node_ptr->Control () < 0) continue;
+
+					signal_ptr = &dat->signal_array [node_ptr->Control ()];
+					green = min_green = cycle = 0;
+
+					for (signal_time_itr = signal_ptr->begin (); signal_time_itr != signal_ptr->end (); signal_time_itr++) {
+						if (signal_time_itr->Start () <= tod && signal_time_itr->End () >= tod) {
+							for (phasing_itr = signal_ptr->phasing_plan.begin (); phasing_itr != signal_ptr->phasing_plan.end (); phasing_itr++) {
+								if (phasing_itr->Phasing () == signal_time_itr->Phasing ()) break;
+							}
+							for (timing_itr = signal_ptr->timing_plan.begin (); timing_itr != signal_ptr->timing_plan.end (); timing_itr++) {
+								if (timing_itr->Timing () == signal_time_itr->Timing ()) break;
+							}
+							cycle = timing_itr->Cycle ();
+
+							for (move_itr = phasing_itr->begin (); move_itr != phasing_itr->end (); move_itr++) {
+								if (move_itr->Connection () == index) {
+									for (phase_itr = timing_itr->begin (); phase_itr != timing_itr->end (); phase_itr++) {
+										if (phase_itr->Phase () == phasing_itr->Phase ()) {
+											green += phase_itr->Max_Green ();
+											min_green += phase_itr->Min_Green ();
+										}
+									}
+								}
+							}
+						}
+					}
+					if (green == 0 || cycle == 0) continue;
+
+					flow = turn_itr->Turn () * vol_fac;
+					lanes = (connect_ptr->High_Lane () - connect_ptr->Low_Lane () + 1);
+					if (green > cycle * 9 / 10) {
+						green = (green + min_green) / 2;
+					}
+					red = cycle - green;
+					sf = 1800 * lanes;
+					gc = (double) green / cycle;
+					max_flow = sf * gc;
+					vc = flow / max_flow;
+					cap = sf * gc / vol_fac;
+					max_cap = 900 / vol_fac;
+
+					delay = (red * red * sf / ((sf - flow) * 2 * cycle)) + 
+						(max_cap * ((vc - 1) + sqrt (pow ((vc - 1), 2) + (4 * vc / cap))));
+
+					turn_itr->Time (Dtime (delay));
 				}
 			}
 		}

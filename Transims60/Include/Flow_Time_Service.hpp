@@ -50,7 +50,7 @@ protected:
 	void Update_Travel_Times (bool avg_times, bool zero_flows)  { Update_Travel_Times (1, 0, avg_times, zero_flows); }
 	void Update_Travel_Times (bool avg_times)                   { Update_Travel_Times (1, 0, avg_times); }
 
-	bool flow_updates, turn_updates, time_updates, first_update;
+	bool flow_updates, turn_updates, time_updates;
 	int update_rate;
 	double flow_factor;
 

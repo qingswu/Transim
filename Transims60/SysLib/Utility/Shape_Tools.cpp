@@ -706,7 +706,7 @@ bool Vehicle_Shape (XYZ_Point p1, XYZ_Point p2, double width, Points &points, bo
 bool Vehicle_Shape (Points &pts, double width, Points &points, bool front_flag)
 {
 	if (pts.size () == 2) {
-		return (Vehicle_Shape (pts [0], pts [1], width, points));
+		return (Vehicle_Shape (pts [0], pts [1], width, points, front_flag));
 	}
 	int i, num_pts;
 	double x0, y0, z0, length, dx1, dy1, dx2, dy2;

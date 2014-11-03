@@ -40,11 +40,23 @@ bool Relocate::Get_Trip_Data (Trip_File &file, Trip_Data &trip_rec, int partitio
 	if (map_itr != target_loc_map.end ()) {
 		location_ptr = &location_array [map_itr->second];
 		trip_rec.Origin (location_ptr->Location ());
+	} else {
+		map_itr = location_map.find (trip_rec.Origin ());
+		if (map_itr != location_map.end ()) {
+			location_ptr = &location_array [map_itr->second];
+			if (location_ptr->Zone () != 1) return (false);
+		}
 	}
 	map_itr = target_loc_map.find (trip_rec.Destination ());
 	if (map_itr != target_loc_map.end ()) {
 		location_ptr = &location_array [map_itr->second];
 		trip_rec.Destination (location_ptr->Location ());
+	} else {
+		map_itr = location_map.find (trip_rec.Destination ());
+		if (map_itr != location_map.end ()) {
+			location_ptr = &location_array [map_itr->second];
+			if (location_ptr->Zone () != 1) return (false);
+		}
 	}
 	Put_Trip_Data (*((Trip_File *) System_File_Handle (NEW_TRIP)), trip_rec);
 	return (false);

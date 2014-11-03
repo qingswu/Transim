@@ -29,6 +29,12 @@ void SubareaNet::Execute (void)
 		Write_Shapes ();
 	}
 
+	//---- write the phasing records ----
+
+	if (System_File_Flag (NEW_PHASING_PLAN)) {
+		Write_Phasing_Plans ();
+	}
+
 	//---- write the boundary records ----
 
 	Write_Boundary ();
@@ -88,7 +94,12 @@ void SubareaNet::Execute (void)
 		Write (1, "Number of Subarea Transit Schedule Records = ") << nschedule;
 		Write (1, "Number of Subarea Transit Driver Records = ") << ndriver;
 	}
-
+	if (System_File_Flag (NEW_PERFORMANCE)) {
+		Write (1, "Number of Subarea Performance Records = ") << nperf;
+	}
+	if (System_File_Flag (NEW_TURN_DELAY)) {
+		Write (1, "Number of Subarea Turn Delay Records = ") << ndelay;
+	}
 	Break_Check (7);
 	Write (2, "Number of Boundary Links = ") << nboundary;
 	Write (1, "Number of Short Links Skipped = ") << nshort;

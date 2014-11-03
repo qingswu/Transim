@@ -10,7 +10,7 @@
 
 void LinkSum::Program_Control (void)
 {
-	int i, field, ngroup;
+	int i, field, ngroup, num;
 	bool binary;
 	String key, token;
 
@@ -287,6 +287,28 @@ void LinkSum::Program_Control (void)
 
 		summary_file.Create (Project_Filename (key));
 		summary_flag = true;
+
+		//---- data summary periods ----
+
+		if (!Control_Key_Empty (NEW_DATA_SUMMARY_PERIODS)) {
+			periods_flag = data_periods.Add_Ranges (Get_Control_Text (NEW_DATA_SUMMARY_PERIODS));
+		}
+
+		//---- data summary ratios ----
+
+		if (Check_Control_Key (NEW_DATA_SUMMARY_RATIOS)) {
+			Double_List list;
+			Dbl_Itr itr;
+
+			Get_Control_List (NEW_DATA_SUMMARY_RATIOS, list);
+
+			for (i=0, itr = list.begin (); itr != list.end (); itr++, i++) {
+				if (i > 0 && *itr >= 1.0) {
+					data_ratios.push_back (Round (*itr * 100.0));
+					ratios_flag = true;
+				}
+			}
+		}
 	}
 
 	//---- group summary file ----
@@ -330,7 +352,16 @@ void LinkSum::Program_Control (void)
 
 	//---- allocate work space ----
 
-	sum_bin.assign (num_inc + 1, dbl);
+	if (periods_flag || ratios_flag) {
+		num = (periods_flag) ? (int) data_periods.size () : 1;
+		num += (ratios_flag) ? (int) data_ratios.size () : 1;
+		if (num_inc + 1 > num) {
+			num = num_inc + 1;
+		}
+	} else {
+		num = num_inc + 1;
+	}
+	sum_bin.assign (num, dbl);
 
 	for (itr = sum_bin.begin (); itr != sum_bin.end (); itr++) {
 		itr->assign (NUM_SUM_BINS, 0.0);

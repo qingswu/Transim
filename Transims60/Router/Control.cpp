@@ -22,15 +22,11 @@ void Router::Program_Control (void)
 		KissRide_Paths (false);
 	}
 
-	//---- initialize the MPI thread range ----
-
-	MPI_Setup ();
-
 	//---- create the network files ----
 
 	Router_Service::Program_Control ();
 
-	Read_Select_Keys ();
+	Read_Converge_Keys ();
 
 	if (!System_File_Flag (TRANSIT_STOP) || !System_File_Flag (TRANSIT_ROUTE) || !System_File_Flag (TRANSIT_SCHEDULE)) {
 		select_modes = true;
@@ -205,6 +201,8 @@ void Router::Program_Control (void)
 		reroute_time = Get_Control_Time (REROUTE_FROM_TIME_POINT);
 		reroute_flag = (reroute_time > 0);
 
+		Reroute_Time (reroute_time);
+
 		if (update_flag && reroute_flag) {
 			Warning ("Re-Routing and Updating Plans are Mutually Exclusive");
 			update_flag = false;
@@ -218,9 +216,6 @@ void Router::Program_Control (void)
 	}
 
 	//---- maximum number of iterations ----
-
-	Print (1);
-	max_iteration = Get_Control_Integer (MAXIMUM_NUMBER_OF_ITERATIONS);
 
 	if (max_iteration > 1) {
 		
@@ -237,102 +232,18 @@ void Router::Program_Control (void)
 			Warning ("Application Method Upgraded to Dynamic Traffic Assignment");
 			method = DTA_FLOWS;
 		}
-		iteration_flag = true;
-
-		//---- link gap criteria ----
-
-		link_gap = Get_Control_Double (LINK_CONVERGENCE_CRITERIA);
-		
-		//---- trip gap criteria ----
-
-		trip_gap = Get_Control_Double (TRIP_CONVERGENCE_CRITERIA);
-		
-		//---- transit gap criteria ----
-
-		transit_gap = Get_Control_Double (TRANSIT_CAPACITY_CRITERIA);
 
 		//---- method specific keys ----
 
-		if (method == DTA_FLOWS) {
+		if (method == DTA_FLOWS && min_vht_flag) {
+			if ((Check_Control_Key (INITIAL_WEIGHTING_FACTOR) && initial_factor > 0) ||
+				(Check_Control_Key (ITERATION_WEIGHTING_INCREMENT) && factor_increment > 0) ||
+				(Check_Control_Key (MAXIMUM_WEIGHTING_FACTOR) && maximum_factor > 0)) {
 
-			//---- initial weighting factor ----
-
-			factor = Get_Control_Double (INITIAL_WEIGHTING_FACTOR);
-		
-			//---- iteration weighting increment ----
-
-			increment = Get_Control_Double (ITERATION_WEIGHTING_INCREMENT);
-
-			//---- maximum weighting factor ----
-
-			max_factor = Get_Control_Double (MAXIMUM_WEIGHTING_FACTOR);
-
-			//---- minimize vehicle hours ----
-		
-			min_vht_flag = Get_Control_Flag (MINIMIZE_VEHICLE_HOURS);
-
-			if (min_vht_flag) {
-				if ((Check_Control_Key (INITIAL_WEIGHTING_FACTOR) && factor > 0) ||
-					(Check_Control_Key (ITERATION_WEIGHTING_INCREMENT) && increment > 0) ||
-					(Check_Control_Key (MAXIMUM_WEIGHTING_FACTOR) && max_factor > 0)) {
-
-					Warning ("Minimizing Vehicle Hours and Iteration Weighting Factors are Incompatible");
-				}
-				factor = 1.0;
+				Warning ("Minimizing Vehicle Hours and Iteration Weighting Factors are Incompatible");
 			}
-
-		} else if (method == DUE_PLANS) {
-
-			//---- maximum number fo reskim iterations ----
-
-			max_speed_updates = Get_Control_Integer (MAXIMUM_RESKIM_ITERATIONS);
-
-			//---- reskim converence criteria ----
-
-			min_speed_diff = Get_Control_Double (RESKIM_CONVERGENCE_CRITERIA);
+			initial_factor = 1.0;
 		}
-
-		//---- save after iterations ----
-
-		if (Check_Control_Key (SAVE_AFTER_ITERATIONS)) {
-			key = Get_Control_Text (SAVE_AFTER_ITERATIONS);
-
-			if (!key.empty () && !key.Equals ("NONE")) {
-				if (key.Equals ("ALL")) {
-					key ("%d..%d") % 1 % max_iteration;
-				}
-				save_iter_flag = true;
-				if (!save_iter_range.Add_Ranges (key)) {
-					Error ("Adding Iteration Ranges");
-				}
-			}
-		}
-
-		//---- new link convergence file ----
-
-		key = Get_Control_String (NEW_LINK_CONVERGENCE_FILE);
-
-		if (!key.empty ()) {
-			Print (1);
-			link_gap_file.File_Type ("New Link Convergence File");
-			link_gap_file.Create (Project_Filename (key));
-			link_gap_flag = true;
-		}
-		save_link_gap = (link_gap_flag || link_gap > 0.0 || Report_Flag (LINK_GAP));
-
-		//---- new trip convergence file ----
-
-		key = Get_Control_String (NEW_TRIP_CONVERGENCE_FILE);
-
-		if (!key.empty ()) {
-			Print (1);
-			trip_gap_file.File_Type ("New Trip Convergence File");
-			trip_gap_file.Create (Project_Filename (key));
-			trip_gap_flag = true;
-		}
-		save_trip_gap = (trip_gap_flag || trip_gap > 0.0 || Report_Flag (TRIP_GAP));
-
-		trip_gap_map_flag = save_trip_gap;
 
 	} else {
 
@@ -368,6 +279,14 @@ void Router::Program_Control (void)
 	//---- list reports ----
 
 	List_Reports ();
+
+	Trip_Gap_Report_Flag (Report_Flag (TRIP_GAP));
+	Link_Gap_Report_Flag (Report_Flag (LINK_GAP));
+
+	save_link_gap = (save_link_gap || Report_Flag (LINK_GAP));
+	save_trip_gap = (save_trip_gap || Report_Flag (TRIP_GAP));
+
+	trip_gap_map_flag = save_trip_gap;
 
 	//---- set the output link delay format ----
 

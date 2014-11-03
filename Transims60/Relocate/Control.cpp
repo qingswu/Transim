@@ -141,4 +141,26 @@ void Relocate::Program_Control (void)
 	//---- delete problem plans ----
 
 	delete_flag = Get_Control_Flag (DELETE_PROBLEM_PLANS);
+
+	//---- location problem file ----
+
+	key = Get_Control_String (NEW_LOCATION_PROBLEM_FILE);
+
+	if (!key.empty ()) {
+		loc_problem_file.File_Type ("New Location Problem File");
+
+		loc_problem_file.Create (Project_Filename (key));
+		loc_problem_flag = true;
+	}
+
+	//---- parking problem file ----
+
+	key = Get_Control_String (NEW_PARKING_PROBLEM_FILE);
+
+	if (!key.empty ()) {
+		park_problem_file.File_Type ("New Parking Problem File");
+
+		park_problem_file.Create (Project_Filename (key));
+		park_problem_flag = true;
+	}
 } 

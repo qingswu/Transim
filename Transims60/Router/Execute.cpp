@@ -19,33 +19,25 @@ void Router::Execute (void)
 	//---- build performance arrays ----
 
 	if (Flow_Updates () || Time_Updates ()) {
-		if (Master ()) {
-			Build_Perf_Arrays (old_perf_period_array);
-			if (Turn_Updates ()) {
-				Build_Turn_Arrays (old_turn_period_array);
-			}
+
+		Build_Perf_Arrays (old_perf_period_array);
+		if (Turn_Updates ()) {
+			Build_Turn_Arrays (old_turn_period_array);
 		}
+
 		if (!System_File_Flag (PERFORMANCE)) {
 			Build_Perf_Arrays ();
 		} else {
-			if (Master ()) {
-				if (reroute_flag && Time_Updates ()) {
-					Update_Travel_Times (1, reroute_time);
-					num_time_updates++;
-				}
-				old_perf_period_array.Copy_Flow_Data (perf_period_array, true, reroute_time);
-			} else {	//---- MPI slave ----
-				perf_period_array.Zero_Flows (reroute_time);
+			if (reroute_flag && Time_Updates ()) {
+				Update_Travel_Times (1, reroute_time);
+				num_time_updates++;
 			}
+			old_perf_period_array.Copy_Flow_Data (perf_period_array, true, reroute_time);
 		}
 		if (!System_File_Flag (TURN_DELAY)) {
 			Build_Turn_Arrays ();
 		} else if (Turn_Updates ()) {
-			if (Master ()) {
-				old_turn_period_array.Copy_Turn_Data (turn_period_array, true, reroute_time);
-			} else {	//---- MPI slave ----
-				turn_period_array.Zero_Turns (reroute_time);
-			}
+			old_turn_period_array.Copy_Turn_Data (turn_period_array, true, reroute_time);
 		}
 	}
 
@@ -56,7 +48,8 @@ void Router::Execute (void)
 	//---- allocate memory ----
 
 	if (Memory_Flag ()) {
-		Map_Trip_Plan ();
+		Input_Trips ();
+		Initialize_Trip_Gap ();
 	}
 	Print (1);
 
@@ -171,24 +164,9 @@ void Router::Execute (void)
 		if (problem_file->Num_Files () == 0) problem_file->Num_Files (num_file_sets);
 	}
 
-	//---- collect data from MPI slaves ----
-
-	MPI_Processing ();
-
 	//---- print reports ----
 
-	for (i=First_Report (); i != 0; i=Next_Report ()) {
-		switch (i) {
-			case LINK_GAP:			//---- Link Gap Report ----
-				if (iteration_flag) Link_Gap_Report ();
-				break;
-			case TRIP_GAP:			//---- Trip Gap Report ----
-				if (iteration_flag) Trip_Gap_Report ();
-				break;
-			default:
-				break;
-		}
-	}
+	Print_Reports ();
 
 	//---- print summary statistics ----
 	
@@ -223,19 +201,24 @@ void Router::Execute (void)
 }
 
 //---------------------------------------------------------
+//	Print_Reports
+//---------------------------------------------------------
+
+void Router::Print_Reports (void)
+{
+	Router_Service::Print_Reports ();
+}
+
+//---------------------------------------------------------
 //	Page_Header
 //---------------------------------------------------------
 
 void Router::Page_Header (void)
 {
 	switch (Header_Number ()) {
-		case LINK_GAP:			//---- Link Gap Report ----
-			Link_Gap_Header ();
-			break;
-		case TRIP_GAP:			//---- Trip Gap Report ----
-			Trip_Gap_Header ();
-			break;
+		case 0:
 		default:
+			Router_Service::Page_Header ();
 			break;
 	}
 }

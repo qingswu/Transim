@@ -11,7 +11,7 @@
 LineSum::LineSum (void) : Execution_Service ()
 {
 	Program ("LineSum");
-	Version (3);
+	Version (4);
 	Title ("Transit Ridership Summary");
 
 	Control_Key keys [] = { //--- code, key, level, status, type, default, range, help ----
@@ -60,6 +60,8 @@ LineSum::LineSum (void) : Execution_Service ()
 		{ NEW_TOTAL_REPORT_FORMAT, "NEW_TOTAL_REPORT_FORMAT", LEVEL1, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, FORMAT_HELP },
 		{ TOTAL_REPORT_PEAK_HOURS, "TOTAL_REPORT_PEAK_HOURS", LEVEL1, OPT_KEY, TIME_KEY, "6.0 hours", "1.0..10.0 hours", NO_HELP }, 
 		{ TOTAL_REPORT_OFFPEAK_HOURS, "TOTAL_REPORT_OFFPEAK_HOURS", LEVEL1, OPT_KEY, TIME_KEY, "10.0 hours", "1.0..20.0 hours", NO_HELP }, 
+		{ NODE_XY_FILE, "NODE_XY_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
+		{ NODE_XY_FORMAT, "NODE_XY_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, FORMAT_HELP },
 
 		{ NEW_LINK_RIDER_FILE, "NEW_LINK_RIDER_FILE", LEVEL1, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
 		{ NEW_LINK_RIDER_FORMAT, "NEW_LINK_RIDER_FORMAT", LEVEL1, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, FORMAT_HELP },
@@ -101,7 +103,7 @@ LineSum::LineSum (void) : Execution_Service ()
 
 	projection.Add_Keys ();
 
-	on_off_flag = access_flag = station_flag = shape_flag = service_flag = false;
+	on_off_flag = access_flag = station_flag = shape_flag = xy_flag = service_flag = false;
 	anode_field = bnode_field = line_fld = peak_fld = offpeak_fld = -1;
 	report_code = 0;
 

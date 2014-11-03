@@ -71,15 +71,13 @@ void Simulator::Read_Trips (void)
 			//} else {
 				num_selected++;
 			//}
-
+			trip_rec.Internal_IDs ();
 			trip_rec.Get_Index (trip_index);
 			file->Add_Trip (trip_index.Household (), trip_index.Person (), trip_index.Tour ());
 
 		    map_itr = plan_trip_map.find (trip_index);
 
 		    if (map_itr == plan_trip_map.end ()) {
-				trip_rec.Internal_IDs ();
-
 			    plan_rec = trip_rec;
 			    plan_rec.Index ((int) plan_array.size ());
 

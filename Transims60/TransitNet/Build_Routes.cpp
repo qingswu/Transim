@@ -151,6 +151,9 @@ void TransitNet::Build_Routes (void)
 
 		for (node_itr = route_itr->nodes.begin (); node_itr != route_itr->nodes.end (); node_itr++) {
 			node = node_itr->Node ();
+			if (node == node0) {
+				Warning (String ("Route %d includes Node %d Twice") % route % n0);
+			}
 			n = node_array [node].Node ();
 
 			stype = node_itr->Type ();

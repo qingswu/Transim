@@ -77,6 +77,12 @@
     <ClCompile Include="Get_Parking_Data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Get_Performance_Data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Get_Turn_Delay_Data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\SubareaNet.hpp">

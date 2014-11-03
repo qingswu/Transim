@@ -11,7 +11,7 @@
 Relocate::Relocate (void) : Data_Service (), Select_Service () 
 {
 	Program ("Relocate");
-	Version (3);
+	Version (7);
 	Title ("Move Trips and Plans to a New Network");
 	
 	System_File_Type required_files [] = {
@@ -19,7 +19,8 @@ Relocate::Relocate (void) : Data_Service (), Select_Service ()
 	};
 	System_File_Type optional_files [] = {
 		SHAPE, PARKING, ACCESS_LINK, TRANSIT_STOP, TRANSIT_ROUTE, 
-		PLAN, TRIP, NEW_TRIP, NEW_PLAN, NEW_SELECTION, END_FILE
+		PLAN, TRIP, PERFORMANCE, TURN_DELAY, 
+		NEW_TRIP, NEW_PLAN, NEW_SELECTION, NEW_PERFORMANCE, NEW_TURN_DELAY, END_FILE
 	};
 	int select_service_keys [] = {
 		SELECT_HOUSEHOLDS, SELECT_MODES, SELECT_PURPOSES, SELECT_START_TIMES, SELECT_END_TIMES, 
@@ -35,8 +36,10 @@ Relocate::Relocate (void) : Data_Service (), Select_Service ()
 		{ TARGET_ACCESS_FILE, "TARGET_ACCESS_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		{ TARGET_STOP_FILE, "TARGET_STOP_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		{ TARGET_ROUTE_FILE, "TARGET_ROUTE_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
-		{ MAXIMUM_XY_DIFFERENCE, "MAXIMUM_XY_DIFFERENCE", LEVEL0, OPT_KEY, FLOAT_KEY, "100 feet", "0..1000 feet", NO_HELP },
+		{ MAXIMUM_XY_DIFFERENCE, "MAXIMUM_XY_DIFFERENCE", LEVEL0, OPT_KEY, FLOAT_KEY, "100 feet", "0..5000 feet", NO_HELP },
 		{ DELETE_PROBLEM_PLANS, "DELETE_PROBLEM_PLANS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
+		{ NEW_LOCATION_PROBLEM_FILE, "NEW_LOCATION_PROBLEM_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
+		{ NEW_PARKING_PROBLEM_FILE, "NEW_PARKING_PROBLEM_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
 		END_CONTROL
 	};
 	Required_System_Files (required_files);
@@ -50,8 +53,8 @@ Relocate::Relocate (void) : Data_Service (), Select_Service ()
 	Enable_Threads (true);
 #endif
 
-	num_problems = 0;
-	select_flag = new_select_flag = delete_flag = false;
+	num_problems = num_perf = num_turn = 0;
+	select_flag = new_select_flag = delete_flag = loc_problem_flag = park_problem_flag = false;
 	shape_flag = parking_flag = access_flag = stop_flag = line_flag = target_flag = false;
 	
 	System_Read_False (TRIP);
@@ -59,6 +62,12 @@ Relocate::Relocate (void) : Data_Service (), Select_Service ()
 
 	System_Read_False (PLAN);
 	System_Data_Reserve (PLAN, 0);
+
+	System_Read_False (PERFORMANCE);
+	System_Data_Reserve (PERFORMANCE, 0);
+
+	System_Read_False (TURN_DELAY);
+	System_Data_Reserve (TURN_DELAY, 0);
 }
 
 //---------------------------------------------------------

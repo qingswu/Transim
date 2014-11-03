@@ -199,13 +199,5 @@ bool Path_Builder::Plan_Reskim (Plan_Ptr plan_ptr)
 
 	plan_ptr->Drive (drive);
 	plan_ptr->Impedance (cum_imp);
-
-	if (exe->save_trip_gap) {
-		Gap_Data *gap_ptr;
-
-		gap_ptr = &exe->gap_data_array [plan_ptr->Index ()];
-		gap_ptr->current = cum_imp;
-		gap_ptr->time = time;
-	}
 	return (true);
 }

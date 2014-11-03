@@ -55,6 +55,7 @@
 #include "Vehicle_Index.hpp"
 
 #include "Link_Data_File.hpp"
+#include "Link_Dir_File.hpp"
 #include "Volume_Array.hpp"
 
 //---------------------------------------------------------
@@ -426,6 +427,7 @@ protected:
 
 	virtual void Read_Link_Data (Link_Data_File &file, Volume_Array &data);
 	virtual void Read_Performance (Performance_File &file, Volume_Array &data);
+	virtual void Read_Link_Direction (Link_Direction_File &file, Volume_Array &data, bool base_flag = true);
 
 private:
 

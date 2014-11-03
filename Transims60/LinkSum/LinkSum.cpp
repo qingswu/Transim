@@ -13,7 +13,7 @@ int	LinkSum::percent_break [NUM_PERCENTILES] = {50, 65, 70, 75, 80, 85, 90, 95, 
 LinkSum::LinkSum (void) : Data_Service (), Select_Service ()
 {
 	Program ("LinkSum");
-	Version (16);
+	Version (17);
 	Title ("Summarize Link Performance Data");
 
 	System_File_Type required_files [] = {
@@ -56,6 +56,8 @@ LinkSum::LinkSum (void) : Data_Service (), Select_Service ()
 		{ NEW_LINK_DATA_FIELD, "NEW_LINK_DATA_FIELD", LEVEL1, OPT_KEY, TEXT_KEY, "", PERF_FIELD_RANGE, NO_HELP },
 		{ NEW_DATA_SUMMARY_FILE, "NEW_DATA_SUMMARY_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
 		{ NEW_DATA_SUMMARY_FORMAT, "NEW_DATA_SUMMARY_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, NO_HELP },
+		{ NEW_DATA_SUMMARY_PERIODS, "NEW_DATA_SUMMARY_PERIODS", LEVEL0, OPT_KEY, TEXT_KEY, " ", TIME_RANGE, NO_HELP },
+		{ NEW_DATA_SUMMARY_RATIOS, "NEW_DATA_SUMMARY_RATIOS", LEVEL0, OPT_KEY, FLOAT_KEY, "0.0", "0.0, 1.0..5.0", NO_HELP },
 		{ NEW_GROUP_SUMMARY_FILE, "NEW_GROUP_SUMMARY_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
 		{ NEW_GROUP_SUMMARY_FORMAT, "NEW_GROUP_SUMMARY_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, NO_HELP },
 		END_CONTROL
@@ -96,7 +98,7 @@ LinkSum::LinkSum (void) : Data_Service (), Select_Service ()
 	Report_List (reports);
 
 	compare_flag = group_select = summary_flag = group_sum_flag = turn_flag = turn_compare_flag = false;
-	select_flag = activity_flag = zone_flag = group_flag = person_flag = false;
+	select_flag = activity_flag = zone_flag = group_flag = person_flag = periods_flag = ratios_flag = false;
 
 	nerror = 0;
 	minimum_volume = 2.0;

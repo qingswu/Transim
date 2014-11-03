@@ -316,6 +316,7 @@
     <ClCompile Include="On_Off_Report.cpp" />
     <ClCompile Include="Read_Service.cpp" />
     <ClCompile Include="Read_Shapes.cpp" />
+    <ClCompile Include="Read_XY.cpp" />
     <ClCompile Include="Stop_Names.cpp" />
     <ClCompile Include="Stop_Report.cpp" />
     <ClCompile Include="Total_Report.cpp" />

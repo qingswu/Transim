@@ -28,6 +28,13 @@ bool Router::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 		if (new_ptr == 0) continue;
 
 		if (new_ptr->Method () == RESKIM_PLAN) {
+			if (save_trip_gap) {
+				Gap_Data *gap_ptr;
+
+				gap_ptr = &gap_data_array [new_ptr->Index ()];
+				gap_ptr->current = new_ptr->Impedance ();
+				gap_ptr->time = (new_ptr->Constraint () == END_TIME) ? new_ptr->End (): new_ptr->Start ();
+			}
 			num_reskim++;
 			continue;
 		}
@@ -216,7 +223,8 @@ select_plans:
 					}
 				}
 
-				if (save_trip_gap || trip_gap_map_flag) {
+				//if (save_trip_gap || trip_gap_map_flag) {
+				if (Trip_Gap_Map_Parts ()) {
 					Gap_Data gap_data;
 					Trip_Gap_Map_Stat map_stat;
 					Trip_Gap_Map *trip_gap_map_ptr;
@@ -229,11 +237,8 @@ select_plans:
 					gap_data.current = (int) new_ptr->Impedance ();
 					gap_data.previous = 0;
 
-					if (part_processor.Thread_Flag ()) {
 						trip_gap_map_ptr = trip_gap_map_array [new_ptr->Partition ()];
-					} else {
-						trip_gap_map_ptr = &trip_gap_map;
-					}
+
 					map_stat = trip_gap_map_ptr->insert (Trip_Gap_Map_Data (new_ptr->Get_Trip_Index (), gap_data));
 
 					if (!map_stat.second) {

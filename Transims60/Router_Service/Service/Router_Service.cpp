@@ -4,11 +4,20 @@
 
 #include "Router_Service.hpp"
 
+const char * Router_Service::reports [] = {
+	"TRAVELER_TYPE_SCRIPT",
+	"TRAVELER_TYPE_STACK",
+	"LINK_GAP_REPORT",
+	"TRIP_GAP_REPORT",
+	"ITERATION_PROBLEMS", 
+	""
+};
+
 //---------------------------------------------------------
 //	Router_Service constructor
 //---------------------------------------------------------
 
-Router_Service::Router_Service (void) : Data_Service (), Flow_Time_Service ()
+Router_Service::Router_Service (void) : Data_Service (), Flow_Time_Service (), Converge_Service ()
 {
 	Service_Level (ROUTER_SERVICE);
 	
@@ -26,7 +35,7 @@ Router_Service::Router_Service (void) : Data_Service (), Flow_Time_Service ()
 
 	walk_path_flag = bike_path_flag = drive_path_flag = access_link_flag = true;
 	transit_path_flag = parkride_path_flag = kissride_path_flag = skim_check_flag = true;
-	script_flag = hhfile_flag = select_flag = update_flag = thread_flag = save_trip_gap = false;
+	script_flag = hhfile_flag = select_flag = update_flag = thread_flag = false;
 
 	Reset_Skim_Gap ();
 	System_Data_Reserve (HOUSEHOLD, 0);
@@ -130,11 +139,30 @@ void Router_Service::Router_Service_Keys (int *keys)
 			}
 		}
 	}
+	int file_service_keys [] = {
+		NOTES_AND_NAME_FIELDS, SAVE_LANE_USE_FLOWS, 0
+	};
+	File_Service_Keys (file_service_keys);
+
+	int data_service_keys [] = {
+		DAILY_WRAP_FLAG, SUMMARY_TIME_RANGES, SUMMARY_TIME_INCREMENT, TRIP_SORT_TYPE, PLAN_SORT_TYPE, 0
+	};
+	Data_Service_Keys (data_service_keys);
+
 	int flow_time_service_keys [] = {
 		UPDATE_FLOW_RATES,  UPDATE_TURNING_MOVEMENTS, CLEAR_INPUT_FLOW_RATES, 
 		UPDATE_TRAVEL_TIMES, TIME_UPDATE_RATE, LINK_FLOW_FACTOR, EQUATION_PARAMETERS, 0
 	};
 	Flow_Time_Service_Keys (flow_time_service_keys);
+
+	int converge_service_keys [] = {
+		MAXIMUM_NUMBER_OF_ITERATIONS, LINK_CONVERGENCE_CRITERIA, TRIP_CONVERGENCE_CRITERIA, 
+		TRANSIT_CAPACITY_CRITERIA, INITIAL_WEIGHTING_FACTOR, ITERATION_WEIGHTING_INCREMENT, 
+		MAXIMUM_WEIGHTING_FACTOR, MINIMIZE_VEHICLE_HOURS, MAXIMUM_RESKIM_ITERATIONS, 
+		RESKIM_CONVERGENCE_CRITERIA, SAVE_AFTER_ITERATIONS, NEW_LINK_CONVERGENCE_FILE, 
+		NEW_TRIP_CONVERGENCE_FILE, 0
+	};
+	Converge_Service_Keys (converge_service_keys);
 }
 
 //---------------------------------------------------------

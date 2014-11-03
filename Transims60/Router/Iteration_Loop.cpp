@@ -10,7 +10,7 @@
 
 void Router::Iteration_Loop (void)
 {
-	int i, p, num, num_car, max_hhold, veh;
+	int p, num, num_car, max_hhold, veh;
 	int last_hhold, skip_hhold, skip_person;
 	
 	Dtime second;
@@ -42,25 +42,6 @@ void Router::Iteration_Loop (void)
 
 	if (max_iteration == 0) max_iteration = 1;
 
-	if (Master ()) {
-		if (link_gap_flag) {
-			link_gap_file.File () << "ITERATION";
-			num = sum_periods.Num_Periods ();
-			for (i=0; i < num; i++) {
-				link_gap_file.File () << "\t" << sum_periods.Range_Label (i);
-			}
-			link_gap_file.File () << "\tTOTAL" << endl;
-		}
-		if (trip_gap_flag) {
-			trip_gap_file.File () << "ITERATION";
-			num = sum_periods.Num_Periods ();
-			for (i=0; i < num; i++) {
-				trip_gap_file.File () << "\t" << sum_periods.Range_Label (i);
-			}
-			trip_gap_file.File () << "\tTOTAL" << endl;
-		}
-	}
-
 	//---- process each iteration ----
 
 	for (iteration=1; iteration <= max_iteration; iteration++) {
@@ -72,23 +53,17 @@ void Router::Iteration_Loop (void)
 		}
 		save_flag = (save_iter_flag && save_iter_range.In_Range (iteration));
 
-		if (Master ()) {
-			if (max_iteration > 1) {
-				Print (1);
-				Write (1, "Iteration Number ") << iteration << ":  Weighting Factor = " << factor;
-				if (!thread_flag) Show_Message (1);
-			}
-			if (trip_set_flag) Show_Message (1);
+		if (max_iteration > 1) {
+			Print (1);
+			Write (1, "Iteration Number ") << iteration << ":  Weighting Factor = " << initial_factor;
+			if (!thread_flag) Show_Message (1);
+		}
+		if (trip_set_flag) Show_Message (1);
 
-			if (link_gap_flag) {
-				link_gap_file.File () << iteration;
-			}
-			if (trip_gap_flag) {
-				trip_gap_file.File () << iteration;
-			}
-			if (rider_flag || (System_File_Flag (RIDERSHIP) && param.cap_penalty_flag)) {
-				line_array.Clear_Ridership ();
-			}
+		Iteration_Setup ();
+
+		if (rider_flag || (System_File_Flag (RIDERSHIP) && param.cap_penalty_flag)) {
+			line_array.Clear_Ridership ();
 		}
 		if (total_records > 0 && max_percent_flag) {
 			percent_selected = ((double) num_selected / total_records);
@@ -126,30 +101,27 @@ void Router::Iteration_Loop (void)
 		path_time = (clock () - path_time);
 
 		link_last_flag = trip_last_flag = transit_last_flag = true;
-		new_factor = factor;
+		new_factor = initial_factor;
 
 		//---- calculate the link gap ----
 		
 		update_time = clock ();
 
 		if (Time_Updates ()) {
-			if (MPI_Size () > 1) {
-				gap = MPI_Link_Delay (last_flag);
-			} else if (min_vht_flag) {
+			if (min_vht_flag) {
 				gap = Minimize_VHT (new_factor, (!last_flag && !save_flag));
 				Print (0, " to ") << new_factor;
 			} else {
 				gap = Merge_Delay (new_factor, (!last_flag && !save_flag));
 			}
-			if (Master ()) {
-				if (max_iteration > 1) Write (1, "Link Convergence Gap  = ") << gap;
-				num_time_updates++;
-			}
+			if (max_iteration > 1) Write (1, "Link Convergence Gap  = ") << gap;
+			num_time_updates++;
+
 			if (link_gap > 0.0 && gap > link_gap) link_last_flag = false;
 
 			if (!min_vht_flag) {
-				new_factor += increment;
-				if (new_factor > max_factor) new_factor = max_factor;
+				new_factor += factor_increment;
+				if (new_factor > maximum_factor) new_factor = maximum_factor;
 			}
 		}
 		update_time = (clock () - update_time);
@@ -159,9 +131,8 @@ void Router::Iteration_Loop (void)
 		if (trip_gap_map_flag) {
 			gap = Get_Trip_Gap ();
 
-			if (Master ()) {
-				Write (1, "Trip Convergence Gap  = ") << gap;
-			}
+			Write (1, "Trip Convergence Gap  = ") << gap;
+
 			if (trip_gap > 0.0 && gap > trip_gap) trip_last_flag = false;
 		}
 
@@ -171,11 +142,10 @@ void Router::Iteration_Loop (void)
 
 			part_processor.Save_Riders ();
 
-			gap = line_array.Ridership_Gap (param.cap_penalty_flag, factor);
+			gap = line_array.Ridership_Gap (param.cap_penalty_flag, initial_factor);
 
-			if (Master ()) {
-				Write (1, "Transit Capacity Gap  = ") << gap;
-			}
+			Write (1, "Transit Capacity Gap  = ") << gap;
+
 			if (transit_gap > 0.0 && gap > transit_gap) transit_last_flag = false;
 		}
 
@@ -200,34 +170,12 @@ void Router::Iteration_Loop (void)
 		if (!last_flag && link_last_flag && trip_last_flag && transit_last_flag) {
 			max_iteration = iteration + 1;
 		}
-		factor = new_factor;
+		initial_factor = new_factor;
 
 		//---- print the iteration problems ----
 
 		if (!last_flag && max_iteration > 1 && Report_Flag (ITERATION_PROBLEMS)) {
-#ifdef MPI_EXE
-			int lvalue [MAX_PROBLEM + 1];
-
-			if (Master ()) {
-				for (int j=1; j < MPI_Size (); j++) {
-					Get_MPI_Array (lvalue, MAX_PROBLEM + 1, j);
-
-					Add_Problems (lvalue);
-
-					total_records += lvalue [MAX_PROBLEM];
-				}
-				Report_Problems (total_records, false);
-			} else {
-				memcpy (lvalue, Get_Problems (), MAX_PROBLEM * sizeof (int));
-				lvalue [MAX_PROBLEM] = total_records;
-
-				Send_MPI_Array (lvalue, MAX_PROBLEM + 1);
-			}
-#else
-			if (Master ()) {
-				Report_Problems (total_records, false);
-			}
-#endif
+			Report_Problems (total_records, false);
 		}
 
 		//---- reset the file counters ----
@@ -249,6 +197,15 @@ void Router::Iteration_Loop (void)
 					if (Turn_Flows ()) {
 						turn_period_array.Zero_Turns (reroute_time);
 					}
+				}
+				if (System_File_Flag (NEW_TURN_DELAY) && System_File_Flag (SIGNAL)) {
+					Turn_Delay_File *file = System_Turn_Delay_File (true);
+					if (file->Part_Flag ()) {
+						file->Open (iteration);
+					} else {
+						file->Create ();
+					}
+					Write_Turn_Delays (full_flag);
 				}
 				if (rider_flag) {
 					System_Ridership_File (true)->Create ();
