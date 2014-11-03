@@ -4,20 +4,28 @@
 
 #include "Relocate.hpp"
 
+#include <math.h>
+
 //---------------------------------------------------------
 //	Map_Locations
 //---------------------------------------------------------
 
 void Relocate::Map_Locations (void)
 {
-	int index, max_location, best, best_diff, diff, num_map, no_map;
+	int index, max_location, best, best_diff, diff, num_map, no_map, best_link, link_diff, no_diff;
+	double dx, dy;
 	Location_Itr loc_itr;
 	Location_Data *loc_ptr;
+
+	if (loc_problem_flag) {
+		loc_problem_file.File () << "LOCATION\tLINK\tDIR\tOFFSET\tX\tY";
+	}
 
 	max_location = (int) location_array.size ();
 	if (max_location == num_location) return;
 
 	num_map = no_map = 0;
+	no_diff = Round (50);
 			
 	Show_Message ("Mapping Location Records");
 	Set_Progress ();
@@ -27,31 +35,48 @@ void Relocate::Map_Locations (void)
 		if (loc_itr->Zone () == 2) break;
 		if (loc_itr->Zone () > 0) continue;
 
-		best = 0;
-		best_diff = MAX_INTEGER;
+		best = best_link = 0;
+		best_diff = link_diff = MAX_INTEGER;
 
 		for (index = num_location; index < max_location; index++) {
 			loc_ptr = &location_array [index];
 
-			if (loc_itr->Link () != loc_ptr->Link ()) continue;
-			if (loc_itr->Dir () != loc_ptr->Dir ()) continue;
+			dx = loc_itr->X () - loc_ptr->X ();
+			dy = loc_itr->Y () - loc_ptr->Y ();
 
-			diff = abs (loc_itr->Offset () - loc_ptr->Offset ());
-			if (diff < best_diff) {
-				best = index;
-				best_diff = diff;
-			}
-			if (abs (loc_itr->X () - loc_ptr->X ()) <= max_xy_diff &&
-				abs (loc_itr->Y () - loc_ptr->Y ()) <= max_xy_diff) {
-				best = index;
-				break;
+			dx = sqrt (dx * dx + dy * dy);
+			if (dx > MAX_INTEGER) continue;
+			diff = (int) dx;
+
+			if (diff > max_xy_diff) continue;
+
+			if (loc_itr->Link () == loc_ptr->Link () && loc_itr->Dir () == loc_ptr->Dir ()) {
+				if (diff < link_diff) {
+					best_link = index;
+					link_diff = diff;
+					if (diff < no_diff) break;
+				}
+			} else {
+				if (diff < best_diff) {
+					best = index;
+					best_diff = diff;
+				}
 			}
 		}
-		if (best > 0) {
+		if (best_link > 0) {
+			target_loc_map.insert (Int_Map_Data (loc_itr->Location (), best_link));
+			loc_itr->Zone (1);
+			num_map++;
+		} else if (best > 0) {
 			target_loc_map.insert (Int_Map_Data (loc_itr->Location (), best));
 			loc_itr->Zone (3);
 			num_map++;
 		} else {
+			if (loc_problem_flag) {
+				loc_problem_file.File () << "\n" << loc_itr->Location () << "\t" << 
+					(link_array [loc_itr->Link ()].Link ()) << "\t" << loc_itr->Dir () << 
+					"\t" << UnRound (loc_itr->X ()) << "\t" << UnRound (loc_itr->Y ());
+			}
 			no_map++;
 		}
 	}

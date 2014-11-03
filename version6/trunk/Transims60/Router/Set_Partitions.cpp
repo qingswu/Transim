@@ -98,4 +98,8 @@ void Router::Set_Partitions (void)
 		problem_set.Initialize (problem_file, num_file_sets);
 	}
 	thread_flag = part_processor.Initialize (this);
+
+	if (trip_gap_map_flag && !Memory_Flag ()) {
+		Trip_Gap_Map_Parts (Num_Partitions ());
+	}
 }

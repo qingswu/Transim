@@ -11,18 +11,12 @@
 Simulator::Simulator (void) : Simulator_Service ()
 {
 	Program ("Simulator");
-	Version (16);
+	Version (17);
 	Title ("Simulate Travel Plans");
 
 	Control_Key msim_keys [] = { //--- code, key, level, status, type, help ----
 		END_CONTROL
 	};
-	const char *reports [] = {
-		"HOUSEHOLD_TYPE_SCRIPT",
-		"HOUSEHOLD_TYPE_STACK",
-		""
-	};
-
 	Simulator_Service_Keys ();
 	Key_List (msim_keys);
 	Report_List (reports);

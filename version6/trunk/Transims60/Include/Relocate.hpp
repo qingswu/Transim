@@ -32,23 +32,27 @@ public:
 	virtual bool Get_Parking_Data (Parking_File &file, Parking_Data &parking_rec);
 	virtual bool Get_Access_Data (Access_File &file, Access_Data &access_rec);
 	virtual bool Get_Trip_Data (Trip_File &file, Trip_Data &data, int partition = 0);
+	virtual bool Get_Performance_Data (Performance_File &file, Performance_Data &data);
+	virtual bool Get_Turn_Delay_Data (Turn_Delay_File &file, Turn_Delay_Data &data);
 
 protected:
 	enum Relocate_Keys { 
 		TARGET_DIRECTORY = 1, TARGET_NODE_FILE, TARGET_SHAPE_FILE, TARGET_LINK_FILE, TARGET_LOCATION_FILE, 
 		TARGET_PARKING_FILE, TARGET_ACCESS_FILE, TARGET_STOP_FILE, TARGET_ROUTE_FILE,
-		MAXIMUM_XY_DIFFERENCE, DELETE_PROBLEM_PLANS
+		MAXIMUM_XY_DIFFERENCE, DELETE_PROBLEM_PLANS, NEW_LOCATION_PROBLEM_FILE, NEW_PARKING_PROBLEM_FILE, 
 	};
 
 	virtual void Program_Control (void);
 
 private:
-	bool shape_flag, parking_flag, access_flag, stop_flag, line_flag, target_flag;
+	bool shape_flag, parking_flag, access_flag, stop_flag, line_flag, target_flag, loc_problem_flag, park_problem_flag;
 	bool trip_flag, plan_flag, select_flag, new_select_flag, delete_flag;
 
-	int num_node, num_shape, num_link, num_location, num_parking, num_problems;
+	int num_node, num_shape, num_link, num_location, num_parking, num_problems, num_perf, num_turn;
 	int max_xy_diff;
 	
+	Db_File loc_problem_file, park_problem_file;
+
 	Node_File node_file;
 	Link_File link_file;
 	Shape_File shape_file;

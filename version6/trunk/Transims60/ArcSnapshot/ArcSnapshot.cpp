@@ -11,7 +11,7 @@
 ArcSnapshot::ArcSnapshot (void) : Data_Service (), Select_Service (), Draw_Service ()
 {
 	Program ("ArcSnapshot");
-	Version (4);
+	Version (5);
 	Title ("Generate ArcView Shapefiles from TRANSIMS Snapshots");
 
 	System_File_Type required_files [] = {

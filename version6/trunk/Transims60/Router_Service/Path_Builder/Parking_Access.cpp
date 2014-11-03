@@ -30,6 +30,11 @@ bool Path_Builder::Origin_Parking (Trip_End_Array *org_ptr, Path_End_Array *from
 		if (org_itr->Index () < 0) continue;
 
 		link_flag = false;
+//#ifdef CHECK
+		if (org_itr->Index () < 0 || org_itr->Index () >= (int) exe->location_array.size ()) {
+			exe->Error (String ("Path_Builder::Origin_Parking: location_array index=%d") % org_itr->Index ());
+		}
+//#endif
 		loc_ptr = &exe->location_array [org_itr->Index ()];
 
 		//---- add the access links to parking ----
@@ -40,6 +45,14 @@ bool Path_Builder::Origin_Parking (Trip_End_Array *org_ptr, Path_End_Array *from
 			//---- process each access link leaving the origin ----
 
 			for (; acc >= 0; acc = acc_ptr->Next (ab_flag)) {
+//#ifdef CHECK
+				if (acc < 0 || acc >= (int) exe->access_array.size ()) {
+					exe->Error (String ("Path_Builder::Origin_Parking: access_array index=%d") % acc);
+				}
+				if (acc < 0 || acc >= (int) exe->next_access (forward_flag).size ()) {
+					exe->Error (String ("Path_Builder::Origin_Parking: next_access index=%d") % acc);
+				}
+//#endif
 				access_ptr = &exe->access_array [acc];
 				acc_ptr = &exe->next_access (forward_flag) [acc];
 

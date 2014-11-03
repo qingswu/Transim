@@ -12,7 +12,7 @@
 
 void ArcSnapshot::Draw_Vehicle (void)
 {
-	int i, center, link, dir, lane, type, num_pts, num, cell;
+	int i, center, link, dir, lane, type, num, cell;
 	double offset, side, veh_width, veh_len;
 	bool front_flag;
 
@@ -73,6 +73,7 @@ void ArcSnapshot::Draw_Vehicle (void)
 	} else {
 		offset -= veh_len = Internal_Units (2.0, METERS);
 	}
+
 	if (arcview_snapshot.LinkDir_Type () == LINK_NODE) {		//***** from node *****
 		if (dir == link_ptr->Anode ()) {
 			dir = 0;
@@ -84,7 +85,7 @@ void ArcSnapshot::Draw_Vehicle (void)
 		}
 	}	
 	if (dir == 1) {
-		offset = UnRound (link_ptr->Length ()) - offset;
+		//offset = UnRound (link_ptr->Length ()) - offset;
 		dir_ptr = &dir_array [link_ptr->BA_Dir ()];
 	} else {
 		dir_ptr = &dir_array [link_ptr->AB_Dir ()];
@@ -105,32 +106,31 @@ void ArcSnapshot::Draw_Vehicle (void)
 		center = 1;
 	}
 	side = (2 * lane - center) * lane_width / 2.0;
-	num_pts = 0;
 
 	if (shape_flag) {
 		Link_Shape (link_ptr, dir, points, offset, veh_len, side);
 
 		veh_width = lane_width * 0.80;
 
-		pt1 = points [points.size ()-1];
-		pt2 = points [0];
-
 		if (snapshot_flag) {
-			if (num_pts > 2) {
-				num = num_pts - 1;
+			if (points.size () > 2) {
+				pts.clear ();
 
-				pts [0] = pt1;
-				pts [num] = pt2;
-
-				for (i=1; i < num; i++) {
-					Link_Shape (link_ptr, dir, points, offset, veh_len * (num - i) / num, side);
-
-					pts [i] = points [points.size () - 1];
+				num = (int) points.size () - 1;
+				for (i=num; i >= 0; i--) {
+					pts.push_back (points [i]);
 				}
 				Vehicle_Shape (pts, veh_width, arcview_snapshot, front_flag);
 			} else {
+				pt1 = points [points.size () - 1];
+				pt2 = points [0];
+
 				Vehicle_Shape (pt1, pt2, veh_width, arcview_snapshot, front_flag);
 			}
+		}
+		if (output_flag) {
+			pt1 = points [points.size () - 1];
+			pt2 = points [0];
 		}
 	} else {
 		if (snapshot_flag) {
@@ -145,8 +145,10 @@ void ArcSnapshot::Draw_Vehicle (void)
 			pt2 = points [0];
 		}
 	}
-	if (snapshot_flag && !arcview_snapshot.Write_Record ()) {
-		Error ("Writing ArcView Snapshot File");
+	if (snapshot_flag && arcview_snapshot.size () > 0) {
+		if (!arcview_snapshot.Write_Record ()) {
+			Error ("Writing ArcView Snapshot File");
+		}
 	}
 	nsaved++;
 

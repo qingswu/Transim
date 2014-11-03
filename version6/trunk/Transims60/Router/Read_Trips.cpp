@@ -13,7 +13,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 	int p, p0, num, num_car, max_hhold, hhold, person, mode;
 	int last_hhold, last_person, partition;
 
-	bool keep_flag, old_flag, duration_flag, last_skip, gap_flag, gap_ptr_flag, first;
+	bool keep_flag, old_flag, duration_flag, last_skip, gap_flag, first;
 
 	Trip_File *file = 0;
 	Plan_File *plan_file = 0;
@@ -37,17 +37,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 	new_ptr = plan_ptr = 0;
 	old_flag = duration_flag = last_skip = false;
 
-	gap_flag = (trip_gap_map_flag && first_iteration);
-	gap_ptr_flag = false;
-	trip_gap_map_ptr = &trip_gap_map;
-
-	if (gap_flag) {
-		if (thread_flag) {
-			trip_gap_map_ptr = trip_gap_map_array [part];
-		} else if (part_processor.Thread_Flag ()) {
-			gap_ptr_flag = true;
-		}
-	}
+	gap_flag = (Trip_Gap_Map_Parts () && first_iteration);
 	partition = part;
 
 	num = 1;
@@ -121,38 +111,34 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 		if (hhold < max_hhold) max_hhold = hhold;
 	}
 
-	if (Master ()) {
-		if (trip_memory_flag) {
-			Show_Message ("Processing Trip Record");
-			Set_Progress ();
-		} else {
-			if (thread_flag) {
-				MAIN_LOCK
-				if (trip_set_flag) {
-					Show_Message (String ("Reading %s %d") % file->File_Type () % file->Part_Number ());
-				} else {
-					Show_Message (String ("Reading %s") % file->File_Type ());
-				}
-				END_LOCK
+	if (trip_memory_flag) {
+		Show_Message ("Processing Trip Record");
+		Set_Progress ();
+	} else {
+		if (thread_flag) {
+			MAIN_LOCK
+			if (trip_set_flag) {
+				Show_Message (String ("Reading %s %d") % file->File_Type () % file->Part_Number ());
 			} else {
-				if (trip_set_flag) {
-					Show_Message (0, String ("\tReading %s %d -- Trip") % file->File_Type () % file->Part_Number ());
-				} else {
-					Show_Message (String ("Reading %s -- Trip") % file->File_Type ());
-				}
-				Set_Progress ();
+				Show_Message (String ("Reading %s") % file->File_Type ());
 			}
+			END_LOCK
+		} else {
+			if (trip_set_flag) {
+				Show_Message (0, String ("\tReading %s %d -- Trip") % file->File_Type () % file->Part_Number ());
+			} else {
+				Show_Message (String ("Reading %s -- Trip") % file->File_Type ());
+			}
+			Set_Progress ();
 		}
 	}
 	last_hhold = last_person = 0;
 
 	for (first=true; ; first=false) {
-		if (Master ()) {
-			if (thread_flag) {
-				Show_Dot ();
-			} else {
-				Show_Progress ();
-			}
+		if (thread_flag) {
+			Show_Dot ();
+		} else {
+			Show_Progress ();
 		}
 		if (trip_memory_flag) {
 			if (first) {
@@ -253,9 +239,8 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 					gap_data.current = 0;
 					gap_data.previous = (int) plan_ptr->Impedance ();
 
-					if (gap_ptr_flag) {
-						trip_gap_map_ptr = trip_gap_map_array [part];
-					}
+					trip_gap_map_ptr = trip_gap_map_array [part];
+
 					map_stat = trip_gap_map_ptr->insert (Trip_Gap_Map_Data (plan_ptr->Get_Trip_Index (), gap_data));
 
 					if (!map_stat.second) {
@@ -316,9 +301,8 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 					gap_data.current = 0;
 					gap_data.previous = (int) plan_ptr->Impedance ();
 
-					if (gap_ptr_flag) {
-						trip_gap_map_ptr = trip_gap_map_array [part];
-					}
+					trip_gap_map_ptr = trip_gap_map_array [part];
+
 					map_stat = trip_gap_map_ptr->insert (Trip_Gap_Map_Data (plan_ptr->Get_Trip_Index (), gap_data));
 
 					if (!map_stat.second) {
@@ -432,7 +416,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 			}
 		}
 	}
-	if (Master () && !thread_flag) End_Progress ();
+	if (!thread_flag) End_Progress ();
 	if (!trip_memory_flag) file->Close ();
 	delete new_ptr;
 
@@ -481,9 +465,8 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 					gap_data.current = 0;
 					gap_data.previous = (int) plan_ptr->Impedance ();
 
-					if (gap_ptr_flag) {
-						trip_gap_map_ptr = trip_gap_map_array [p];
-					}
+					trip_gap_map_ptr = trip_gap_map_array [p];
+
 					map_stat = trip_gap_map_ptr->insert (Trip_Gap_Map_Data (plan_ptr->Get_Trip_Index (), gap_data));
 
 					if (!map_stat.second) {

@@ -15,7 +15,7 @@ int Validate::volume_level [] = {
 Validate::Validate (void) : Data_Service ()
 {
 	Program ("Validate");
-	Version (13);
+	Version (14);
 	Title ("Compare Volumes to Counts");
 
 	System_File_Type required_files [] = {
@@ -84,7 +84,7 @@ Validate::Validate (void) : Data_Service ()
 
 	Page_Size (120, 47);
 
-	problem_node_flag = problem_link_flag = problem_coord_flag = false;
+	problem_node_flag = problem_link_flag = problem_coord_flag = cnt_dir_flag = false;
 	delay_flag = link_flag = turn_flag = output_flag = zone_flag = method = line_flag = stop_flag = vc_flag = check_net_flag = false;
 	factor = 1.0;
 	hours = 1.0;

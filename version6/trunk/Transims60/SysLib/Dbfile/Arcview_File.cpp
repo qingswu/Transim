@@ -79,7 +79,7 @@ bool Arcview_Base::Arc_Open (string filename)
 		filename += ".";
 	}
 	filename += "dbf";
-	
+
 	messages = exe->Send_Messages ();
 	exe->Send_Messages (false);
 
@@ -261,6 +261,7 @@ bool Arcview_Base::Arc_Close (void)
 
 	if (shape_file.Is_Open ()) {
 		if (shape_file.File_Access () != READ) {
+
 			switch (Shape_Type ()) {
 				case DOT:
 					shape_header.shape_type = POINT_TYPE;
@@ -323,6 +324,7 @@ bool Arcview_Base::Arc_Close (void)
 				index_header.mbox.max = shape_header.mbox.max;
 			}
 			index_header.file_size = (int) (index_file.File_Size () / sizeof (short));
+
 			Reorder_Bits (&index_header, 7);
 
 			if (!index_file.Write (&index_header, sizeof (index_header), 0L)) {

@@ -7,6 +7,7 @@
 
 #include "APIDefs.hpp"
 #include "Db_Base.hpp"
+#include "TypeDefs.hpp"
 
 //---------------------------------------------------------
 //	Db_Header Class definition
@@ -75,6 +76,7 @@ public:
 	bool Update_Def_Header (void)               { return (Write_Def_Header (Header_Record ())); }
 
 	static string Def_Format (string filename);
+	static Strings Def_Fields (string filename);
 
 	int  LinkDir_Type_Field (void);	
 

@@ -80,12 +80,14 @@ void Simulator_Service::Program_Control (void)
 
 #ifdef ROUTING
 	Router_Service::Program_Control ();
+
+	Read_Converge_Keys ();
 #else
 	Data_Service::Program_Control ();
-#endif
 
 	Read_Select_Keys ();
-
+#endif
+	
 	if (System_File_Flag (NEW_PROBLEM)) {
 		param.problem_flag = true;
 		Problem_File *problem_file = System_Problem_File (true);

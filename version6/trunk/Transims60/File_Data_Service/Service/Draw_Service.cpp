@@ -91,9 +91,15 @@ void Draw_Service::Read_Draw_Keys (void)
 			lanes_flag = exe->Get_Control_Flag (DRAW_NETWORK_LANES);
 		}
 
+		//---- draw vehicle shapes ----
+
+		if (exe->Control_Key_Status (DRAW_VEHICLE_SHAPES)) {
+			shape_flag = exe->Set_Control_Flag (DRAW_VEHICLE_SHAPES);
+		}
+
 		//---- lane width ----
 
-		if ((lanes_flag || dat->System_File_Flag (CONNECTION)) && exe->Control_Key_Status (LANE_WIDTH)) {
+		if ((lanes_flag || shape_flag || dat->System_File_Flag (CONNECTION)) && exe->Control_Key_Status (LANE_WIDTH)) {
 			lane_width = exe->Get_Control_Double (LANE_WIDTH);
 
 			if (lanes_flag && lane_width == 0.0) {

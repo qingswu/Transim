@@ -310,6 +310,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Control.cpp" />
+    <ClCompile Include="Custom_Summaries.cpp" />
     <ClCompile Include="Execute.cpp" />
     <ClCompile Include="Gap_Report.cpp" />
     <ClCompile Include="Get_Location_Data.cpp" />

@@ -14,16 +14,17 @@ bool SubareaNet::Get_Phasing_Data (Phasing_File &file, Phasing_Record &data)
 
 	if (Data_Service::Get_Phasing_Data (file, data)) {
 
-		//---- copy the fields to the subarea file ----
+		////---- copy the fields to the subarea file ----
 
-		Db_Header *new_file = System_File_Header (NEW_PHASING_PLAN);
+		//Db_Header *new_file = System_File_Header (NEW_PHASING_PLAN);
 
-		new_file->Copy_Fields (file);
+		//new_file->Copy_Fields (file);
 
-		if (!new_file->Write (file.Nested ())) {
-			Error (String ("Writing %s") % new_file->File_Type ());
-		}
+		//if (!new_file->Write (file.Nested ())) {
+		//	Error (String ("Writing %s") % new_file->File_Type ());
+		//}
 		nphasing++;
+		return (true);
 	}
 	return (false);
 }

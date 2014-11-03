@@ -424,13 +424,35 @@ void LineSum::Program_Control (void)
 			key = Get_Control_String (NEW_ON_OFF_REPORT_FILE, i);
 
 			if (!key.empty ()) {
-				on_off_report_data.file = new Db_Header ();
-				on_off_report_data.file->File_Type (String ("New On-Off Report File #%d") % i);
-
 				if (Check_Control_Key (NEW_ON_OFF_REPORT_FORMAT, i)) {
-					on_off_report_data.file->Dbase_Format (Get_Control_String (NEW_ON_OFF_REPORT_FORMAT, i));
+					format = Get_Control_String (NEW_ON_OFF_REPORT_FORMAT, i);
+
+					on_off_report_data.arcview_flag = format.Equals ("ARCVIEW");
+				} else {
+					on_off_report_data.arcview_flag = false;
 				}
-				on_off_report_data.file->Create (Project_Filename (key));
+				Print (1);
+				if (on_off_report_data.arcview_flag) {
+					on_off_report_data.file = on_off_report_data.arc_file = new Arcview_File ();
+
+					on_off_report_data.arc_file->File_Type (String ("New On-Off Report File #%d") % i);
+					on_off_report_data.arc_file->Shape_Type (DOT);
+					on_off_report_data.arc_file->Z_Flag (z_flag);
+					on_off_report_data.arc_file->M_Flag (m_flag);
+
+					on_off_report_data.arc_file->Create (Project_Filename (key));
+
+					on_off_report_data.arc_file->Set_Projection (projection.Input_Projection (), projection.Output_Projection ());
+					xy_flag = true;
+				} else {
+					on_off_report_data.file = new Db_Header ();
+
+					if (Check_Control_Key (NEW_ON_OFF_REPORT_FORMAT, i)) {
+						on_off_report_data.file->Dbase_Format (format);
+					}
+					on_off_report_data.file->File_Type (String ("New On-Off Report File #%d") % i);
+					on_off_report_data.file->Create (Project_Filename (key));
+				}
 			} else {
 				on_off_report_data.file = 0;
 			}
@@ -521,6 +543,36 @@ void LineSum::Program_Control (void)
 					access_report_data.file->Dbase_Format (Get_Control_String (NEW_ACCESS_REPORT_FORMAT, i));
 				}
 				access_report_data.file->Create (Project_Filename (key));
+
+				if (Check_Control_Key (NEW_ACCESS_REPORT_FORMAT, i)) {
+					format = Get_Control_String (NEW_ACCESS_REPORT_FORMAT, i);
+
+					access_report_data.arcview_flag = format.Equals ("ARCVIEW");
+				} else {
+					access_report_data.arcview_flag = false;
+				}
+				Print (1);
+				if (access_report_data.arcview_flag) {
+					access_report_data.file = access_report_data.arc_file = new Arcview_File ();
+
+					access_report_data.arc_file->File_Type (String ("New Access Report File #%d") % i);
+					access_report_data.arc_file->Shape_Type (DOT);
+					access_report_data.arc_file->Z_Flag (z_flag);
+					access_report_data.arc_file->M_Flag (m_flag);
+
+					access_report_data.arc_file->Create (Project_Filename (key));
+
+					access_report_data.arc_file->Set_Projection (projection.Input_Projection (), projection.Output_Projection ());
+					xy_flag = true;
+				} else {
+					access_report_data.file = new Db_Header ();
+
+					if (Check_Control_Key (NEW_ACCESS_REPORT_FORMAT, i)) {
+						access_report_data.file->Dbase_Format (format);
+					}
+					access_report_data.file->File_Type (String ("New Access Report File #%d") % i);
+					access_report_data.file->Create (Project_Filename (key));
+				}
 			} else {
 				access_report_data.file = 0;
 			}
@@ -669,6 +721,23 @@ void LineSum::Program_Control (void)
 
 			total_report_array.push_back (total_report_data);
 		}
+	}
+
+	//---- open the node XY file ----
+
+	if (xy_flag) {
+		key = Get_Control_String (NODE_XY_FILE);
+
+		if (key.empty ()) {
+			Error ("Node XY File is Required for Stop Shapefiles");
+		}
+		if (Check_Control_Key (NODE_XY_FORMAT)) {
+			node_xy_file.Dbase_Format (Get_Control_String (NODE_XY_FORMAT));
+		}
+		node_xy_file.File_Type ("Node XY File");
+
+		Print (1);
+		node_xy_file.Open (Project_Filename (key));
 	}
 
 	//---- link rider file data ----

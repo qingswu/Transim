@@ -17,8 +17,8 @@ void Router_Service::Execute (void)
 	//---- compile the type script ----
 
 	if (script_flag) {
-		if (Report_Flag (SCRIPT_REPORT)) {
-			Header_Number (SCRIPT_REPORT);
+		if (Report_Flag (TRAVELER_SCRIPT)) {
+			Header_Number (TRAVELER_SCRIPT);
 
 			if (!Break_Check (10)) {
 				Print (1);
@@ -31,11 +31,11 @@ void Router_Service::Execute (void)
 
 		type_script.Initialize (files, random.Seed () + 1);
 
-		if (!type_script.Compile (script_file, Report_Flag (SCRIPT_REPORT))) {
-			Error ("Compiling Household Type Script");
+		if (!type_script.Compile (script_file, Report_Flag (TRAVELER_SCRIPT))) {
+			Error ("Compiling Traveler Type Script");
 		}
-		if (Report_Flag (STACK_REPORT)) {
-			Header_Number (STACK_REPORT);
+		if (Report_Flag (TRAVELER_STACK)) {
+			Header_Number (TRAVELER_STACK);
 
 			type_script.Print_Commands (false);
 		}
@@ -58,10 +58,10 @@ void Router_Service::Execute (void)
 	if (walk_path_flag) {
 		int *first_ptr;
 		Link_Itr link_itr;
-		List_Data *list_ptr;
+		List_Data *list_ptr, list_rec;
 
-		walk_list.resize (node_array.size (), -1);
-		walk_link.resize (link_array.size ());
+		walk_list.assign (node_array.size (), -1);
+		walk_link.assign (link_array.size (), list_rec);
 
 		for (link=0, link_itr = link_array.begin (); link_itr != link_array.end (); link_itr++, link++) {
 			Show_Progress ();
@@ -92,10 +92,10 @@ void Router_Service::Execute (void)
 	if (bike_path_flag) {
 		int *first_ptr;
 		Link_Itr link_itr;
-		List_Data *list_ptr;
+		List_Data *list_ptr, list_rec;
 
-		bike_list.resize (node_array.size (), -1);
-		bike_link.resize (link_array.size ());
+		bike_list.assign (node_array.size (), -1);
+		bike_link.assign (link_array.size (), list_rec);
 
 		for (link=0, link_itr = link_array.begin (); link_itr != link_array.end (); link_itr++, link++) {
 			Show_Progress ();
@@ -149,15 +149,15 @@ void Router_Service::Execute (void)
 
 	if (access_link_flag) {
 		Access_Itr access_itr;
-		List_Data *from_ptr, *to_ptr, *first_ptr;
+		List_Data *from_ptr, *to_ptr, *first_ptr, list_rec;
 
-		loc_access.resize (location_array.size ());
-		if (drive_path_flag) park_access.resize (parking_array.size ());
-		if (transit_path_flag) stop_access.resize (stop_array.size ());
-		if (transit_path_flag) node_access.resize (node_array.size ());
+		loc_access.assign (location_array.size (), list_rec);
+		if (drive_path_flag) park_access.assign (parking_array.size (), list_rec);
+		if (transit_path_flag) stop_access.assign (stop_array.size (), list_rec);
+		if (transit_path_flag) node_access.assign (node_array.size (), list_rec);
 
-		from_access.resize (access_array.size ());
-		to_access.resize (access_array.size ());
+		from_access.assign (access_array.size (), list_rec);
+		to_access.assign (access_array.size (), list_rec);
 
 		for (index=0, access_itr = access_array.begin (); access_itr != access_array.end (); access_itr++, index++) {
 			Show_Progress ();
@@ -269,8 +269,8 @@ void Router_Service::Execute (void)
 
 	//---- link to location map ----
 
-	link_location.resize (link_array.size (), -1);
-	next_location.resize (location_array.size (), -1);
+	link_location.assign (link_array.size (), -1);
+	next_location.assign (location_array.size (), -1);
 
 	Location_Itr loc_itr;
 
@@ -289,8 +289,8 @@ void Router_Service::Execute (void)
 	if (drive_path_flag) {
 		Link_Itr link_itr;
 
-		link_parking.resize (link_array.size (), -1);
-		next_parking.resize (parking_array.size (), -1);
+		link_parking.assign (link_array.size (), -1);
+		next_parking.assign (parking_array.size (), -1);
 		
 		Parking_Itr park_itr;
 
@@ -325,8 +325,8 @@ void Router_Service::Execute (void)
 		
 		Route_Stop_Data route_stop, *rstop_ptr;
 
-		stop_list.resize (stop_array.size (), -1);
-		route_stop_array.resize (line_array.Route_Stops (), route_stop);
+		stop_list.assign (stop_array.size (), -1);
+		route_stop_array.assign (line_array.Route_Stops (), route_stop);
 
 		for (index=route=0, line_itr = line_array.begin (); line_itr != line_array.end (); line_itr++, route++) {
 			Show_Progress ();
@@ -345,8 +345,8 @@ void Router_Service::Execute (void)
 
 		//---- build the list of stops on a link ----
 
-		link_stop.resize (link_array.size (), -1);
-		next_stop.resize (stop_array.size (), -1);
+		link_stop.assign (link_array.size (), -1);
+		next_stop.assign (stop_array.size (), -1);
 		
 		for (index=0, stop_itr = stop_array.begin (); stop_itr != stop_array.end (); stop_itr++, index++) {
 			Show_Progress ();
@@ -595,19 +595,47 @@ void Router_Service::Execute (void)
 }
 
 //---------------------------------------------------------
+//	Print_Reports
+//---------------------------------------------------------
+
+void Router_Service::Print_Reports (void)
+{
+	//---- print reports ----
+
+	for (int i=First_Report (); i != 0; i=Next_Report ()) {
+		switch (i) {
+			case LINK_GAP:			//---- Link Gap Report ----
+				if (iteration_flag) Link_Gap_Report (LINK_GAP);
+				break;
+			case TRIP_GAP:			//---- Trip Gap Report ----
+				if (iteration_flag) Trip_Gap_Report (TRIP_GAP);
+				break;
+			default:
+				break;
+		}
+	}
+}
+
+//---------------------------------------------------------
 //	Page_Header
 //---------------------------------------------------------
 
 void Router_Service::Page_Header (void)
 {
 	switch (Header_Number ()) {
-		case SCRIPT_REPORT:		//---- Type Script ----
-			Print (1, "Household Type Script");
+		case TRAVELER_SCRIPT:		//---- Type Script ----
+			Print (1, "Traveler Type Script");
 			Print (1);
 			break;
-		case STACK_REPORT:		//---- Type Stack ----
-			Print (1, "Household Type Stack");
+		case TRAVELER_STACK:		//---- Type Stack ----
+			Print (1, "Traveler Type Stack");
 			Print (1);
+			break;
+		case LINK_GAP:			//---- Link Gap Report ----
+			Link_Gap_Header ();
+			break;
+		case TRIP_GAP:			//---- Trip Gap Report ----
+			Trip_Gap_Header ();
 			break;
 		default:
 			break;

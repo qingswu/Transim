@@ -26,25 +26,6 @@ void Router::DUE_Loop (void)
 		plan_processor = new Plan_Processor (this);
 	}
 
-	if (Master ()) {
-		if (link_gap_flag) {
-			link_gap_file.File () << "ITERATION";
-			num = sum_periods.Num_Periods ();
-			for (i=0; i < num; i++) {
-				link_gap_file.File () << "\t" << sum_periods.Range_Label (i);
-			}
-			link_gap_file.File () << "\tTOTAL" << endl;
-		}
-		if (trip_gap_flag) {
-			trip_gap_file.File () << "ITERATION";
-			num = sum_periods.Num_Periods ();
-			for (i=0; i < num; i++) {
-				trip_gap_file.File () << "\t" << sum_periods.Range_Label (i);
-			}
-			trip_gap_file.File () << "\tTOTAL" << endl;
-		}
-	}
-
 	//---- process each iteration ----
 
 	for (iteration=1; iteration <= max_iteration; iteration++) {
@@ -52,20 +33,14 @@ void Router::DUE_Loop (void)
 		if (!first_iteration) {
 			Use_Link_Delays (true);
 		}
-		if (Master ()) {
-			Show_Message (1, String ("Iteration Number %d") % iteration);
-			Print (2, "Iteration Number ") << iteration;
-			Set_Progress ();
+		Show_Message (1, String ("Iteration Number %d") % iteration);
+		Print (2, "Iteration Number ") << iteration;
+		Set_Progress ();
 
-			if (link_gap_flag) {
-				link_gap_file.File () << iteration;
-			}
-			if (trip_gap_flag) {
-				trip_gap_file.File () << iteration;
-			}
-			if (first_iteration && (rider_flag || (System_File_Flag (RIDERSHIP) && Cap_Penalty_Flag ()))) {
-				line_array.Clear_Ridership ();
-			}
+		Iteration_Setup ();
+
+		if (first_iteration && (rider_flag || (System_File_Flag (RIDERSHIP) && Cap_Penalty_Flag ()))) {
+			line_array.Clear_Ridership ();
 		}
 		converge_flag = true;
 		last_hhold = -1;
@@ -236,27 +211,24 @@ void Router::DUE_Loop (void)
 					}
 					Write_Performance (full_flag);
 				}
+				if (System_File_Flag (NEW_TURN_DELAY) && System_File_Flag (SIGNAL)) {
+					Turn_Delay_File *file = System_Turn_Delay_File (true);
+					if (file->Part_Flag ()) {
+						file->Open (iteration);
+					} else {
+						file->Create ();
+					}
+					Write_Turn_Delays (full_flag);
+				}
 			}
 
-			if (Master ()) {
 
-				//---- copy existing flow data ----
+			//---- copy existing flow data ----
 
-				old_perf_period_array.Copy_Flow_Data (perf_period_array, true, reroute_time);
+			old_perf_period_array.Copy_Flow_Data (perf_period_array, true, reroute_time);
 
-				if (Turn_Flows ()) {
-					old_turn_period_array.Copy_Turn_Data (turn_period_array, true, reroute_time);
-				}
-
-			} else {	//---- MPI slave ----
-
-				//---- clear flow data ----
-
-				perf_period_array.Zero_Flows ();
-
-				if (Turn_Flows ()) {
-					turn_period_array.Zero_Turns ();
-				}
+			if (Turn_Flows ()) {
+				old_turn_period_array.Copy_Turn_Data (turn_period_array, true, reroute_time);
 			}
 
 			//---- print the iteration problems ----

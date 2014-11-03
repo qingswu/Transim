@@ -1,18 +1,19 @@
 //*********************************************************
-//	Get_Lane_Use_Data.cpp - read the lane use file
+//	Get_Performance_Data - read the performance file
 //*********************************************************
 
 #include "SubareaNet.hpp"
 
 //---------------------------------------------------------
-//	Get_Lane_Use_Data
+//	Get_Performance_Data
 //---------------------------------------------------------
 
-bool SubareaNet::Get_Lane_Use_Data (Lane_Use_File &file, Lane_Use_Data &data)
+bool SubareaNet::Get_Performance_Data (Performance_File &file, Performance_Data &data)
 {
+
 	//---- do standard processing ----
 
-	if (Data_Service::Get_Lane_Use_Data (file, data)) {
+	if (Data_Service::Get_Performance_Data (file, data)) {
 
 		//---- check the subarea boundary ----
 
@@ -23,14 +24,14 @@ bool SubareaNet::Get_Lane_Use_Data (Lane_Use_File &file, Lane_Use_Data &data)
 
 			//---- copy the fields to the subarea file ----
 
-			Db_Header *new_file = System_File_Header (NEW_LANE_USE);
+			Db_Header *new_file = System_File_Header (NEW_PERFORMANCE);
 
 			new_file->Copy_Fields (file);
 
 			if (!new_file->Write ()) {
 				Error (String ("Writing %s") % new_file->File_Type ());
 			}
-			nlane_use++;
+			nperf++;
 		}
 	}
 	

@@ -342,7 +342,7 @@
       <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -376,19 +376,12 @@
     <ClCompile Include="Copy_Plans.cpp" />
     <ClCompile Include="DUE_Loop.cpp" />
     <ClCompile Include="Execute.cpp" />
-    <ClCompile Include="Get_Link_Gap.cpp" />
     <ClCompile Include="Get_Trip_Data.cpp" />
-    <ClCompile Include="Get_Trip_Gap.cpp" />
     <ClCompile Include="Input_Trips.cpp" />
     <ClCompile Include="Iteration_Loop.cpp" />
-    <ClCompile Include="Link_Gap_Report.cpp" />
-    <ClCompile Include="Map_Trip_Plan.cpp" />
     <ClCompile Include="Memory_Loop.cpp" />
     <ClCompile Include="Merge_Delay.cpp" />
     <ClCompile Include="Minimize_VHT.cpp" />
-    <ClCompile Include="MPI_Link_Delay.cpp" />
-    <ClCompile Include="MPI_Processing.cpp" />
-    <ClCompile Include="MPI_Setup.cpp" />
     <ClCompile Include="Part_Processor.cpp" />
     <ClCompile Include="Preload_Transit.cpp" />
     <ClCompile Include="Read_Trips.cpp" />
@@ -397,7 +390,6 @@
     <ClCompile Include="Save_Plans.cpp" />
     <ClCompile Include="Selection.cpp" />
     <ClCompile Include="Set_Partitions.cpp" />
-    <ClCompile Include="Trip_Gap_Report.cpp" />
     <ClCompile Include="Write_Plan_Files.cpp" />
   </ItemGroup>
   <ItemGroup>

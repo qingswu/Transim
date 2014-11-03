@@ -11,7 +11,7 @@
 SubareaNet::SubareaNet (void) : Data_Service ()
 {
 	Program ("SubareaNet");
-	Version (4);
+	Version (6);
 	Title ("Subarea Network Files");
 
 	System_File_Type required_files [] = {
@@ -24,10 +24,11 @@ SubareaNet::SubareaNet (void) : Data_Service ()
 		ZONE, SHAPE, LANE_USE, TURN_PENALTY, ACCESS_LINK,    
 		SIGN, SIGNAL, TIMING_PLAN, PHASING_PLAN, DETECTOR,  
 		TRANSIT_STOP, TRANSIT_ROUTE, TRANSIT_SCHEDULE, TRANSIT_DRIVER,
+		PERFORMANCE, TURN_DELAY,
 		NEW_ZONE, NEW_SHAPE, NEW_LANE_USE, NEW_TURN_PENALTY, NEW_ACCESS_LINK,
 		NEW_SIGN, NEW_SIGNAL, NEW_TIMING_PLAN, NEW_PHASING_PLAN, NEW_DETECTOR,
 		NEW_TRANSIT_STOP, NEW_TRANSIT_ROUTE, NEW_TRANSIT_SCHEDULE, NEW_TRANSIT_DRIVER,
-		VEHICLE_TYPE, 
+		VEHICLE_TYPE, NEW_PERFORMANCE, NEW_TURN_DELAY,
 		END_FILE
 	};
 	int file_service_keys [] = {
@@ -53,7 +54,7 @@ SubareaNet::SubareaNet (void) : Data_Service ()
 	max_location = max_parking = max_access = max_stop = max_route = max_zone = 0;
 	new_location = new_parking = new_access = new_stop = new_route = new_zone = 0;
 	nnode = nlink = nshort = nboundary = nshape = npocket = nconnect = 0;
-	nlocation = nparking = naccess = nlane_use = nturn = ntoll = 0;
+	nlocation = nparking = naccess = nlane_use = nturn = ntoll = nperf = ndelay = 0;
 	nsign = nsignal = ntiming = nphasing = ndetector = ncoord = 0;
 	nstop = nroute = nschedule = ndriver = 0;
 

@@ -48,7 +48,11 @@ void Validate::Execute (void)
 
 		//---- read the count file ----
 
-		Read_Link_Data (count_file, link_count_array);
+		if (cnt_dir_flag) {
+			Read_Link_Direction (cnt_dir_file, link_count_array);
+		} else {
+			Read_Link_Data (count_file, link_count_array);
+		}
 	}
 
 	//---- process turning volume data ----

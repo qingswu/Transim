@@ -105,6 +105,7 @@ void Select_Service::Read_Select_Keys (void)
 	String key;
 	
 	exe->Print (2, "Select Service Controls:");
+	exe->Print (1);
 
 	//---- select households ----
 	

@@ -59,11 +59,11 @@ protected:
 		NEW_ACCESS_REPORT_FILE, NEW_ACCESS_REPORT_FORMAT,
 		STOP_REPORT_TITLE, STOP_REPORT_STOPS, STOP_REPORT_MODES, STOP_REPORT_LINES, STOP_REPORT_TRANSFERS,
 		TOTAL_REPORT_TITLE, TOTAL_REPORT_LINES, TOTAL_REPORT_MODES, NEW_TOTAL_REPORT_FILE, NEW_TOTAL_REPORT_FORMAT,
-		TOTAL_REPORT_PEAK_HOURS, TOTAL_REPORT_OFFPEAK_HOURS, 
+		TOTAL_REPORT_PEAK_HOURS, TOTAL_REPORT_OFFPEAK_HOURS, NODE_XY_FILE, NODE_XY_FORMAT,
 		NEW_LINK_RIDER_FILE, NEW_LINK_RIDER_FORMAT, LINK_RIDER_MODES, LINK_RIDER_LINES, 
 		LINK_RIDER_PEAK_HOURS, LINK_RIDER_PEAK_FACTOR, LINK_RIDER_PEAK_CAPACITY, LINK_RIDER_OFFPEAK_HOURS, 
 		LINK_RIDER_XY_FILE, LINK_RIDER_XY_FORMAT, LINK_RIDER_SIDE_OFFSET,
-		LINK_SHAPE_FILE, LINK_SHAPE_ANODE, LINK_SHAPE_BNODE,
+		LINK_SHAPE_FILE, LINK_SHAPE_ANODE, LINK_SHAPE_BNODE, 
 		SERVICE_FILE, SERVICE_FORMAT, SERVICE_LINE_FIELD, SERVICE_PEAK_FIELD, SERVICE_OFFPEAK_FIELD,
 		BASE_ROUTE_FILE, BASE_ROUTE_FORMAT, ALTERNATIVE_ROUTE_FILE, ALTERNATIVE_ROUTE_FORMAT,
 	};
@@ -168,15 +168,17 @@ private:
 	//---- boarding report data ----
 
 	struct On_Off_Report_Data {
-		int        number;
-		int        details;
-		String     title;
-		bool       all_stops;
-		bool       all_modes;
-		Data_Range stops;
-		Data_Range modes;
-		Db_Header  *file;
-		On_Off_Report_Data (void) : number(0), details(0), all_stops(0), all_modes(0), file(0) {};
+		int          number;
+		int          details;
+		String       title;
+		bool         all_stops;
+		bool         all_modes;
+		Data_Range   stops;
+		Data_Range   modes;
+		Db_Header    *file;
+		bool         arcview_flag;
+		Arcview_File *arc_file;
+		On_Off_Report_Data (void) : number(0), details(0), all_stops(0), all_modes(0), file(0), arcview_flag(0), arc_file(0) {};
 	};
 	typedef vector <On_Off_Report_Data>   On_Off_Report_Array;
 	typedef On_Off_Report_Array::iterator On_Off_Report_Itr;
@@ -195,15 +197,17 @@ private:
 	//---- access report data ----
 
 	struct Access_Report_Data {
-		int        number;
-		int        details;
-		String     title;
-		bool       all_stops;
-		bool       all_modes;
-		Data_Range stops;
-		Data_Range modes;
-		Db_Header  *file;
-		Access_Report_Data (void) : number(0), details(0), all_stops(0), all_modes(0), file(0) {};
+		int          number;
+		int          details;
+		String       title;
+		bool         all_stops;
+		bool         all_modes;
+		Data_Range   stops;
+		Data_Range   modes;
+		Db_Header    *file;
+		bool         arcview_flag;
+		Arcview_File *arc_file;
+		Access_Report_Data (void) : number(0), details(0), all_stops(0), all_modes(0), file(0), arcview_flag(0), arc_file(0) {};
 	};
 	typedef vector <Access_Report_Data>   Access_Report_Array;
 	typedef Access_Report_Array::iterator Access_Report_Itr;
@@ -278,7 +282,7 @@ private:
 
 	//---- A-B map to Points ----
 
-	bool shape_flag;
+	bool shape_flag, xy_flag;
 	int anode_field, bnode_field;
 	Arcview_File link_shape;
 
@@ -290,8 +294,12 @@ private:
 	I2_Points_Map points_map;
 	Projection_Service projection;
 
+	Db_Header node_xy_file;
+	XY_Map xy_map;
+
 	//---- methods ----
 
+	void Read_XY (void);
 	void Read_Shapes (void);
 	void Read_Service (void);
 

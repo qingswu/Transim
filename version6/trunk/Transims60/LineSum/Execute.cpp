@@ -18,6 +18,12 @@ void LineSum::Execute (void)
 	Total_Report_Itr total_report_itr;
 	Link_Rider_Itr link_rider_itr;
 
+	//---- read the node coordinates ----
+
+	if (xy_flag) {
+		Read_XY ();
+	}
+
 	//---- read the stop names ----
 
 	if (station_flag) {

@@ -125,12 +125,12 @@ void LinkSum::Perf_Sum_Report (void)
 				sum_bin [j] [QUEUE] += data.Queue () * person_fac;
 				sum_bin [j] [MAX_QUEUE] = MAX (sum_bin [j] [MAX_QUEUE], data.Max_Queue () * person_fac);
 				sum_bin [j] [FAILURE] += data.Failure () * person_fac;
+				sum_bin [j] [COUNT] += data.Count () * lane_len;
 
 				if (Ratio_Flag ()) {
 					sum_bin [j] [CONG_VMT] += data.Ratio_Dist () * person_fac;
 					sum_bin [j] [CONG_VHT] += data.Ratio_Time () * person_fac;
 					sum_bin [j] [CONG_TIME] += data.Ratios () * lane_len;
-					sum_bin [j] [COUNT] += data.Count () * lane_len;
 				}
 
 				if (compare_flag) {
@@ -158,12 +158,12 @@ void LinkSum::Perf_Sum_Report (void)
 					sum_bin [j] [QUEUE+PREV] += data.Queue () * person_fac;
 					sum_bin [j] [MAX_QUEUE+PREV] = MAX (sum_bin [j] [MAX_QUEUE+PREV], data.Max_Queue () * person_fac);
 					sum_bin [j] [FAILURE+PREV] += data.Failure () * person_fac;
+					sum_bin [j] [COUNT+PREV] += data.Count () * lane_len;
 
 					if (Ratio_Flag ()) {
 						sum_bin [j] [CONG_VMT+PREV] += data.Ratio_Dist () * person_fac;
 						sum_bin [j] [CONG_VHT+PREV] += data.Ratio_Time () * person_fac;
 						sum_bin [j] [CONG_TIME+PREV] += data.Ratios () * lane_len;
-						sum_bin [j] [COUNT+PREV] += data.Count () * lane_len;
 					}
 				}
 			}
@@ -254,11 +254,13 @@ void LinkSum::Perf_Sum_Report (void)
 
 		if (i == num_inc) {
 			Print (0, "       Total");
-			lane_len = sum_bin [i] [LANES+PREV];
 		} else {
 			lane_len = sum_bin [i] [LANES];
 			Print (0, String ("%12.12s") % sum_periods.Range_Format (i));
 		}
+		lane_len = sum_bin [i] [COUNT];
+		if (lane_len == 0) lane_len = 1.0;
+
 		Print (1, String ("Number of Links                 %13.2lf") % sum_bin [i] [LINKS]);
 		Print (1, String ("Number of Roadway %-10.10s    %13.2lf") % units % (sum_bin [i] [LENGTH] * factor));
 		Print (1, String ("Number of Lane %-10.10s       %13.2lf") % units % (sum_bin [i] [LANES] * factor));
@@ -320,16 +322,15 @@ void LinkSum::Perf_Sum_Report (void)
 
 		Print (1, String ("Average Link Time Ratio         %13.2lf") % (sum_bin [i] [TIME_RATIO] / (lane_len * 100)));
 		if (compare_flag) {
-			base = sum_bin [i] [TIME_RATIO+PREV] / (lane_len * 100.0);
+			base = sum_bin [i] [TIME_RATIO+PREV] / (sum_bin [i] [COUNT+PREV] * 100.0);
 			diff = sum_bin [i] [TIME_RATIO] / (lane_len * 100.0) - base;
 
 			Print (0, String (" %13.2lf %13.2lf  (%.2lf%%)") % base % diff % ((base > 0.0) ? (100.0 * diff / base) : 0.0) % FINISH);
 		}
-		if (i == num_inc) {
-			value = sum_bin [i] [LINKS] * num_inc;
-		} else {
-			value = sum_bin [i] [LINKS];
-		}
+
+		value = sum_bin [i] [LINKS];
+		if (i == num_inc) value *= num_inc;
+
 		Print (1, String ("Average Link Density (/ln-%s)   %13.2lf") % lane_mi % UnRound (sum_bin [i] [DENSITY] / value));
 		if (compare_flag) {
 			base = UnRound (sum_bin [i] [DENSITY+PREV] / value);
@@ -413,12 +414,7 @@ void LinkSum::Perf_Sum_Report (void)
 				Print (0, String (" %13.2lf %13.2lf  (%.2lf%%)") % base % diff % ((base > 0.0) ? (100.0 * diff / base) : 0.0) % FINISH);
 			}
 
-			if (i == num_inc) {
-				value = num_inc;
-			} else {
-				value = 1.0;
-			}
-			value /= (lane_len * inc_per_hour);
+			value = (double) period / (lane_len * tod);
 
 			label = "Congested Duration (hours)";
 			Print (1, String ("%-32.32s%13.2lf") % label % (sum_bin [i] [CONG_TIME] * value));

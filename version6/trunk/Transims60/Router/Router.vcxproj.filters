@@ -20,25 +20,10 @@
     <ClCompile Include="Execute.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Get_Trip_Gap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Iteration_Loop.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Link_Gap_Report.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Merge_Delay.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MPI_Link_Delay.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MPI_Processing.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MPI_Setup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Part_Processor.cpp">
@@ -59,9 +44,6 @@
     <ClCompile Include="Set_Partitions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Trip_Gap_Report.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Minimize_VHT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -71,13 +53,7 @@
     <ClCompile Include="Get_Trip_Data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Get_Link_Gap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Reskim_Plans.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Map_Trip_Plan.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DUE_Loop.cpp">

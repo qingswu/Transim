@@ -180,6 +180,7 @@ bool Db_Header::Close (void)
 				}
 			}
 		}
+		Reset_Buffers ();
 	}
 	return (Db_File::Close ());
 }
@@ -771,7 +772,7 @@ bool Db_Header::Write_dBase_Header (void)
 	header.num_records = Num_Records ();
 	header.header_size = (short) (sizeof (header) + num_field * sizeof (dBase_Field) + 1);
 	header.record_size = (short) max_size;
-	
+
 	if (!Write (&header, sizeof (header), 0L)) {
 		return (Status (HEADER_WRITE));
 	}
@@ -1177,6 +1178,88 @@ string Db_Header::Def_Format (string filename)
 	record.Split (token, delim);
 
 	return (token);
+}
+
+//---------------------------------------------------------
+//	Def_Fields
+//---------------------------------------------------------
+
+Strings Db_Header::Def_Fields (string filename) 
+{
+	int lines, headers;
+	char buffer [4094];
+	const char *delim = ",\t";
+	String name, record, token;
+	Strings fields;
+	FILE *def;
+
+	//---- construct the definition filename ----
+
+	if (filename.empty ()) return (fields);
+
+	name = filename + ".def";
+
+	def = f_open (name, "rt");
+	if (def == 0) return (fields);
+
+	//---- get the header line ----
+
+	if (fgets (buffer, sizeof (buffer), def) == 0) return (fields);
+
+	record = buffer;
+
+	//---- TRANSIMS version code ----
+
+	record.Split (token, delim);
+
+	if (!token.Starts_With ("TRANSIMS")) return (fields);
+
+	//---- file format ----
+
+	record.Split (token, delim);
+
+	//---- file format ----
+
+	record.Split (token, delim);
+
+	//---- number of header lines ----
+
+	record.Split (token, delim);
+
+	headers = token.Integer ();
+
+	//---- nested file flag ----
+
+	if (record.Split (token, delim)) {
+		if (Check_Nest_Code (token)) {
+			if (Nest_Code (token) == NESTED) {
+				lines = 2;
+			} else {
+				lines = 1;
+			}
+		} else {
+			lines = 1;
+		}
+	} else {
+		lines = 1;
+	}
+	for (int i=lines; i < headers; i++) {
+		if (fgets (buffer, sizeof (buffer), def) == 0) return (fields);
+	}
+
+	//---- read the fields ----
+
+	while (fgets (buffer, sizeof (buffer), def) != 0) {
+		record = buffer;
+		record.Clean ();
+
+		record.Split (name, delim);
+		if (name.empty ()) continue;
+
+		fields.push_back (name);
+	}
+	fclose (def);
+	return (fields);
 }
 
 //-----------------------------------------------------------

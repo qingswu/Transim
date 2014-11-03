@@ -130,7 +130,7 @@ double Router::Merge_Delay (double factor, bool zero_flag)
 					} else {
 						gap = 0.0;
 					}
-					if (link_gap_flag) link_gap_file.File () << "\t" << gap;
+					Write_Link_Gap (gap);
 					if (report_flag && gap > gap_sum.max_gap) gap_sum.max_gap = gap;
 				}
 				period_diff = period_sum = 0.0;
@@ -175,7 +175,7 @@ double Router::Merge_Delay (double factor, bool zero_flag)
 			} else {
 				gap = 0.0;
 			}
-			if (link_gap_flag) link_gap_file.File () << "\t" << gap;
+			Write_Link_Gap (gap);
 			if (report_flag && gap > gap_sum.max_gap) gap_sum.max_gap = gap;
 		}
 
@@ -193,9 +193,8 @@ double Router::Merge_Delay (double factor, bool zero_flag)
 	} else {
 		gap = 0.0;
 	}
-	if (link_gap_flag) {
-		link_gap_file.File () << "\t" << gap << endl;
-	}
+	Write_Link_Gap (gap, true);
+
 	if (report_flag) {
 		link_gap_array.push_back (gap_sum);
 	}

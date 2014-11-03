@@ -114,6 +114,7 @@
     <ClCompile Include="Read\Read_Lines.cpp" />
     <ClCompile Include="Read\Read_Links.cpp" />
     <ClCompile Include="Read\Read_Link_Data.cpp" />
+    <ClCompile Include="Read\Read_Link_Dir.cpp" />
     <ClCompile Include="Read\Read_Locations.cpp" />
     <ClCompile Include="Read\Read_Nodes.cpp" />
     <ClCompile Include="Read\Read_Parking_Lots.cpp" />
@@ -138,6 +139,7 @@
     <ClCompile Include="Read\Read_Turn_Pens.cpp" />
     <ClCompile Include="Read\Read_Veh_Types.cpp" />
     <ClCompile Include="Read\Read_Zones.cpp" />
+    <ClCompile Include="Service\Converge_Service.cpp" />
     <ClCompile Include="Service\Data_Service.cpp" />
     <ClCompile Include="Service\Data_Shapes.cpp" />
     <ClCompile Include="Service\Draw_Service.cpp" />
@@ -189,6 +191,7 @@
     <ClInclude Include="..\Include\Attribute_Data.hpp" />
     <ClInclude Include="..\Include\Connect_Data.hpp" />
     <ClInclude Include="..\Include\Connect_File.hpp" />
+    <ClInclude Include="..\Include\Converge_Service.hpp" />
     <ClInclude Include="..\Include\Data_Service.hpp" />
     <ClInclude Include="..\Include\Detector_Data.hpp" />
     <ClInclude Include="..\Include\Detector_File.hpp" />

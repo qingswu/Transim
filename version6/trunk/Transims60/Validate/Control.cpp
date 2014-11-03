@@ -160,12 +160,34 @@ void Validate::Program_Control (void)
 	if (link_flag) {
 		key = Get_Control_String (TRAFFIC_COUNT_FILE);
 
+		//---- verify the file type ----
+
+		Strings fields = Db_Header::Def_Fields (Project_Filename (key));
+		Str_Itr str_itr;
+		cnt_dir_flag = false;
+
+		for (str_itr = fields.begin (); str_itr != fields.end (); str_itr++) {
+			if (str_itr->Starts_With ("AB_")) break;
+			if ((*str_itr) [0] == 'B' && (*str_itr) [1] >= '0' && (*str_itr) [1] <= '9') {
+				cnt_dir_flag = true;
+				break;
+			}
+		}
 		Print (1);
-		count_file.File_Type ("Traffic Count File");
 
-		count_file.Open (Project_Filename (key));
+		if (cnt_dir_flag) {
+			cnt_dir_file.File_Type ("Traffic Count File");
 
-		Print (1, "Number of Time Periods = ") << count_file.Num_Periods ();
+			cnt_dir_file.Open (Project_Filename (key));
+
+			Print (1, "Number of Time Periods = ") << cnt_dir_file.Num_Periods ();
+		} else {
+			count_file.File_Type ("Traffic Count File");
+
+			count_file.Open (Project_Filename (key));
+
+			Print (1, "Number of Time Periods = ") << count_file.Num_Periods ();
+		}
 	}
 
 	//---- open the turn count file ----
@@ -266,11 +288,19 @@ void Validate::Program_Control (void)
 
 		num = sum_periods.Num_Periods ();
 
-		if (count_file.Num_Periods () < num) goto field_error;
+		if (cnt_dir_flag) {
+			if (cnt_dir_file.Num_Periods () < num) goto field_error;
+		} else {
+			if (count_file.Num_Periods () < num) goto field_error;
+		}
 
 		for (i=0; i < num; i++) {
 			sum_periods.Period_Range (i, low, high);
-			if (!count_file.In_Range (low) || !count_file.In_Range ((low + high) / 2)) goto field_error;
+			if (cnt_dir_flag) {
+				if (!cnt_dir_file.In_Range (low) || !cnt_dir_file.In_Range ((low + high) / 2)) goto field_error;
+			} else {
+				if (!count_file.In_Range (low) || !count_file.In_Range ((low + high) / 2)) goto field_error;
+			}
 		}
 		if (!delay_flag) {
 			key = "Input Volume";

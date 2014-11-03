@@ -43,12 +43,14 @@ protected:
 	virtual bool Get_Phasing_Data (Phasing_File &file, Phasing_Record &data);
 	virtual bool Get_Detector_Data (Detector_File &file, Detector_Data &data);
 	virtual bool Get_Stop_Data (Stop_File &file, Stop_Data &data);
+	virtual bool Get_Performance_Data (Performance_File &file, Performance_Data &data);
+	virtual bool Get_Turn_Delay_Data (Turn_Delay_File &file, Turn_Delay_Data &data);
 
 private:
 
 	int max_location, max_parking, max_access, max_stop, max_route, max_zone;
 	int nnode, nzone, nlink, nshort, nboundary, nshape, npocket, nconnect;
-	int nlocation, nparking, naccess, nlane_use, nturn, ntoll;
+	int nlocation, nparking, naccess, nlane_use, nturn, ntoll, nperf, ndelay;
 	int nsign, nsignal, ntiming, nphasing, ndetector, ncoord;
 	int nstop, nroute, nschedule, ndriver, external_offset;
 	int new_zone, new_location, new_parking, new_access, new_stop, new_route;

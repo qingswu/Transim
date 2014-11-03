@@ -33,7 +33,7 @@ bool Relocate::Get_Parking_Data (Parking_File &file, Parking_Data &parking_rec)
 				Parking_Data *parking_ptr = &parking_array [map_itr->second];
 
 				if (parking_ptr->Link () != parking_rec.Link ()) {
-					target_loc_map.insert (Int_Map_Data (parking_rec.Parking (), index));
+					target_park_map.insert (Int_Map_Data (parking_rec.Parking (), index));
 					parking_array.push_back (parking_rec);
 					parking_pt.insert (Point_Map_Data (index, points [0]));
 				} else {

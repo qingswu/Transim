@@ -37,10 +37,9 @@ bool Router::Memory_Loop (int part, Plan_Processor *plan_process_ptr)
 		if (hhold < max_hhold) max_hhold = hhold;
 	}
 
-	if (Master ()) {
-		Show_Message ("Processing Trip Record");
-		Set_Progress ();
-	}
+	Show_Message ("Processing Trip Record");
+	Set_Progress ();
+
 	last_hhold = 0;
 	build_flag = true;
 
@@ -130,7 +129,7 @@ bool Router::Memory_Loop (int part, Plan_Processor *plan_process_ptr)
 			}
 		}
 	}
-	if (Master () && !thread_flag) End_Progress ();
+	if (!thread_flag) End_Progress ();
 
 	if (last_hhold > 0 && ptr_array->size () > 0) {
 		part_processor.Plan_Build (ptr_array, part, plan_process_ptr);

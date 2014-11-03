@@ -114,6 +114,7 @@ void ArcSnapshot::Read_Snapshot (void)
 
 			//---- create a new shape file ----
 
+			arcview_snapshot.First_Open (true);
 			arcview_snapshot.Open (String ("%s_%s.shp") % shapename % end_time.Time_Label (pad_flag));
 			arcview_snapshot.Write_Header ();
 		}

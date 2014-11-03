@@ -31,7 +31,9 @@ bool Relocate::Process_Plan (Plan_Ptr plan_ptr)
 	if (select_end_times && !end_range.In_Range (plan_ptr->End ())) return (false);
 	if (select_origins && !org_range.In_Range (plan_ptr->Origin ())) return (false);
 	if (select_destinations && !des_range.In_Range (plan_ptr->Destination ())) return (false);
-		
+
+	flag = false;
+
 	//---- check the selection records ----
 
 	if (select_flag) {
@@ -44,16 +46,38 @@ bool Relocate::Process_Plan (Plan_Ptr plan_ptr)
 	if (map_itr != target_loc_map.end ()) {
 		location_ptr = &location_array [map_itr->second];
 		plan_ptr->Origin (location_ptr->Location ());
+	} else {
+		map_itr = location_map.find (plan_ptr->Origin ());
+		if (map_itr != location_map.end ()) {
+			location_ptr = &location_array [map_itr->second];
+			if (location_ptr->Zone () != 1) {
+				flag = true;
+				goto flag_plan;
+			}
+		} else {
+			flag = true;
+			goto flag_plan;
+		}
 	}
 	map_itr = target_loc_map.find (plan_ptr->Destination ());
 	if (map_itr != target_loc_map.end ()) {
 		location_ptr = &location_array [map_itr->second];
 		plan_ptr->Destination (location_ptr->Location ());
+	} else {
+		map_itr = location_map.find (plan_ptr->Destination ());
+		if (map_itr != location_map.end ()) {
+			location_ptr = &location_array [map_itr->second];
+			if (location_ptr->Zone () != 1) {
+				flag = true;
+				goto flag_plan;
+			}
+		} else {
+			flag = true;
+			goto flag_plan;
+		}	
 	}
 
 	//---- process plan legs ----
-
-	flag = false;
 
 	for (leg_itr = plan_ptr->begin (); leg_itr != plan_ptr->end (); leg_itr++) {
 		if (leg_itr->Type () == LOCATION_ID) {
@@ -61,12 +85,36 @@ bool Relocate::Process_Plan (Plan_Ptr plan_ptr)
 			if (map_itr != target_loc_map.end ()) {
 				location_ptr = &location_array [map_itr->second];
 				leg_itr->ID (location_ptr->Location ());
+			} else {
+				map_itr = location_map.find (leg_itr->ID ());
+				if (map_itr != location_map.end ()) {
+					location_ptr = &location_array [map_itr->second];
+					if (location_ptr->Zone () != 1) {
+						flag = true;
+						break;
+					}
+				} else {
+					flag = true;
+					break;
+				}
 			}
 		} else if (leg_itr->Type () == PARKING_ID) {
-			map_itr = target_loc_map.find (leg_itr->ID ());
-			if (map_itr != target_loc_map.end ()) {
+			map_itr = target_park_map.find (leg_itr->ID ());
+			if (map_itr != target_park_map.end ()) {
 				parking_ptr = &parking_array [map_itr->second];
 				leg_itr->ID (parking_ptr->Parking ());
+			} else {
+				map_itr = parking_map.find (leg_itr->ID ());
+				if (map_itr != parking_map.end ()) {
+					parking_ptr = &parking_array [map_itr->second];
+					if (parking_ptr->Type () != 1) {
+						flag = true;
+						break;
+					}
+				} else {
+					flag = true;
+					break;
+				}
 			}
 		} else if (leg_itr->Link_Type ()) {
 			link = leg_itr->Link_ID ();
@@ -85,7 +133,7 @@ bool Relocate::Process_Plan (Plan_Ptr plan_ptr)
 			}
 		}
 	}
-
+flag_plan:
 	if (flag) {
 		if (new_select_flag) {
 			Trip_Index trip_index;

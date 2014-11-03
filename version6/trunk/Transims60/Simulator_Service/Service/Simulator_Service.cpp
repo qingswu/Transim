@@ -11,7 +11,7 @@ Simulator_Service *sim = 0;
 //---------------------------------------------------------
 
 #ifdef ROUTING
-Simulator_Service::Simulator_Service (void) : Router_Service (), Select_Service ()
+Simulator_Service::Simulator_Service (void) : Router_Service ()
 #else
 Simulator_Service::Simulator_Service (void) : Data_Service (), Select_Service ()
 #endif
@@ -136,6 +136,15 @@ void Simulator_Service::Simulator_Service_Keys (int *keys)
 		SELECT_TRAVELER_TYPES, SELECT_VEHICLE_TYPES, SELECT_PROBLEM_TYPES, 0
 	};
 	Select_Service_Keys (select_service_keys);
+	
+	int converge_service_keys [] = {
+		MAXIMUM_NUMBER_OF_ITERATIONS, LINK_CONVERGENCE_CRITERIA, TRIP_CONVERGENCE_CRITERIA, 
+		TRANSIT_CAPACITY_CRITERIA, INITIAL_WEIGHTING_FACTOR, ITERATION_WEIGHTING_INCREMENT, 
+		MAXIMUM_WEIGHTING_FACTOR, MINIMIZE_VEHICLE_HOURS, MAXIMUM_RESKIM_ITERATIONS, 
+		RESKIM_CONVERGENCE_CRITERIA, SAVE_AFTER_ITERATIONS, NEW_LINK_CONVERGENCE_FILE, 
+		NEW_TRIP_CONVERGENCE_FILE, 0
+	};
+	Converge_Service_Keys (converge_service_keys);
 
 	sim_output_step.Add_Keys ();
 }

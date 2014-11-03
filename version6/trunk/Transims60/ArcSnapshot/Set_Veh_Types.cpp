@@ -43,7 +43,7 @@ void ArcSnapshot::Set_Veh_Types (void)
 			size = veh_length [type];
 		}
 	}
-	if (size < cell_size) cell_size = size;
+	if (size < cell_size || cell_size == 0) cell_size = size;
 
 	//---- allocate link arrays ----
 

@@ -116,9 +116,6 @@ bool Router::Part_Processor::Initialize (Router *_exe)
 		for (i=0; i < num_processors; i++) {
 			part_thread [i] = new Part_Thread (i, this);
 		}
-		if (exe->trip_gap_map_flag) {
-			exe->trip_gap_map_array.Initialize (exe->Num_Partitions ());
-		}
 		if (exe->trip_flag && !exe->trip_set_flag) {
 			for (i=j=0; i < exe->Num_Partitions (); i++, j++) {
 				if (j == num_processors) j = 0;

@@ -20,6 +20,8 @@ public:
 	Simulator (void);
 
 	virtual void Execute (void);
+	virtual void Print_Reports (void);
+	virtual void Page_Header (void);
 
 protected:
 	virtual void Program_Control (void);

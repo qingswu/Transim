@@ -18,6 +18,8 @@ void LineSum::On_Off_Report (On_Off_Report_Data &report)
 	On_Off_Map_Itr on_off_itr;
 	On_Off_Data *access_ptr, stop_data, mode_data, total_data;
 	Str_Map_Itr name_itr;
+	XY_Map_Itr xy_itr;
+	XYZ_Point point;
 
 	report_code = report.details;
 
@@ -142,7 +144,21 @@ void LineSum::On_Off_Report (On_Off_Report_Data &report)
 							report.file->Put_Field (day_on_fld, vol_on);
 							report.file->Put_Field (day_off_fld, vol_off);
 
-							report.file->Write ();
+							if (report.arcview_flag) {
+								report.arc_file->clear ();
+
+								xy_itr = xy_map.find (stop);
+
+								if (xy_itr != xy_map.end ()) {
+									point.x = xy_itr->second.x;
+									point.y = xy_itr->second.y;
+									report.arc_file->push_back (point);
+
+									report.arc_file->Write_Record ();
+								}
+							} else {
+								report.file->Write ();
+							}
 						}
 					} else {
 						vol_on = stop_data.pk_on + stop_data.op_on;
@@ -167,7 +183,21 @@ void LineSum::On_Off_Report (On_Off_Report_Data &report)
 							report.file->Put_Field (day_on_fld, vol_on);
 							report.file->Put_Field (day_off_fld, vol_off);
 
-							report.file->Write ();
+							if (report.arcview_flag) {
+								report.arc_file->clear ();
+
+								xy_itr = xy_map.find (stop);
+
+								if (xy_itr != xy_map.end ()) {
+									point.x = xy_itr->second.x;
+									point.y = xy_itr->second.y;
+									report.arc_file->push_back (point);
+
+									report.arc_file->Write_Record ();
+								}
+							} else {
+								report.file->Write ();
+							}
 						}
 					}
 				}
@@ -218,7 +248,21 @@ void LineSum::On_Off_Report (On_Off_Report_Data &report)
 						report.file->Put_Field (day_on_fld, vol_on);
 						report.file->Put_Field (day_off_fld, vol_off);
 
-						report.file->Write ();
+						if (report.arcview_flag) {
+							report.arc_file->clear ();
+
+							xy_itr = xy_map.find (stop);
+
+							if (xy_itr != xy_map.end ()) {
+								point.x = xy_itr->second.x;
+								point.y = xy_itr->second.y;
+								report.arc_file->push_back (point);
+
+								report.arc_file->Write_Record ();
+							}
+						} else {
+							report.file->Write ();
+						}
 					}
 					count++;
 				}
@@ -262,7 +306,21 @@ void LineSum::On_Off_Report (On_Off_Report_Data &report)
 					report.file->Put_Field (day_on_fld, vol_on);
 					report.file->Put_Field (day_off_fld, vol_off);
 
-					report.file->Write ();
+					if (report.arcview_flag) {
+						report.arc_file->clear ();
+
+						xy_itr = xy_map.find (stop);
+
+						if (xy_itr != xy_map.end ()) {
+							point.x = xy_itr->second.x;
+							point.y = xy_itr->second.y;
+							report.arc_file->push_back (point);
+
+							report.arc_file->Write_Record ();
+						}
+					} else {
+						report.file->Write ();
+					}
 				}
 				count++;
 			}

@@ -77,7 +77,11 @@ void LinkSum::Execute (void)
 	//---- write the perf data file ----
 
 	if (summary_flag) {
-		Summary_File ();
+		if (periods_flag || ratios_flag) {
+			Custom_Summaries ();
+		} else {
+			Summary_File ();
+		}
 	}
 
 	//---- write the group perf file ----

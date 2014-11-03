@@ -35,15 +35,15 @@ public:
 
 protected:
 	enum LinkSum_Keys { 
-		COMPARE_PERFORMANCE_FILE = 1, COMPARE_PERFORMANCE_FORMAT, MINIMUM_LINK_VOLUME,
-		PERSON_BASED_STATISTICS, SELECT_BY_LINK_GROUP,  
-		COMPARE_TURN_DELAY_FILE, COMPARE_TURN_DELAY_FORMAT, 
-		TURN_NODE_RANGE, NEW_LINK_ACTIVITY_FILE, NEW_LINK_ACTIVITY_FORMAT, 
-		COPY_LOCATION_FIELDS, NEW_ZONE_TRAVEL_FILE, NEW_ZONE_TRAVEL_FORMAT, 
+		COMPARE_PERFORMANCE_FILE = 1, COMPARE_PERFORMANCE_FORMAT, 
+		MINIMUM_LINK_VOLUME, PERSON_BASED_STATISTICS, SELECT_BY_LINK_GROUP,  
+		COMPARE_TURN_DELAY_FILE, COMPARE_TURN_DELAY_FORMAT, TURN_NODE_RANGE,
+		NEW_LINK_ACTIVITY_FILE, NEW_LINK_ACTIVITY_FORMAT, COPY_LOCATION_FIELDS, 
+		NEW_ZONE_TRAVEL_FILE, NEW_ZONE_TRAVEL_FORMAT, 
 		NEW_GROUP_TRAVEL_FILE, NEW_GROUP_TRAVEL_FORMAT, 
-		NEW_LINK_DIRECTION_FILE, NEW_LINK_DIRECTION_FORMAT, NEW_LINK_DIRECTION_FIELD, 
-		NEW_LINK_DIRECTION_INDEX, NEW_LINK_DATA_FILE, NEW_LINK_DATA_FORMAT, 
-		NEW_LINK_DATA_FIELD, NEW_DATA_SUMMARY_FILE, NEW_DATA_SUMMARY_FORMAT, 
+		NEW_LINK_DIRECTION_FILE, NEW_LINK_DIRECTION_FORMAT, NEW_LINK_DIRECTION_FIELD, NEW_LINK_DIRECTION_INDEX, 
+		NEW_LINK_DATA_FILE, NEW_LINK_DATA_FORMAT, NEW_LINK_DATA_FIELD, 
+		NEW_DATA_SUMMARY_FILE, NEW_DATA_SUMMARY_FORMAT, NEW_DATA_SUMMARY_PERIODS, NEW_DATA_SUMMARY_RATIOS,
 		NEW_GROUP_SUMMARY_FILE, NEW_GROUP_SUMMARY_FORMAT, 
 	};
 	virtual void Program_Control (void);
@@ -57,7 +57,7 @@ private:
 		TIME_DISTRIB, VC_RATIOS, TIME_CHANGE, VOLUME_CHANGE, TRAVEL_TIME,
 		PERF_REPORT, PERF_SUMMARY, GROUP_REPORT, GROUP_SUMMARY, RELATIVE_GAP };
 
-	bool select_flag, activity_flag, zone_flag, group_flag, person_flag;
+	bool select_flag, activity_flag, zone_flag, group_flag, person_flag, periods_flag, ratios_flag;
 	bool compare_flag, group_select, summary_flag, group_sum_flag, turn_flag, turn_compare_flag;
 	int increment, num_inc, nerror;
 	double header_value, cap_factor, minimum_volume, congested_ratio;
@@ -67,6 +67,8 @@ private:
 	typedef Doubles_Array::iterator    Doubles_Itr;
 
 	Doubles_Array sum_bin, zone_vmt, zone_vht;
+	Doubles data_ratios;
+	Time_Periods data_periods;
 
 	Performance_File compare_file;
 	Turn_Delay_File turn_compare_file;
@@ -185,6 +187,7 @@ private:
 	void Relative_Gap_Header (void);
 
 	void Summary_File (void);
+	void Custom_Summaries (void);
 	void Group_Sum_File (void);
 };
 #endif

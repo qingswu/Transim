@@ -24,6 +24,9 @@ void Simulator::Execute (void)
 	Simulator_Service::Execute ();
 
 #ifdef ROUTING
+	clock_t path_total = 0;
+
+	Global_Data ();
 
 	//---- read trips into memory ----
 
@@ -31,7 +34,7 @@ void Simulator::Execute (void)
 
 	//---- build paths ----
 
-	Show_Message ("Build Plans");
+	Show_Message ("Building Plans -- Trip");
 	Set_Progress ();
 
 	bool build_flag, first_iteration = true;
@@ -45,6 +48,8 @@ void Simulator::Execute (void)
 
 	plan_processor.Start_Processing ();
 	plan_ptr_array = new Plan_Ptr_Array ();
+			
+	start = clock ();
 
 	//---- process each trip ----
 	
@@ -73,7 +78,7 @@ void Simulator::Execute (void)
 		//---- update the selection priority flag ----
 
 		if (plan_ptr->Priority () == NO_PRIORITY) {
-			plan_ptr->Method (UPDATE_PLAN);
+			plan_ptr->Method (COPY_PLAN);
 		} else if (!first_iteration && select_priorities) {
 			build_flag = select_priority [plan_ptr->Priority ()];
 
@@ -83,7 +88,7 @@ void Simulator::Execute (void)
 			if (build_flag) {
 				plan_ptr->Method (BUILD_PATH);
 			} else {
-				plan_ptr->Method (UPDATE_PLAN);
+				plan_ptr->Method (COPY_PLAN);
 			}
 		} else {
 			plan_ptr->Method (BUILD_PATH);
@@ -100,13 +105,16 @@ void Simulator::Execute (void)
 	}
 	plan_processor.Stop_Processing ();
 	End_Progress ();
-#endif
+
+	path_total += (clock () - start);
+#else
 
 	//---- initialize the global data structures ----
 
 	Show_Message ("Initializing the Simulator");
 
 	Global_Data ();
+#endif
 
 	time_step = param.start_time_step;
 	sim_period = sim_periods.Period (time_step) - 1;
@@ -124,15 +132,14 @@ void Simulator::Execute (void)
 	read_status = first = true;
 	input_total = update_total = node_total = output_total = travel_total = 0;
 
-#ifdef ROUTING
-	Show_Message (2, "Plan Processing -- Trip");
-#else
+#ifndef ROUTING
 	if (read_all_flag) {
 		Show_Message (2, "Reading Plans into Memory -- Trip");
 	} else {
-		Show_Message (2, "Processing Time of Day");
+		Show_Message (1);
 	}
 #endif
+	Show_Message (1, "Simulating Time of Day");
 	Set_Progress ();
 
 	//---- process each time step ----
@@ -220,7 +227,13 @@ void Simulator::Execute (void)
 	if (start == 0) start = 1;
 
 	Break_Check (6);
-	Write (2, String ("Seconds in Input Processing = %.1lf (%.1lf%%)") % 
+	Write (1);
+#ifdef ROUTING
+	start += path_total;
+	Write (1, String ("Seconds in Path Processing = %.1lf (%.1lf%%)") % 
+		((double) input_total / CLOCKS_PER_SEC) % (100.0 * path_total / start) % FINISH);
+#endif
+	Write (1, String ("Seconds in Input Processing = %.1lf (%.1lf%%)") % 
 		((double) input_total / CLOCKS_PER_SEC) % (100.0 * input_total / start) % FINISH);
 	Write (1, String ("Seconds in Output Processing = %.1lf (%.1lf%%)") % 
 		((double) output_total / CLOCKS_PER_SEC) % (100.0 * output_total / start) % FINISH);
@@ -307,9 +320,37 @@ void Simulator::Execute (void)
 		}
 	}
 
+	//---- print reports ----
+
+	Print_Reports ();
+
 	//---- end the program ----
 
 	Report_Problems ();
 
 	Exit_Stat (DONE);
 }
+
+//---------------------------------------------------------
+//	Print_Reports
+//---------------------------------------------------------
+
+void Simulator::Print_Reports (void)
+{
+	Router_Service::Print_Reports ();
+}
+
+//---------------------------------------------------------
+//	Page_Header
+//---------------------------------------------------------
+
+void Simulator::Page_Header (void)
+{
+	switch (Header_Number ()) {
+		case 0:
+		default:
+			Router_Service::Page_Header ();
+			break;
+	}
+}
+

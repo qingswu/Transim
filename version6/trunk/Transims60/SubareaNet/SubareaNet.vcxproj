@@ -313,12 +313,14 @@
     <ClCompile Include="Get_Location_Data.cpp" />
     <ClCompile Include="Get_Node_Data.cpp" />
     <ClCompile Include="Get_Parking_Data.cpp" />
+    <ClCompile Include="Get_Performance_Data.cpp" />
     <ClCompile Include="Get_Phasing_Data.cpp" />
     <ClCompile Include="Get_Pocket_Data.cpp" />
     <ClCompile Include="Get_Signal_Data.cpp" />
     <ClCompile Include="Get_Sign_Data.cpp" />
     <ClCompile Include="Get_Stop_Data.cpp" />
     <ClCompile Include="Get_Timing_Data.cpp" />
+    <ClCompile Include="Get_Turn_Delay_Data.cpp" />
     <ClCompile Include="Get_Turn_Pen_Data.cpp" />
     <ClCompile Include="Get_Zone_Data.cpp" />
     <ClCompile Include="SubareaNet.cpp" />

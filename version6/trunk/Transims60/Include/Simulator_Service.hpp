@@ -51,7 +51,7 @@
 //---------------------------------------------------------
 
 #ifdef ROUTING
-class SYSLIB_API Simulator_Service : public Router_Service, public Select_Service
+class SYSLIB_API Simulator_Service : public Router_Service
 #else
 class SYSLIB_API Simulator_Service : public Data_Service, public Select_Service
 #endif
