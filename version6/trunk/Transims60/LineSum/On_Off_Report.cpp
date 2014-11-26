@@ -11,8 +11,8 @@
 void LineSum::On_Off_Report (On_Off_Report_Data &report)
 {
 	int i, stop, mode, count, vol_on, vol_off;
-	int stop_fld, mode_fld, name_fld, pk_on_fld, pk_off_fld, op_on_fld, op_off_fld, day_on_fld, day_off_fld;
-	String name;
+	int stop_fld, mode_fld, name_fld, pk_on_fld, pk_off_fld, op_on_fld, op_off_fld, day_on_fld, day_off_fld, station_fld;
+	String name, station;
 
 	Range_Array_Itr range_itr;
 	On_Off_Map_Itr on_off_itr;
@@ -23,7 +23,7 @@ void LineSum::On_Off_Report (On_Off_Report_Data &report)
 
 	report_code = report.details;
 
-	stop_fld = mode_fld = name_fld = pk_on_fld = pk_off_fld = op_on_fld = op_off_fld = day_on_fld = day_off_fld = -1;
+	stop_fld = mode_fld = name_fld = pk_on_fld = pk_off_fld = op_on_fld = op_off_fld = day_on_fld = day_off_fld = station_fld = -1;
 
 	if (report.file != 0) {
 		stop_fld = report.file->Add_Field ("STOP", DB_INTEGER, 8);
@@ -38,6 +38,9 @@ void LineSum::On_Off_Report (On_Off_Report_Data &report)
 		day_on_fld = report.file->Add_Field ("DAY_ON", DB_INTEGER, 8);
 		day_off_fld = report.file->Add_Field ("DAY_OFF", DB_INTEGER, 8);
 
+		if (station_flag) {
+			station_fld = report.file->Add_Field ("NAME", DB_STRING, 30);
+		}
 		report.file->Write_Header ();
 	}
 	Show_Message (String ("Creating On-Off Report #%d -- Stops") % report.number);
@@ -98,8 +101,10 @@ void LineSum::On_Off_Report (On_Off_Report_Data &report)
 							vol_on = stop_data.pk_on + stop_data.op_on;
 							vol_off = stop_data.pk_off + stop_data.op_off;
 
-							Print (1, String ("        Total   %4d        %6d  %6d  %6d  %6d  %6d  %6d") % count % 
-								stop_data.pk_on % stop_data.pk_off % stop_data.op_on % stop_data.op_off % vol_on % vol_off);
+							if (vol_on > 0 || vol_off > 0) {
+								Print (1, String ("        Total   %4d        %6d  %6d  %6d  %6d  %6d  %6d") % count % 
+									stop_data.pk_on % stop_data.pk_off % stop_data.op_on % stop_data.op_off % vol_on % vol_off);
+							}
 						}
 						Print (1);
 					} else if (report_code == 2) {
@@ -107,43 +112,55 @@ void LineSum::On_Off_Report (On_Off_Report_Data &report)
 							vol_on = mode_data.pk_on + mode_data.op_on;
 							vol_off = mode_data.pk_off + mode_data.op_off;
 
-							Print (1, String ("%-5d    %3d   %6d  %6d  %6d  %6d  %6d  %6d") % stop % mode % 
-								mode_data.pk_on % mode_data.pk_off % mode_data.op_on % mode_data.op_off % vol_on % vol_off);
+							if (vol_on > 0 || vol_off > 0) {
+								Print (1, String ("%-5d    %3d   %6d  %6d  %6d  %6d  %6d  %6d") % stop % mode % 
+									mode_data.pk_on % mode_data.pk_off % mode_data.op_on % mode_data.op_off % vol_on % vol_off);
 
-							if (station_flag) {
-								name_itr = stop_names.find (stop);
+								if (station_flag) {
+									name_itr = stop_names.find (stop);
 
-								if (name_itr != stop_names.end ()) {
-									Print (0, "  ") << name_itr->second;
+									if (name_itr != stop_names.end ()) {
+										Print (0, "  ") << name_itr->second;
+										station = name_itr->second;
+									} else {
+										station.clear ();
+									}
 								}
 							}
 						} else if (mode > 0) {
 							vol_on = mode_data.pk_on + mode_data.op_on;
 							vol_off = mode_data.pk_off + mode_data.op_off;
 
-							Print (1, String ("         %3d   %6d  %6d  %6d  %6d  %6d  %6d") % mode % 
-								mode_data.pk_on % mode_data.pk_off % mode_data.op_on % mode_data.op_off % vol_on % vol_off);	
+							if (vol_on > 0 || vol_off > 0) {
+								Print (1, String ("         %3d   %6d  %6d  %6d  %6d  %6d  %6d") % mode % 
+									mode_data.pk_on % mode_data.pk_off % mode_data.op_on % mode_data.op_off % vol_on % vol_off);
+							}
 
 							vol_on = stop_data.pk_on + stop_data.op_on;
 							vol_off = stop_data.pk_off + stop_data.op_off;
 
-							Print (1, String ("        Total  %6d  %6d  %6d  %6d  %6d  %6d") % 
-								stop_data.pk_on % stop_data.pk_off % stop_data.op_on % stop_data.op_off % vol_on % vol_off);
+							if (vol_on > 0 || vol_off > 0) {
+								Print (1, String ("        Total  %6d  %6d  %6d  %6d  %6d  %6d") % 
+									stop_data.pk_on % stop_data.pk_off % stop_data.op_on % stop_data.op_off % vol_on % vol_off);
+							}
 						}
 						Print (1);
 						if (report.file != 0) {
 							vol_on = mode_data.pk_on + mode_data.op_on;
 							vol_off = mode_data.pk_off + mode_data.op_off;
 
-							report.file->Put_Field (stop_fld, stop);
-							report.file->Put_Field (mode_fld, mode);
-							report.file->Put_Field (pk_on_fld, mode_data.pk_on);
-							report.file->Put_Field (pk_off_fld, mode_data.pk_off);
-							report.file->Put_Field (op_on_fld, mode_data.op_on);
-							report.file->Put_Field (op_off_fld, mode_data.op_off);
-							report.file->Put_Field (day_on_fld, vol_on);
-							report.file->Put_Field (day_off_fld, vol_off);
+							if (vol_on > 0 || vol_off > 0) {
+								report.file->Put_Field (stop_fld, stop);
+								report.file->Put_Field (mode_fld, mode);
+								report.file->Put_Field (pk_on_fld, mode_data.pk_on);
+								report.file->Put_Field (pk_off_fld, mode_data.pk_off);
+								report.file->Put_Field (op_on_fld, mode_data.op_on);
+								report.file->Put_Field (op_off_fld, mode_data.op_off);
+								report.file->Put_Field (day_on_fld, vol_on);
+								report.file->Put_Field (day_off_fld, vol_off);
+								report.file->Put_Field (station_fld, station);
 
+<<<<<<< .working
 							if (report.arcview_flag) {
 								report.arc_file->clear ();
 
@@ -159,30 +176,54 @@ void LineSum::On_Off_Report (On_Off_Report_Data &report)
 							} else {
 								report.file->Write ();
 							}
+=======
+								if (report.arcview_flag) {
+									report.arc_file->clear ();
+
+									xy_itr = xy_map.find (stop);
+
+									if (xy_itr != xy_map.end ()) {
+										point.x = xy_itr->second.x;
+										point.y = xy_itr->second.y;
+										report.arc_file->push_back (point);
+
+										report.arc_file->Write_Record ();
+									}
+								} else {
+									report.file->Write ();
+								}
+							}
+>>>>>>> .merge-right.r1529
 						}
 					} else {
 						vol_on = stop_data.pk_on + stop_data.op_on;
 						vol_off = stop_data.pk_off + stop_data.op_off;
 
-						Print (1, String ("%-6d  %6d  %6d  %6d  %6d  %6d  %6d") % stop %
-							stop_data.pk_on % stop_data.pk_off % stop_data.op_on % stop_data.op_off % vol_on % vol_off);
+						if (vol_on > 0 || vol_off > 0) {
+							Print (1, String ("%-6d  %6d  %6d  %6d  %6d  %6d  %6d") % stop %
+								stop_data.pk_on % stop_data.pk_off % stop_data.op_on % stop_data.op_off % vol_on % vol_off);
 
-						if (station_flag) {
-							name_itr = stop_names.find (stop);
+							if (station_flag) {
+								name_itr = stop_names.find (stop);
 
-							if (name_itr != stop_names.end ()) {
-								Print (0, "  ") << name_itr->second;
+								if (name_itr != stop_names.end ()) {
+									Print (0, "  ") << name_itr->second;
+									station = name_itr->second;
+								} else {
+									station.clear ();
+								}
 							}
-						}
-						if (report.file != 0) {
-							report.file->Put_Field (stop_fld, stop);
-							report.file->Put_Field (pk_on_fld, stop_data.pk_on);
-							report.file->Put_Field (pk_off_fld, stop_data.pk_off);
-							report.file->Put_Field (op_on_fld, stop_data.op_on);
-							report.file->Put_Field (op_off_fld, stop_data.op_off);
-							report.file->Put_Field (day_on_fld, vol_on);
-							report.file->Put_Field (day_off_fld, vol_off);
+							if (report.file != 0) {
+								report.file->Put_Field (stop_fld, stop);
+								report.file->Put_Field (pk_on_fld, stop_data.pk_on);
+								report.file->Put_Field (pk_off_fld, stop_data.pk_off);
+								report.file->Put_Field (op_on_fld, stop_data.op_on);
+								report.file->Put_Field (op_off_fld, stop_data.op_off);
+								report.file->Put_Field (day_on_fld, vol_on);
+								report.file->Put_Field (day_off_fld, vol_off);
+								report.file->Put_Field (station_fld, station);
 
+<<<<<<< .working
 							if (report.arcview_flag) {
 								report.arc_file->clear ();
 
@@ -198,6 +239,24 @@ void LineSum::On_Off_Report (On_Off_Report_Data &report)
 							} else {
 								report.file->Write ();
 							}
+=======
+								if (report.arcview_flag) {
+									report.arc_file->clear ();
+
+									xy_itr = xy_map.find (stop);
+
+									if (xy_itr != xy_map.end ()) {
+										point.x = xy_itr->second.x;
+										point.y = xy_itr->second.y;
+										report.arc_file->push_back (point);
+
+										report.arc_file->Write_Record ();
+									}
+								} else {
+									report.file->Write ();
+								}
+							}
+>>>>>>> .merge-right.r1529
 						}
 					}
 				}
@@ -218,36 +277,46 @@ void LineSum::On_Off_Report (On_Off_Report_Data &report)
 						vol_on = mode_data.pk_on + mode_data.op_on;
 						vol_off = mode_data.pk_off + mode_data.op_off;
 
-						Print (1, String ("%-5d    %3d   %6d  %6d  %6d  %6d  %6d  %6d") % stop % mode % 
-							mode_data.pk_on % mode_data.pk_off % mode_data.op_on % mode_data.op_off % vol_on % vol_off);	
+						if (vol_on > 0 || vol_off > 0) {
+							Print (1, String ("%-5d    %3d   %6d  %6d  %6d  %6d  %6d  %6d") % stop % mode % 
+								mode_data.pk_on % mode_data.pk_off % mode_data.op_on % mode_data.op_off % vol_on % vol_off);	
 
-						if (station_flag) {
-							name_itr = stop_names.find (stop);
+							if (station_flag) {
+								name_itr = stop_names.find (stop);
 
-							if (name_itr != stop_names.end ()) {
-								Print (0, "  ") << name_itr->second;
+								if (name_itr != stop_names.end ()) {
+									Print (0, "  ") << name_itr->second;
+									station = name_itr->second;
+								} else {
+									station.clear ();
+								}
 							}
 						}
 					} else {
 						vol_on = mode_data.pk_on + mode_data.op_on;
 						vol_off = mode_data.pk_off + mode_data.op_off;
 
-						Print (1, String ("         %3d   %6d  %6d  %6d  %6d  %6d  %6d") % mode % 
-							mode_data.pk_on % mode_data.pk_off % mode_data.op_on % mode_data.op_off % vol_on % vol_off);
+						if (vol_on > 0 || vol_off > 0) {
+							Print (1, String ("         %3d   %6d  %6d  %6d  %6d  %6d  %6d") % mode % 
+								mode_data.pk_on % mode_data.pk_off % mode_data.op_on % mode_data.op_off % vol_on % vol_off);
+						}
 					}
 					if (report.file != 0) {
 						vol_on = mode_data.pk_on + mode_data.op_on;
 						vol_off = mode_data.pk_off + mode_data.op_off;
 
-						report.file->Put_Field (stop_fld, stop);
-						report.file->Put_Field (mode_fld, mode);
-						report.file->Put_Field (pk_on_fld, mode_data.pk_on);
-						report.file->Put_Field (pk_off_fld, mode_data.pk_off);
-						report.file->Put_Field (op_on_fld, mode_data.op_on);
-						report.file->Put_Field (op_off_fld, mode_data.op_off);
-						report.file->Put_Field (day_on_fld, vol_on);
-						report.file->Put_Field (day_off_fld, vol_off);
+						if (vol_on > 0 || vol_off > 0) {
+							report.file->Put_Field (stop_fld, stop);
+							report.file->Put_Field (mode_fld, mode);
+							report.file->Put_Field (pk_on_fld, mode_data.pk_on);
+							report.file->Put_Field (pk_off_fld, mode_data.pk_off);
+							report.file->Put_Field (op_on_fld, mode_data.op_on);
+							report.file->Put_Field (op_off_fld, mode_data.op_off);
+							report.file->Put_Field (day_on_fld, vol_on);
+							report.file->Put_Field (day_off_fld, vol_off);
+							report.file->Put_Field (station_fld, station);
 
+<<<<<<< .working
 						if (report.arcview_flag) {
 							report.arc_file->clear ();
 
@@ -263,6 +332,24 @@ void LineSum::On_Off_Report (On_Off_Report_Data &report)
 						} else {
 							report.file->Write ();
 						}
+=======
+							if (report.arcview_flag) {
+								report.arc_file->clear ();
+
+								xy_itr = xy_map.find (stop);
+
+								if (xy_itr != xy_map.end ()) {
+									point.x = xy_itr->second.x;
+									point.y = xy_itr->second.y;
+									report.arc_file->push_back (point);
+
+									report.arc_file->Write_Record ();
+								}
+							} else {
+								report.file->Write ();
+							}
+						}
+>>>>>>> .merge-right.r1529
 					}
 					count++;
 				}
@@ -279,7 +366,7 @@ void LineSum::On_Off_Report (On_Off_Report_Data &report)
 			vol_on = access_ptr->pk_on + access_ptr->op_on;
 			vol_off = access_ptr->pk_off + access_ptr->op_off;
 
-			if (report_code == 1) {
+			if (report_code == 1 && (vol_on > 0 || vol_off > 0)) {
 				if (!count) {
 					Print (1, String ("%-5d    %3d   %-12.12s %6d  %6d  %6d  %6d  %6d  %6d") % stop % mode % name %
 						access_ptr->pk_on % access_ptr->pk_off % access_ptr->op_on % access_ptr->op_off % vol_on % vol_off);
@@ -289,6 +376,9 @@ void LineSum::On_Off_Report (On_Off_Report_Data &report)
 
 						if (name_itr != stop_names.end ()) {
 							Print (0, "  ") << name_itr->second;
+							station = name_itr->second;
+						} else {
+							station.clear ();
 						}
 					}
 				} else {
@@ -305,6 +395,7 @@ void LineSum::On_Off_Report (On_Off_Report_Data &report)
 					report.file->Put_Field (op_off_fld, access_ptr->op_off);
 					report.file->Put_Field (day_on_fld, vol_on);
 					report.file->Put_Field (day_off_fld, vol_off);
+					report.file->Put_Field (station_fld, station);
 
 					if (report.arcview_flag) {
 						report.arc_file->clear ();
@@ -345,15 +436,17 @@ void LineSum::On_Off_Report (On_Off_Report_Data &report)
 	vol_on = total_data.pk_on + total_data.op_on;
 	vol_off = total_data.pk_off + total_data.op_off;
 
-	if (report_code == 1) {
-		Print (1, String ("Total                      %7d %7d %7d %7d %7d %7d") % 
-			total_data.pk_on % total_data.pk_off % total_data.op_on % total_data.op_off % vol_on % vol_off);
-	} else if (report_code == 2) {
-		Print (1, String ("Total         %7d %7d %7d %7d %7d %7d") % 
-			total_data.pk_on % total_data.pk_off % total_data.op_on % total_data.op_off % vol_on % vol_off);
-	} else {
-		Print (2, String ("Total  %7d %7d %7d %7d %7d %7d") % 
-			total_data.pk_on % total_data.pk_off % total_data.op_on % total_data.op_off % vol_on % vol_off);
+	if (vol_on > 0 || vol_off > 0) {
+		if (report_code == 1) {
+			Print (1, String ("Total                      %7d %7d %7d %7d %7d %7d") % 
+				total_data.pk_on % total_data.pk_off % total_data.op_on % total_data.op_off % vol_on % vol_off);
+		} else if (report_code == 2) {
+			Print (1, String ("Total         %7d %7d %7d %7d %7d %7d") % 
+				total_data.pk_on % total_data.pk_off % total_data.op_on % total_data.op_off % vol_on % vol_off);
+		} else {
+			Print (2, String ("Total  %7d %7d %7d %7d %7d %7d") % 
+				total_data.pk_on % total_data.pk_off % total_data.op_on % total_data.op_off % vol_on % vol_off);
+		}
 	}
 	if (report.file != 0) {
 		report.file->Close ();

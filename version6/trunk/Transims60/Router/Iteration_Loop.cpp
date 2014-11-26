@@ -10,13 +10,17 @@
 
 void Router::Iteration_Loop (void)
 {
+<<<<<<< .working
 	int p, num, num_car, max_hhold, veh;
+=======
+	int p, num, num_car, max_hhold, veh, potential;
+>>>>>>> .merge-right.r1529
 	int last_hhold, skip_hhold, skip_person;
-	
+
 	Dtime second;
 	bool old_flag, duration_flag, last_skip, last_flag, link_last_flag, trip_last_flag, transit_last_flag;
-	bool last_new_plan_flag, last_problem_flag, last_skim_only;
-	double gap, new_factor, save_flag;
+	bool last_new_plan_flag, last_problem_flag, last_skim_only, save_flag;
+	double gap, new_factor, total_percent;
 	
 	clock_t path_time, update_time, total_time;
 
@@ -46,11 +50,7 @@ void Router::Iteration_Loop (void)
 
 	for (iteration=1; iteration <= max_iteration; iteration++) {
 		last_flag = (iteration == max_iteration);
-		first_iteration = (iteration == 1);
 
-		if (!first_iteration) {
-			Use_Link_Delays (true);
-		}
 		save_flag = (save_iter_flag && save_iter_range.In_Range (iteration));
 
 		if (max_iteration > 1) {
@@ -62,20 +62,50 @@ void Router::Iteration_Loop (void)
 
 		Iteration_Setup ();
 
+		if (!first_iteration) {
+			Use_Link_Delays (true);
+		}
+		if (rider_flag || (System_File_Flag (RIDERSHIP) && param.cap_penalty_flag)) {
+			line_array.Clear_Ridership ();
+		}
+		potential = select_records;
+		total_percent = 1.0;
+
+<<<<<<< .working
+		if (max_iteration > 1) {
+			Print (1);
+			Write (1, "Iteration Number ") << iteration << ":  Weighting Factor = " << initial_factor;
+			if (!thread_flag) Show_Message (1);
+		}
+		if (trip_set_flag) Show_Message (1);
+=======
+		if (total_records > 0 && max_percent_flag) {
+			percent_selected = ((double) select_records / total_records);
+			total_percent = percent_selected;
+>>>>>>> .merge-right.r1529
+
+<<<<<<< .working
+		Iteration_Setup ();
+
 		if (rider_flag || (System_File_Flag (RIDERSHIP) && param.cap_penalty_flag)) {
 			line_array.Clear_Ridership ();
 		}
 		if (total_records > 0 && max_percent_flag) {
 			percent_selected = ((double) num_selected / total_records);
+=======
+>>>>>>> .merge-right.r1529
 			if (percent_selected > max_percent_select) {
 				percent_selected = max_percent_select / percent_selected;
+				if (select_weight > 0) {
+					percent_selected = percent_selected * select_records / select_weight;
+				}
 			} else {
 				percent_selected = 1.0;
 			}
 		} else {
 			percent_selected = 1.0;
 		}
-		total_records = num_selected = 0;
+		total_records = select_records = select_weight = 0;
 
 		if (last_flag) {
 			new_plan_flag = last_new_plan_flag;
@@ -151,6 +181,11 @@ void Router::Iteration_Loop (void)
 
 		//---- build count ----
 
+		if (method != DTA_FLOWS) {
+			Write (2, String ("Build Selection Total = %d (%.1lf%%)") % potential % (total_percent * 100.0) % FINISH);
+		} else {
+			Write (1);
+		}
 		Write (1, "Number of Paths Built = ") << num_build;
 		num = num_build + num_update + num_copied;
 		if (num > 0) Write (0, String (" (%.1lf%%)") % (num_build * 100.0 / num) % FINISH);

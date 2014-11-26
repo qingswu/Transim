@@ -77,12 +77,24 @@
     <ClCompile Include="Get_Parking_Data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+<<<<<<< .working
     <ClCompile Include="Get_Performance_Data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Get_Turn_Delay_Data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+=======
+    <ClCompile Include="Get_Performance_Data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Get_Turn_Delay_Data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Add_Buffer_Nodes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+>>>>>>> .merge-right.r1529
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\SubareaNet.hpp">

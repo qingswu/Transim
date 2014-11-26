@@ -13,7 +13,11 @@ int	LinkSum::percent_break [NUM_PERCENTILES] = {50, 65, 70, 75, 80, 85, 90, 95, 
 LinkSum::LinkSum (void) : Data_Service (), Select_Service ()
 {
 	Program ("LinkSum");
+<<<<<<< .working
 	Version (17);
+=======
+	Version (24);
+>>>>>>> .merge-right.r1529
 	Title ("Summarize Link Performance Data");
 
 	System_File_Type required_files [] = {
@@ -26,7 +30,8 @@ LinkSum::LinkSum (void) : Data_Service (), Select_Service ()
 		SAVE_LANE_USE_FLOWS, LINK_EQUIVALENCE_FILE, ZONE_EQUIVALENCE_FILE, 0
 	};
 	int data_service_keys [] = {
-		DAILY_WRAP_FLAG, SUMMARY_TIME_RANGES, SUMMARY_TIME_INCREMENT, CONGESTED_TIME_RATIO, 0
+		DAILY_WRAP_FLAG, SUMMARY_TIME_RANGES, SUMMARY_TIME_INCREMENT, 
+		CONGESTED_TIME_RATIO, MAXIMUM_TIME_RATIO, EXCLUDE_TIME_RATIO, 0
 	};
 	int select_service_keys [] = {
 		SELECT_FACILITY_TYPES, SELECT_VC_RATIOS, SELECT_TIME_RATIOS, SELECT_SUBAREAS, SELECTION_POLYGON, 0
@@ -34,6 +39,8 @@ LinkSum::LinkSum (void) : Data_Service (), Select_Service ()
 	Control_Key linksum_keys [] = { //--- code, key, level, status, type, default, range, help ----
 		{ COMPARE_PERFORMANCE_FILE, "COMPARE_PERFORMANCE_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		{ COMPARE_PERFORMANCE_FORMAT, "COMPARE_PERFORMANCE_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, NO_HELP },
+		{ COMPARE_LINK_MAP_FILE, "COMPARE_LINK_MAP_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
+		{ COMPARE_LINK_MAP_FORMAT, "COMPARE_LINK_MAP_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, NO_HELP },
 		{ MINIMUM_LINK_VOLUME, "MINIMUM_LINK_VOLUME", LEVEL0, OPT_KEY, FLOAT_KEY, "2.0", ">= 0", NO_HELP },
 		{ PERSON_BASED_STATISTICS, "PERSON_BASED_STATISTICS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ SELECT_BY_LINK_GROUP, "SELECT_BY_LINK_GROUP", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
@@ -50,7 +57,8 @@ LinkSum::LinkSum (void) : Data_Service (), Select_Service ()
 		{ NEW_LINK_DIRECTION_FILE, "NEW_LINK_DIRECTION_FILE", LEVEL1, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
 		{ NEW_LINK_DIRECTION_FORMAT, "NEW_LINK_DIRECTION_FORMAT", LEVEL1, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, NO_HELP },
 		{ NEW_LINK_DIRECTION_FIELD, "NEW_LINK_DIRECTION_FIELD", LEVEL1, OPT_KEY, TEXT_KEY, "", PERF_FIELD_RANGE, NO_HELP },
-		{ NEW_LINK_DIRECTION_INDEX, "NEW_LINK_DIRECTION_INDEX", LEVEL1, OPT_KEY, BOOL_KEY, "", BOOL_RANGE, NO_HELP },
+		{ NEW_LINK_DIRECTION_INDEX, "NEW_LINK_DIRECTION_INDEX", LEVEL1, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
+		{ NEW_LINK_DIRECTION_FLIP, "NEW_LINK_DIRECTION_FLIP", LEVEL1, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ NEW_LINK_DATA_FILE, "NEW_LINK_DATA_FILE", LEVEL1, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
 		{ NEW_LINK_DATA_FORMAT, "NEW_LINK_DATA_FORMAT", LEVEL1, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, NO_HELP },
 		{ NEW_LINK_DATA_FIELD, "NEW_LINK_DATA_FIELD", LEVEL1, OPT_KEY, TEXT_KEY, "", PERF_FIELD_RANGE, NO_HELP },
@@ -98,7 +106,12 @@ LinkSum::LinkSum (void) : Data_Service (), Select_Service ()
 	Report_List (reports);
 
 	compare_flag = group_select = summary_flag = group_sum_flag = turn_flag = turn_compare_flag = false;
+<<<<<<< .working
 	select_flag = activity_flag = zone_flag = group_flag = person_flag = periods_flag = ratios_flag = false;
+=======
+	select_flag = activity_flag = zone_flag = group_flag = person_flag = periods_flag = ratios_flag = false;
+	link_map_flag = compare_perf_flag = false;
+>>>>>>> .merge-right.r1529
 
 	nerror = 0;
 	minimum_volume = 2.0;

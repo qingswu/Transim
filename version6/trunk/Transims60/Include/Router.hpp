@@ -13,7 +13,6 @@
 #include "TypeDefs.hpp"
 #include "Partition_Files.hpp"
 #include "Plan_Processor.hpp"
-#include "Bounded_Queue.hpp"
 #include "Data_Queue.hpp"
 
 #define  plan_processor     part_processor.plan_process
@@ -50,10 +49,17 @@ private:
 	bool preload_flag;
 
 	Router_Method_Type method;
+<<<<<<< .working
 	int total_records, num_file_sets, num_time_updates, num_trip_parts, num_selected, initial_priority;
 	int num_update, num_build, num_copied;
 	double min_speed_diff, percent_selected;
 
+=======
+	int total_records, num_file_sets, num_time_updates, num_trip_parts, initial_priority;
+	int num_update, num_build, num_copied, select_records, select_weight, random_seed;
+	double min_speed_diff, percent_selected;
+
+>>>>>>> .merge-right.r1529
 	Trip_File *trip_file;
 	Plan_File *plan_file, *new_plan_file;
 	Problem_File *problem_file;
@@ -85,11 +91,9 @@ private:
 		Plan_Processor *plan_process;
 
 #ifdef THREADS
-		typedef Bounded_Queue <Plan_Ptr_Array *> Trip_Queue;
-
 		Threads threads;
 		Data_Queue <int> partition_queue;
-		Trip_Queue **trip_queue;
+		Plan_Ptr_Queue **trip_queue;
 		Integers partition_map;
 
 		class Part_Thread

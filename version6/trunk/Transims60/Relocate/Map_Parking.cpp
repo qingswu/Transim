@@ -44,6 +44,7 @@ void Relocate::Map_Parking (void)
 
 			pt2_itr = parking_pt.find (index);
 
+<<<<<<< .working
 			dx = pt2_itr->second.x - pt1_itr->second.y;
 			dy = pt2_itr->second.y - pt1_itr->second.y;
 
@@ -64,6 +65,28 @@ void Relocate::Map_Parking (void)
 					best = index;
 					best_diff = diff;
 				}
+=======
+			dx = pt2_itr->second.x - pt1_itr->second.x;
+			dy = pt2_itr->second.y - pt1_itr->second.y;
+
+			dx = Round (sqrt (dx * dx + dy * dy));
+			if (dx > MAX_INTEGER) continue;
+			diff = (int) dx;
+
+			if (diff > max_xy_diff) continue;
+
+			if (park_itr->Link () == park_ptr->Link () && park_itr->Dir () == park_ptr->Dir ()) {
+				if (diff < link_diff) {
+					best_link = index;
+					link_diff = diff;
+					if (diff < no_diff) break;
+				}
+			} else {
+				if (diff < best_diff) {
+					best = index;
+					best_diff = diff;
+				}
+>>>>>>> .merge-right.r1529
 			}
 		}
 		if (best_link > 0) {

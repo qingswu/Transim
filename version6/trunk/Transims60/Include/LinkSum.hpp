@@ -32,18 +32,34 @@ public:
 
 	virtual void Initialize_Locations (Location_File &file);
 	virtual bool Get_Location_Data (Location_File &file, Location_Data &data);
+	virtual bool Get_Performance_Data (Performance_File &file, Performance_Data &data);
 
 protected:
 	enum LinkSum_Keys { 
+<<<<<<< .working
 		COMPARE_PERFORMANCE_FILE = 1, COMPARE_PERFORMANCE_FORMAT, 
 		MINIMUM_LINK_VOLUME, PERSON_BASED_STATISTICS, SELECT_BY_LINK_GROUP,  
 		COMPARE_TURN_DELAY_FILE, COMPARE_TURN_DELAY_FORMAT, TURN_NODE_RANGE,
 		NEW_LINK_ACTIVITY_FILE, NEW_LINK_ACTIVITY_FORMAT, COPY_LOCATION_FIELDS, 
 		NEW_ZONE_TRAVEL_FILE, NEW_ZONE_TRAVEL_FORMAT, 
+=======
+		COMPARE_PERFORMANCE_FILE = 1, COMPARE_PERFORMANCE_FORMAT, 
+		COMPARE_LINK_MAP_FILE, COMPARE_LINK_MAP_FORMAT, 
+		MINIMUM_LINK_VOLUME, PERSON_BASED_STATISTICS, SELECT_BY_LINK_GROUP,  
+		COMPARE_TURN_DELAY_FILE, COMPARE_TURN_DELAY_FORMAT, TURN_NODE_RANGE,
+		NEW_LINK_ACTIVITY_FILE, NEW_LINK_ACTIVITY_FORMAT, COPY_LOCATION_FIELDS, 
+		NEW_ZONE_TRAVEL_FILE, NEW_ZONE_TRAVEL_FORMAT, 
+>>>>>>> .merge-right.r1529
 		NEW_GROUP_TRAVEL_FILE, NEW_GROUP_TRAVEL_FORMAT, 
+<<<<<<< .working
 		NEW_LINK_DIRECTION_FILE, NEW_LINK_DIRECTION_FORMAT, NEW_LINK_DIRECTION_FIELD, NEW_LINK_DIRECTION_INDEX, 
 		NEW_LINK_DATA_FILE, NEW_LINK_DATA_FORMAT, NEW_LINK_DATA_FIELD, 
 		NEW_DATA_SUMMARY_FILE, NEW_DATA_SUMMARY_FORMAT, NEW_DATA_SUMMARY_PERIODS, NEW_DATA_SUMMARY_RATIOS,
+=======
+		NEW_LINK_DIRECTION_FILE, NEW_LINK_DIRECTION_FORMAT, NEW_LINK_DIRECTION_FIELD, NEW_LINK_DIRECTION_INDEX, 
+		NEW_LINK_DIRECTION_FLIP, NEW_LINK_DATA_FILE, NEW_LINK_DATA_FORMAT, NEW_LINK_DATA_FIELD, 
+		NEW_DATA_SUMMARY_FILE, NEW_DATA_SUMMARY_FORMAT, NEW_DATA_SUMMARY_PERIODS, NEW_DATA_SUMMARY_RATIOS,
+>>>>>>> .merge-right.r1529
 		NEW_GROUP_SUMMARY_FILE, NEW_GROUP_SUMMARY_FORMAT, 
 	};
 	virtual void Program_Control (void);
@@ -57,8 +73,13 @@ private:
 		TIME_DISTRIB, VC_RATIOS, TIME_CHANGE, VOLUME_CHANGE, TRAVEL_TIME,
 		PERF_REPORT, PERF_SUMMARY, GROUP_REPORT, GROUP_SUMMARY, RELATIVE_GAP };
 
+<<<<<<< .working
 	bool select_flag, activity_flag, zone_flag, group_flag, person_flag, periods_flag, ratios_flag;
 	bool compare_flag, group_select, summary_flag, group_sum_flag, turn_flag, turn_compare_flag;
+=======
+	bool select_flag, activity_flag, zone_flag, group_flag, person_flag, periods_flag, ratios_flag, compare_perf_flag;
+	bool compare_flag, group_select, summary_flag, group_sum_flag, turn_flag, turn_compare_flag, link_map_flag;
+>>>>>>> .merge-right.r1529
 	int increment, num_inc, nerror;
 	double header_value, cap_factor, minimum_volume, congested_ratio;
 	String header_label;
@@ -79,10 +100,10 @@ private:
 	Turn_Period_Array compare_turn_array;
 
 	Db_Sort_Array link_db;
-	Db_Header activity_file, zone_file, group_file, summary_file, group_sum_file;
+	Db_Header activity_file, zone_file, group_file, summary_file, group_sum_file, link_map_file;
 	Integers field_list;
 
-	Int_Map zone_list;
+	Int_Map zone_list, compare_link_map;
 
 	typedef struct {
 		int group;
@@ -100,6 +121,7 @@ private:
 		int field;
 		Link_Direction_File *file;
 		bool index;
+		bool flip;
 	} Dir_Group;
 
 	typedef vector <Dir_Group>         Dir_Group_Array;
@@ -125,6 +147,7 @@ private:
 
 	//---- methods ----
 
+	void Compare_Links (void);
 	void Set_Link_Dir (Dir_Group *group);
 	void Set_Link_Data (Data_Group *group);
 	void Select_Links (void);

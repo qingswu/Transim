@@ -83,10 +83,11 @@ void LinkSum::Top_100_Ratios (int type)
 				data.Start (low);
 				data.End (high);
 
-				data.Get_Data (&perf_data, dir_ptr, &(*link_itr));
+				if (data.Get_Data (&perf_data, dir_ptr, &(*link_itr), Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
 
-				ratio = 0;
+					ratio = 0;
 
+<<<<<<< .working
 				switch (type) {
 					case TOP_SPEED:
 						if (dir_ptr->Time0 () <= 0) continue;
@@ -106,42 +107,64 @@ void LinkSum::Top_100_Ratios (int type)
 						break;
 					case TOP_TIME_CHANGE:
 						period_ptr = &compare_perf_array [j];
-
-						perf_data = period_ptr->Total_Performance (index, use_index);
-						if (perf_data.Volume () < minimum_volume) continue;
-						base = perf_data.Time ();
-						if (base == 0) continue;
-						load = data.Time ();
-						break;
-					case TOP_VOL_CHANGE:
-						period_ptr = &compare_perf_array [j];
-						perf_data = period_ptr->Total_Performance (index, use_index);
-						base = DTOI (perf_data.Volume ());
-						if (base < minimum_volume) continue;
-						load = DTOI (data.Volume ());
-						break;
-				}
-
-				if (ratio == 0 && base > 0) {
-					ratio = ((load - base) * 1000 + base / 2) / base;
-				}
-				if (ratio > min_ratio) {
-					ptr = ratios;
-
-					for (k=0; k < 100; k++, ptr++) {
-						if (ratio > ptr->ratio) {
-							if (ptr->ratio > 0 && k < 99) {
-								memmove (ptr+1, ptr, (99-k) * sizeof (Ratio_Data));							
-								min_ratio = ratios [99].ratio;
-							}
-							ptr->link = link_itr->Link ();
-							ptr->from = anode;
-							ptr->to = bnode;
-							ptr->period = j;
-							ptr->base = base;
-							ptr->load = load;
-							ptr->ratio = ratio;
+=======
+					switch (type) {
+						case TOP_SPEED:
+							if (dir_ptr->Time0 () <= 0) continue;
+							base = DTOI ((double) link_itr->Length () / dir_ptr->Time0 ());
+							load = Round (data.Speed ());
 							break;
+						case TOP_TIME_RATIO:
+							base = dir_ptr->Time0 ();
+							load = data.Time ();
+							ratio = DTOI (data.Time_Ratio () * 10);
+							break;
+						case TOP_VC_RATIO:
+							if (data.VC_Ratio () <= 0) continue;
+							base = DTOI (data.Volume () * 100.0 / data.VC_Ratio ());
+							load = DTOI (data.Volume ());
+							ratio = DTOI (data.VC_Ratio () * 10);
+							break;
+						case TOP_TIME_CHANGE:
+							period_ptr = &compare_perf_array [j];
+>>>>>>> .merge-right.r1529
+
+							perf_data = period_ptr->Total_Performance (index, use_index);
+							if (perf_data.Volume () < minimum_volume) continue;
+							base = perf_data.Time ();
+							if (base == 0) continue;
+							load = data.Time ();
+							break;
+						case TOP_VOL_CHANGE:
+							period_ptr = &compare_perf_array [j];
+							perf_data = period_ptr->Total_Performance (index, use_index);
+							base = DTOI (perf_data.Volume ());
+							if (base < minimum_volume) continue;
+							load = DTOI (data.Volume ());
+							break;
+					}
+
+					if (ratio == 0 && base > 0) {
+						ratio = ((load - base) * 1000 + base / 2) / base;
+					}
+					if (ratio > min_ratio) {
+						ptr = ratios;
+
+						for (k=0; k < 100; k++, ptr++) {
+							if (ratio > ptr->ratio) {
+								if (ptr->ratio > 0 && k < 99) {
+									memmove (ptr+1, ptr, (99-k) * sizeof (Ratio_Data));							
+									min_ratio = ratios [99].ratio;
+								}
+								ptr->link = link_itr->Link ();
+								ptr->from = anode;
+								ptr->to = bnode;
+								ptr->period = j;
+								ptr->base = base;
+								ptr->load = load;
+								ptr->ratio = ratio;
+								break;
+							}
 						}
 					}
 				}
@@ -166,11 +189,11 @@ void LinkSum::Top_100_Ratios (int type)
 			sum_periods.Range_Format (ptr->period));
 
 		if (type == TOP_VC_RATIO || type == TOP_TIME_RATIO) {
-			Print (0, String ("%7d  %7d   %5.2lf") % ptr->base % ptr->load % (ptr->ratio / 1000.0));
+			Print (0, String ("%7d  %7d %8.2lf") % ptr->base % ptr->load % (ptr->ratio / 1000.0));
 		} else if (type == TOP_VOL_CHANGE) {
-			Print (0, String ("%7d  %7d   %5.1lf") % ptr->base % ptr->load % (ptr->ratio / 10.0));
+			Print (0, String ("%7d  %7d %8.1lf") % ptr->base % ptr->load % (ptr->ratio / 10.0));
 		} else {
-			Print (0, String ("%7.1lf  %7.1lf   %5.1lf") % (ptr->base / 10.0) % (ptr->load / 10.0) % (ptr->ratio / 10.0));
+			Print (0, String ("%7.1lf  %7.1lf %8.1lf") % (ptr->base / 10.0) % (ptr->load / 10.0) % (ptr->ratio / 10.0));
 		}
 	}
 	if (i) {

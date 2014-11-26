@@ -31,7 +31,7 @@ void LinkSum::Summary_File (void)
 {
 	int i, j, k, k1, index, use_index;
 	int text_field, value_field, compare_field;
-	double length, value, percent, factor, time, person_fac, lane_len, inc_per_hour;
+	double length, value, percent, factor, time, person_fac, lane_len, inc_per_hour, hours;
 	String buffer, units, vmt, lane_mi, type;
 	bool connect_flag;
 	Dtime low, high, tod, period;
@@ -60,8 +60,11 @@ void LinkSum::Summary_File (void)
 	for (itr = sum_bin.begin (); itr != sum_bin.end (); itr++) {
 		itr->assign (NUM_SUM_BINS, 0.0);
 	}
-	connect_flag = System_Data_Flag (CONNECTION) && (turn_period_array.size () > 0) && (compare_turn_array.size () > 0);
-	
+	if (compare_flag) {
+		connect_flag = System_Data_Flag (CONNECTION) && (turn_period_array.size () > 0) && (compare_turn_array.size () > 0);
+	} else {
+		connect_flag = System_Data_Flag (CONNECTION) && (turn_period_array.size () > 0);
+	}
 	type = (person_flag) ? "Person" : "Vehicle";
 	inc_per_hour = 0.0;
 
@@ -95,34 +98,43 @@ void LinkSum::Summary_File (void)
 
 				perf_data = period_itr->Total_Performance (index, use_index);
 
-				data.Get_Data (&perf_data, dir_ptr, &(*link_itr));
+				if (data.Get_Data (&perf_data, dir_ptr, &(*link_itr), Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
 
-				if (person_flag && data.Volume () > 0) {
-					person_fac = data.Persons () / data.Volume ();
-				} else {
-					person_fac = 1.0;
-				}
-				inc_per_hour = data.Count ();
-				lane_len = data.Lane_Len ();
+					if (person_flag && data.Volume () > 0) {
+						person_fac = data.Persons () / data.Volume ();
+					} else {
+						person_fac = 1.0;
+					}
+					inc_per_hour = data.Count ();
+					lane_len = data.Lane_Len ();
 
-				sum_bin [j] [LINKS] += 1;
-				sum_bin [j] [LENGTH] += length;
-				sum_bin [j] [LANES] += lane_len;
-				sum_bin [j] [VMT] += data.Veh_Dist () * person_fac;
-				sum_bin [j] [VHT] += data.Veh_Time () * person_fac;
-				sum_bin [j] [VHD] += data.Veh_Delay () * person_fac;
-				sum_bin [j] [TIME_RATIO] += data.Time_Ratio () * lane_len;
-				sum_bin [j] [DENSITY] += data.Density () * person_fac;
-				sum_bin [j] [MAX_DEN] = MAX (sum_bin [j] [MAX_DEN], data.Max_Density () * person_fac);
-				sum_bin [j] [QUEUE] += data.Queue () * person_fac;
-				sum_bin [j] [MAX_QUEUE] = MAX (sum_bin [j] [MAX_QUEUE], data.Max_Queue () * person_fac);
-				sum_bin [j] [FAILURE] += data.Failure () * person_fac;
+					sum_bin [j] [LINKS] += 1;
+					sum_bin [j] [LENGTH] += length;
+					sum_bin [j] [LANES] += lane_len;
+					sum_bin [j] [VMT] += data.Veh_Dist () * person_fac;
+					sum_bin [j] [VHT] += data.Veh_Time () * person_fac;
+					sum_bin [j] [VHD] += data.Veh_Delay () * person_fac;
+					sum_bin [j] [TIME_RATIO] += data.Time_Ratio () * lane_len;
+					sum_bin [j] [DENSITY] += data.Density () * person_fac;
+					sum_bin [j] [MAX_DEN] = MAX (sum_bin [j] [MAX_DEN], data.Max_Density () * person_fac);
+					sum_bin [j] [QUEUE] += data.Queue () * person_fac;
+					sum_bin [j] [MAX_QUEUE] = MAX (sum_bin [j] [MAX_QUEUE], data.Max_Queue () * person_fac);
+					sum_bin [j] [FAILURE] += data.Failure () * person_fac;
+					sum_bin [j] [COUNT] += data.Count () * lane_len;
 				sum_bin [j] [COUNT] += data.Count () * lane_len;
 
+<<<<<<< .working
 				if (Ratio_Flag ()) {
 					sum_bin [j] [CONG_VMT] += data.Ratio_Dist () * person_fac;
 					sum_bin [j] [CONG_VHT] += data.Ratio_Time () * person_fac;
 					sum_bin [j] [CONG_TIME] += data.Ratios () * lane_len;
+=======
+					if (Ratio_Flag ()) {
+						sum_bin [j] [CONG_VMT] += data.Ratio_Dist () * person_fac;
+						sum_bin [j] [CONG_VHT] += data.Ratio_Time () * person_fac;
+						sum_bin [j] [CONG_TIME] += data.Ratios () * lane_len;
+					}
+>>>>>>> .merge-right.r1529
 				}
 
 				if (compare_flag) {
@@ -130,30 +142,39 @@ void LinkSum::Summary_File (void)
 
 					perf_data = period_ptr->Total_Performance (index, use_index);
 
-					data.Get_Data (&perf_data, dir_ptr, &(*link_itr));
+					if (data.Get_Data (&perf_data, dir_ptr, &(*link_itr), Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
 					
-					if (person_flag && data.Volume () > 0) {
-						person_fac = data.Persons () / data.Volume ();
-					} else {
-						person_fac = 1.0;
-					}
-					lane_len = data.Lane_Len ();
+						if (person_flag && data.Volume () > 0) {
+							person_fac = data.Persons () / data.Volume ();
+						} else {
+							person_fac = 1.0;
+						}
+						lane_len = data.Lane_Len ();
 
-					sum_bin [j] [VMT+PREV] += data.Veh_Dist () * person_fac;
-					sum_bin [j] [VHT+PREV] += data.Veh_Time () * person_fac;
-					sum_bin [j] [VHD+PREV] += data.Veh_Delay () * person_fac;
-					sum_bin [j] [TIME_RATIO+PREV] += data.Time_Ratio () * lane_len;
-					sum_bin [j] [DENSITY+PREV] += data.Density () * person_fac;
-					sum_bin [j] [MAX_DEN+PREV] = MAX (sum_bin [j] [MAX_DEN+PREV], data.Max_Density () * person_fac);
-					sum_bin [j] [QUEUE+PREV] += data.Queue () * person_fac;
-					sum_bin [j] [MAX_QUEUE+PREV] = MAX (sum_bin [j] [MAX_QUEUE+PREV], data.Max_Queue () * person_fac);
-					sum_bin [j] [FAILURE+PREV] += data.Failure () * person_fac;
+						sum_bin [j] [VMT+PREV] += data.Veh_Dist () * person_fac;
+						sum_bin [j] [VHT+PREV] += data.Veh_Time () * person_fac;
+						sum_bin [j] [VHD+PREV] += data.Veh_Delay () * person_fac;
+						sum_bin [j] [TIME_RATIO+PREV] += data.Time_Ratio () * lane_len;
+						sum_bin [j] [DENSITY+PREV] += data.Density () * person_fac;
+						sum_bin [j] [MAX_DEN+PREV] = MAX (sum_bin [j] [MAX_DEN+PREV], data.Max_Density () * person_fac);
+						sum_bin [j] [QUEUE+PREV] += data.Queue () * person_fac;
+						sum_bin [j] [MAX_QUEUE+PREV] = MAX (sum_bin [j] [MAX_QUEUE+PREV], data.Max_Queue () * person_fac);
+						sum_bin [j] [FAILURE+PREV] += data.Failure () * person_fac;
+						sum_bin [j] [COUNT+PREV] += data.Count () * lane_len;
 					sum_bin [j] [COUNT+PREV] += data.Count () * lane_len;
 
+<<<<<<< .working
 					if (Ratio_Flag ()) {
 						sum_bin [j] [CONG_VMT+PREV] += data.Ratio_Dist () * person_fac;
 						sum_bin [j] [CONG_VHT+PREV] += data.Ratio_Time () * person_fac;
 						sum_bin [j] [CONG_TIME+PREV] += data.Ratios () * lane_len;
+=======
+						if (Ratio_Flag ()) {
+							sum_bin [j] [CONG_VMT+PREV] += data.Ratio_Dist () * person_fac;
+							sum_bin [j] [CONG_VHT+PREV] += data.Ratio_Time () * person_fac;
+							sum_bin [j] [CONG_TIME+PREV] += data.Ratios () * lane_len;
+						}
+>>>>>>> .merge-right.r1529
 					}
 				}
 			}
@@ -170,12 +191,14 @@ void LinkSum::Summary_File (void)
 					for (j=0, turn_itr = turn_period_array.begin (); turn_itr != turn_period_array.end (); turn_itr++, j++) {
 						turn_ptr = turn_itr->Data_Ptr (k);
 
+						sum_bin [j] [VHD] += turn_ptr->Time () * turn_ptr->Turn ();
 						sum_bin [j] [TURNS] += turn_ptr->Turn ();
 
 						if (compare_flag) {
 							compare_ptr = &compare_turn_array [j];
 							turn_ptr = compare_ptr->Data_Ptr (k);
 
+							sum_bin [j] [VHD+PREV] += turn_ptr->Time () * turn_ptr->Turn ();
 							sum_bin [j] [TURNS+PREV] += turn_ptr->Turn ();
 						}
 					}
@@ -191,7 +214,7 @@ void LinkSum::Summary_File (void)
 		factor = 1.0 / 1000.0;
 		units = "Kilometers";
 		vmt = (person_flag) ? "PKT" : "VKT";
-		lane_mi = "km";
+		lane_mi = "km)";
 	} else {
 		factor = 1.0 / MILETOFEET;
 		units = "Miles";
@@ -199,17 +222,25 @@ void LinkSum::Summary_File (void)
 		lane_mi = "mi)";
 	}
 	tod.Hours (1);
-	sum_bin [num_inc] [LANES+PREV] = 0;
 
 	period = perf_period_array.periods->Increment ();
-	inc_per_hour = (inc_per_hour * period) / tod;
-	if (inc_per_hour < 0) inc_per_hour = 1.0;
+	hours = (double) period / (double) tod;
+	if (inc_per_hour <= 0) inc_per_hour = 1.0;
 
 	for (j=0; j <= num_inc; j++) {
 		if (sum_bin [j] [LINKS] == 0.0)continue;
 
 		if (j == num_inc) {
 			buffer = "Time Period Total";
+<<<<<<< .working
+=======
+
+			lane_len = 0;
+
+			for (k=0; k < num_inc; k++) {
+				lane_len += sum_bin [k] [LANES];
+			}
+>>>>>>> .merge-right.r1529
 		} else {
 			buffer = String ("Time Period %12.12s") % sum_periods.Range_Format (j);
 
@@ -218,9 +249,7 @@ void LinkSum::Summary_File (void)
 				if (k < VMT) {
 					sum_bin [num_inc] [k] = MAX (sum_bin [j] [k], sum_bin [num_inc] [k]);
 
-					if (k == LANES) {
-						sum_bin [num_inc] [k1] += sum_bin [j] [k];
-					} else if (compare_flag) {
+					if (compare_flag) {
 						sum_bin [num_inc] [k1] = MAX (sum_bin [j] [k1], sum_bin [num_inc] [k1]);
 					}
 				} else {
@@ -233,9 +262,14 @@ void LinkSum::Summary_File (void)
 			}
 			lane_len = sum_bin [j] [LANES];
 		}
+<<<<<<< .working
 		lane_len = sum_bin [j] [COUNT];
 		if (lane_len == 0) lane_len = 1.0;
 
+=======
+		if (lane_len == 0) lane_len = 1.0;
+
+>>>>>>> .merge-right.r1529
 		summary_file.Put_Field (text_field, buffer);
 		summary_file.Put_Field (value_field, 0.0);
 		if (compare_flag) summary_file.Put_Field (compare_field, 0.0);
@@ -382,9 +416,13 @@ void LinkSum::Summary_File (void)
 			}
 			summary_file.Write ();
 
+<<<<<<< .working
 			value = (double) period / (lane_len * tod);
+=======
+			value = factor * hours / inc_per_hour;
+>>>>>>> .merge-right.r1529
 
-			buffer = "Congested Duration (hours)";
+			buffer = "Congested Duration (hrs*ln-" + lane_mi;
 			summary_file.Put_Field (text_field, buffer);
 			summary_file.Put_Field (value_field, sum_bin [j] [CONG_TIME] * value);
 			if (compare_flag) summary_file.Put_Field (compare_field, sum_bin [j] [CONG_TIME+PREV] * value);

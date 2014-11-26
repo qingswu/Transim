@@ -10,8 +10,8 @@
 
 void Router::DUE_Loop (void)
 {
-	int i, num, last_hhold;
-	double gap, last_gap;
+	int i, num, last_hhold, potential;
+	double gap, last_gap, total_percent;
 	bool converge_flag, build_flag;
 
 	clock_t path_time, update_time, total_time;
@@ -30,9 +30,16 @@ void Router::DUE_Loop (void)
 
 	for (iteration=1; iteration <= max_iteration; iteration++) {
 
+		Show_Message (1, String ("Iteration Number %d") % iteration);
+		Print (2, "Iteration Number ") << iteration;
+		Set_Progress ();
+
+		Iteration_Setup ();
+
 		if (!first_iteration) {
 			Use_Link_Delays (true);
 		}
+<<<<<<< .working
 		Show_Message (1, String ("Iteration Number %d") % iteration);
 		Print (2, "Iteration Number ") << iteration;
 		Set_Progress ();
@@ -41,22 +48,33 @@ void Router::DUE_Loop (void)
 
 		if (first_iteration && (rider_flag || (System_File_Flag (RIDERSHIP) && Cap_Penalty_Flag ()))) {
 			line_array.Clear_Ridership ();
+=======
+		if (rider_flag || (System_File_Flag (RIDERSHIP) && Cap_Penalty_Flag ())) {
+			line_array.Clear_Ridership ();
+>>>>>>> .merge-right.r1529
 		}
 		converge_flag = true;
 		last_hhold = -1;
 
+		potential = select_records;
+		total_percent = 1.0;
+
 		if (total_records > 0 && max_percent_flag) {
-			percent_selected = ((double) num_selected / total_records);
+			percent_selected = ((double) select_records / total_records);
+			total_percent = percent_selected;
 
 			if (percent_selected > max_percent_select) {
 				percent_selected = max_percent_select / percent_selected;
+				if (select_weight > 0) {
+					percent_selected = percent_selected * select_records / select_weight;
+				}
 			} else {
 				percent_selected = 1.0;
 			}
 		} else {
 			percent_selected = 1.0;
 		}
-		total_records = num_selected = 0;
+		total_records = select_records = select_weight = 0;
 
 		//---- preload transit vehicles ----
 
@@ -101,11 +119,18 @@ void Router::DUE_Loop (void)
 
 			if (plan_ptr->Priority () == NO_PRIORITY) {
 				plan_ptr->Method (COPY_PLAN);
+			} else if (iteration == 1 && plan_ptr->size () == 0) {
+				plan_ptr->Method (BUILD_PATH);
 			} else if (!first_iteration && select_priorities) {
 				build_flag = select_priority [plan_ptr->Priority ()];
 
 				if (build_flag && max_percent_flag && percent_selected < 1.0) {
-					build_flag = (random_select.Probability () <= percent_selected);
+					double prob = random_select.Probability (plan_ptr->Household () + iteration + random_seed);
+					if (plan_ptr->Priority () > 0) {
+						build_flag = (prob <= (percent_selected * plan_ptr->Priority ()));
+					} else {
+						build_flag = (prob <= percent_selected);
+					}
 				}
 				if (build_flag) {
 					plan_ptr->Method (BUILD_PATH);
@@ -153,7 +178,7 @@ void Router::DUE_Loop (void)
 
 			Write (1, "Skim Convergence Gap  = ") << last_gap;
 		} else {
-			Update_Travel_Times ();
+			Update_Travel_Times (Average_Times ());
 			num_time_updates++;
 		}
 		update_time = (clock () - update_time);
@@ -176,9 +201,24 @@ void Router::DUE_Loop (void)
 			if (link_gap > 0.0 && gap > link_gap) converge_flag = false;
 		}
 
+		//---- update transit penalties ----
+
+		if (iteration != max_iteration && (rider_flag || (System_File_Flag (RIDERSHIP) && Cap_Penalty_Flag ()))) {
+
+			part_processor.Save_Riders ();
+
+			gap = line_array.Ridership_Gap (Cap_Penalty_Flag (), initial_factor);
+
+			Write (1, "Transit Capacity Gap  = ") << gap;
+
+			if (transit_gap > 0.0 && gap > transit_gap) converge_flag = false;
+		}
+
 		//---- build count ----
 
-		Write (2, "Number of Paths Built = ") << num_build;
+		Write (2, String ("Build Selection Total = %d (%.1lf%%)") % potential % (total_percent * 100.0) % FINISH);
+
+		Write (1, "Number of Paths Built = ") << num_build;
 		num = num_build + num_update + num_copied;
 		if (num > 0) Write (0, String (" (%.1lf%%)") % (num_build * 100.0 / num) % FINISH);
 

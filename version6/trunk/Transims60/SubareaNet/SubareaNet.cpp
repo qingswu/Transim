@@ -11,7 +11,11 @@
 SubareaNet::SubareaNet (void) : Data_Service ()
 {
 	Program ("SubareaNet");
+<<<<<<< .working
 	Version (6);
+=======
+	Version (7);
+>>>>>>> .merge-right.r1529
 	Title ("Subarea Network Files");
 
 	System_File_Type required_files [] = {
@@ -40,6 +44,7 @@ SubareaNet::SubareaNet (void) : Data_Service ()
 		{ SUBAREA_COORDINATE_BOX, "SUBAREA_COORDINATE_BOX", LEVEL0, OPT_KEY, LIST_KEY, "", "XMIN, YMIN, XMAX, YMAX", NO_HELP },
 		{ SUBAREA_NODE_CODE, "SUBAREA_NODE_CODE", LEVEL0, OPT_KEY, INT_KEY, "1", "1..100", NO_HELP },
 		{ EXTERNAL_OFFSET_LENGTH, "EXTERNAL_OFFSET_LENGTH", LEVEL0, OPT_KEY, INT_KEY, "30 feet", "10..200 feet", NO_HELP },
+		{ SUBAREA_BUFFER_DISTANCE, "SUBAREA_BUFFER_DISTANCE", LEVEL0, OPT_KEY, INT_KEY, "0 feet", "0..20000 feet", NO_HELP },
 		END_CONTROL
 	};
 
@@ -58,7 +63,9 @@ SubareaNet::SubareaNet (void) : Data_Service ()
 	nsign = nsignal = ntiming = nphasing = ndetector = ncoord = 0;
 	nstop = nroute = nschedule = ndriver = 0;
 
-	external_offset = node_code = 0;	
+	external_offset = node_code = buffer = 0;
+
+	System_Read_False (NODE);
 }
 
 #ifdef _CONSOLE

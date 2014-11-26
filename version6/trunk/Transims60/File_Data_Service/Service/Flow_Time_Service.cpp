@@ -12,7 +12,11 @@
 
 Flow_Time_Service::Flow_Time_Service (void)
 {
+<<<<<<< .working
 	flow_updates = turn_updates = time_updates = false;
+=======
+	flow_updates = turn_updates = time_updates = average_times = false;
+>>>>>>> .merge-right.r1529
 	update_rate = 0;
 	flow_factor = 1.0;
 }
@@ -29,6 +33,7 @@ void Flow_Time_Service::Flow_Time_Service_Keys (int *keys)
 		{ CLEAR_INPUT_FLOW_RATES, "CLEAR_INPUT_FLOW_RATES", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ UPDATE_TRAVEL_TIMES, "UPDATE_TRAVEL_TIMES", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ TIME_UPDATE_RATE, "TIME_UPDATE_RATE", LEVEL0, OPT_KEY, INT_KEY, "0", "-1..5000", NO_HELP },
+		{ AVERAGE_TRAVEL_TIMES, "AVERAGE_TRAVEL_TIMES", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ LINK_FLOW_FACTOR, "LINK_FLOW_FACTOR", LEVEL0, OPT_KEY, FLOAT_KEY, "1.0", "1..100000", NO_HELP },
 		{ EQUATION_PARAMETERS, "EQUATION_PARAMETERS", LEVEL1, OPT_KEY, LIST_KEY, "BPR, 0.15, 4.0, 0.75" , EQUATION_RANGE, NO_HELP},
 		END_CONTROL
@@ -105,7 +110,12 @@ void Flow_Time_Service::Read_Flow_Time_Keys (void)
 				Flow_Updates (true);
 			}
 		}
-		
+
+		if (dat->Control_Key_Status (AVERAGE_TRAVEL_TIMES)) {
+			dat->Print (1);
+			Average_Times (dat->Get_Control_Flag (AVERAGE_TRAVEL_TIMES));
+		}
+
 		//---- link flow factor ----
 
 		if (dat->Control_Key_Status (LINK_FLOW_FACTOR)) {
@@ -157,8 +167,8 @@ void Flow_Time_Service::Build_Turn_Arrays (Turn_Period_Array &turn_delay)
 void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, bool avg_times, bool zero_flows)
 {
 	int i, num, nrec, type, lanes, lanes0, lanes1, cap, capacity, tod_cap, max_cap, len, index, rec, use_index;
-	Dtime time0, time, time1, tod1, tod, period;
-	double volume, vol_fac, length, speed;
+	Dtime time0, time, time1, tod1, tod, period, prv, prv1, prev, prev1;
+	double volume, vol_fac, length, speed, avg_tt;
 
 	Dir_Itr dir_itr;
 	Link_Data *link_ptr;
@@ -166,7 +176,7 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 	Link_Dir_Data *index_ptr;
 	Lane_Use_Data *use_ptr;
 	Perf_Period_Itr per_itr;
-	Perf_Data *perf_ptr, *perf1_ptr;
+	Perf_Data *perf_ptr, *perf1_ptr, *prev_ptr, *prev1_ptr;
 
 	period = dat->time_periods.Increment ();
 	if (period < 1) period = 1;
@@ -188,6 +198,8 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 		lanes = dir_itr->Lanes ();
 		if (lanes < 1) lanes = 1;
 		tod = tod1;
+		prev_ptr = prev1_ptr = 0;
+		prv = prev = prv1 = prev1 = time0;
 
 		for (per_itr = dat->perf_period_array.begin (); per_itr != dat->perf_period_array.end (); per_itr++, tod += period) {
 			if (tod < first_time) continue;
@@ -220,6 +232,7 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 							} else if (use_ptr->Spd_Fac () != 100 && use_ptr->Spd_Fac () != 0) {
 								time = time * 100.0 / use_ptr->Spd_Fac ();
 							}
+							if (time < time0) time = time0;
 							if (use_ptr->Capacity () > 0) {
 								cap = use_ptr->Capacity ();
 							} else if (use_ptr->Cap_Fac () != 100 && use_ptr->Cap_Fac () != 0) {
@@ -252,7 +265,7 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 			}
 			if (lanes0 < 1) {
 				time1 = (int) (len / 0.1 + 0.5);
-				if (time1 < 1) time1 = 1;
+				if (time1 < time0) time1 = time0;
 			} else if (volume == 0.0) {
 				time1 = time;
 			} else {
@@ -262,16 +275,26 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 					tod_cap = cap;
 				}
 				if (avg_times) {
-					max_cap = 2 * tod_cap;
+					max_cap = 4 * tod_cap;
 					if (volume > max_cap) {
 						volume = max_cap;
 					}
 				}
 				time1 = equation.Apply_Equation (type, time, volume, tod_cap, len);
-				if (time1 < 1) time1 = 1;
+				if (time1 < time0) time1 = time0;
 			}
 			if (avg_times) {
-				perf_ptr->Average_Time (time1);
+				time1 = (MAX (perf_ptr->Time (), time0) + time1) / 2;
+				perf_ptr->Time (time1);
+
+				if (prev_ptr > 0) {
+					avg_tt = (prv + 2.0 * prev + time1) / 4.0;
+					if (avg_tt >= MAX_INTEGER) avg_tt = MAX_INTEGER - 1;
+					prev_ptr->Time ((int) avg_tt);
+				}
+				prev_ptr = perf_ptr;
+				prv = prev;
+				prev = time1;
 			} else {
 				perf_ptr->Time (time1);
 			}
@@ -279,7 +302,7 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 				perf_ptr->Clear_Flows ();
 			} else {
 				time1 = perf_ptr->Time ();
-				if (time1 < 1) time1 = 1;
+				if (time1 < time0) time1 = time0;
 
 				speed = length / time1.Seconds ();
 				if (speed < 0.1) speed = 0.1;
@@ -294,27 +317,33 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 
 				if (lanes1 == 0) {
 					time1 = (int) (len / 0.1 + 0.5);
-					if (time1 < 1) time1 = 1;
+					if (time1 < time0) time1 = time0;
 				} else if (volume == 0.0) {
 					time1 = time;
 				} else {
 					tod_cap = (cap * lanes1 + lanes1 / 2) / lanes;
 
 					if (avg_times) {
-						max_cap = 2 * tod_cap;
+						max_cap = 4 * tod_cap;
 						if (volume > max_cap) {
 							volume = max_cap;
 						}
 					}
 					time1 = equation.Apply_Equation (type, time, volume, tod_cap, len);
-					if (time1 < 1) time1 = 1;
+					if (time1 < time0) time1 = time0;
 				}
-			} else {
-				time1 = perf_ptr->Time ();
-			}
-			if (perf1_ptr > 0) {
 				if (avg_times) {
-					perf1_ptr->Average_Time (time1);
+					time1 = (MAX (perf1_ptr->Time (), time0) + time1) / 2;
+					perf1_ptr->Time (time1);
+
+					if (prev1_ptr > 0) {
+						avg_tt = (prv1 + 2.0 * prev1 + time1) / 4.0;
+						if (avg_tt >= MAX_INTEGER) avg_tt = MAX_INTEGER - 1;
+						prev1_ptr->Time ((int) avg_tt);
+					}
+					prev1_ptr = perf1_ptr;
+					prv1 = prev1;
+					prev1 = time1;
 				} else {
 					perf1_ptr->Time (time1);
 				}
@@ -322,20 +351,37 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 					perf1_ptr->Clear_Flows ();
 				} else {
 					time1 = perf1_ptr->Time ();
-					if (time1 < 1) time1 = 1;
+					if (time1 < time0) time1 = time0;
 
 					speed = length / time1.Seconds ();
 					if (speed < 0.1) speed = 0.1;
 
-					perf1_ptr->Veh_Time (perf1_ptr->Veh_Dist () / speed);
+					perf_ptr->Veh_Time (perf1_ptr->Veh_Dist () / speed);
 				}
+			} else if (avg_times) {
+				time1 = perf_ptr->Time ();
+
+				if (perf1_ptr > 0) {
+					avg_tt = (prv1 + 2.0 * prev1 + time1) / 4.0;
+					if (avg_tt >= MAX_INTEGER) avg_tt = MAX_INTEGER - 1;
+					prev1_ptr->Time ((int) avg_tt);
+				}
+				prev1_ptr = perf1_ptr;
+				prv1 = prev1;
+				prev1 = time1;
 			}
 		}
 	}
 
+<<<<<<< .working
 	if (turn_updates && dat->System_File_Flag (SIGNAL) && dat->System_File_Flag (CONNECTION)) {
 		int index, node, lanes, cycle, green, min_green;
 		double red, sf, gc, vc, cap, max_flow, max_cap, flow, delay;
+=======
+	if (turn_updates && dat->System_File_Flag (SIGNAL) && dat->System_File_Flag (CONNECTION)) {
+		int index, node, lanes, cycle, green, min_green, type;
+		double red, sf, gc, vc, cap, max_flow, max_cap, flow, delay, max_delay;
+>>>>>>> .merge-right.r1529
 
 		Turn_Period_Itr per_itr;
 		Turn_Itr turn_itr;
@@ -350,6 +396,7 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 		Phasing_Itr phasing_itr;
 		Movement_Itr move_itr;
 
+<<<<<<< .working
 		tod = tod1;
 
 		for (per_itr = dat->turn_period_array.begin (); per_itr != dat->turn_period_array.end (); per_itr++, tod += period) {
@@ -419,6 +466,109 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 					delay = (red * red * sf / ((sf - flow) * 2 * cycle)) + 
 						(max_cap * ((vc - 1) + sqrt (pow ((vc - 1), 2) + (4 * vc / cap))));
 
+					turn_itr->Time (Dtime (delay));
+=======
+		tod = tod1;
+		max_delay = Dtime (1.0, HOURS).Seconds ();
+
+		for (per_itr = dat->turn_period_array.begin (); per_itr != dat->turn_period_array.end (); per_itr++, tod += period) {
+			if (tod < first_time) continue;
+
+			for (index=0, turn_itr = per_itr->begin (); turn_itr != per_itr->end (); turn_itr++, index++) {
+				turn_itr->Time (0);
+				if (turn_itr->Turn () == 0) continue;
+
+				connect_ptr = &dat->connect_array [index];
+
+				//---- assume an uncontrolled yield sign -----
+
+				if (connect_ptr->Type () == RIGHT) {
+					dir_ptr = &dat->dir_array [connect_ptr->To_Index ()];
+					link_ptr = &dat->link_array [dir_ptr->Link ()];
+					type = link_ptr->Type ();
+
+					if (type == RAMP || type == FREEWAY || type == EXPRESSWAY) {
+						turn_itr->Time (50);
+						continue;
+					}
+>>>>>>> .merge-right.r1529
+				}
+
+				//---- apply the approach controls ----
+
+				dir_ptr = &dat->dir_array [connect_ptr->Dir_Index ()];
+
+				if (dir_ptr->Sign () == STOP_SIGN) {
+					turn_itr->Time (200);
+				} else if (dir_ptr->Sign () == ALL_STOP) {
+					turn_itr->Time (100);
+				} else if (dir_ptr->Sign () == YIELD_SIGN) {
+					turn_itr->Time (50);
+				} else if (connect_ptr->Type () == LEFT || connect_ptr->Type () == RIGHT && connect_ptr->Type () == UTURN) {
+					link_ptr = &dat->link_array [dir_ptr->Link ()];
+
+					//---- assume an uncontrolled yield sign ----
+
+					if (link_ptr->Type () == RAMP && connect_ptr->Type () == RIGHT) {
+						turn_itr->Time (50);
+						continue;
+					}
+
+					//---- get the green time for the signal -----
+
+					node = (dir_ptr->Dir () == 1) ? link_ptr->Anode () : link_ptr->Bnode ();
+					node_ptr = &dat->node_array [node];
+					if (node_ptr->Control () < 0) continue;
+
+					signal_ptr = &dat->signal_array [node_ptr->Control ()];
+					green = min_green = cycle = 0;
+
+					for (signal_time_itr = signal_ptr->begin (); signal_time_itr != signal_ptr->end (); signal_time_itr++) {
+						if (signal_time_itr->Start () <= tod && signal_time_itr->End () >= tod) {
+							for (phasing_itr = signal_ptr->phasing_plan.begin (); phasing_itr != signal_ptr->phasing_plan.end (); phasing_itr++) {
+								if (phasing_itr->Phasing () == signal_time_itr->Phasing ()) break;
+							}
+							for (timing_itr = signal_ptr->timing_plan.begin (); timing_itr != signal_ptr->timing_plan.end (); timing_itr++) {
+								if (timing_itr->Timing () == signal_time_itr->Timing ()) break;
+							}
+							cycle = timing_itr->Cycle ();
+
+							for (move_itr = phasing_itr->begin (); move_itr != phasing_itr->end (); move_itr++) {
+								if (move_itr->Connection () == index) {
+									for (phase_itr = timing_itr->begin (); phase_itr != timing_itr->end (); phase_itr++) {
+										if (phase_itr->Phase () == phasing_itr->Phase ()) {
+											green += phase_itr->Max_Green ();
+											min_green += phase_itr->Min_Green ();
+										}
+									}
+								}
+							}
+						}
+					}
+					if (green == 0 || cycle == 0) continue;
+
+					//---- estimate the signal delay ----
+
+					flow = turn_itr->Turn () * vol_fac;
+					lanes = (connect_ptr->High_Lane () - connect_ptr->Low_Lane () + 1);
+					if (green > cycle * 9 / 10) {
+						green = (green + min_green) / 2;
+					}
+					red = cycle - green;
+					sf = 1800 * lanes;
+					gc = (double) green / cycle;
+					max_flow = sf * gc;
+					vc = flow / max_flow;
+					cap = sf * gc / vol_fac;
+					max_cap = 900 / vol_fac;
+
+					delay = (red * red * sf / ((sf - flow) * 2 * cycle)) + 
+						(max_cap * ((vc - 1) + sqrt (pow ((vc - 1), 2) + (4 * vc / cap))));
+
+					if (avg_times) {
+						delay = (delay + turn_itr->Time ().Seconds ()) / 2.0;
+					}
+					if (delay > max_delay) delay = max_delay;
 					turn_itr->Time (Dtime (delay));
 				}
 			}
