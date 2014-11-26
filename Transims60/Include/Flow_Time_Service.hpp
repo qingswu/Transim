@@ -22,7 +22,7 @@ public:
 
 	enum Flow_Time_Service_Keys { 
 		 UPDATE_FLOW_RATES = FLOW_TIME_SERVICE_OFFSET, UPDATE_TURNING_MOVEMENTS, CLEAR_INPUT_FLOW_RATES, 
-		 UPDATE_TRAVEL_TIMES, TIME_UPDATE_RATE, LINK_FLOW_FACTOR, EQUATION_PARAMETERS
+		 UPDATE_TRAVEL_TIMES, TIME_UPDATE_RATE, AVERAGE_TRAVEL_TIMES, LINK_FLOW_FACTOR, EQUATION_PARAMETERS
 	};
 
 	void Flow_Time_Service_Keys (int *keys = 0);
@@ -42,6 +42,9 @@ public:
 	bool Time_Updates (void)         { return (time_updates); }
 	void Time_Updates (bool flag)    { time_updates = flag; }
 
+	bool Average_Times (void)        { return (average_times); }
+	void Average_Times (bool flag)   { average_times = flag; }
+
 protected:
 
 	void Read_Flow_Time_Keys (void);
@@ -50,7 +53,11 @@ protected:
 	void Update_Travel_Times (bool avg_times, bool zero_flows)  { Update_Travel_Times (1, 0, avg_times, zero_flows); }
 	void Update_Travel_Times (bool avg_times)                   { Update_Travel_Times (1, 0, avg_times); }
 
+<<<<<<< .working
 	bool flow_updates, turn_updates, time_updates;
+=======
+	bool flow_updates, turn_updates, time_updates, average_times;
+>>>>>>> .merge-right.r1529
 	int update_rate;
 	double flow_factor;
 

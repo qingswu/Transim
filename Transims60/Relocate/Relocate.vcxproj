@@ -304,8 +304,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Control.cpp" />
+    <ClCompile Include="Dir_Path.cpp" />
     <ClCompile Include="Execute.cpp" />
     <ClCompile Include="Get_Access_Data.cpp" />
+    <ClCompile Include="Get_Connect_Data.cpp" />
     <ClCompile Include="Get_Link_Data.cpp" />
     <ClCompile Include="Get_Location_Data.cpp" />
     <ClCompile Include="Get_Node_Data.cpp" />
@@ -313,15 +315,22 @@
     <ClCompile Include="Get_Performance_Data.cpp" />
     <ClCompile Include="Get_Shape_Data.cpp" />
     <ClCompile Include="Get_Trip_Data.cpp" />
+<<<<<<< .working
     <ClCompile Include="Get_Turn_Delay_Data.cpp" />
+=======
+    <ClCompile Include="Get_Turn_Delay_Data.cpp" />
+    <ClCompile Include="Location_Map_Report.cpp" />
+>>>>>>> .merge-right.r1529
     <ClCompile Include="Map_Locations.cpp" />
     <ClCompile Include="Map_Parking.cpp" />
+    <ClCompile Include="Parking_Map_Report.cpp" />
     <ClCompile Include="Plan_Processor.cpp" />
     <ClCompile Include="Process_Plan.cpp" />
     <ClCompile Include="Read_Plans.cpp" />
     <ClCompile Include="Relocate.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Include\Dir_Path_Data.hpp" />
     <ClInclude Include="..\Include\Relocate.hpp" />
   </ItemGroup>
   <ItemGroup>

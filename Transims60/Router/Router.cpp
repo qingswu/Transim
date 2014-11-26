@@ -11,7 +11,11 @@
 Router::Router (void) : Router_Service ()
 {
 	Program ("Router");
+<<<<<<< .working
 	Version (60);
+=======
+	Version (74);
+>>>>>>> .merge-right.r1529
 	Title ("Network Path Building");
 
 	System_File_Type optional_files [] = {
@@ -57,7 +61,8 @@ Router::Router (void) : Router_Service ()
 	initial_priority = CRITICAL;
 
 	num_file_sets = 1;
-	total_records = num_time_updates = num_trip_parts = num_reroute = num_reskim = num_update = num_build = num_copied = num_selected = 0;
+	total_records = num_time_updates = num_trip_parts = num_reroute = num_reskim = num_update = num_build = num_copied = 0;
+	select_records = select_weight = random_seed = 0;
 	trip_flag = plan_flag = new_plan_flag = problem_flag = false;
 	percent_selected = 0.0;
 
