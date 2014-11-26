@@ -25,6 +25,8 @@ Data_Service::Data_Service (void) : File_Service ()
 	Bearing_Warnings (false);
 
 	Congested_Ratio (Round (300));
+	Maximum_Time_Ratio (300);
+	Delete_Time_Ratio (300);
 	compass.Set_Points (360);
 	Bearing_Offset (Round (45));
 	Max_Zone_Number (0);
@@ -48,6 +50,8 @@ void Data_Service::Data_Service_Keys (int *keys)
 		{ SUMMARY_TIME_INCREMENT, "SUMMARY_TIME_INCREMENT", LEVEL0, OPT_KEY, TIME_KEY, "15 minutes", MINUTE_RANGE, NO_HELP },
 		{ PERIOD_CONTROL_POINT, "PERIOD_CONTROL_POINT", LEVEL0, OPT_KEY, TEXT_KEY, "MID-TRIP", "START, END, MID-TRIP", NO_HELP },
 		{ CONGESTED_TIME_RATIO, "CONGESTED_TIME_RATIO", LEVEL0, OPT_KEY, FLOAT_KEY, "2.0", "1.0..5.0", NO_HELP },
+		{ MAXIMUM_TIME_RATIO, "MAXIMUM_TIME_RATIO", LEVEL0, OPT_KEY, FLOAT_KEY, "20000.0", "2.0..20000.0", NO_HELP },
+		{ EXCLUDE_TIME_RATIO, "EXCLUDE_TIME_RATIO", LEVEL0, OPT_KEY, FLOAT_KEY, "20000.0", "5.0..20000.0", NO_HELP },
 		{ TRIP_SORT_TYPE, "TRIP_SORT_TYPE", LEVEL0, OPT_KEY, TEXT_KEY, "DO_NOT_SORT", "DO_NOT_SORT, TRAVELER_SORT, TIME_SORT", NO_HELP },
 		{ PLAN_SORT_TYPE, "PLAN_SORT_TYPE", LEVEL0, OPT_KEY, TEXT_KEY, "DO_NOT_SORT", "DO_NOT_SORT, TRAVELER_SORT, TIME_SORT", NO_HELP },
 		{ HIGHEST_ZONE_NUMBER, "HIGHEST_ZONE_NUMBER", LEVEL0, OPT_KEY, INT_KEY, "0", "0..32000", NO_HELP },
@@ -145,6 +149,18 @@ void Data_Service::Program_Control (void)
 		Congested_Ratio (Round (Get_Control_Double (CONGESTED_TIME_RATIO) * 100.0));
 
 		Ratio_Flag (Check_Control_Key (CONGESTED_TIME_RATIO));
+	}
+
+	//---- maximum time ratio ----
+
+	if (Control_Key_Status (MAXIMUM_TIME_RATIO)) {
+		Maximum_Time_Ratio ((int) (Get_Control_Double (MAXIMUM_TIME_RATIO) * 100.0));
+	}
+
+	//---- exclude time ratio ----
+
+	if (Control_Key_Status (EXCLUDE_TIME_RATIO)) {
+		Delete_Time_Ratio ((int) (Get_Control_Double (EXCLUDE_TIME_RATIO) * 100.0));
 	}
 
 	//---- trip sort type ----

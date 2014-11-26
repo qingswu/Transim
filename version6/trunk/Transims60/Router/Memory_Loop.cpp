@@ -66,14 +66,19 @@ bool Router::Memory_Loop (int part, Plan_Processor *plan_process_ptr)
 
 		if (plan_ptr->Priority () == NO_PRIORITY) {
 			plan_ptr->Method (UPDATE_PLAN);
+		} else if (method == DTA_FLOWS) {
+			plan_ptr->Method (BUILD_PATH);
 		} else if (select_priorities) {
 			build_flag = select_priority [plan_ptr->Priority ()];
 
 			if (build_flag && max_percent_flag && percent_selected < 1.0) {
-				double prob = random_select.Probability ();
-				build_flag = (prob <= percent_selected);
+				double prob = random_select.Probability (plan_ptr->Household () + iteration + random_seed);
+				if (plan_ptr->Priority () > 0) {
+					build_flag = (prob <= (percent_selected * plan_ptr->Priority ()));
+				} else {
+					build_flag = (prob <= percent_selected);
+				}
 			}
-
 			if (build_flag || plan_ptr->size () == 0 || plan_ptr->Problem () > 0) {
 				plan_ptr->Method (BUILD_PATH);
 				plan_ptr->Depart (plan_ptr->Start ());

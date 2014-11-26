@@ -75,44 +75,46 @@ use_link:
 				} else {
 					perf_data = period_itr->at (index);
 				}
-				data.Get_Data (&perf_data, dir_ptr, link_ptr);
 
-				perf_file->Time (data.Time ());
-				perf_file->Persons (data.Persons ());
-				perf_file->Volume (data.Volume ());
-				perf_file->Enter (data.Enter ());
-				perf_file->Exit (data.Exit ());
-				perf_file->Flow (data.Flow ());
-				perf_file->Speed (data.Speed ());
-				perf_file->Time_Ratio (data.Time_Ratio ());
-				perf_file->Delay (data.Delay ());
-				perf_file->Density (data.Density ());
-				perf_file->Max_Density (data.Max_Density ());
-				perf_file->Queue (data.Queue ());
-				perf_file->Max_Queue (data.Max_Queue ());
-				perf_file->Failure (data.Failure ());
-				perf_file->Veh_Dist (data.Veh_Dist ());
-				perf_file->Veh_Time (data.Veh_Time ());
-				perf_file->Veh_Delay (data.Veh_Delay ());
+				if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
 
-				arcview_perf.Copy_Fields (*perf_file);
+					perf_file->Time (data.Time ());
+					perf_file->Persons (data.Persons ());
+					perf_file->Volume (data.Volume ());
+					perf_file->Enter (data.Enter ());
+					perf_file->Exit (data.Exit ());
+					perf_file->Flow (data.Flow ());
+					perf_file->Speed (data.Speed ());
+					perf_file->Time_Ratio (data.Time_Ratio ());
+					perf_file->Delay (data.Delay ());
+					perf_file->Density (data.Density ());
+					perf_file->Max_Density (data.Max_Density ());
+					perf_file->Queue (data.Queue ());
+					perf_file->Max_Queue (data.Max_Queue ());
+					perf_file->Failure (data.Failure ());
+					perf_file->Veh_Dist (data.Veh_Dist ());
+					perf_file->Veh_Time (data.Veh_Time ());
+					perf_file->Veh_Delay (data.Veh_Delay ());
 
-				arcview_perf.Put_Field (length_field, UnRound (link_ptr->Length ()));
-				arcview_perf.Put_Field (lane_len_field, data.Lane_Len ());
-				arcview_perf.Put_Field (vc_field, data.VC_Ratio ());
-				arcview_perf.Put_Field (cong_time_field, 100.0 * data.Ratios () / num);
-				arcview_perf.Put_Field (cong_vmt_field, data.Ratio_Dist ());
-				arcview_perf.Put_Field (cong_vht_field, data.Ratio_Time ());
+					arcview_perf.Copy_Fields (*perf_file);
 
-				if (index_flag) {
-					arcview_perf.Put_Field (1, link_itr->Link () * 2 + dir);
-				}
-				value = arcview_perf.Get_Double (max_period_field);
+					arcview_perf.Put_Field (length_field, UnRound (link_ptr->Length ()));
+					arcview_perf.Put_Field (lane_len_field, data.Lane_Len ());
+					arcview_perf.Put_Field (vc_field, data.VC_Ratio ());
+					arcview_perf.Put_Field (cong_time_field, 100.0 * data.Ratios () / num);
+					arcview_perf.Put_Field (cong_vmt_field, data.Ratio_Dist ());
+					arcview_perf.Put_Field (cong_vht_field, data.Ratio_Time ());
 
-				if (value > max_value) {
-					max_value = value;
-					max_period = period;
-					best_data = perf_data;
+					if (index_flag) {
+						arcview_perf.Put_Field (1, link_itr->Link () * 2 + dir);
+					}
+					value = arcview_perf.Get_Double (max_period_field);
+
+					if (value > max_value) {
+						max_value = value;
+						max_period = period;
+						best_data = perf_data;
+					}
 				}
 			}
 
@@ -125,39 +127,40 @@ use_link:
 				data.Start (low);
 				data.End (high);
 
-				data.Get_Data (&best_data, dir_ptr, link_ptr);
+				if (data.Get_Data (&best_data, dir_ptr, link_ptr, Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
+					
+					perf_file->Time (data.Time ());
+					perf_file->Persons (data.Persons ());
+					perf_file->Volume (data.Volume ());
+					perf_file->Enter (data.Enter ());
+					perf_file->Exit (data.Exit ());
+					perf_file->Flow (data.Flow ());
+					perf_file->Speed (data.Speed ());
+					perf_file->Time_Ratio (data.Time_Ratio ());
+					perf_file->Delay (data.Delay ());
+					perf_file->Density (data.Density ());
+					perf_file->Max_Density (data.Max_Density ());
+					perf_file->Queue (data.Queue ());
+					perf_file->Max_Queue (data.Max_Queue ());
+					perf_file->Failure (data.Failure ());
+					perf_file->Veh_Dist (data.Veh_Dist ());
+					perf_file->Veh_Time (data.Veh_Time ());
+					perf_file->Veh_Delay (data.Veh_Delay ());
 
-				perf_file->Time (data.Time ());
-				perf_file->Persons (data.Persons ());
-				perf_file->Volume (data.Volume ());
-				perf_file->Enter (data.Enter ());
-				perf_file->Exit (data.Exit ());
-				perf_file->Flow (data.Flow ());
-				perf_file->Speed (data.Speed ());
-				perf_file->Time_Ratio (data.Time_Ratio ());
-				perf_file->Delay (data.Delay ());
-				perf_file->Density (data.Density ());
-				perf_file->Max_Density (data.Max_Density ());
-				perf_file->Queue (data.Queue ());
-				perf_file->Max_Queue (data.Max_Queue ());
-				perf_file->Failure (data.Failure ());
-				perf_file->Veh_Dist (data.Veh_Dist ());
-				perf_file->Veh_Time (data.Veh_Time ());
-				perf_file->Veh_Delay (data.Veh_Delay ());
+					arcview_perf.Copy_Fields (*perf_file);
 
-				arcview_perf.Copy_Fields (*perf_file);
+					arcview_perf.Put_Field (length_field, UnRound (length));
+					arcview_perf.Put_Field (lane_len_field, data.Lane_Len ());
+					arcview_perf.Put_Field (vc_field, data.VC_Ratio ());
+					arcview_perf.Put_Field (cong_time_field, 100.0 * data.Ratios () / num);
+					arcview_perf.Put_Field (cong_vmt_field, data.Ratio_Dist ());
+					arcview_perf.Put_Field (cong_vht_field, data.Ratio_Time ());
 
-				arcview_perf.Put_Field (length_field, UnRound (length));
-				arcview_perf.Put_Field (lane_len_field, data.Lane_Len ());
-				arcview_perf.Put_Field (vc_field, data.VC_Ratio ());
-				arcview_perf.Put_Field (cong_time_field, 100.0 * data.Ratios () / num);
-				arcview_perf.Put_Field (cong_vmt_field, data.Ratio_Dist ());
-				arcview_perf.Put_Field (cong_vht_field, data.Ratio_Time ());
-
-				if (index_flag) {
-					arcview_perf.Put_Field (1, link_itr->Link () * 2 + dir);
+					if (index_flag) {
+						arcview_perf.Put_Field (1, link_itr->Link () * 2 + dir);
+					}
+					Draw_Link (arcview_perf, link_ptr, dir);
 				}
-				Draw_Link (arcview_perf, link_ptr, dir);
 			}
 
 			if (use_index > 0 && Lane_Use_Flows ()) {

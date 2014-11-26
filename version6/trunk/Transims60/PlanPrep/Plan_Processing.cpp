@@ -12,7 +12,7 @@ PlanPrep::Plan_Processing::Plan_Processing (PlanPrep *_exe)
 {
 	exe = _exe;
 	thread_flag = (exe->Num_Threads () > 1);
-	num_temp = num_repair = 0;
+	num_temp = num_repair = repair_plans = 0;
 	plan_file = new_plan_file = merge_file = 0;
 }
 
@@ -80,5 +80,6 @@ void PlanPrep::Plan_Processing::operator()()
 		merge_file->Close ();
 	}
 	exe->num_repair += num_repair;
+	exe->repair_plans += repair_plans;
 	END_LOCK
 }

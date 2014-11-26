@@ -10,6 +10,13 @@
 
 void SubareaNet::Execute (void)
 {
+	//---- read the node file
+
+	Read_Nodes (*System_Node_File ());
+
+	if (buffer > 0) {
+		Add_Buffer_Nodes ();
+	}
 
 	//---- read the network ----
 

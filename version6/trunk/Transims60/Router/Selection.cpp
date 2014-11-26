@@ -94,6 +94,11 @@ bool Router::Selection (Trip_Data *trip_ptr)
 	if (delete_travelers && traveler_delete.In_Range (type)) return (false);
 	if (select_vehicles && !vehicle_range.In_Range (trip_ptr->Veh_Type ())) return (false);
 
-	return (!percent_flag || random_select.Probability () <= select_percent);
+	if (percent_flag) {
+		double prob = random_select.Probability (trip_ptr->Household () + random_seed);
+		return (prob <= select_percent);
+	} else {
+		return (true);
+	}
 }
 

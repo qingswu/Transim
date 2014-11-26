@@ -10,7 +10,7 @@
 
 void NewFormat::Read_Activity (void)
 {
-	int lvalue, hhold, person, purpose, location, last_hh, last_per, last_tour, last_trip;
+	int hhold, person, purpose, location, last_hh, last_per, last_tour, last_trip;
 	Int_Map_Itr map_itr;
 	Vehicle_Index veh_index;
 	Vehicle_Map_Itr veh_itr;
@@ -38,14 +38,13 @@ void NewFormat::Read_Activity (void)
 		person = activity_file.Person ();
 		purpose = activity_file.Purpose ();
 
-		lvalue = activity_file.Location ();
-		map_itr = location_map.find (lvalue);
+		location = activity_file.Location ();
+		map_itr = location_map.find (location);
 
 		if (map_itr == location_map.end ()) {
-			Warning (String ("Activity %d Location %d was Not Found") % Progress_Count () % lvalue);
+			Warning (String ("Activity %d Location %d was Not Found") % Progress_Count () % location);
 			continue;
 		}
-		location = map_itr->second;
 
 		if (hhold != last_hh || person != last_per) {
 			last_hh = hhold;
@@ -85,10 +84,10 @@ void NewFormat::Read_Activity (void)
 			Vehicle_Map_Itr itr = vehicle_type.find (veh_index);
 
 			if (itr == vehicle_type.end ()) continue;
-
-			trip_rec.Veh_Type (itr->second);
+			Veh_Type_Data *ptr = &veh_type_array [itr->second];
+			trip_rec.Veh_Type (ptr->Type ());
 		} else {
-			trip_rec.Veh_Type (0);
+			trip_rec.Veh_Type (-1);
 		}
 		trip_rec.Vehicle (vehicle);
 

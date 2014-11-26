@@ -226,6 +226,7 @@ void PlanCompare::Plan_Processing::Read_Plans (int part)
 				exe->cost_gap.Add_Trip_Gap_Data (tod, cost1, cost2);
 			}
 		}
+		percent = 0.0;
 
 		//---- compare plan times ----
 
@@ -251,6 +252,13 @@ void PlanCompare::Plan_Processing::Read_Plans (int part)
 				percent = (double) diff / cost2;
 				if (percent < exe->percent_cost_diff) continue;
 			}
+		}
+
+		//---- path difference ----
+
+		if (exe->path_diff_flag) {
+			if (!exe->Select_Path_Difference (plan, compare_plan)) continue;
+			percent = MAX (percent, 1.0);
 		}
 
 		//---- selection difference ----

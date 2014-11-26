@@ -237,7 +237,7 @@
       <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -302,18 +302,20 @@
       <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Compare_Links.cpp" />
     <ClCompile Include="Control.cpp" />
     <ClCompile Include="Custom_Summaries.cpp" />
     <ClCompile Include="Execute.cpp" />
     <ClCompile Include="Gap_Report.cpp" />
     <ClCompile Include="Get_Location_Data.cpp" />
+    <ClCompile Include="Get_Performance_Data.cpp" />
     <ClCompile Include="Group_Report.cpp" />
     <ClCompile Include="Group_Summary.cpp" />
     <ClCompile Include="Group_Sum_File.cpp" />

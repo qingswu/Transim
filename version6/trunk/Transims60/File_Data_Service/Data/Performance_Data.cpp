@@ -507,31 +507,46 @@ Perf_Period * Perf_Period_Array::Period_Ptr (Dtime time)
 
 Dtime Perf_Period_Array::Travel_Time (int dir_index, Dtime time, double len_factor, bool forward_flag) 
 {
-	int period, num_periods;
-	Dtime low, high, end_time, ttime, ttim;
+	int period, num_periods, min_period, max_period, num;
+	Dtime low, high, end_time, ttime, ttim, increment;
 	double factor;
+	bool break_flag;
 
 	ttime = 0;
 	num_periods = periods->Num_Periods ();
+	increment = periods->Increment ();
+	if (increment <= 0) increment = Dtime (15.0, MINUTES);
+	num = Dtime (1.0, HOURS) / increment; 
+	if (num < 1) num = 1;
 
-	for (period = periods->Period (time); period >= 0 && period < num_periods; ) {
+	period = periods->Period (time);
+	min_period = MAX ((period - num), 0);
+	max_period = MIN ((period + num), (num_periods - 1));
+	break_flag = false;
+
+	for (; period >= min_period && period <= max_period; ) {
 		periods->Period_Range (period, low, high);
 
 		Perf_Period *period_ptr = &at (period);
 
 		Perf_Data *perf_ptr = period_ptr->Data_Ptr (dir_index);
 
+		if (perf_ptr->Time () <= 0) return (-1);
+
 		if (len_factor <= 0.0) {
 			ttime += perf_ptr->Time ();
+			break_flag = true;
 			break;
 		}
 		ttim = (int) (perf_ptr->Time () * len_factor);
+		if (ttim < 0) return (-1);
 		if (ttim < 1) ttim = 1;
 
 		if (forward_flag) {
 			end_time = time + ttim;
 			if (end_time <= high) {
 				ttime += ttim;
+				break_flag = true;
 				break;
 			} else {
 				ttim = high - time;
@@ -542,7 +557,10 @@ Dtime Perf_Period_Array::Travel_Time (int dir_index, Dtime time, double len_fact
 					factor = 0.001;
 				}
 				len_factor -= factor;
-				if (len_factor <= 0) break;
+				if (len_factor <= 0) {
+					break_flag = true;
+					break;
+				}
 				time = high + 1;
 				period++;
 			}
@@ -550,6 +568,7 @@ Dtime Perf_Period_Array::Travel_Time (int dir_index, Dtime time, double len_fact
 			end_time = time - ttim;
 			if (end_time >= low) {
 				ttime += ttim;
+				break_flag = true;
 				break;
 			} else {
 				ttim = time - low;
@@ -560,13 +579,20 @@ Dtime Perf_Period_Array::Travel_Time (int dir_index, Dtime time, double len_fact
 					factor = 0.001;
 				}
 				len_factor -= factor;
-				if (len_factor <= 0) break;
+				if (len_factor <= 0) {
+					break_flag = true;
+					break;
+				}
 				time = low - 1;
 				period--;
 			}
 		}
 	}
-	return (ttime);
+	if (break_flag) {
+		return (ttime);
+	} else {
+		return (-1);
+	}
 }
 
 //---------------------------------------------------------
@@ -575,8 +601,8 @@ Dtime Perf_Period_Array::Travel_Time (int dir_index, Dtime time, double len_fact
 
 Dtime  Perf_Period_Array::Flow_Time (int dir_index, Dtime time, double len_factor, double len, double pce, double occ, bool forward_flag)
 {
-	int period, num_periods;
-	Dtime low, high, end_time, ttime, ttim;
+	int period, num_periods, min_period, max_period, num;
+	Dtime low, high, end_time, ttime, ttim, increment;
 	double factor, tt;
 	bool first;
 
@@ -585,12 +611,23 @@ Dtime  Perf_Period_Array::Flow_Time (int dir_index, Dtime time, double len_facto
 	ttime = 0;
 	first = true;
 
-	for (period = periods->Period (time); period >= 0 && period < num_periods; first = false) {
+	increment = periods->Increment ();
+	if (increment <= 0) increment = Dtime (15.0, MINUTES);
+	num = Dtime (1.0, HOURS) / increment; 
+	if (num < 1) num = 1;
+
+	period = periods->Period (time);
+	min_period = MAX ((period - num), 0);
+	max_period = MIN ((period + num), (num_periods - 1));
+
+	for (; period >= min_period && period <= max_period; first = false) {
 		periods->Period_Range (period, low, high);
 
 		Perf_Period *period_ptr = &at (period);
 
 		Perf_Data *perf_ptr = period_ptr->Data_Ptr (dir_index);
+		
+		if (perf_ptr->Time () <= 0) return (-1);
 
 		if (len_factor <= 0.0) {
 			ttime += perf_ptr->Time ();
@@ -598,6 +635,7 @@ Dtime  Perf_Period_Array::Flow_Time (int dir_index, Dtime time, double len_facto
 		}
 		tt = perf_ptr->Time () * len_factor;
 		ttim = (int) (tt + 0.5);
+		if (ttim < 0) return (-1);
 		if (ttim < 1) ttim = 1;
 
 		if (forward_flag) {
@@ -673,9 +711,9 @@ link_end:
 		} else {
 			perf_ptr->Add_Enter (pce);
 		}
-		break;
+		return (ttime);
 	}
-	return (ttime);
+	return (-1);
 }
 
 //---------------------------------------------------------
@@ -684,8 +722,8 @@ link_end:
 
 Dtime Perf_Period_Array::Load_Flow (int dir_index, Dtime time, Dtime ttime, double len_factor, double len, double pce, double occ)
 {
-	int period, num_periods;
-	Dtime low, high, end_time, ttim, perf_time;
+	int period, num_periods, min_period, max_period, num;
+	Dtime low, high, end_time, ttim, increment, perf_time;
 	double factor, tt;
 	bool first;
 
@@ -695,12 +733,23 @@ Dtime Perf_Period_Array::Load_Flow (int dir_index, Dtime time, Dtime ttime, doub
 
 	first = true;
 
-	for (period = periods->Period (time); period >= 0 && period < num_periods; first = false) {
+	increment = periods->Increment ();
+	if (increment <= 0) increment = Dtime (15.0, MINUTES);
+	num = Dtime (1.0, HOURS) / increment; 
+	if (num < 1) num = 1;
+
+	period = periods->Period (time);
+	min_period = MAX ((period - num), 0);
+	max_period = MIN ((period + num), (num_periods - 1));
+
+	for (; period >= min_period && period <= max_period; first = false) {
+
 		periods->Period_Range (period, low, high);
 
 		Perf_Period *period_ptr = &at (period);
 
 		Perf_Data *perf_ptr = period_ptr->Data_Ptr (dir_index);
+		if (perf_ptr->Time () < 0) return (-1);
 
 		if (len_factor <= 0.0) goto link_end;
 
@@ -708,6 +757,7 @@ Dtime Perf_Period_Array::Load_Flow (int dir_index, Dtime time, Dtime ttime, doub
 
 		tt = ttime * len_factor;
 		ttim = (int) (tt + 0.5);
+		if (ttim < 0) return (-1);
 		if (ttim < 1) ttim = 1;
 
 		end_time = time + ttim;
@@ -745,28 +795,32 @@ Dtime Perf_Period_Array::Load_Flow (int dir_index, Dtime time, Dtime ttime, doub
 		continue;
 link_end:
 		perf_ptr->Add_Exit (pce);
-		break;
+		return (perf_time);
 	}
-	return (perf_time);
+	return (-1);
 }
 
 //---------------------------------------------------------
 //	Get_Data
 //---------------------------------------------------------
 
-void Performance_Data::Get_Data (Perf_Data *perf_ptr, int dir_index) 
+bool Performance_Data::Get_Data (Perf_Data *perf_ptr, int dir_index, int max_ratio, int delete_ratio) 
 {
 	Dir_Data *dir_ptr = &dat->dir_array [dir_index];
 	Link_Data *link_ptr = &dat->link_array [dir_ptr->Link ()];
 
-	Get_Data (perf_ptr, dir_ptr, link_ptr);
+	return (Get_Data (perf_ptr, dir_ptr, link_ptr, max_ratio, delete_ratio));
 }
 
-void Performance_Data::Get_Data (Perf_Data *perf_ptr, Dir_Data *dir_ptr, Link_Data *link_ptr)
+bool Performance_Data::Get_Data (Perf_Data *perf_ptr, Dir_Data *dir_ptr, Link_Data *link_ptr, int max_ratio, int delete_ratio)
 {
 	int i, lanes;
-	double length, len, lane_len, speed, ratio;
-	Dtime time;
+	double length, len, lane_len, speed, ratio, factor, min_vol, volume;
+	Dtime time, increment;
+	bool ratio_flag = true;
+		
+	increment = End () - Start ();
+	if (increment <= 0) increment = Dtime (15, MINUTES);
 
 	length = link_ptr->Length ();
 	len = exe->UnRound (length);
@@ -787,23 +841,58 @@ void Performance_Data::Get_Data (Perf_Data *perf_ptr, Dir_Data *dir_ptr, Link_Da
 		speed = length / dir_ptr->Time0 ();
 	}
 	if (speed < 0.1) speed = 0.1;
-    Speed (speed);
 
 	time = (int) (length / speed + 0.5);
-	if (time < 1) time = 1;
-	
-	Time (time);
-	Delay (time - dir_ptr->Time0 ());
+	if (time < dir_ptr->Time0 ()) {
+		if (perf_ptr->Time () > dir_ptr->Time0 ()) {
+			time = perf_ptr->Time ();
+		} else {
+			time = dir_ptr->Time0 ();
+		}
+		speed = length / time;
+		if (speed < 0.1) speed = 0.1;
 
-	Veh_Delay (Delay () * Volume ());
-
+		Veh_Time (perf_ptr->Veh_Dist () / speed);
+	}
 	if (dir_ptr->Time0 () > 0) {
 		ratio = time * 100.0 / dir_ptr->Time0 ();
 	} else {
 		ratio = 100;
 	}
+	ratio_flag = (ratio <= delete_ratio);
+
+	if (ratio > max_ratio) {
+		ratio = max_ratio / ratio;
+		Veh_Time (Veh_Time () * ratio);
+
+		time = (int) (time * ratio + 0.5);
+		if (time < dir_ptr->Time0 ()) time = dir_ptr->Time0 ();
+		
+		speed = length / time;
+		ratio = max_ratio;
+
+		if (perf_ptr->Volume () > 0) {
+			factor = perf_ptr->Persons () / perf_ptr->Volume ();
+		} else {
+			factor = 1.0;
+		}
+		min_vol = volume = MAX (perf_ptr->Enter (), perf_ptr->Exit ());
+		if (time > increment) {
+			volume = volume * time / increment;
+		}
+		if (perf_ptr->Volume () < min_vol || volume < perf_ptr->Volume ()) {
+			Volume (volume);
+			Persons (volume * factor);
+		}
+	}
 	Time_Ratio (ratio);
 
+    Speed (speed);
+	Time (time);
+	Delay (time - dir_ptr->Time0 ());
+
+	Veh_Delay (Delay () * Volume ());
+		
 	lanes = dir_ptr->Lanes ();
 	i = dir_ptr->First_Lane_Use ();
 
@@ -844,11 +933,11 @@ void Performance_Data::Get_Data (Perf_Data *perf_ptr, Dir_Data *dir_ptr, Link_Da
 	Max_Queue (perf_ptr->Max_Queue ());
 	Failure (perf_ptr->Failure ());
 
-	if (perf_ptr->Volume () > 0 && dir_ptr->Capacity () > 0 && End () > 0) {
+	if (Volume () > 0 && dir_ptr->Capacity () > 0 && End () > 0) {
 		if (lanes != dir_ptr->Lanes () && dir_ptr->Lanes () > 0) {
 			ratio = ratio * lanes / dir_ptr->Lanes ();
 		}
-		VC_Ratio (100.0 * perf_ptr->Volume () / (dir_ptr->Capacity () * ratio));
+		VC_Ratio (100.0 * Volume () / (dir_ptr->Capacity () * ratio));
 	} else {
 		VC_Ratio (0.0);
 	}
@@ -857,17 +946,20 @@ void Performance_Data::Get_Data (Perf_Data *perf_ptr, Dir_Data *dir_ptr, Link_Da
 	Ratio_Time (perf_ptr->Ratio_Time ());
 	Ratios (perf_ptr->Ratios ());
 	Count (perf_ptr->Count ());
+
+	return (ratio_flag);
 }
 
 //---------------------------------------------------------
 //	Get_Data
 //---------------------------------------------------------
 
-void Performance_Data::Get_Data (Vol_Spd_Data *vol_spd_ptr, Dir_Data *dir_ptr, Link_Data *link_ptr)
+bool Performance_Data::Get_Data (Vol_Spd_Data *vol_spd_ptr, Dir_Data *dir_ptr, Link_Data *link_ptr, int max_ratio, int delete_ratio)
 {
 	int i, lanes;
 	double length, lane_len, speed, ratio;
 	Dtime time;
+	bool ratio_flag = true;
 
 	length = link_ptr->Length ();
 
@@ -882,23 +974,33 @@ void Performance_Data::Get_Data (Vol_Spd_Data *vol_spd_ptr, Dir_Data *dir_ptr, L
 
 	speed = vol_spd_ptr->Speed ();
 	if (speed < 0.1) speed = 0.1;
-	Speed (speed);
 
 	time = (int) (length / speed + 0.5);
-	if (time < 1) time = 1;
-
-	Time (time);
-	Delay (time - dir_ptr->Time0 ());
-
-	Veh_Time (vol_spd_ptr->Volume () * time);
-	Veh_Delay (Delay () * Volume ());
+	if (time < dir_ptr->Time0 ()) time = dir_ptr->Time0 ();
 
 	if (dir_ptr->Time0 () > 0) {
 		ratio = time * 100.0 / dir_ptr->Time0 ();
 	} else {
 		ratio = 100;
 	}
+	ratio_flag = (ratio <= delete_ratio);
+	
+	if (ratio > max_ratio) {
+		ratio = max_ratio / ratio;
+
+		time = (int) (time * ratio + 0.5);
+		if (time < dir_ptr->Time0 ()) time = dir_ptr->Time0 ();
+		
+		speed = length / time;
+		ratio = max_ratio;
+	}
 	Time_Ratio (ratio);
+    Speed (speed);
+	Time (time);
+	Delay (time - dir_ptr->Time0 ());
+
+	Veh_Time (vol_spd_ptr->Volume () * time);
+	Veh_Delay (Delay () * Volume ());
 
 	lanes = dir_ptr->Lanes ();
 	i = dir_ptr->First_Lane_Use ();
@@ -947,4 +1049,6 @@ void Performance_Data::Get_Data (Vol_Spd_Data *vol_spd_ptr, Dir_Data *dir_ptr, L
 	Ratio_Time (0);
 	Ratios (0);
 	Count (0);
+
+	return (ratio_flag);
 }

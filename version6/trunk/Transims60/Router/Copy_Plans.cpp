@@ -150,7 +150,7 @@ bool Router::Copy_Plans (int part, Plan_Processor *plan_process_ptr)
 
 		    if (!update_flag && !reroute_flag && !keep_flag) continue;
 							
-		    plan_rec.Internal_IDs ();
+		    if (!plan_rec.Internal_IDs ()) continue;
 
 		    //---- update the paths ----
 

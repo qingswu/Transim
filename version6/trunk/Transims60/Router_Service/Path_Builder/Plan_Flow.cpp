@@ -52,7 +52,10 @@ bool Path_Builder::Plan_Flow (Plan_Data *plan_data)
 
 	for (leg_itr = plan_ptr->begin (); leg_itr != plan_ptr->end (); leg_itr++, time += ttime) {
 		ttime = leg_itr->Time ();
-			
+		if (ttime < 0) {
+			plan_ptr->Problem (PATH_PROBLEM);
+			break;
+		}			
 		if (leg_itr->Mode () != DRIVE_MODE) continue;
 
 		perf_period_ptr = perf_period_array_ptr->Period_Ptr (time);
@@ -100,6 +103,10 @@ bool Path_Builder::Plan_Flow (Plan_Data *plan_data)
 					len_factor = len / link_ptr->Length ();
 				}
 				ttime = perf_period_array_ptr->Flow_Time (use_index, time, len_factor, link_ptr->Length (), path_param.pce, path_param.occupancy);
+				if (ttime < 0) {
+					plan_ptr->Problem (PATH_PROBLEM);
+					break;
+				}
 			}
 			if (dir_index >= 0 && path_param.turn_flow_flag) {
 				map2_itr = exe->connect_map.find (Int2_Key (dir_index, index));
@@ -109,6 +116,7 @@ bool Path_Builder::Plan_Flow (Plan_Data *plan_data)
 					if (turn_period_ptr != 0) {
 						turn_ptr = turn_period_ptr->Data_Ptr (map2_itr->second);
 						turn_ptr->Add_Turn (path_param.pce);
+						ttime += turn_ptr->Time ();
 					}
 				}
 			}

@@ -172,7 +172,7 @@ void Data_Service::Read_Performance (Performance_File &file, Perf_Period_Array &
 			} else {
 				time = dir_ptr->Time0 ();
 			}
-			if (time < 1) time = 1;
+			if (time < dir_ptr->Time0 ()) time = dir_ptr->Time0 ();
 			perf_itr->Time (time);
 			
 			if (Clear_Flow_Flag ()) perf_itr->Clear_Flows ();
@@ -226,6 +226,7 @@ bool Data_Service::Get_Performance_Data (Performance_File &file, Performance_Dat
 	static Dtime period;
 
 	Link_Data *link_ptr;
+	Dir_Data *dir_ptr;
 
 	//---- check/convert the link number and direction ----
 		
@@ -233,7 +234,6 @@ bool Data_Service::Get_Performance_Data (Performance_File &file, Performance_Dat
 	dir = file.Dir ();
 
 	link_ptr = Set_Link_Direction (file, link, dir, (file.Version () <= 40));
-
 	if (link_ptr == 0) return (false);
 
 	if (dir) {
@@ -249,6 +249,8 @@ bool Data_Service::Get_Performance_Data (Performance_File &file, Performance_Dat
 		node = 0;
 		return (false);
 	}
+	dir_ptr = &dir_array [dir_index];
+
 	perf_rec.Dir_Index (dir_index);
 	perf_rec.Type (file.Type ());
 
@@ -276,6 +278,9 @@ bool Data_Service::Get_Performance_Data (Performance_File &file, Performance_Dat
 		perf_rec.Start (file.Start ());
 		perf_rec.Time (file.Time ());
 	}
+	if (perf_rec.Time () < dir_ptr->Time0 ()) {
+		perf_rec.Time (dir_ptr->Time0 ());
+	}
 	perf_rec.Speed (file.Speed ());
 	perf_rec.Time_Ratio (file.Time_Ratio ());
 	perf_rec.Delay (file.Delay ());
@@ -288,6 +293,7 @@ bool Data_Service::Get_Performance_Data (Performance_File &file, Performance_Dat
 	perf_rec.Veh_Time (file.Veh_Time ());
 	perf_rec.Veh_Delay (file.Veh_Delay ());
 
+	if (perf_rec.Time_Ratio () > Delete_Time_Ratio ()) return (false);
 	return (true);
 }
 

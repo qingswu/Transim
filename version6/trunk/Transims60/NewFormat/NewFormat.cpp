@@ -11,7 +11,7 @@
 NewFormat::NewFormat (void) : Data_Service (), Select_Service ()
 {
 	Program ("NewFormat");
-	Version (11);
+	Version (12);
 	Title ("Convert Data Files to Version 6.0 Format");
 
 	String old_range ("[project_directory]Old_filename");

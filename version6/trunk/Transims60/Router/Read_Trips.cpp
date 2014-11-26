@@ -54,7 +54,6 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 		p0 = 0;
 		num = num_file_sets;
 	}
-
 	if (plan_flag) {
 		if (plan_memory_flag) {
 			if (!trip_memory_flag) {
@@ -82,7 +81,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 						} else {
 							plan_ptr->Partition (p);
 							if (!Selection (plan_ptr)) continue;
-							plan_ptr->Internal_IDs ();
+							if (!plan_ptr->Internal_IDs ()) continue;
 						}
 						break;
 					}
@@ -96,7 +95,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 						plan_ptr->Household (0);
 					} else {
 						if (!Selection (plan_ptr)) continue;
-						plan_ptr->Internal_IDs ();
+						if (!plan_ptr->Internal_IDs ()) continue;
 					}
 					break;
 				}
@@ -250,7 +249,9 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 
 				//---- save the old plan to the household array ----
 
-				if (update_flag) {
+				if (method == DTA_FLOWS) {
+					plan_ptr->Method (BUILD_PATH);
+				} else if (update_flag) {
 					plan_ptr->Method (UPDATE_PLAN);
 				} else if (Link_Flows ()) {
 					plan_ptr->Method (PATH_FLOWS);
@@ -280,7 +281,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 						} else {
 							plan_ptr->Partition (part);
 							if (!Selection (plan_ptr)) continue;
-							plan_ptr->Internal_IDs ();
+							if (!plan_ptr->Internal_IDs ()) continue;
 						}
 						break;
 					}
@@ -342,7 +343,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 						} else {
 							plan_ptr->Partition (part);
 							if (!Selection (plan_ptr)) continue;
-							plan_ptr->Internal_IDs ();
+							if (!plan_ptr->Internal_IDs ()) continue;
 						}
 						break;
 					}
@@ -476,7 +477,9 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 
 				//---- save the old plan to the household array ----
 
-				if (reroute_flag) {
+				if (method == DTA_FLOWS) {
+					plan_ptr->Method (BUILD_PATH);
+				} else if (reroute_flag) {
 					if (plan_ptr->Depart () < reroute_time && plan_ptr->Arrive () > reroute_time) {
 						plan_ptr->Method (REROUTE_PATH);
 						plan_ptr->Arrive (reroute_time);
@@ -518,7 +521,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 							plan_ptr->Household (0);
 						} else {
 							if (!Selection (plan_ptr)) continue;
-							plan_ptr->Internal_IDs ();
+							if (!plan_ptr->Internal_IDs ()) continue;
 						}
 						break;
 					}

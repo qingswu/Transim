@@ -35,7 +35,7 @@ private:
 	Plan_File *plan_file, *new_plan_file;
 	Plan_File merge_file;
 
-	int sort_size, new_format, num_repair;
+	int sort_size, new_format, num_repair, repair_plans;
 	bool select_flag, merge_flag, combine_flag, output_flag, new_plan_flag, repair_flag;
 	String pathname;
 
@@ -64,7 +64,7 @@ private:
 
 	private:
 		PlanPrep *exe;
-		int  num_temp, num_repair;
+		int  num_temp, num_repair, repair_plans;
 		bool thread_flag;
 
 		Plan_Ptr_Array  plan_ptr_array;

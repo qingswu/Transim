@@ -66,6 +66,7 @@ void PlanPrep::Execute (void)
 
 	if (repair_flag) {
 		Write (2, "Number of Repaired Plan Legs = ") << num_repair;
+		Write (1, "Number of Repaired Plans = ") << repair_plans;
 	}
 
 	//---- print processing summary ----

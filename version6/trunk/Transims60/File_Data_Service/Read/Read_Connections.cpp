@@ -147,6 +147,18 @@ bool Data_Service::Get_Connect_Data (Connect_File &file, Connect_Data &connect_r
 		return (false);
 	}
 	connect_rec.Dir_Index (dir_index);
+	connect_rec.Type (file.Type ());
+
+	//---- capacity adjustment ----
+
+	if (link_ptr->Type () == RAMP &&  (connect_rec.Type () == R_MERGE || 
+		connect_rec.Type () == L_MERGE || connect_rec.Type () == THRU)) {
+		Dir_Data *dir_ptr = &dir_array [dir_index];
+		int min_cap = dir_ptr->Lanes () * 1500;
+		if (dir_ptr->Capacity () < min_cap) {
+			dir_ptr->Capacity (min_cap);
+		}
+	}
 
 	//---- convert the to-link number ----
 
@@ -202,7 +214,6 @@ bool Data_Service::Get_Connect_Data (Connect_File &file, Connect_Data &connect_r
 
 	//---- optional fields ----
 	
-	connect_rec.Type (file.Type ());
 	connect_rec.Penalty (file.Penalty ());
 	connect_rec.Speed (file.Speed ());
 	connect_rec.Capacity (file.Capacity ());

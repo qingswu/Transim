@@ -168,7 +168,7 @@ void SubareaPlans::Sublink_Data (void)
 	//		Dir_Data *dir_ptr = &dir_array [i];
 	//		link_ptr = &link_array [dir_ptr->Link ()];
 
-	//		Write (1, "link=") << link_ptr->Link () << " lot=" << itr->parking << " stop=" << itr->stop << " loc=" << itr->location;
+	//		Write (1, "link=") << link_ptr->Link () << " dir=" << dir_ptr->Dir () << " lot=" << itr->parking << " stop=" << itr->stop << " loc=" << itr->location;
 	//	}
 	//}
 }

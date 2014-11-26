@@ -63,7 +63,7 @@ bool Equation_Array::Add_Equation (int number, string &parameters)
 				}
 				return (false);
 			}
-			eq_rec.b = (2 * eq_rec.a - 1) / (2 * eq_rec.a - 2);
+			eq_rec.c = (2 * eq_rec.a - 1) / (2 * eq_rec.a - 2);
 		} else if (eq_rec.type == AKCELIK) {
 			if (eq_rec.a <= 0.05 || eq_rec.a > 2.5) {
 				if (exe->Send_Messages ()) {
@@ -108,11 +108,11 @@ bool Equation_Array::Add_Equation (int number, string &parameters)
 	if (flag && exe->Send_Messages ()) {
 		exe->Print (1, String ("Equation Parameters %d = %s, A=%0.2lf") % number % Equation_Code (eq_rec.type) % eq_rec.a);
 
-		if (eq_rec.type == CONSTANT) {
+		if (eq_rec.type == CONSTANT || eq_rec.type == CONICAL) {
 			if (eq_rec.b != 0.0) {
 				exe->Print (0, String (", B=%.2lf") % eq_rec.b);
 			}
-		} else if (eq_rec.type != CONICAL && eq_rec.type != AKCELIK) {
+		} else if (eq_rec.type != AKCELIK) {
 			exe->Print (0, String (", B=%0.2lf, C=%.2lf") % eq_rec.b % eq_rec.c);
 		}
 		if (eq_rec.type == BPR_PLUS) {
@@ -167,9 +167,15 @@ int Equation_Array::Apply_Equation (int number, int time0, double volume, int ca
 		} else if (eq_ptr->type == CONICAL) {
 			cap = 1 - (volume / cap);
 
-			ttime = time0 * (2 - eq_ptr->b - eq_ptr->a * cap + 
-				sqrt (eq_ptr->a * eq_ptr->a * cap * cap + eq_ptr->b * eq_ptr->b));
+			ttime = time0 * (2 - eq_ptr->c - eq_ptr->a * cap + 
+				sqrt (eq_ptr->a * eq_ptr->a * cap * cap + eq_ptr->c * eq_ptr->c));
 
+			if (eq_ptr->b > 0) {
+				cap = ttime / time0;
+				if (cap > eq_ptr->b) {
+					ttime = time0 * eq_ptr->b;
+				}
+			}
 		} else if (eq_ptr->type == AKCELIK && length > 0) {
 			double vc, fac, spd;
 			vc = volume / cap;

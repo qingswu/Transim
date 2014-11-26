@@ -11,7 +11,7 @@
 void Router::Preload_Transit (void)
 {
 	int index;
-	Dtime time, dwell;
+	Dtime time, dwell, ttime;
 	double pce, occ;
 
 	Line_Itr line_itr;
@@ -54,7 +54,9 @@ void Router::Preload_Transit (void)
 				if (dir_ptr->Use_Index () >= 0) {
 					index = dir_ptr->Use_Index ();
 				}
-				time += perf_period_array.Flow_Time (index, time, 1.0, link_ptr->Length (), pce, occ) + dwell;
+				ttime = perf_period_array.Flow_Time (index, time, 1.0, link_ptr->Length (), pce, occ) + dwell;
+				if (ttime < 0) break;
+				time += ttime;
 			}
 		}
 	}

@@ -91,6 +91,10 @@ void SubareaNet::Program_Control (void)
 
 	external_offset = Get_Control_Integer (EXTERNAL_OFFSET_LENGTH);
 
+	//---- get the subarea buffer distance ----
+
+	buffer = Round (Get_Control_Integer (SUBAREA_BUFFER_DISTANCE));
+
 	//---- replicate the field names ----
 
 	Copy_File_Header (NODE, NEW_NODE);

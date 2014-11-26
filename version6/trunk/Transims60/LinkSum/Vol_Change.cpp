@@ -61,22 +61,23 @@ void LinkSum::Volume_Change (void)
 				data.Start (low);
 				data.End (high);
 
-				data.Get_Data (&perf_data, dir_ptr, &(*link_itr));
+				if (data.Get_Data (&perf_data, dir_ptr, &(*link_itr), Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
 				
-				period_ptr = &compare_perf_array [j];
+					period_ptr = &compare_perf_array [j];
 
-				perf_data = period_ptr->Total_Performance (index, use_index);
+					perf_data = period_ptr->Total_Performance (index, use_index);
 
-				if (perf_data.Volume () < minimum_volume) continue;
+					if (perf_data.Volume () < minimum_volume) continue;
 
-				if (perf_data.Volume () == 0.0) perf_data.Volume (0.1);
+					if (perf_data.Volume () == 0.0) perf_data.Volume (0.1);
 
-				bin = DTOI (abs (DTOI (data.Volume () - perf_data.Volume ())) * 10 * RESOLUTION / perf_data.Volume ());
+					bin = DTOI (abs (DTOI (data.Volume () - perf_data.Volume ())) * 10 * RESOLUTION / perf_data.Volume ());
 
-				if (bin < 0 || bin >= NUM_SUM_BINS) bin = NUM_SUM_BINS - 1;
+					if (bin < 0 || bin >= NUM_SUM_BINS) bin = NUM_SUM_BINS - 1;
 
-				sum_bin [j] [bin] += data.Lane_Len ();
-				sum_bin [num_inc] [bin] += data.Lane_Len ();
+					sum_bin [j] [bin] += data.Lane_Len ();
+					sum_bin [num_inc] [bin] += data.Lane_Len ();
+				}
 			}
 		}
 	}

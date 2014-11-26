@@ -53,7 +53,11 @@ void LinkSum::Group_Sum_Report (void)
 	Show_Message ("Creating the Group Performance Summary -- Record");
 	Set_Progress ();
 	
-	connect_flag = System_Data_Flag (CONNECTION) && (turn_period_array.size () > 0) && (compare_turn_array.size () > 0);
+	if (compare_flag) {
+		connect_flag = System_Data_Flag (CONNECTION) && (turn_period_array.size () > 0) && (compare_turn_array.size () > 0);
+	} else {
+		connect_flag = System_Data_Flag (CONNECTION) && (turn_period_array.size () > 0);
+	}
 
 	tod = sum_periods.Increment ();
 	if (tod < 1) {
@@ -114,60 +118,62 @@ void LinkSum::Group_Sum_Report (void)
 
 				perf_data = period_itr->Total_Performance (index, use_index);
 
-				data.Get_Data (&perf_data, dir_ptr, link_ptr);
+				if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
 
-				//---- check the time ratio ----
+					//---- check the time ratio ----
 
-				if (select_ratio) {
-					if (data.Time_Ratio () < time_ratio) continue;
-				}
+					if (select_ratio) {
+						if (data.Time_Ratio () < time_ratio) continue;
+					}
 
-				//---- check the vc ratio ----
+					//---- check the vc ratio ----
 
-				if (select_vc) {
-					if (data.VC_Ratio () < vc_ratio) continue;
-				}
-				sum_bin [j] [LINKS] += 1;
-				sum_bin [j] [LENGTH] += length;
-				sum_bin [j] [LANES] += data.Lane_Len ();
-				sum_bin [j] [VMT] += data.Veh_Dist ();
-				sum_bin [j] [VHT] += data.Veh_Time ();
-				sum_bin [j] [VHD] += data.Veh_Delay ();
-				sum_bin [j] [TIME_RATIO] += data.Time_Ratio ();
-				sum_bin [j] [DENSITY] += data.Density ();
-				sum_bin [j] [MAX_DEN] = MAX (sum_bin [j] [MAX_DEN], data.Max_Density ());
-				sum_bin [j] [QUEUE] += data.Queue ();
-				sum_bin [j] [MAX_QUEUE] = MAX (sum_bin [j] [MAX_QUEUE], data.Max_Queue ());
-				sum_bin [j] [FAILURE] += data.Failure ();
+					if (select_vc) {
+						if (data.VC_Ratio () < vc_ratio) continue;
+					}
+					sum_bin [j] [LINKS] += 1;
+					sum_bin [j] [LENGTH] += length;
+					sum_bin [j] [LANES] += data.Lane_Len ();
+					sum_bin [j] [VMT] += data.Veh_Dist ();
+					sum_bin [j] [VHT] += data.Veh_Time ();
+					sum_bin [j] [VHD] += data.Veh_Delay ();
+					sum_bin [j] [TIME_RATIO] += data.Time_Ratio ();
+					sum_bin [j] [DENSITY] += data.Density ();
+					sum_bin [j] [MAX_DEN] = MAX (sum_bin [j] [MAX_DEN], data.Max_Density ());
+					sum_bin [j] [QUEUE] += data.Queue ();
+					sum_bin [j] [MAX_QUEUE] = MAX (sum_bin [j] [MAX_QUEUE], data.Max_Queue ());
+					sum_bin [j] [FAILURE] += data.Failure ();
 
-				if (Ratio_Flag ()) {
-					sum_bin [j] [CONG_VMT] += data.Ratio_Dist ();
-					sum_bin [j] [CONG_VHT] += data.Ratio_Time ();
-					sum_bin [j] [CONG_TIME] += data.Ratios ();
-					sum_bin [j] [COUNT] += data.Count ();
+					if (Ratio_Flag ()) {
+						sum_bin [j] [CONG_VMT] += data.Ratio_Dist ();
+						sum_bin [j] [CONG_VHT] += data.Ratio_Time ();
+						sum_bin [j] [CONG_TIME] += data.Ratios ();
+						sum_bin [j] [COUNT] += data.Count ();
+					}
 				}
 
 				if (compare_flag) {
 					period_ptr = &compare_perf_array [j];
 					perf_data = period_ptr->Total_Performance (index, use_index);
 
-					data.Get_Data (&perf_data, dir_ptr, link_ptr);
+					if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
 
-					sum_bin [j] [VMT+PREV] += data.Veh_Dist ();
-					sum_bin [j] [VHT+PREV] += data.Veh_Time ();
-					sum_bin [j] [VHD+PREV] += data.Veh_Delay ();
-					sum_bin [j] [TIME_RATIO+PREV] += data.Time_Ratio ();
-					sum_bin [j] [DENSITY+PREV] += data.Density ();
-					sum_bin [j] [MAX_DEN+PREV] = MAX (sum_bin [j] [MAX_DEN+PREV], data.Max_Density ());
-					sum_bin [j] [QUEUE+PREV] += data.Queue ();
-					sum_bin [j] [MAX_QUEUE+PREV] = MAX (sum_bin [j] [MAX_QUEUE+PREV], data.Max_Queue ());
-					sum_bin [j] [FAILURE+PREV] += data.Failure ();
+						sum_bin [j] [VMT+PREV] += data.Veh_Dist ();
+						sum_bin [j] [VHT+PREV] += data.Veh_Time ();
+						sum_bin [j] [VHD+PREV] += data.Veh_Delay ();
+						sum_bin [j] [TIME_RATIO+PREV] += data.Time_Ratio ();
+						sum_bin [j] [DENSITY+PREV] += data.Density ();
+						sum_bin [j] [MAX_DEN+PREV] = MAX (sum_bin [j] [MAX_DEN+PREV], data.Max_Density ());
+						sum_bin [j] [QUEUE+PREV] += data.Queue ();
+						sum_bin [j] [MAX_QUEUE+PREV] = MAX (sum_bin [j] [MAX_QUEUE+PREV], data.Max_Queue ());
+						sum_bin [j] [FAILURE+PREV] += data.Failure ();
 
-					if (Ratio_Flag ()) {
-						sum_bin [j] [CONG_VMT+PREV] += data.Ratio_Dist ();
-						sum_bin [j] [CONG_VHT+PREV] += data.Ratio_Time ();
-						sum_bin [j] [CONG_TIME+PREV] += data.Ratios ();
-						sum_bin [j] [COUNT+PREV] += data.Count ();
+						if (Ratio_Flag ()) {
+							sum_bin [j] [CONG_VMT+PREV] += data.Ratio_Dist ();
+							sum_bin [j] [CONG_VHT+PREV] += data.Ratio_Time ();
+							sum_bin [j] [CONG_TIME+PREV] += data.Ratios ();
+							sum_bin [j] [COUNT+PREV] += data.Count ();
+						}
 					}
 				}
 			}
@@ -184,12 +190,14 @@ void LinkSum::Group_Sum_Report (void)
 					for (j=0, turn_itr = turn_period_array.begin (); turn_itr != turn_period_array.end (); turn_itr++, j++) {
 						turn_ptr = turn_itr->Data_Ptr (k);
 
+						sum_bin [j] [VHD] += turn_ptr->Time () * turn_ptr->Turn ();
 						sum_bin [j] [TURNS] += turn_ptr->Turn ();
 
 						if (compare_flag) {
 							compare_ptr = &compare_turn_array [j];
 							turn_ptr = compare_ptr->Data_Ptr (k);
-
+							
+							sum_bin [j] [VHD+PREV] += turn_ptr->Time () * turn_ptr->Turn ();
 							sum_bin [j] [TURNS+PREV] += turn_ptr->Turn ();
 						}
 					}

@@ -22,7 +22,7 @@ public:
 
 protected:
 	enum SubareaNet_Keys { 
-		SUBAREA_BOUNDARY_POLYGON = 1, SUBAREA_COORDINATE_BOX, SUBAREA_NODE_CODE, EXTERNAL_OFFSET_LENGTH
+		SUBAREA_BOUNDARY_POLYGON = 1, SUBAREA_COORDINATE_BOX, SUBAREA_NODE_CODE, EXTERNAL_OFFSET_LENGTH, SUBAREA_BUFFER_DISTANCE,
 	};
 
 	virtual void Program_Control (void);
@@ -55,7 +55,7 @@ private:
 	int nstop, nroute, nschedule, ndriver, external_offset;
 	int new_zone, new_location, new_parking, new_access, new_stop, new_route;
 	bool transit_flag, zone_flag, box_flag, node_flag;
-	int x_min, y_min, x_max, y_max, node_code;
+	int x_min, y_min, x_max, y_max, node_code, buffer;
 
 	Arcview_File subarea_boundary;	
 
@@ -64,6 +64,7 @@ private:
 	Projection projection;
 	Projection_Service proj_service;
 
+	void Add_Buffer_Nodes (void);
 	void Write_Node (void);
 	void Write_Boundary (void);
 	void Write_Route (void);

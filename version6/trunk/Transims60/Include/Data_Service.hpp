@@ -174,6 +174,12 @@ public:
 
 	int  Congested_Ratio (void)         { return (congested_ratio); }
 	void Congested_Ratio (int value)    { congested_ratio = value; }
+	
+	int  Maximum_Time_Ratio (void)      { return (maximum_ratio); }
+	void Maximum_Time_Ratio (int value) { maximum_ratio = value; }
+	
+	int  Delete_Time_Ratio (void)       { return (delete_ratio); }
+	void Delete_Time_Ratio (int value)  { delete_ratio = value; }
 
 	Trip_Sort_Type Trip_Sort (void)     { return (trip_sort); }
 	void Trip_Sort (Trip_Sort_Type t)   { trip_sort = t; }
@@ -268,8 +274,8 @@ public:
 
 	enum Data_Service_Keys { 
 		DAILY_WRAP_FLAG = DATA_SERVICE_OFFSET, SUMMARY_TIME_RANGES, SUMMARY_TIME_INCREMENT, 
-		PERIOD_CONTROL_POINT, CONGESTED_TIME_RATIO, TRIP_SORT_TYPE, PLAN_SORT_TYPE, HIGHEST_ZONE_NUMBER,
-		UPDATE_LINK_BEARINGS, LINK_BEARING_WARNINGS
+		PERIOD_CONTROL_POINT, CONGESTED_TIME_RATIO, MAXIMUM_TIME_RATIO, EXCLUDE_TIME_RATIO, 
+		TRIP_SORT_TYPE, PLAN_SORT_TYPE, HIGHEST_ZONE_NUMBER, UPDATE_LINK_BEARINGS, LINK_BEARING_WARNINGS
 	};
 	void Data_Service_Keys (int *keys = 0);
 
@@ -433,7 +439,7 @@ private:
 
 	bool ratio_flag, loc_xy_flag, sum_flow_flag, clear_flow_flag, time_table_flag, transit_veh_flag;
 	bool person_map_flag, lane_use_flows, update_bearings, bearing_warnings;
-	int bearing_offset, num_fare_zone, congested_ratio, max_zone, num_lane_flows;
+	int bearing_offset, num_fare_zone, congested_ratio, maximum_ratio, delete_ratio, max_zone, num_lane_flows;
 
 	Trip_Sort_Type trip_sort;
 };

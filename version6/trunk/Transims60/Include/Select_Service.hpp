@@ -35,6 +35,7 @@ public:
 		PERCENT_TIME_DIFFERENCE, MINIMUM_TIME_DIFFERENCE, MAXIMUM_TIME_DIFFERENCE, 
 		PERCENT_COST_DIFFERENCE, MINIMUM_COST_DIFFERENCE, MAXIMUM_COST_DIFFERENCE, 
 		PERCENT_TRIP_DIFFERENCE, MINIMUM_TRIP_DIFFERENCE, MAXIMUM_TRIP_DIFFERENCE, 
+		PERCENT_PATH_DIFFERENCE, MINIMUM_PATH_DIFFERENCE, MAXIMUM_PATH_DIFFERENCE, 
 		SELECTION_PERCENTAGE, MAXIMUM_PERCENT_SELECTED, SELECTION_POLYGON, 
 		DELETION_FILE, DELETION_FORMAT,	DELETE_HOUSEHOLDS, DELETE_MODES, 
 		DELETE_TRAVELER_TYPES,
@@ -50,6 +51,7 @@ protected:
 	bool Select_Plan_Routes (Plan_Data &plan);
 	bool Select_Plan_Subareas (Plan_Data &plan);
 	bool Select_Plan_Polygon (Plan_Data &plan);
+	bool Select_Path_Difference (Plan_Data &plan1, Plan_Data &plan2);
 
 	//---- selection data ----
 	
@@ -60,10 +62,11 @@ protected:
 	bool select_transit [ANY_TRANSIT], select_transit_modes, select_priorities, select_priority [CRITICAL+1];
 	bool select_stops, select_routes, select_time_of_day, select_parking, select_vc, select_ratio;
 	bool delete_mode [MAX_MODE], delete_modes, delete_travelers, delete_households, delete_flag;
-	bool time_diff_flag, cost_diff_flag, trip_diff_flag;
+	bool time_diff_flag, cost_diff_flag, trip_diff_flag, path_diff_flag;
 	Dtime min_time_diff, max_time_diff, max_min_time_diff, min_trip_diff, max_trip_diff, max_min_trip_diff;
-	int min_cost_diff, max_cost_diff, max_min_cost_diff;
-	double select_percent, max_percent_select, percent_time_diff, percent_cost_diff, percent_trip_diff, vc_ratio, time_ratio;;
+	int min_cost_diff, max_cost_diff, max_min_cost_diff, min_path_diff, max_path_diff, max_min_path_diff;
+	double percent_time_diff, percent_cost_diff, percent_trip_diff, percent_path_diff;
+	double select_percent, max_percent_select, vc_ratio, time_ratio;;
 
 	Data_Range hhold_range, purpose_range, traveler_range, vehicle_range, problem_range, stop_range, route_range;
 	Data_Range org_range, des_range, org_zone_range, des_zone_range, hhold_delete, traveler_delete, parking_range, subarea_range;

@@ -28,6 +28,8 @@ bool Path_Builder::Best_Lane_Use (int index, Dtime time, double len_factor, Dtim
 			ttimes [1] = exe->perf_period_array.Travel_Time (dir_ptr->Use_Index (), time, len_factor, forward_flag);
 		}
 	}
+	if (ttimes [0] < 0 && ttimes [1] <= 0) return (false);
+
 	if (ttimes [0] == 0) ttimes [0] = dir_ptr->Time0 ();
 	if (ttimes [1] == 0) ttimes [1] = dir_ptr->Time0 ();
 
@@ -120,7 +122,11 @@ bool Path_Builder::Best_Lane_Use (int index, Dtime time, double len_factor, Dtim
 			factor = 1.0 + path_param.random_imped * (path_param.random.Probability () - 0.5) / 100.0;
 			best [1] = DTOI (best [1] * factor);
 		}
-		group = (best [1] < best [0]) ? 1 : 0;
+		if (best [1] > 0 && best [0] > 0) {
+			group = (best [1] < best [0]) ? 1 : 0;
+		} else {
+			group = 0;
+		}
 	} else if (use_type [0] == APPLY) {
 		group = 0;
 	} else {
@@ -129,5 +135,5 @@ bool Path_Builder::Best_Lane_Use (int index, Dtime time, double len_factor, Dtim
 	delay = delays [group];
 	cost = costs [group];
 	ttime = ttimes [group];
-	return (true);
+	return ((ttime > 0));
 }

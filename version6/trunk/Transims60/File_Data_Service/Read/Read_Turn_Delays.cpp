@@ -118,6 +118,7 @@ void Data_Service::Initialize_Turn_Delays (Turn_Delay_File &file, Turn_Period_Ar
 bool Data_Service::Get_Turn_Delay_Data (Turn_Delay_File &file, Turn_Delay_Data &turn_rec)
 {
 	int link, to_link, node, nod;
+	Dtime delay, max_delay;
 
 	Link_Data *link_ptr, *to_link_ptr;
 	Int_Map_Itr map_itr;
@@ -215,6 +216,15 @@ bool Data_Service::Get_Turn_Delay_Data (Turn_Delay_File &file, Turn_Delay_Data &
 	if (turn_rec.End () == 0) turn_rec.End (Model_End_Time ());
 
 	turn_rec.Turn (file.Turn ());
-	turn_rec.Time (file.Time ());
+	
+	delay = file.Time ();
+	max_delay = Dtime (1.0, HOURS);
+
+	if (delay < 0) {
+		delay = 0;
+	} else if (delay > max_delay) {
+		delay = max_delay;
+	}
+	turn_rec.Time (delay);
 	return (true);
 }

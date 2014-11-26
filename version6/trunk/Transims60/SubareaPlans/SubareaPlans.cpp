@@ -11,7 +11,7 @@
 SubareaPlans::SubareaPlans (void) : Data_Service (), Select_Service ()
 {
 	Program ("SubareaPlans");
-	Version (0);
+	Version (1);
 	Title ("Subarea Plan and Vehicle Files");
 
 	System_File_Type required_files [] = {

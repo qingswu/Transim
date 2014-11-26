@@ -17,9 +17,16 @@ void LinkSum::Execute (void)
 
 	Data_Service::Execute ();
 
+	//---- read the link map file ----
+
+	if (link_map_flag) {
+		Compare_Links ();
+	}
+
 	//---- read compare performance file ----
 
 	if (compare_flag) {
+		compare_perf_flag = (compare_link_map.size () > 0);
 		Read_Performance (compare_file, compare_perf_array);
 	}
 	if (turn_compare_flag) {

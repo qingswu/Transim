@@ -20,7 +20,9 @@
 
 #ifdef THREADS
 #include "Ordered_Work.hpp"
+#include "Bounded_Queue.hpp"
 
+typedef Bounded_Queue <Plan_Ptr_Array *> Plan_Ptr_Queue;
 typedef Ordered_Work <Plan_Ptr_Array, Plan_Ptr_Array> Plan_Queue;
 typedef Ordered_Work <One_To_Many, One_To_Many> Skim_Queue;
 #endif
@@ -36,9 +38,11 @@ public:
 	Path_Builder (Router_Service *exe = 0);
 #ifdef THREADS
 	Path_Builder (Plan_Queue *plan_queue, Router_Service *exe);
+	Path_Builder (Plan_Ptr_Queue *plan_ptr_queue, Router_Service *exe);
 	Path_Builder (Skim_Queue *skim_queue, Router_Service *exe);
-
+		
 	Plan_Queue *plan_queue;
+	Plan_Ptr_Queue *plan_ptr_queue;
 	Skim_Queue *skim_queue;
 	
 	Perf_Period_Array perf_period_array;
@@ -75,7 +79,7 @@ private:
 
 	double skim_gap, skim_time;
 
-	bool initialized, forward_flag, plan_flag;
+	bool initialized, forward_flag, plan_flag, trip_flag;
 	bool walk_path_flag, bike_path_flag, transit_path_flag, access_link_flag, reroute_flag;
 
 	Path_Parameters path_param;

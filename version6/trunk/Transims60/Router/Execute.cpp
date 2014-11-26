@@ -53,6 +53,8 @@ void Router::Execute (void)
 	}
 	Print (1);
 
+	first_iteration = !(System_File_Flag (PLAN) && System_File_Flag (PERFORMANCE));
+
 	//---- processing method ----
 
 	if (method == DUE_PLANS) {
@@ -95,8 +97,15 @@ void Router::Execute (void)
 	//---- save the turn time data ----
 
 	if (System_File_Flag (NEW_TURN_DELAY)) {
-		if (save_iter_flag) System_Turn_Delay_File (true)->Create ();
-		Write_Turn_Delays (full_flag);
+		if (save_iter_flag) { 
+			Turn_Delay_File *file = System_Turn_Delay_File (true);
+			if (file->Part_Flag ()) {
+				file->Open (0);
+			} else {
+				file->Create ();
+			}
+			Write_Turn_Delays (full_flag);
+		}
 	}
 
 	//---- save the transit ridership ----

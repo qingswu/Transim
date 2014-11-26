@@ -83,109 +83,7 @@ void LinkSum::Write_Link_Dir (Dir_Group_Itr &group)
 					} else {
 						perf_data = period_itr->Total_Performance (index, use_index);
 					}
-					data.Get_Data (&perf_data, dir_ptr, link_ptr);
-
-					switch (group->field) {
-						case TTIME_DATA:
-							value = data.Time ().Seconds ();
-							break;
-						case PERSON_DATA:
-							value = data.Persons ();
-							break;
-						case VOLUME_DATA:
-							value = data.Volume ();
-							break;
-						case ENTER_DATA:
-							value = data.Enter ();
-							break;
-						case EXIT_DATA:
-							value = data.Exit ();
-							break;
-						case FLOW_DATA:
-							value = data.Flow ();
-							break;
-						case SPEED_DATA:
-							value = data.Speed ();
-							break;
-						case RATIO_DATA:
-							value = data.Time_Ratio ();
-							break;
-						case DELAY_DATA:
-							value = data.Delay ();
-							break;
-						case DENSITY_DATA:
-							value = data.Density ();
-							break;
-						case MAX_DENSITY_DATA:
-							value = data.Max_Density ();
-							break;
-						case QUEUE_DATA:
-							value = data.Queue ();
-							break;
-						case MAX_QUEUE_DATA:
-							value = data.Max_Queue ();
-							break;
-						case FAILURE_DATA:
-							value = data.Failure ();
-							break;
-						case VC_DATA:
-							value = data.VC_Ratio ();
-							break;
-						case VMT_DATA:
-						case PMT_DATA:
-							value = data.Veh_Dist ();
-							break;
-						case VHT_DATA:
-						case PHT_DATA:
-							value = data.Veh_Time ();
-							break;
-						case VHD_DATA:
-						case PHD_DATA:
-							value = data.Veh_Delay ();
-							break;
-						case CONG_VMT_DATA:
-						case CONG_PMT_DATA:
-							value = data.Ratio_Dist ();
-							break;
-						case CONG_VHT_DATA:
-						case CONG_PHT_DATA:
-							value = data.Ratio_Time ();
-							break;
-						case CONG_TIME_DATA:
-							value = data.Count ();
-							if (value <= 0.0) value = 1.0;
-							value = 100.0 * data.Ratios () / value;
-							break;
-						default:
-							value = 0.0;
-							break;
-					}
-					if (value != 0.0) {
-						if (data.Volume () > 0 && 
-							(group->field == PMT_DATA || group->field == PHT_DATA || group->field == PHD_DATA ||
-							group->field == CONG_PMT_DATA || group->field == CONG_PHT_DATA)) {
-							value *= data.Persons () / data.Volume ();
-						}
-						group->file->Data (j, value);
-						save = true;
-					}
-
-					//---- add the previous value ----
-
-					if (compare_flag) {
-						period_ptr = &compare_perf_array [j];
-
-						if (type_flag) {
-							if (type == 0) {
-								perf_data = period_ptr->at (index);
-							} else {
-								perf_data = period_ptr->at (use_index);
-
-							}
-						} else {
-							perf_data = period_ptr->Total_Performance (index, use_index);
-						}
-						data.Get_Data (&perf_data, dir_ptr, link_ptr);
+					if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
 
 						switch (group->field) {
 							case TTIME_DATA:
@@ -268,8 +166,120 @@ void LinkSum::Write_Link_Dir (Dir_Group_Itr &group)
 								group->field == CONG_PMT_DATA || group->field == CONG_PHT_DATA)) {
 								value *= data.Persons () / data.Volume ();
 							}
-							group->file->Data2 (j, value);
+							if (group->flip) {
+								group->file->Data2 (j, value);
+							} else {
+								group->file->Data (j, value);
+							}
 							save = true;
+						}
+					}
+
+					//---- add the previous value ----
+
+					if (compare_flag) {
+						period_ptr = &compare_perf_array [j];
+
+						if (type_flag) {
+							if (type == 0) {
+								perf_data = period_ptr->at (index);
+							} else {
+								perf_data = period_ptr->at (use_index);
+
+							}
+						} else {
+							perf_data = period_ptr->Total_Performance (index, use_index);
+						}
+						if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
+
+							switch (group->field) {
+								case TTIME_DATA:
+									value = data.Time ().Seconds ();
+									break;
+								case PERSON_DATA:
+									value = data.Persons ();
+									break;
+								case VOLUME_DATA:
+									value = data.Volume ();
+									break;
+								case ENTER_DATA:
+									value = data.Enter ();
+									break;
+								case EXIT_DATA:
+									value = data.Exit ();
+									break;
+								case FLOW_DATA:
+									value = data.Flow ();
+									break;
+								case SPEED_DATA:
+									value = data.Speed ();
+									break;
+								case RATIO_DATA:
+									value = data.Time_Ratio ();
+									break;
+								case DELAY_DATA:
+									value = data.Delay ();
+									break;
+								case DENSITY_DATA:
+									value = data.Density ();
+									break;
+								case MAX_DENSITY_DATA:
+									value = data.Max_Density ();
+									break;
+								case QUEUE_DATA:
+									value = data.Queue ();
+									break;
+								case MAX_QUEUE_DATA:
+									value = data.Max_Queue ();
+									break;
+								case FAILURE_DATA:
+									value = data.Failure ();
+									break;
+								case VC_DATA:
+									value = data.VC_Ratio ();
+									break;
+								case VMT_DATA:
+								case PMT_DATA:
+									value = data.Veh_Dist ();
+									break;
+								case VHT_DATA:
+								case PHT_DATA:
+									value = data.Veh_Time ();
+									break;
+								case VHD_DATA:
+								case PHD_DATA:
+									value = data.Veh_Delay ();
+									break;
+								case CONG_VMT_DATA:
+								case CONG_PMT_DATA:
+									value = data.Ratio_Dist ();
+									break;
+								case CONG_VHT_DATA:
+								case CONG_PHT_DATA:
+									value = data.Ratio_Time ();
+									break;
+								case CONG_TIME_DATA:
+									value = data.Count ();
+									if (value <= 0.0) value = 1.0;
+									value = 100.0 * data.Ratios () / value;
+									break;
+								default:
+									value = 0.0;
+									break;
+							}
+							if (value != 0.0) {
+								if (data.Volume () > 0 && 
+									(group->field == PMT_DATA || group->field == PHT_DATA || group->field == PHD_DATA ||
+									group->field == CONG_PMT_DATA || group->field == CONG_PHT_DATA)) {
+									value *= data.Persons () / data.Volume ();
+								}
+								if (group->flip) {
+									group->file->Data (j, value);
+								} else {
+									group->file->Data2 (j, value);
+								}
+								save = true;
+							}
 						}
 					}
 				}

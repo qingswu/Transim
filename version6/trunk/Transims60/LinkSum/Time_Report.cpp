@@ -60,14 +60,15 @@ void LinkSum::Travel_Time_Report (void)
 
 				perf_data = period_itr->Total_Performance (index, use_index);
 
-				data.Get_Data (&perf_data, dir_ptr, &(*link_itr));
+				if (data.Get_Data (&perf_data, dir_ptr, &(*link_itr), Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
 
-				bin = DTOI (data.Time_Ratio () * RESOLUTION);
+					bin = DTOI (data.Time_Ratio () * RESOLUTION);
 
-				if (bin < 0 || bin >= NUM_SUM_BINS) bin = NUM_SUM_BINS - 1;
+					if (bin < 0 || bin >= NUM_SUM_BINS) bin = NUM_SUM_BINS - 1;
 
-				sum_bin [j] [bin] += data.Lane_Len ();
-				sum_bin [num_inc] [bin] += data.Lane_Len ();
+					sum_bin [j] [bin] += data.Lane_Len ();
+					sum_bin [num_inc] [bin] += data.Lane_Len ();
+				}
 			}
 		}
 	}

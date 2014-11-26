@@ -12,7 +12,7 @@ void NewFormat::Plan_Processing::Travel_Plans (int part)
 {
 	int i, current_traveler, current_trip, current_origin, park_id, link, dir, node, distance, length;
 	int traveler, trip, origin, tour, mode, time, tim, type, id, num, *path, *leg, imp, imped, walk_fac;
-	bool drive_flag, first;
+	bool drive_flag, first, skip_flag;
 	double factor, imped_fac, time_fac;
 
 	//enum Plan_Mode {AUTO_MODE, TRANSIT_MODE, WALK_MODE, BIKE_MODE, ACTIVITY_MODE, OTHER_MODE, MAGIC_MODE, CARPOOL_MODE, DRIVER_MODE};
@@ -63,6 +63,8 @@ void NewFormat::Plan_Processing::Travel_Plans (int part)
 
 	current_traveler = current_trip = current_origin = tour = length = 0;
 	first = true;
+	skip_flag = false;
+
 	walk_fac = (Metric_Flag ()) ? 1 : 3;
 
 	while (old_plan->Read ()) {
@@ -73,14 +75,18 @@ void NewFormat::Plan_Processing::Travel_Plans (int part)
 		}
 		mode = mode_map [old_plan->Mode ()];
 		if (mode == WAIT_MODE) continue;
-		drive_flag = (mode == DRIVE_MODE || mode == HOV3_MODE);
 
+		drive_flag = (mode == DRIVE_MODE || mode == HOV3_MODE);
+		if (mode == TRANSIT_MODE && old_plan->Driver_Flag ()) {
+			skip_flag = true;
+			continue;
+		}
 		traveler = old_plan->Traveler ();
 		trip = old_plan->Trip ();
 		origin = old_plan->Start_ID ();
 
 		if (current_traveler != traveler || current_trip != trip) {
-			if (current_traveler > 0) {
+			if (current_traveler > 0 && !skip_flag) {
 				plan_rec.Length (length);
 
 				if (!new_plan->Write_Plan (plan_rec)) {
@@ -109,6 +115,7 @@ void NewFormat::Plan_Processing::Travel_Plans (int part)
 			plan_rec.Depart (old_plan->Time ());
 			plan_rec.Origin (origin);
 			first = true;
+			skip_flag = false;
 		}
 		plan_rec.End (old_plan->Stop_Time ());
 		plan_rec.Arrive (old_plan->Stop_Time ());
@@ -146,7 +153,6 @@ void NewFormat::Plan_Processing::Travel_Plans (int part)
 		path = old_plan->Path (&num);
 
 		if (num > 0) {
-
 			tim = time / (num + 1);
 			imp = imped / (num + 1);
 
@@ -586,8 +592,13 @@ void NewFormat::Plan_Processing::Travel_Plans (int part)
 					imp = DTOI (tim * imped_fac);
 
 					leg_rec.Mode (mode);
-					leg_rec.Type (LINK_ID);
-					leg_rec.ID (link);
+					if (link < 0) {
+						leg_rec.Type (LINK_BA);
+						leg_rec.ID (-link);
+					} else {
+						leg_rec.Type (LINK_AB);
+						leg_rec.ID (link);
+					}
 					leg_rec.Time (tim);
 					leg_rec.Length (distance);
 					leg_rec.Cost (0);
@@ -634,6 +645,11 @@ void NewFormat::Plan_Processing::Travel_Plans (int part)
 			if (plan_rec.Mode () == WALK_MODE) {
 				if (old_plan->Driver_Flag () == 1) {
 					plan_rec.Mode (mode_map [old_plan->Mode ()]);
+
+					if (mode_map [old_plan->Mode ()] == TRANSIT_MODE) {
+						plan_rec.Mode (DRIVE_MODE);
+						drive_flag = true;
+					}
 				} else {
 					plan_rec.Mode (RIDE_MODE);
 				}
@@ -679,7 +695,7 @@ void NewFormat::Plan_Processing::Travel_Plans (int part)
 		length += distance;
 		plan_rec.push_back (leg_rec);
 	}
-	if (current_traveler > 0) {
+	if (current_traveler > 0 && !skip_flag) {
 		plan_rec.Length (length);
 
 		if (!new_plan->Write_Plan (plan_rec)) {

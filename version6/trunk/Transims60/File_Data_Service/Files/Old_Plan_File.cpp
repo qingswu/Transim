@@ -514,7 +514,8 @@ int * Old_Plan_File::Path (int *num_path)
 		case TRANSIT_MODE:		//---- transit ----
 			if (Driver_Flag ()) {	//---- driver ----
 				offset = 3;
-				*num_path = Tokens () - offset - 2 * plan->data [0];
+				//*num_path = Tokens () - offset - 2 * plan->data [0];
+				*num_path = Tokens () - offset;
 			}
 			break;
 		case BIKE_MODE:		//---- bike ----
