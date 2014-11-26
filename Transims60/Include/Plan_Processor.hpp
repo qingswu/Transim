@@ -31,6 +31,7 @@ private:
 
 #ifdef THREADS
 	Threads threads;
+	Plan_Ptr_Queue *plan_ptr_queue;
 	Plan_Queue *plan_queue;
 	Path_Builder **path_builder;
 

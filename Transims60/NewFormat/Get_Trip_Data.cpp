@@ -73,7 +73,8 @@ bool NewFormat::Get_Trip_Data (Trip_File &file, Trip_Data &trip_rec, int partiti
 			Vehicle_Map_Itr itr = vehicle_type.find (veh_index);
 
 			if (itr != vehicle_type.end ()) {
-				veh_type = itr->second;
+				Veh_Type_Data *ptr = &veh_type_array [itr->second];
+				veh_type = ptr->Type ();
 			} else if (file.Version () < 50 || veh_type == 0) {
 				return (false);
 			}

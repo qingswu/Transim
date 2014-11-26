@@ -26,9 +26,13 @@ void Relocate::Program_Control (void)
 		System_File_False (PLAN);
 		System_File_False (NEW_PLAN);
 		System_File_False (PARKING);
+		System_File_False (CONNECTION);
 		System_File_False (ACCESS_LINK);
 		System_File_False (TRANSIT_STOP);
 		System_File_False (TRANSIT_ROUTE);
+	} else {
+		System_File_True (PARKING);
+		System_File_True (CONNECTION);
 	}
 
 	//---- open network and demand files ----
@@ -93,6 +97,15 @@ void Relocate::Program_Control (void)
 
 	if (plan_flag) {
 
+		//---- open target connection file ----
+
+		key = Get_Control_String (TARGET_CONNECTION_FILE);
+
+		if (!key.empty ()) {
+			connect_file.File_Type ("Target Connection File");
+			connect_file.Open (target + key);
+			connect_flag = true;
+		}
 		//---- open target parking file ----
 
 		key = Get_Control_String (TARGET_PARKING_FILE);

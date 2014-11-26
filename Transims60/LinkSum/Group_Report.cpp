@@ -98,23 +98,24 @@ void LinkSum::Group_Report (void)
 
 				perf_data = period_itr->Total_Performance (index, use_index);
 
-				data.Get_Data (&perf_data, dir_ptr, link_ptr);
+				if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
 
-				//---- check the time ratio ----
+					//---- check the time ratio ----
 
-				if (select_ratio) {
-					if (data.Time_Ratio () < time_ratio) continue;
+					if (select_ratio) {
+						if (data.Time_Ratio () < time_ratio) continue;
+					}
+
+					//---- check the vc ratio ----
+
+					if (select_vc) {
+						if (data.VC_Ratio () < vc_ratio) continue;
+					}
+					sum_bin [j] [LANE_MILES] += data.Lane_Len ();
+					sum_bin [j] [VMT] += data.Veh_Dist ();
+					sum_bin [j] [VHT] += data.Veh_Time ();
+					sum_bin [j] [VHD] += data.Veh_Delay ();
 				}
-
-				//---- check the vc ratio ----
-
-				if (select_vc) {
-					if (data.VC_Ratio () < vc_ratio) continue;
-				}
-				sum_bin [j] [LANE_MILES] += data.Lane_Len ();
-				sum_bin [j] [VMT] += data.Veh_Dist ();
-				sum_bin [j] [VHT] += data.Veh_Time ();
-				sum_bin [j] [VHD] += data.Veh_Delay ();
 			}
 
 			//---- get the turning movements ----
@@ -129,6 +130,7 @@ void LinkSum::Group_Report (void)
 					for (j=0, turn_itr = turn_period_array.begin (); turn_itr != turn_period_array.end (); turn_itr++, j++) {
 						turn_ptr = turn_itr->Data_Ptr (k);
 
+						sum_bin [j] [VHD] += turn_ptr->Time () * turn_ptr->Turn ();
 						sum_bin [j] [TURNS] += turn_ptr->Turn ();
 					}
 				}

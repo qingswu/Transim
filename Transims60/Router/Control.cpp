@@ -93,7 +93,7 @@ void Router::Program_Control (void)
 	//---- check file and selection keys ----
 
 	if (percent_flag) {
-		random_select.Seed (random.Seed () + 1);
+		random_seed = random_select.Seed (random.Seed () + 1);
 	}
 	select_flag = System_File_Flag (SELECTION);
 	rider_flag = System_File_Flag (NEW_RIDERSHIP);
@@ -225,7 +225,7 @@ void Router::Program_Control (void)
 		if (!Flow_Updates () || !Time_Updates ()) {
 			Error ("Iterative Processing Requires Flow and Travel Time Updates");
 		}
-		if (method == TRAVEL_PLANS) {
+		if (method == TRAVEL_PLANS && Memory_Flag ()) {
 			Warning ("Application Method Upgraded to Dynamic User Equilibrium");
 			method = DUE_PLANS;
 		} else if (method == LINK_FLOWS) {

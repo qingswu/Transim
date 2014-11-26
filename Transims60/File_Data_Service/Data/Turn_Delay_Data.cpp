@@ -13,7 +13,9 @@ void  Turn_Data::Add_Turn_Time (double trn, Dtime tim)
 {
 	if (turn > 0) {
 		double tot = turn + trn;
-		time = (int) ((time * turn + tim * trn) / tot + 0.5); 
+		if (tim >= 0) {
+			time = (int) ((time * turn + tim * trn) / tot + 0.5); 
+		}
 		turn = (float) tot;
 	} else {
 		turn = (float) trn;
@@ -42,6 +44,7 @@ void Turn_Data::Average_Turn (double trn)
 
 void  Turn_Data::Average_Turn_Time (double trn, Dtime tim, double weight)
 {
+	if (tim < 0) tim = 0;
 	if (turn > 0) {
 		time = (int) ((time * turn + tim * trn * weight) / (weight + 1) + 0.5); 
 		turn = (float) ((turn + trn * weight) / (weight + 1));

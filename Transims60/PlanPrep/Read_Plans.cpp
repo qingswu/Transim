@@ -134,7 +134,11 @@ void PlanPrep::Plan_Processing::Read_Plans (int part)
 		//---- repair plan legs ----
 
 		if (exe->repair_flag) {
-			num_repair += exe->Repair_Legs (plan_ptr);
+			int num = exe->Repair_Legs (plan_ptr);
+			if (num) {
+				num_repair += num;
+				repair_plans++;
+			}
 		}
 
 		//---- save the sort key ----

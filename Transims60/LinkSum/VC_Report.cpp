@@ -62,15 +62,16 @@ void LinkSum::Volume_Capacity_Report (void)
 				data.Start (low);
 				data.End (high);
 
-				data.Get_Data (&perf_data, dir_ptr, &(*link_itr));
+				if (data.Get_Data (&perf_data, dir_ptr, &(*link_itr), Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
 
-				//---- save the vc ratio ----
+					//---- save the vc ratio ----
 
-				vc = DTOI (data.VC_Ratio () * RESOLUTION);
-				if (vc < 0 || vc >= NUM_SUM_BINS) vc = NUM_SUM_BINS - 1;
+					vc = DTOI (data.VC_Ratio () * RESOLUTION);
+					if (vc < 0 || vc >= NUM_SUM_BINS) vc = NUM_SUM_BINS - 1;
 
-				sum_bin [j] [vc] += data.Lane_Len ();
-				sum_bin [num_inc] [vc] += data.Lane_Len ();
+					sum_bin [j] [vc] += data.Lane_Len ();
+					sum_bin [num_inc] [vc] += data.Lane_Len ();
+				}
 			}
 		}
 	}

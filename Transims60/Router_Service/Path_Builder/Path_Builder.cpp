@@ -16,6 +16,19 @@ Path_Builder::Path_Builder (Router_Service *exe) : Static_Service ()
 
 #ifdef THREADS
 
+Path_Builder::Path_Builder (Plan_Ptr_Queue *queue, Router_Service *exe) : Static_Service ()
+{
+	if (queue == 0) {
+		cout << "\tPlan_Ptr Queue is Zero" << endl;
+		initialized = false;
+	} else {
+		Initialize (exe);
+		plan_ptr_queue = queue;
+		path_param.one_to_many = false;
+		trip_flag = true;
+		plan_flag = false;
+	}
+}
 Path_Builder::Path_Builder (Plan_Queue *queue, Router_Service *exe) : Static_Service ()
 {
 	if (queue == 0) {
@@ -25,6 +38,7 @@ Path_Builder::Path_Builder (Plan_Queue *queue, Router_Service *exe) : Static_Ser
 		Initialize (exe);
 		plan_queue = queue;
 		path_param.one_to_many = false;
+		trip_flag = false;
 		plan_flag = true;
 	}
 }
@@ -37,7 +51,7 @@ Path_Builder::Path_Builder (Skim_Queue *queue, Router_Service *exe) : Static_Ser
 		Initialize (exe);
 		skim_queue = queue;
 		path_param.one_to_many = true;
-		plan_flag = false;
+		plan_flag = trip_flag = false;
 	}
 }
 
@@ -68,13 +82,25 @@ void Path_Builder::operator()()
 		} else if (zero_flows_flag) {
 			Zero_Flows ();
 		}
-		for (;;) {
-			array_ptr = plan_queue->Get_Work (number);
-			if (array_ptr == 0) break;
+		if (exe->Memory_Flag ()) {
+			for (;;) {
+				if (!plan_ptr_queue->Get (array_ptr)) break;
 
-			if (!Array_Processing (array_ptr)) break;
+				if (!Array_Processing (array_ptr)) break;
 
-			if (!plan_queue->Put_Result (array_ptr, number)) break;
+				exe->Save_Plans (array_ptr);
+				plan_ptr_queue->Finished ();
+
+			}
+		} else {
+			for (;;) {
+				array_ptr = plan_queue->Get_Work (number);
+				if (array_ptr == 0) break;
+
+				if (!Array_Processing (array_ptr)) break;
+
+				if (!plan_queue->Put_Result (array_ptr, number)) break;
+			}
 		}
 		Save_Skim_Gap ();
 	}
@@ -235,10 +261,12 @@ void Path_Builder::Initialize (Router_Service *_exe)
 
 void Path_Builder::Zero_Flows (void)
 {
-	perf_period_array_ptr->Zero_Flows ();
+	if (path_param.flow_flag) {
+		perf_period_array_ptr->Zero_Flows ();
 
-	if (path_param.turn_flow_flag) {
-		turn_period_array_ptr->Zero_Turns ();
+		if (path_param.turn_flow_flag) {
+			turn_period_array_ptr->Zero_Turns ();
+		}
 	}
 	zero_flows_flag = false;
 }

@@ -16,11 +16,11 @@ Select_Service::Select_Service (void)
 	select_travelers = select_vehicles = select_problems = select_subareas = select_polygon = select_org_zones = select_des_zones = false;
 	select_modes = select_facilities = select_priorities = select_links = select_nodes = delete_flag = select_stops = select_routes = false;
 	percent_flag = max_percent_flag = select_parking = select_vc = select_ratio = select_time_of_day = false;
-	time_diff_flag = cost_diff_flag = trip_diff_flag = false;
+	time_diff_flag = cost_diff_flag = trip_diff_flag = path_diff_flag = false;
 	min_time_diff = max_time_diff = min_trip_diff = max_trip_diff = 0;
-	min_cost_diff = max_cost_diff = 0;
+	min_cost_diff = max_cost_diff = min_path_diff = max_path_diff = 0;
 	max_min_time_diff = max_min_trip_diff = 1;
-	max_min_cost_diff = 1;
+	max_min_cost_diff = max_min_path_diff = 1;
 	select_percent = max_percent_select = percent_time_diff = percent_cost_diff = percent_trip_diff = 100.0;
 	vc_ratio = time_ratio = 0.0;
 }
@@ -65,6 +65,9 @@ void Select_Service::Select_Service_Keys (int *keys)
 		{ PERCENT_TRIP_DIFFERENCE, "PERCENT_TRIP_DIFFERENCE", LEVEL0, OPT_KEY, FLOAT_KEY, "0.0 percent", "0.0..100.0 percent", NO_HELP },
 		{ MINIMUM_TRIP_DIFFERENCE, "MINIMUM_TRIP_DIFFERENCE", LEVEL0, OPT_KEY, TIME_KEY, "10 minutes", "0..120 minutes", NO_HELP },
 		{ MAXIMUM_TRIP_DIFFERENCE, "MAXIMUM_TRIP_DIFFERENCE", LEVEL0, OPT_KEY, TIME_KEY, "60 minutes", "0..1440 minutes", NO_HELP },
+		{ PERCENT_PATH_DIFFERENCE, "PERCENT_PATH_DIFFERENCE", LEVEL0, OPT_KEY, FLOAT_KEY, "0.0 percent", "0.0..100.0 percent", NO_HELP },
+		{ MINIMUM_PATH_DIFFERENCE, "MINIMUM_PATH_DIFFERENCE", LEVEL0, OPT_KEY, FLOAT_KEY, "1 link", "0..50 links", NO_HELP },
+		{ MAXIMUM_PATH_DIFFERENCE, "MAXIMUM_PATH_DIFFERENCE", LEVEL0, OPT_KEY, FLOAT_KEY, "10 links", "0..1000 links", NO_HELP },
 		{ SELECTION_PERCENTAGE, "SELECTION_PERCENTAGE", LEVEL0, OPT_KEY, FLOAT_KEY, "100.0 percent", "0.01..100.0 percent", NO_HELP },
 		{ MAXIMUM_PERCENT_SELECTED, "MAXIMUM_PERCENT_SELECTED", LEVEL0, OPT_KEY, FLOAT_KEY, "100.0 percent", "0.1..100.0 percent", NO_HELP },
 		{ SELECTION_POLYGON, "SELECTION_POLYGON", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
@@ -534,6 +537,28 @@ void Select_Service::Read_Select_Keys (void)
 		if (max_min_trip_diff < 1) max_min_trip_diff = 1;
 	}
 
+	//---- percent path difference ----
+
+	if (exe->Control_Key_Status (PERCENT_PATH_DIFFERENCE)) {
+		percent_path_diff = exe->Get_Control_Double (PERCENT_PATH_DIFFERENCE);
+		path_diff_flag = (percent_path_diff > 0.0);
+		percent_path_diff /= 100.0;
+
+		//---- minimum path difference ----
+
+		if (exe->Control_Key_Status (MINIMUM_PATH_DIFFERENCE)) {
+			min_path_diff = exe->Get_Control_Integer (MINIMUM_PATH_DIFFERENCE);
+		}
+
+		//---- maximum path difference ----
+
+		if (exe->Control_Key_Status (MAXIMUM_PATH_DIFFERENCE)) {
+			max_path_diff = exe->Get_Control_Integer (MAXIMUM_PATH_DIFFERENCE);
+		}
+		max_min_path_diff = max_path_diff - min_path_diff;
+		if (max_min_path_diff < 1) max_min_path_diff = 1;
+	}
+
 	//---- selection percentage ----
 
 	if (exe->Control_Key_Status (SELECTION_PERCENTAGE)) {
@@ -862,6 +887,38 @@ bool Select_Service::Select_Plan_Polygon (Plan_Data &plan)
 		if (In_Polygon (polygon_file, dat->UnRound (node_ptr->X ()), dat->UnRound (node_ptr->Y ()))) return (true);
 	}
 	return (false);
+}
+
+//---------------------------------------------------------
+//	Select_Path_Difference
+//---------------------------------------------------------
+
+bool Select_Service::Select_Path_Difference (Plan_Data &plan1, Plan_Data &plan2)
+{
+	int count, total;
+	bool found;
+	Plan_Leg_Itr leg1_itr, leg2_itr;
+	
+	count = 0;
+
+	for (leg1_itr = plan1.begin (); leg1_itr != plan1.end (); leg1_itr++) {
+		found = false;
+
+		for (leg2_itr = plan2.begin (); leg2_itr != plan2.end (); leg2_itr++) {
+			if (leg1_itr->Type () == leg2_itr->Type () && leg1_itr->ID () == leg2_itr->ID ()) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) count++;
+	}
+	if (count < min_path_diff) return (false);
+	if (count > max_path_diff) return (true);
+
+	total = (int) plan1.size ();
+	if (total < 1) total = 1;
+
+	return ((((double) count / total) >= percent_path_diff));
 }
 
 //---------------------------------------------------------

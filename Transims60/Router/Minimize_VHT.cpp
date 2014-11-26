@@ -187,12 +187,12 @@ double Router::Minimize_VHT (double &factor, bool zero_flag)
 								gap_sum.current += vht1;
 							}
 						}
-						if (zero_flag) {
-							new_ptr->Clear_Flows ();
-							new_ptr->Time (perf_rec.Time ());
-						} else {
+						//if (zero_flag) {
+						//	new_ptr->Clear_Flows ();
+						//	new_ptr->Time (perf_rec.Time ());
+						//} else {
 							*new_ptr = perf_rec;
-						}
+						//}
 						*old_ptr = perf_rec;
 					}
 				}
@@ -306,7 +306,12 @@ double Router::Minimize_VHT (double &factor, bool zero_flag)
 
 		last_flag = ((fac1 - fac2) < exit_diff);
 	}
-	
+
+	//---- update travel times ----
+
+	//Update_Travel_Times (false, zero_flag);
+	//num_time_updates++;
+
 	//---- overall gap ----
 
 	if (sum_vht > 0.0) {

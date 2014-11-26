@@ -61,24 +61,25 @@ void LinkSum::Travel_Time_Change (void)
 
 				perf_data = period_itr->Total_Performance (index, use_index);
 
-				data.Get_Data (&perf_data, dir_ptr, &(*link_itr));
+				if (data.Get_Data (&perf_data, dir_ptr, &(*link_itr), Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
 
-				time = data.Time ();
+					time = data.Time ();
 
-				period_ptr = &compare_perf_array [j];
+					period_ptr = &compare_perf_array [j];
 
-				perf_data = period_ptr->Total_Performance (index, use_index);
+					perf_data = period_ptr->Total_Performance (index, use_index);
 				
-				old_time = perf_data.Time ();
-				if (perf_data.Volume () < minimum_volume) continue;
-				if (old_time == 0) old_time = 1;
+					old_time = perf_data.Time ();
+					if (perf_data.Volume () < minimum_volume) continue;
+					if (old_time == 0) old_time = 1;
 
-				bin = abs (time - old_time) * 10 * RESOLUTION / old_time;
+					bin = abs (time - old_time) * 10 * RESOLUTION / old_time;
 
-				if (bin < 0 || bin >= NUM_SUM_BINS) bin = NUM_SUM_BINS - 1;
+					if (bin < 0 || bin >= NUM_SUM_BINS) bin = NUM_SUM_BINS - 1;
 
-				sum_bin [j] [bin] += data.Lane_Len ();
-				sum_bin [num_inc] [bin] += data.Lane_Len ();
+					sum_bin [j] [bin] += data.Lane_Len ();
+					sum_bin [num_inc] [bin] += data.Lane_Len ();
+				}
 			}
 		}
 	}

@@ -11,7 +11,7 @@
 PlanPrep::PlanPrep (void) : Data_Service (), Select_Service ()
 {
 	Program ("PlanPrep");
-	Version (2);
+	Version (3);
 	Title ("Travel Plan Processing Utility");
 
 	System_File_Type required_files [] = {
@@ -57,7 +57,7 @@ PlanPrep::PlanPrep (void) : Data_Service (), Select_Service ()
 	Enable_MPI (true);
 #endif
 
-	sort_size = num_repair = 0;
+	sort_size = num_repair = repair_plans = 0;
 	select_flag = merge_flag = combine_flag = output_flag = new_plan_flag = repair_flag = false;
 
 	System_Read_False (PLAN);

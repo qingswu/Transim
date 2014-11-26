@@ -186,7 +186,7 @@ next_mode:
 				park_flag = false;
 			} else {
 #ifdef CHECK
-				if (from_index < 0 || from_index >= (int) link_path.size ()) exe->Error ("Path_Builder::Trace: from from_index");
+				if (from_index < 0 || from_index >= (int) from->size ()) exe->Error ("Path_Builder::Trace: from from_index");
 #endif
 				from_end = &from->at (from_index);
 			}

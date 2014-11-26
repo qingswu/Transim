@@ -11,7 +11,7 @@
 Dtime Path_Builder::Load_Flow (Plan_Data *plan_data)
 {
 	int mode, index, dir_index, use_index;
-	Dtime time, ttime, perf_time;
+	Dtime time, ttime, perf_time, tt;
 	double len, len_factor;
 
 	Plan_Leg_Itr leg_itr;
@@ -53,6 +53,7 @@ Dtime Path_Builder::Load_Flow (Plan_Data *plan_data)
 
 	for (leg_itr = plan_ptr->begin (); leg_itr != plan_ptr->end (); leg_itr++, time += ttime) {
 		ttime = leg_itr->Time ();
+		if (ttime < 0) plan_ptr->Problem (PATH_PROBLEM);
 			
 		if (leg_itr->Mode () != DRIVE_MODE) {
 			perf_time += ttime;
@@ -64,7 +65,6 @@ Dtime Path_Builder::Load_Flow (Plan_Data *plan_data)
 			perf_time += ttime;
 			continue;
 		}
-
 		if (leg_itr->Link_Type ()) {
 			index = leg_itr->Link_ID ();
 
@@ -97,6 +97,8 @@ Dtime Path_Builder::Load_Flow (Plan_Data *plan_data)
 		} else {
 			use_index = index = -1;
 		}
+		tt = ttime;
+
 		if (use_index >= 0) {
 			if (path_param.flow_flag) {
 				len = leg_itr->Length ();
@@ -106,9 +108,11 @@ Dtime Path_Builder::Load_Flow (Plan_Data *plan_data)
 				} else {
 					len_factor = len / link_ptr->Length ();
 				}
-				perf_time += perf_period_array_ptr->Load_Flow (use_index, time, ttime, len_factor, link_ptr->Length (), path_param.pce, path_param.occupancy);
-			} else {
-				perf_time += ttime;
+				tt = perf_period_array_ptr->Load_Flow (use_index, time, ttime, len_factor, link_ptr->Length (), path_param.pce, path_param.occupancy);
+				if (tt < 0) {
+					plan_ptr->Problem (PATH_PROBLEM);
+					break;
+				}
 			}
 			if (dir_index >= 0 && path_param.turn_flow_flag) {
 				map2_itr = exe->connect_map.find (Int2_Key (dir_index, index));
@@ -118,12 +122,34 @@ Dtime Path_Builder::Load_Flow (Plan_Data *plan_data)
 					if (turn_period_ptr != 0) {
 						turn_ptr = turn_period_ptr->Data_Ptr (map2_itr->second);
 						turn_ptr->Add_Turn (path_param.pce);
+						tt += turn_ptr->Time ();
 					}
 				}
 			}
 			dir_index = index;
+		}
+		if (tt < ttime) {
+			ttime = tt;
+			leg_itr->Time (ttime);
+		}
+		perf_time += tt;
+	}
+	ttime = plan_ptr->Arrive () - plan_ptr->Depart ();
+
+	//---- adjust shorter travel times ----
+
+	if (perf_time < ttime) {
+		ttime = perf_time;
+		if (plan_ptr->Constraint () != END_TIME) {
+			plan_ptr->Arrive (plan_ptr->Depart () + ttime.Round_Seconds ());
+			if (plan_ptr->Arrive () > exe->Model_End_Time ()) {
+				plan_ptr->Arrive (exe->Model_End_Time ());
+			}
 		} else {
-			perf_time += ttime;
+			plan_ptr->Depart (plan_ptr->Arrive () - ttime.Round_Seconds ());
+			if (plan_ptr->Depart () < exe->Model_Start_Time ()) {
+				plan_ptr->Depart (exe->Model_Start_Time ());
+			}
 		}
 	}
 	return (perf_time);

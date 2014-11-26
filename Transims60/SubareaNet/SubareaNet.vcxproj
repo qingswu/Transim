@@ -231,7 +231,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
@@ -303,6 +303,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Add_Buffer_Nodes.cpp" />
     <ClCompile Include="Control.cpp" />
     <ClCompile Include="Execute.cpp" />
     <ClCompile Include="Get_Access_Data.cpp" />

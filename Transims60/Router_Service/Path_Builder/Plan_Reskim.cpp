@@ -44,6 +44,10 @@ bool Path_Builder::Plan_Reskim (Plan_Ptr plan_ptr)
 
 		for (leg_itr = plan_ptr->begin (); leg_itr != plan_ptr->end (); leg_itr++, tod += time, cum_imp += imped) {
 			time = leg_itr->Time ();
+			if (time < 0) {
+				plan_ptr->Problem (PATH_PROBLEM);
+				break;
+			}
 			imped = leg_itr->Impedance ();
 
 			if (leg_itr->Mode () != DRIVE_MODE) continue;
@@ -89,7 +93,10 @@ bool Path_Builder::Plan_Reskim (Plan_Ptr plan_ptr)
 					len_factor = len / link_ptr->Length ();
 				}
 				time = perf_period_array_ptr->Flow_Time (index, tod, len_factor, link_ptr->Length (), path_param.pce, path_param.occupancy);
-
+				if (time < 0) {
+					plan_ptr->Problem (PATH_PROBLEM);
+					break;
+				}
 				diff = time - leg_itr->Time ();
 				leg_itr->Time (time);
 				imped += Resolve (diff * path_param.value_time);
@@ -103,6 +110,7 @@ bool Path_Builder::Plan_Reskim (Plan_Ptr plan_ptr)
 						if (turn_period_ptr != 0) {
 							turn_ptr = turn_period_ptr->Data_Ptr (map2_itr->second);
 							turn_ptr->Add_Turn (path_param.pce);
+							////time += turn_ptr->Time ();
 						}
 					}
 				}
@@ -167,7 +175,10 @@ bool Path_Builder::Plan_Reskim (Plan_Ptr plan_ptr)
 					len_factor = len / link_ptr->Length ();
 				}
 				time = perf_period_array_ptr->Flow_Time (index, tod, len_factor, link_ptr->Length (), path_param.pce, path_param.occupancy, false);
-
+				if (time < 0) {
+					plan_ptr->Problem (PATH_PROBLEM);
+					break;
+				}
 				diff = time - leg_ritr->Time ();
 				leg_ritr->Time (time);
 				imped += Resolve (diff * path_param.value_time);
@@ -181,6 +192,7 @@ bool Path_Builder::Plan_Reskim (Plan_Ptr plan_ptr)
 						if (turn_period_ptr != 0) {
 							turn_ptr = turn_period_ptr->Data_Ptr (map2_itr->second);
 							turn_ptr->Add_Turn (path_param.pce);
+							//time += turn_ptr->Time ();
 						}
 					}
 				}

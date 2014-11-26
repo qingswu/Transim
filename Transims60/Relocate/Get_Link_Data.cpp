@@ -20,6 +20,7 @@ bool Relocate::Get_Link_Data (Link_File &file, Link_Data &link_rec, Dir_Data &ab
 		Int_Map_Itr map_itr = link_map.find (link_rec.Link ());
 
 		if (map_itr != link_map.end ()) {
+			Dir_Data *dir_ptr;
 			Link_Data *link_ptr = &link_array [map_itr->second];
 
 			if (link_ptr->Anode () == link_rec.Anode () && link_ptr->Bnode () == link_rec.Bnode ()) {
@@ -30,7 +31,23 @@ bool Relocate::Get_Link_Data (Link_File &file, Link_Data &link_rec, Dir_Data &ab
 						link_ptr->Shape (map_itr->second);
 					}
 				}
+				if (link_ptr->AB_Dir ()) {
+					dir_ptr = &dir_array [link_ptr->AB_Dir ()];
+					dir_ptr->Sign (1);
+				}
+				if (link_ptr->BA_Dir ()) {
+					dir_ptr = &dir_array [link_ptr->BA_Dir ()];
+					dir_ptr->Sign (1);
+				}
 				return (false);
+			} else if (link_ptr->Anode () == link_rec.Anode () || link_ptr->Bnode () == link_rec.Bnode ()) {
+				link_ptr->Divided (3);
+				if (shape_flag) {
+					Int_Map_Itr map_itr = target_shape_map.find (link_rec.Link ());
+					if (map_itr != target_shape_map.end ()) {
+						link_ptr->Shape (map_itr->second);
+					}
+				}
 			}
 			if (link_rec.AB_Dir () >= 0) {
 				link_rec.AB_Dir ((int) dir_array.size ());

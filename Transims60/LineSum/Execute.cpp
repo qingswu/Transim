@@ -194,6 +194,9 @@ void LineSum::Page_Header (void)
 		case ACCESS_REPORT:		//---- Access Report ----
 			Access_Header ();
 			break;
+		case ON_OFF_REPORT:		//---- On_Off Report ----
+			On_Off_Header ();
+			break;
 		case STOP_REPORT:		//---- Stop Report ----
 			Stop_Header ();
 			break;

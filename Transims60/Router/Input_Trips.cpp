@@ -10,7 +10,7 @@
 
 void Router::Input_Trips (void)
 {
-	int part, num_rec, part_num, first, num_selected;
+	int part, num_rec, part_num, first, num_selected, priority;
 	Trip_File *file = (Trip_File *) System_File_Handle (TRIP);
 
 	Trip_Data trip_rec;
@@ -20,6 +20,7 @@ void Router::Input_Trips (void)
 	Trip_Map_Itr map_itr;
 
 	num_rec = first = num_selected = 0;
+	total_records = select_records = select_weight = 0;
 
 	//---- check the partition number ----
 
@@ -56,16 +57,21 @@ void Router::Input_Trips (void)
 
 			if (trip_rec.Partition () < part_num) trip_rec.Partition (part_num);
 
+			priority = initial_priority;
+
 			if (priority_flag) {
-				trip_rec.Priority (initial_priority);
+				trip_rec.Priority (priority);
+			} else if (trip_rec.Priority () == NO_PRIORITY) {
+				trip_rec.Priority (MEDIUM);
 			}
 			if (!Selection (&trip_rec)) {
 				trip_rec.Priority (NO_PRIORITY);
+				priority = NO_PRIORITY;
 			} else {
 				num_selected++;
 			}
+			if (!trip_rec.Internal_IDs ()) continue;
 
-			trip_rec.Internal_IDs ();
 			trip_rec.Get_Index (trip_index);
 			file->Add_Trip (trip_index.Household (), trip_index.Person (), trip_index.Tour ());
 
@@ -74,15 +80,27 @@ void Router::Input_Trips (void)
 		    if (map_itr == plan_trip_map.end ()) {
 			    plan_rec = trip_rec;
 			    plan_rec.Index ((int) plan_array.size ());
+				plan_rec.Priority (CRITICAL);
 
 			    map_stat = plan_trip_map.insert (Trip_Map_Data (trip_index, plan_rec.Index ()));
 
 			    plan_array.push_back (plan_rec);
 			    plan_array.Max_Partition (plan_rec);
+				plan_ptr = &plan_rec;
 		    } else {
 				plan_ptr = &plan_array [map_itr->second];
-				plan_ptr->Priority (trip_rec.Priority ());
-		    }
+				if (plan_ptr->Priority () == 0) {
+					plan_ptr->Priority (MEDIUM);
+				}
+				if (priority_flag || priority == NO_PRIORITY) {
+					plan_ptr->Priority (priority);
+				}
+			}
+			total_records++;
+			if (select_priorities && select_priority [plan_ptr->Priority ()]) {
+				select_records++;
+				select_weight += plan_ptr->Priority ();
+			}
 		}
 		End_Progress ();
 		num_rec += Progress_Count ();

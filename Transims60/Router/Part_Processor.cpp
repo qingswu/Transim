@@ -121,10 +121,10 @@ bool Router::Part_Processor::Initialize (Router *_exe)
 				if (j == num_processors) j = 0;
 				partition_map.push_back (j);
 			}
-			trip_queue = new Trip_Queue * [num_processors];
+			trip_queue = new Plan_Ptr_Queue * [num_processors];
 
 			for (i=0; i < num_processors; i++) {
-				trip_queue [i] = new Trip_Queue ();
+				trip_queue [i] = new Plan_Ptr_Queue ();
 			}
 			return (false);
 		}
@@ -367,7 +367,7 @@ void Router::Part_Processor::Part_Thread::operator()()
 		}
 	} else {
 		Plan_Ptr_Array *plan_ptr_array;
-		Trip_Queue *queue = ptr->trip_queue [number];
+		Plan_Ptr_Queue *queue = ptr->trip_queue [number];
 		queue->Start_Work ();
 
 		while (queue->Get (plan_ptr_array)) {

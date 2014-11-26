@@ -11,21 +11,22 @@
 ArcPerf::ArcPerf (void) : Data_Service (), Select_Service (), Draw_Service ()
 {
 	Program ("ArcPerf");
-	Version (8);
+	Version (10);
 	Title ("ArcView Performance Files");
 
 	System_File_Type required_files [] = {
 		NODE, LINK, END_FILE
 	};
 	System_File_Type optional_files [] = {
-		SHAPE, CONNECTION, POCKET, ACCESS_LINK,
+		SHAPE, CONNECTION, POCKET, ACCESS_LINK, LOCATION, PARKING, 
 		VEHICLE_TYPE, PERFORMANCE, TURN_DELAY, END_FILE
 	};
 	int file_service_keys [] = {
 		NOTES_AND_NAME_FIELDS, SAVE_LANE_USE_FLOWS, 0
 	};
 	int data_service_keys [] = {
-		DAILY_WRAP_FLAG, SUMMARY_TIME_RANGES, SUMMARY_TIME_INCREMENT, CONGESTED_TIME_RATIO, 0
+		DAILY_WRAP_FLAG, SUMMARY_TIME_RANGES, SUMMARY_TIME_INCREMENT, 
+		CONGESTED_TIME_RATIO, MAXIMUM_TIME_RATIO, EXCLUDE_TIME_RATIO, 0
 	};
 	int select_service_keys [] = {
 		SELECT_FACILITY_TYPES, SELECT_LINKS, SELECT_SUBAREAS, SELECTION_POLYGON, 0

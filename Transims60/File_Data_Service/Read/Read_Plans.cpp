@@ -42,10 +42,10 @@ void Data_Service::Read_Plans (Plan_File &file)
 
 		if (file.Part_Flag ()) {
 			part_num = file.Part_Number ();
-			Show_Message (String ("Reading %s %d -- Record") % file.File_Type () % part_num);
+			Show_Message (String ("Reading %s %d -- Trip") % file.File_Type () % part_num);
 		} else {
 			part_num = part + first;
-			Show_Message (String ("Reading %s -- Record") % file.File_Type ());
+			Show_Message (String ("Reading %s -- Trip") % file.File_Type ());
 		}
 		Set_Progress ();
 
@@ -69,8 +69,6 @@ void Data_Service::Read_Plans (Plan_File &file)
 					Error (String ("Number of Nested Records for Plan %d-%d-%d-%d") % trip_index.Household () %
 						trip_index.Person () % trip_index.Tour () % trip_index.Trip ());
 				}
-				Show_Progress ();
-
 				Get_Plan_Data (file, plan_rec, part_num);
 			}
 			if (keep_flag) {

@@ -11,7 +11,7 @@
 void PerfPrep::Load_Transit_Data (void)
 {
 	int offset, run, runs, num_stops, index;
-	Dtime time, dwell;
+	Dtime time, dwell, ttime;
 	double volume, persons, load, len_fac, max_len_fac;
 	bool first;
 
@@ -108,7 +108,9 @@ void PerfPrep::Load_Transit_Data (void)
 				if (dir_ptr->Use_Index () >= 0) {
 					index = dir_ptr->Use_Index ();
 				}
-				time += merge_perf_array.Flow_Time (index, time, 1.0, link_ptr->Length (), volume, persons) + num_stops * dwell;
+				ttime = merge_perf_array.Flow_Time (index, time, 1.0, link_ptr->Length (), volume, persons) + num_stops * dwell;
+				if (ttime < 0) break;
+				time += ttime;
 
 				if (stop_itr == last_itr) break;
 

@@ -57,6 +57,21 @@ void LinkSum::Program_Control (void)
 	cap_factor = (double) sum_periods.Range_Length () / (Dtime (1, HOURS) * num_inc);
 	if (cap_factor <= 0.0) cap_factor = 1.0;
 
+	//---- open the compare link map file ----
+	
+	key = Get_Control_String (COMPARE_LINK_MAP_FILE);
+
+	if (!key.empty ()) {
+		link_map_file.File_Type ("Compare Link Map File");
+		Print (1);
+
+		if (Check_Control_Key (COMPARE_LINK_MAP_FORMAT)) {
+			link_map_file.Dbase_Format (Get_Control_String (COMPARE_LINK_MAP_FORMAT));
+		}
+		link_map_file.Open (Project_Filename (key));
+		link_map_flag = true;
+	}
+
 	//---- get minimum volume ----
 	
 	minimum_volume = Get_Control_Double (MINIMUM_LINK_VOLUME);
@@ -226,7 +241,13 @@ void LinkSum::Program_Control (void)
 			group_ptr->field = Performance_Code (key);
 
 			group_ptr->index = Get_Control_Flag (NEW_LINK_DIRECTION_INDEX, i);
+			
+			group_ptr->flip = Get_Control_Flag (NEW_LINK_DIRECTION_FLIP, i);
 
+			if (group_ptr->flip && !compare_flag) {
+				Warning ("Link Direction Flipping requires Comparison Data");
+				group_ptr->flip = false;
+			}
 			Set_Link_Dir (group_ptr);
 		}
 	}
