@@ -11,7 +11,7 @@
 TripPrep::TripPrep (void) : Data_Service (), Select_Service ()
 {
 	Program ("TripPrep");
-	Version (2);
+	Version (3);
 	Title ("Trip Processing Utility");
 
 	System_File_Type required_files [] = {
@@ -40,6 +40,9 @@ TripPrep::TripPrep (void) : Data_Service (), Select_Service ()
 		{ SORT_HOUSEHOLD_TOURS, "SORT_HOUSEHOLD_TOURS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ SYNTHESIZE_VEHICLES, "SYNTHESIZE_VEHICLES", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ CHECK_ACTIVITY_PATTERNS, "CHECK_ACTIVITY_PATTERNS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
+		{ SHIFT_START_PERCENTAGE, "SHIFT_START_PERCENTAGE", LEVEL0, OPT_KEY, FLOAT_KEY, "0.0", "0.0..100.0", NO_HELP },
+		{ SHIFT_FROM_TIME_RANGE, "SHIFT_FROM_TIME_RANGE", LEVEL0, OPT_KEY, TEXT_KEY, "", TIME_RANGE, NO_HELP },
+		{ SHIFT_TO_TIME_RANGE, "SHIFT_TO_TIME_RANGE", LEVEL0, OPT_KEY, TEXT_KEY, "", TIME_RANGE, NO_HELP },
 		END_CONTROL
 	};
 	const char *reports [] = {
@@ -66,7 +69,9 @@ TripPrep::TripPrep (void) : Data_Service (), Select_Service ()
 	sort_size = check_count = error_count = 0;
 	select_flag = merge_flag = combine_flag = output_flag = new_trip_flag = new_select_flag = false;
 	update_flag = type_flag = script_flag = merge_veh_flag = veh_part_flag = false;
-	sort_tours = make_veh_flag = check_flag = false;
+	sort_tours = make_veh_flag = check_flag = shift_flag = false;
+	shift_rate = 0.0;
+	shift_factor = 1.0;
 
 	System_Read_False (TRIP);
 	System_Data_Reserve (TRIP, 0);

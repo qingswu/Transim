@@ -28,11 +28,11 @@ SubareaNet::SubareaNet (void) : Data_Service ()
 		ZONE, SHAPE, LANE_USE, TURN_PENALTY, ACCESS_LINK,    
 		SIGN, SIGNAL, TIMING_PLAN, PHASING_PLAN, DETECTOR,  
 		TRANSIT_STOP, TRANSIT_ROUTE, TRANSIT_SCHEDULE, TRANSIT_DRIVER,
-		PERFORMANCE, TURN_DELAY,
+		PERFORMANCE, TURN_DELAY, RIDERSHIP,
 		NEW_ZONE, NEW_SHAPE, NEW_LANE_USE, NEW_TURN_PENALTY, NEW_ACCESS_LINK,
 		NEW_SIGN, NEW_SIGNAL, NEW_TIMING_PLAN, NEW_PHASING_PLAN, NEW_DETECTOR,
 		NEW_TRANSIT_STOP, NEW_TRANSIT_ROUTE, NEW_TRANSIT_SCHEDULE, NEW_TRANSIT_DRIVER,
-		VEHICLE_TYPE, NEW_PERFORMANCE, NEW_TURN_DELAY,
+		VEHICLE_TYPE, NEW_PERFORMANCE, NEW_TURN_DELAY, NEW_RIDERSHIP,
 		END_FILE
 	};
 	int file_service_keys [] = {
@@ -45,6 +45,7 @@ SubareaNet::SubareaNet (void) : Data_Service ()
 		{ SUBAREA_NODE_CODE, "SUBAREA_NODE_CODE", LEVEL0, OPT_KEY, INT_KEY, "1", "1..100", NO_HELP },
 		{ EXTERNAL_OFFSET_LENGTH, "EXTERNAL_OFFSET_LENGTH", LEVEL0, OPT_KEY, INT_KEY, "30 feet", "10..200 feet", NO_HELP },
 		{ SUBAREA_BUFFER_DISTANCE, "SUBAREA_BUFFER_DISTANCE", LEVEL0, OPT_KEY, INT_KEY, "0 feet", "0..20000 feet", NO_HELP },
+		{ SAVE_OUTSIDE_NETWORK, "SAVE_OUTSIDE_NETWORK", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		END_CONTROL
 	};
 
@@ -55,13 +56,13 @@ SubareaNet::SubareaNet (void) : Data_Service ()
 	Key_List (subareanet_keys);
 	proj_service.Add_Keys ();
 
-	transit_flag = zone_flag = box_flag = node_flag = false;
+	transit_flag = zone_flag = box_flag = node_flag = outside_flag = false;
 	max_location = max_parking = max_access = max_stop = max_route = max_zone = 0;
 	new_location = new_parking = new_access = new_stop = new_route = new_zone = 0;
 	nnode = nlink = nshort = nboundary = nshape = npocket = nconnect = 0;
 	nlocation = nparking = naccess = nlane_use = nturn = ntoll = nperf = ndelay = 0;
 	nsign = nsignal = ntiming = nphasing = ndetector = ncoord = 0;
-	nstop = nroute = nschedule = ndriver = 0;
+	nstop = nroute = nschedule = ndriver = nrider = 0;
 
 	external_offset = node_code = buffer = 0;
 

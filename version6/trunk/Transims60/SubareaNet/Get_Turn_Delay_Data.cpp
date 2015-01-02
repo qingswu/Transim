@@ -19,19 +19,23 @@ bool SubareaNet::Get_Turn_Delay_Data (Turn_Delay_File &file, Turn_Delay_Data &da
 		Dir_Data *dir_ptr = &dir_array [data.Dir_Index ()];
 		Link_Data *link_ptr = &link_array [dir_ptr->Link ()];
 
-		if (link_ptr->Type () > 0) {
+		if (link_ptr->Type () == 0)  return (false);
 
-			//---- copy the fields to the subarea file ----
+		dir_ptr = &dir_array [data.To_Index ()];
+		link_ptr = &link_array [dir_ptr->Link ()];
 
-			Db_Header *new_file = System_File_Header (NEW_TURN_DELAY);
+		if (link_ptr->Type () == 0)  return (false);
 
-			new_file->Copy_Fields (file);
+		//---- copy the fields to the subarea file ----
 
-			if (!new_file->Write ()) {
-				Error (String ("Writing %s") % new_file->File_Type ());
-			}
-			ndelay++;
+		Db_Header *new_file = System_File_Header (NEW_TURN_DELAY);
+
+		new_file->Copy_Fields (file);
+
+		if (!new_file->Write ()) {
+			Error (String ("Writing %s") % new_file->File_Type ());
 		}
+		ndelay++;
 	}
 		
 	//---- don't save the record ----

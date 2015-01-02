@@ -10,6 +10,7 @@
 
 void SubareaPlans::Sublink_Data (void)
 {
+	int dir, diff, offset, best_diff, best_loc;
 	Boundary_Link data_rec, *data_ptr;
 	Parking_Itr parking_itr;
 	Location_Itr location_itr;
@@ -32,15 +33,42 @@ void SubareaPlans::Sublink_Data (void)
 
 	for (parking_itr = parking_array.begin (); parking_itr != parking_array.end (); parking_itr++) {
 		Show_Progress ();
+		if (!transit_flag && parking_itr->Type () == PARKRIDE) {
+			best_loc = 0;
+			best_diff = MAX_INTEGER;
+
+			link_ptr = &link_array [parking_itr->Link ()];
+			offset = link_ptr->Length () - parking_itr->Offset ();
+
+			for (location_itr = location_array.begin (); location_itr != location_array.end (); location_itr++) {
+				if (location_itr->Link () == parking_itr->Link ()) {
+					if (location_itr->Dir () == parking_itr->Dir ()) {
+						diff = abs (location_itr->Offset () - parking_itr->Offset ());
+					} else {
+						diff = abs (location_itr->Offset () - offset);
+					}
+					if (diff < best_diff) {
+						best_loc = location_itr->Location ();
+						best_diff = diff;
+					}
+				}
+			}
+			if (best_loc > 0) {
+				pnr_loc.insert (Int_Map_Data (parking_itr->Parking (), best_loc));
+			}
+		}
 		if (parking_itr->Type () != BOUNDARY) continue;
 
 		link_ptr = &link_array [parking_itr->Link ()];
 
 		if (parking_itr->Dir () == 0) {
-			data_ptr = &sublink_array [link_ptr->AB_Dir ()];
+			dir = link_ptr->AB_Dir ();
 		} else {
-			data_ptr = &sublink_array [link_ptr->BA_Dir ()];
+			dir = link_ptr->BA_Dir ();
 		}
+		if (dir < 0) Write (1, " parking dir wrong for link=") << link_ptr->Link () << " dir=" << parking_itr->Dir ();
+
+		data_ptr = &sublink_array [dir];
 		data_ptr->parking = parking_itr->Parking ();
 		data_ptr->parking_offset = parking_itr->Offset ();
 	}
@@ -160,16 +188,5 @@ void SubareaPlans::Sublink_Data (void)
 		}
 	}
 	End_Progress ();
-
-	//int i;
-	//Sublink_Itr itr;
-	//for (i=0, itr = sublink_array.begin (); itr != sublink_array.end (); itr++, i++) {
-	//	if (itr->parking > 0 || itr->stop > 0 || itr->location > 0) {
-	//		Dir_Data *dir_ptr = &dir_array [i];
-	//		link_ptr = &link_array [dir_ptr->Link ()];
-
-	//		Write (1, "link=") << link_ptr->Link () << " dir=" << dir_ptr->Dir () << " lot=" << itr->parking << " stop=" << itr->stop << " loc=" << itr->location;
-	//	}
-	//}
 }
 

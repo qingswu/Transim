@@ -19,7 +19,7 @@ Router::Router (void) : Router_Service ()
 	Title ("Network Path Building");
 
 	System_File_Type optional_files [] = {
-		TRIP, PLAN, SIGN, SIGNAL, TIMING_PLAN, PHASING_PLAN, NEW_TURN_DELAY, NEW_RIDERSHIP, END_FILE
+		TRIP, PLAN, SIGN, SIGNAL, TIMING_PLAN, PHASING_PLAN, DETECTOR, NEW_TURN_DELAY, NEW_RIDERSHIP, END_FILE
 	};
 	int select_service_keys [] = {
 		SELECT_HOUSEHOLDS, SELECT_MODES, SELECT_PURPOSES, SELECT_PRIORITIES, 

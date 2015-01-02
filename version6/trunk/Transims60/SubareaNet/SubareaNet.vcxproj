@@ -231,7 +231,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
@@ -317,6 +317,7 @@
     <ClCompile Include="Get_Performance_Data.cpp" />
     <ClCompile Include="Get_Phasing_Data.cpp" />
     <ClCompile Include="Get_Pocket_Data.cpp" />
+    <ClCompile Include="Get_Ridership_Data.cpp" />
     <ClCompile Include="Get_Signal_Data.cpp" />
     <ClCompile Include="Get_Sign_Data.cpp" />
     <ClCompile Include="Get_Stop_Data.cpp" />

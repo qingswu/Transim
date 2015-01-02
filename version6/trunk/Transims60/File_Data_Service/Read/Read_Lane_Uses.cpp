@@ -234,6 +234,16 @@ void Data_Service::Initialize_Lane_Uses (Lane_Use_File &file)
 			lane_use_array.reserve (num);
 			if (num > (int) lane_use_array.capacity ()) Mem_Error (file.File_ID ());
 		}
+	} else {
+		Dir_Itr dir_itr;
+		Lane_Use_Itr use_itr;
+
+		for (dir_itr = dir_array.begin (); dir_itr != dir_array.end (); dir_itr++) {
+			dir_itr->First_Lane_Use (-1);
+		}
+		for (use_itr = lane_use_array.begin (); use_itr != lane_use_array.end (); use_itr++) {
+			use_itr->Next_Index (-1);
+		}
 	}
 }
 

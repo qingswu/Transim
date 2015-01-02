@@ -38,11 +38,13 @@ void Relocate::Map_Parking (void)
 		best_diff = link_diff = MAX_INTEGER;
 
 		pt1_itr = parking_pt.find (index1);
+		if (pt1_itr == parking_pt.end ()) continue;
 
 		for (index = num_parking; index < max_parking; index++) {
 			park_ptr = &parking_array [index];
 
 			pt2_itr = parking_pt.find (index);
+			if (pt2_itr == parking_pt.end ()) continue;
 
 <<<<<<< .working
 			dx = pt2_itr->second.x - pt1_itr->second.y;

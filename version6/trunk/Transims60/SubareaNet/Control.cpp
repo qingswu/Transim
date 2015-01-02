@@ -89,11 +89,15 @@ void SubareaNet::Program_Control (void)
 
 	//---- get the external offset length ----
 
-	external_offset = Get_Control_Integer (EXTERNAL_OFFSET_LENGTH);
+	external_offset = Round (Get_Control_Integer (EXTERNAL_OFFSET_LENGTH));
 
 	//---- get the subarea buffer distance ----
 
 	buffer = Round (Get_Control_Integer (SUBAREA_BUFFER_DISTANCE));
+
+	//---- get the save outside network flag ----
+
+	outside_flag = Get_Control_Flag (SAVE_OUTSIDE_NETWORK);
 
 	//---- replicate the field names ----
 

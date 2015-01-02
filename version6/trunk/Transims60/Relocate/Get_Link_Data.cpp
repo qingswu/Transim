@@ -31,11 +31,11 @@ bool Relocate::Get_Link_Data (Link_File &file, Link_Data &link_rec, Dir_Data &ab
 						link_ptr->Shape (map_itr->second);
 					}
 				}
-				if (link_ptr->AB_Dir ()) {
+				if (link_ptr->AB_Dir () >= 0) {
 					dir_ptr = &dir_array [link_ptr->AB_Dir ()];
 					dir_ptr->Sign (1);
 				}
-				if (link_ptr->BA_Dir ()) {
+				if (link_ptr->BA_Dir () >= 0) {
 					dir_ptr = &dir_array [link_ptr->BA_Dir ()];
 					dir_ptr->Sign (1);
 				}

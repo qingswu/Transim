@@ -23,6 +23,9 @@
     <ClCompile Include="Read_Runs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Update_Schedules.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\Reschedule.hpp">

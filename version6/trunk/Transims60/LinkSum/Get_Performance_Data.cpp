@@ -15,18 +15,27 @@ bool LinkSum::Get_Performance_Data (Performance_File &file, Performance_Data &pe
 
 		Dir_Data *dir_ptr;
 		Link_Data *link_ptr;
+		Ints_Map_Itr list_itr;
 		Int_Map_Itr map_itr;
+		Int_Itr int_itr;
 
 		link = file.Link ();
+		dir = file.Dir ();
 
-		map_itr = compare_link_map.find (link);
+		list_itr = compare_link_map.find (link);
 
-		if (map_itr != compare_link_map.end ()) {
-			dir = map_itr->second;
+		if (list_itr != compare_link_map.end ()) {
 
-			map_itr = link_map.find (link);
+			for (int_itr = list_itr->second.begin (); int_itr != list_itr->second.end (); int_itr++) {
+				dir_ptr = &dir_array [*int_itr];
+				link_ptr = &link_array [dir_ptr->Link ()];
 
-			if (map_itr != link_map.end ()) {
+				file.Link (link_ptr->Link ());
+
+				if (dir_ptr->Dir () == 1) {
+					dir = file.Dir ();
+					file.Dir (1 - dir);
+				}
 				if (Data_Service::Get_Performance_Data (file, perf_rec)) {
 					int i, num, start, end, index;
 					double factor, p1, p2, share, occ_fac;
@@ -119,15 +128,8 @@ bool LinkSum::Get_Performance_Data (Performance_File &file, Performance_Data &pe
 					}
 				}
 			}
-			dir_ptr = &dir_array [dir];
-			link_ptr = &link_array [dir_ptr->Link ()];
-
-			file.Link (link_ptr->Link ());
-
-			if (dir_ptr->Dir () == 1) {
-				dir = file.Dir ();
-				file.Dir (1 - dir);
-			}
+			file.Link (link);
+			file.Dir (dir);
 		}
 	}
 	return (Data_Service::Get_Performance_Data (file, perf_rec));

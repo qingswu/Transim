@@ -118,7 +118,7 @@ void LinkSum::Group_Sum_Report (void)
 
 				perf_data = period_itr->Total_Performance (index, use_index);
 
-				if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
+				if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio ())) {
 
 					//---- check the time ratio ----
 
@@ -156,7 +156,7 @@ void LinkSum::Group_Sum_Report (void)
 					period_ptr = &compare_perf_array [j];
 					perf_data = period_ptr->Total_Performance (index, use_index);
 
-					if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
+					if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio ())) {
 
 						sum_bin [j] [VMT+PREV] += data.Veh_Dist ();
 						sum_bin [j] [VHT+PREV] += data.Veh_Time ();

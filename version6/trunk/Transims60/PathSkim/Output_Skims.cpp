@@ -11,6 +11,7 @@
 void PathSkim::Output_Skims (int period)
 {
 	int org, des, factor;
+	Doubles des_data;
 	Skim_Data *skim_ptr;
 
 	factor = skim_file->Neighbor_Factor ();
@@ -69,6 +70,48 @@ void PathSkim::Output_Skims (int period)
 				per_out.insert (period);
 				org_out.insert (org);
 				des_out.insert (des);
+			}
+		}
+	}
+	if (accessibility_flag) {
+		int zone;
+		double wt;
+		Dtime ttime;
+		Int_Map *org_map, *des_map;
+		Int_Map_Itr org_itr, des_itr, int_itr;
+
+		org_map = skim_file->Org_Map ();
+		des_map = skim_file->Des_Map ();
+
+		for (org_itr = org_map->begin (); org_itr != org_map->end (); org_itr++) {
+
+			int_itr = zone_map.find (org_itr->first);
+			if (int_itr == zone_map.end ()) continue;
+
+			zone = int_itr->second;
+			org = org_itr->second;
+
+			if (org_wt [zone] <= 0.0) continue;
+
+			for (des_itr = des_map->begin (); des_itr != des_map->end (); des_itr++) {
+
+				int_itr = zone_map.find (des_itr->first);
+				if (int_itr == zone_map.end ()) continue;
+
+				wt = des_wt [int_itr->second];
+				if (wt <= 0.0) continue;
+
+				des = des_itr->second;
+				skim_ptr = skim_file->Table (org, des);
+
+				if (skim_file->Data_Type () == TIME_TABLE  || skim_file->Total_Time_Flag ()) {
+					ttime = skim_ptr->Time ();
+				} else {
+					ttime = skim_ptr->Drive () + skim_ptr->Transit ();
+				}
+				if (ttime <= max_travel_time) {
+					des_wt_total [zone] += wt;
+				}
 			}
 		}
 	}

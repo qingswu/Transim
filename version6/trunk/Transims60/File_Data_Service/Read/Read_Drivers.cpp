@@ -110,7 +110,7 @@ void Data_Service::Read_Drivers (Driver_File &file)
 					offset = 0;
 				}
 				if (driver_itr == line_itr->driver_array.end ()) {
-					Error (String ("Route %d Stop %d and Driver Links are Incompatible") % line_itr->Route () % stop_ptr->Stop ());
+					Warning (String ("Route %d Stop %d and Driver Links are Incompatible") % line_itr->Route () % stop_ptr->Stop ());
 				}
 				if (first) {
 					first = false;

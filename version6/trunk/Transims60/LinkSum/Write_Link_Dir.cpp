@@ -83,7 +83,9 @@ void LinkSum::Write_Link_Dir (Dir_Group_Itr &group)
 					} else {
 						perf_data = period_itr->Total_Performance (index, use_index);
 					}
-					if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
+					value = 0;
+
+					if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio ())) {
 
 						switch (group->field) {
 							case TTIME_DATA:
@@ -166,13 +168,13 @@ void LinkSum::Write_Link_Dir (Dir_Group_Itr &group)
 								group->field == CONG_PMT_DATA || group->field == CONG_PHT_DATA)) {
 								value *= data.Persons () / data.Volume ();
 							}
-							if (group->flip) {
-								group->file->Data2 (j, value);
-							} else {
-								group->file->Data (j, value);
-							}
 							save = true;
 						}
+					}
+					if (group->flip) {
+						group->file->Data2 (j, value);
+					} else {
+						group->file->Data (j, value);
 					}
 
 					//---- add the previous value ----
@@ -190,7 +192,9 @@ void LinkSum::Write_Link_Dir (Dir_Group_Itr &group)
 						} else {
 							perf_data = period_ptr->Total_Performance (index, use_index);
 						}
-						if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
+						value = 0;
+
+						if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio ())) {
 
 							switch (group->field) {
 								case TTIME_DATA:
@@ -273,13 +277,13 @@ void LinkSum::Write_Link_Dir (Dir_Group_Itr &group)
 									group->field == CONG_PMT_DATA || group->field == CONG_PHT_DATA)) {
 									value *= data.Persons () / data.Volume ();
 								}
-								if (group->flip) {
-									group->file->Data (j, value);
-								} else {
-									group->file->Data2 (j, value);
-								}
 								save = true;
 							}
+						}
+						if (group->flip) {
+							group->file->Data (j, value);
+						} else {
+							group->file->Data2 (j, value);
 						}
 					}
 				}

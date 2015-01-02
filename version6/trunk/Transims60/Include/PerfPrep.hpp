@@ -52,7 +52,6 @@ private:
 	typedef struct {
 		Dtime period;
 		int   max_ratio;
-		int   del_ratio;
 	} Constraint_Data;
 
 	typedef vector <Constraint_Data>     Constraint_Array;

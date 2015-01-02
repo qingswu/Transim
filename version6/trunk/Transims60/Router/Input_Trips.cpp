@@ -95,6 +95,20 @@ void Router::Input_Trips (void)
 				if (priority_flag || priority == NO_PRIORITY) {
 					plan_ptr->Priority (priority);
 				}
+				if (plan_ptr->Start () != trip_rec.Start ()) {
+					shift = plan_ptr->Start () - trip_rec.Start ();
+
+					plan_ptr->Start (trip_rec.Start ());
+					plan_ptr->End (trip_rec.End ());
+
+					duration = plan_ptr->Arrive () - plan_ptr->Depart ();
+
+					new_time = plan_ptr->Depart () - shift;
+					if (new_time < 0) new_time = 0;
+
+					plan_ptr->Depart (new_time); 
+					plan_ptr->Arrive (new_time + duration);
+				}
 			}
 			total_records++;
 			if (select_priorities && select_priority [plan_ptr->Priority ()]) {
@@ -109,6 +123,7 @@ void Router::Input_Trips (void)
 
 	Print (2, String ("Number of %s Records = %d") % file->File_Type () % num_rec);
 	if (part > 1) Print (0, String (" (%d files)") % part);
+
 	if (num_selected < num_rec) {
 		Print (1, "Number of Selected Trip = ") << num_selected;
 		if (num_rec > 0) {

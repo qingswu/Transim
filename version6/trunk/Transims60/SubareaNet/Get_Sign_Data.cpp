@@ -19,19 +19,18 @@ bool SubareaNet::Get_Sign_Data (Sign_File &file, Sign_Data &data)
 		Dir_Data *dir_ptr = &dir_array [data.Dir_Index ()];
 		Link_Data *link_ptr = &link_array [dir_ptr->Link ()];
 
-		if (link_ptr->Type () > 0) {
+		if (link_ptr->Type () == 0)  return (false);
 
-			//---- copy the fields to the subarea file ----
+		//---- copy the fields to the subarea file ----
 
-			Db_Header *new_file = System_File_Header (NEW_SIGN);
+		Db_Header *new_file = System_File_Header (NEW_SIGN);
 
-			new_file->Copy_Fields (file);
+		new_file->Copy_Fields (file);
 
-			if (!new_file->Write ()) {
-				Error (String ("Writing %s") % new_file->File_Type ());
-			}
-			nsign++;
+		if (!new_file->Write ()) {
+			Error (String ("Writing %s") % new_file->File_Type ());
 		}
+		nsign++;
 	}
 		
 	//---- don't save the record ----

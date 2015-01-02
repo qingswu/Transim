@@ -16,7 +16,7 @@ void Skim_Processor::Initialize (Router_Service *_exe)
 	path_builder = 0;
 	skim_queue = 0;
 
-	num_builders = num_threads = exe->Sub_Threads ();
+	num_builders = num_threads = exe->Num_Threads ();
 	if (num_builders > 4) num_builders--;
 
 	path_builder = new Path_Builder * [num_builders];

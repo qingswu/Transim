@@ -13,7 +13,15 @@ void FileFormat::Execute (void)
 	//---- process data files ----
 
 	if (data_flag) {
-		Format_Data ();
+		if (combine_flag) {
+			if (index_flag) {
+				Combine_Index ();
+			} else {
+				Combine_Fields ();
+			}
+		} else {
+			Format_Data ();
+		}
 	}
 
 	//---- process matrix files ----

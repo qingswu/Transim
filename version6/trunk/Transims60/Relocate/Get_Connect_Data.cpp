@@ -92,6 +92,13 @@ bool Relocate::Get_Connect_Data (Connect_File &file, Connect_Data &connect_rec)
 			ptr->Node () % link_ptr->Link ());
 		return (false);
 	}
+	if (to_index < 0) {
+		Node_Data *ptr = &node_array [node];
+
+		Warning (String ("Connection %d Link %d Node %d was Not Found") % Progress_Count () % 
+			link_ptr->Link () % ptr->Node ());
+		return (false);
+	}
 	connect_rec.To_Index (to_index);
 	connect_rec.Node (node);
 

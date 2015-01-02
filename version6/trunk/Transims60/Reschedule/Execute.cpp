@@ -14,8 +14,18 @@ void Reschedule::Execute (void)
 
 	Data_Service::Execute ();
 
+	//---- read detailed schedules ----
+
 	if (run_flag) {
 		Read_Runs ();
+	}
+	
+	//---- update schedules based on link travel time changes ----
+
+	if (update_flag) {
+		Read_Performance (update_file, update_array);
+
+		Update_Schedules ();
 	}
 
 	//---- write the selection file ----

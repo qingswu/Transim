@@ -372,8 +372,8 @@ bool Db_Header::Read_CSV_Header (bool stat)
 
 		//---- refine the delimiter type ----
 
-		if (Record_Format () == CSV_DELIMITED) {
-		
+		if (Record_Format () == CSV_DELIMITED || Filename ().Ends_With (".csv")) {
+	
 			//---- scan for tabs ----
 
 			i = 0;
@@ -510,7 +510,7 @@ bool Db_Header::Read_CSV_Header (bool stat)
 
 	//---- restore the file format ----
 
-	File_Format (type);
+	Dbase_Format (type);
 
 	if (!stat) {
 		Write_Def_Header (Header_Record ());

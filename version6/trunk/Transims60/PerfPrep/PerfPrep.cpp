@@ -11,7 +11,7 @@
 PerfPrep::PerfPrep (void) : Data_Service (), Select_Service (), Flow_Time_Service ()
 {
 	Program ("PerfPrep");
-	Version (8);
+	Version (12);
 	Title ("Manipulate the Performance File");
 
 	System_File_Type required_files [] = {
@@ -25,10 +25,11 @@ PerfPrep::PerfPrep (void) : Data_Service (), Select_Service (), Flow_Time_Servic
 		SAVE_LANE_USE_FLOWS, 0
 	};
 	int data_service_keys [] = {
-		DAILY_WRAP_FLAG, SUMMARY_TIME_RANGES, SUMMARY_TIME_INCREMENT, MAXIMUM_TIME_RATIO, EXCLUDE_TIME_RATIO, 0
+		DAILY_WRAP_FLAG, SUMMARY_TIME_RANGES, SUMMARY_TIME_INCREMENT, MAXIMUM_TIME_RATIO, 0
 	};
 	int select_service_keys [] = {
-		SELECT_LINKS, SELECT_NODES, SELECT_SUBAREAS, SELECT_STOPS, SELECT_ROUTES, SELECTION_POLYGON, SELECTION_PERCENTAGE, 0
+		SELECT_LINKS, SELECT_NODES, SELECT_FACILITY_TYPES, SELECT_SUBAREAS, 
+		SELECT_STOPS, SELECT_ROUTES, SELECTION_POLYGON, SELECTION_PERCENTAGE, 0
 	};
 	int flow_time_service_keys [] = {
 		UPDATE_TRAVEL_TIMES, EQUATION_PARAMETERS, 0

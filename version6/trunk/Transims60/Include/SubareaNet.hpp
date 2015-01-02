@@ -22,7 +22,8 @@ public:
 
 protected:
 	enum SubareaNet_Keys { 
-		SUBAREA_BOUNDARY_POLYGON = 1, SUBAREA_COORDINATE_BOX, SUBAREA_NODE_CODE, EXTERNAL_OFFSET_LENGTH, SUBAREA_BUFFER_DISTANCE,
+		SUBAREA_BOUNDARY_POLYGON = 1, SUBAREA_COORDINATE_BOX, SUBAREA_NODE_CODE, EXTERNAL_OFFSET_LENGTH, 
+		SUBAREA_BUFFER_DISTANCE, SAVE_OUTSIDE_NETWORK, 
 	};
 
 	virtual void Program_Control (void);
@@ -45,16 +46,17 @@ protected:
 	virtual bool Get_Stop_Data (Stop_File &file, Stop_Data &data);
 	virtual bool Get_Performance_Data (Performance_File &file, Performance_Data &data);
 	virtual bool Get_Turn_Delay_Data (Turn_Delay_File &file, Turn_Delay_Data &data);
+	virtual bool Get_Ridership_Data (Ridership_File &file, Ridership_Data &rider_rec);
 
 private:
 
 	int max_location, max_parking, max_access, max_stop, max_route, max_zone;
 	int nnode, nzone, nlink, nshort, nboundary, nshape, npocket, nconnect;
 	int nlocation, nparking, naccess, nlane_use, nturn, ntoll, nperf, ndelay;
-	int nsign, nsignal, ntiming, nphasing, ndetector, ncoord;
+	int nsign, nsignal, ntiming, nphasing, ndetector, ncoord, nrider;
 	int nstop, nroute, nschedule, ndriver, external_offset;
 	int new_zone, new_location, new_parking, new_access, new_stop, new_route;
-	bool transit_flag, zone_flag, box_flag, node_flag;
+	bool transit_flag, zone_flag, box_flag, node_flag, outside_flag;
 	int x_min, y_min, x_max, y_max, node_code, buffer;
 
 	Arcview_File subarea_boundary;	

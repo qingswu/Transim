@@ -122,6 +122,8 @@ bool Data_Service::Get_Skim_Data (Skim_File &file, Skim_Record &skim_rec, int pa
 	skim_rec.Period (file.Period ());
 	if (partition > 0 && skim_rec.Period () == 0) skim_rec.Period (partition);
 
+	skim_rec.Count (file.Count ());
+
 	if (file.Data_Type () == TIME_TABLE) {
 		skim_rec.Time (file.Time ());
 	} else {

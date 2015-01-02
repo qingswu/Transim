@@ -98,7 +98,7 @@ void LinkSum::Summary_File (void)
 
 				perf_data = period_itr->Total_Performance (index, use_index);
 
-				if (data.Get_Data (&perf_data, dir_ptr, &(*link_itr), Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
+				if (data.Get_Data (&perf_data, dir_ptr, &(*link_itr), Maximum_Time_Ratio ())) {
 
 					if (person_flag && data.Volume () > 0) {
 						person_fac = data.Persons () / data.Volume ();
@@ -142,7 +142,7 @@ void LinkSum::Summary_File (void)
 
 					perf_data = period_ptr->Total_Performance (index, use_index);
 
-					if (data.Get_Data (&perf_data, dir_ptr, &(*link_itr), Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
+					if (data.Get_Data (&perf_data, dir_ptr, &(*link_itr), Maximum_Time_Ratio ())) {
 					
 						if (person_flag && data.Volume () > 0) {
 							person_fac = data.Persons () / data.Volume ();

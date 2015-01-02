@@ -32,11 +32,14 @@ protected:
 		DESTINATION_LOCATIONS_PER_ZONE, LOCATION_SELECTION_METHOD, ORIGIN_ZONE_FILE, 
 		DESTINATION_ZONE_FILE, ORIGIN_LOCATION_FILE, DESTINATION_LOCATION_FILE, 
 		NEW_ORIGIN_LOCATION_FILE, NEW_DESTINATION_LOCATION_FILE, SKIM_TRANSIT_LOAD_FACTOR,
+		NEW_ACCESSIBILITY_FILE, NEW_ACCESSIBILITY_FORMAT, 
+		ORIGIN_WEIGHT_FIELD, DESTINATION_WEIGHT_FIELD, MAXIMUM_TRAVEL_TIME,
 	};
 	virtual void Program_Control (void);
 	virtual bool Save_Plans (Plan_Ptr_Array *array_ptr, int part=0);
 	virtual bool Save_Skims (One_To_Many *skim_ptr);
 	virtual bool Skim_Check (Plan_Ptr ptr);
+	virtual bool Get_Zone_Data (Zone_File &file, Zone_Data &data);
 
 private:
 	enum PathSkim_Reports { ZONE_EQUIV = 1 };
@@ -44,16 +47,21 @@ private:
 	bool mode_flag, select_org, select_des, select_time, forward_flag, user_loc_flag;
 	bool sel_org_zone, sel_des_zone, zone_loc_flag, org_loc_flag, des_loc_flag;
 	bool plan_flag, problem_flag, skim_flag, zone_skim_flag, district_flag, zone_flag;
+	bool accessibility_flag;
 
 	double load_factor;
 	int new_mode, use_type, veh_type, traveler_type;
 	int nprocess, constraint, total_records, num_org, num_des, method, cells_out;
+	int org_wt_fld, des_wt_fld;
+	Dtime max_travel_time;
 
 	Skim_File *skim_file;
 	Plan_File *plan_file;
 	Problem_File *problem_file;
 	Db_File user_org_file, user_des_file;
 	Db_File org_loc_file, des_loc_file;
+	Db_Header accessibility_file;
+	Zone_File *zone_file;
 
 	Time_Periods route_periods;
 	Data_Range org_range, des_range, purpose_range;
@@ -64,6 +72,7 @@ private:
 	Integers org_loc, des_loc;
 	Ints_Map org_zone_loc, des_zone_loc;
 	Int_Set org_out, des_out, per_out;
+	Doubles org_wt, des_wt, des_wt_total;
 
 	void Zone_Locations (void);
 	void Build_Paths (void);

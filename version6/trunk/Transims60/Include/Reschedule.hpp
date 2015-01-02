@@ -22,7 +22,7 @@ public:
 protected:
 	enum Reschedule_Keys { RUN_SCHEDULE_FILE = 1, RUN_SCHEDULE_FORMAT, 
 		RUN_FILTER_FIELD, RUN_TYPE_FIELD, RUN_SCHEDULE_LINE, RUN_FILTER_RANGE,
-		RUN_STOP_FIELD_FILE, 
+		RUN_STOP_FIELD_FILE, PERFORMANCE_UPDATE_FILE, PERFORMANCE_UPDATE_FORMAT,
 	};
 
 	virtual void Program_Control (void);
@@ -30,7 +30,10 @@ protected:
 private:
 	enum Reschedule_Reports { MATCH_DUMP = 1, };
 
-	bool run_flag, match_dump;
+	bool run_flag, match_dump, update_flag;
+
+	Performance_File update_file;
+	Perf_Period_Array update_array;
 	
 	typedef struct {
 		int line;
@@ -57,5 +60,6 @@ private:
 	//---- methods ----
 
 	void Read_Runs (void);
+	void Update_Schedules (void);
 };
 #endif

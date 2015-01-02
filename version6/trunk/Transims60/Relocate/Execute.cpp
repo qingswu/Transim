@@ -84,6 +84,9 @@ void Relocate::Execute (void)
 		while (num--) {
 			connect_ptr = &connect_array [num];
 
+			if (connect_ptr->Dir_Index () < 0 || connect_ptr->Dir_Index () >= (int) dir_array.size ()) continue;
+			if (connect_ptr->To_Index () < 0 || connect_ptr->To_Index () >= (int) dir_array.size ()) continue;
+
 			from_ptr = &dir_array [connect_ptr->Dir_Index ()];
 			to_ptr = &dir_array [connect_ptr->To_Index ()];
 

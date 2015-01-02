@@ -84,7 +84,7 @@ void ArcPerf::Write_Performance (void)
 					perf_data = period_itr->at (index);
 				}
 use_link:		
-				if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
+				if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio ())) {
 
 					perf_file->Time (data.Time ());
 					perf_file->Persons (data.Persons ());

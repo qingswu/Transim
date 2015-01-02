@@ -256,9 +256,9 @@ public:
 	void   Delay (int value)          { delay = value; }
 	void   Delay (double value)       { delay = exe->Round (value); }
 
-	bool   Get_Data (Perf_Data *perf_ptr, int dir_index, int max_ratio = 2000000, int delete_ratio = 2000000);
-	bool   Get_Data (Perf_Data *perf_ptr, Dir_Data *dir_ptr, Link_Data *link_ptr, int max_ratio = 2000000, int delete_ratio = 2000000);
-	bool   Get_Data (Vol_Spd_Data *vol_spd_ptr, Dir_Data *dir_ptr, Link_Data *link_ptr, int max_ratio = 2000000, int delete_ratio = 2000000);
+	bool   Get_Data (Perf_Data *perf_ptr, int dir_index, int max_ratio = 2000000);
+	bool   Get_Data (Perf_Data *perf_ptr, Dir_Data *dir_ptr, Link_Data *link_ptr, int max_ratio = 2000000);
+	bool   Get_Data (Vol_Spd_Data *vol_spd_ptr, Dir_Data *dir_ptr, Link_Data *link_ptr, int max_ratio = 2000000);
 
 	void   Clear (void)
 	{

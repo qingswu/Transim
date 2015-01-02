@@ -81,7 +81,9 @@ void LinkSum::Write_Link_Data (Data_Group_Itr &group)
 					} else {
 						perf_data = period_itr->Total_Performance (index, use_index);
 					}
-					if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
+					value = 0.0;
+
+					if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio ())) {
 
 						switch (group->field) {
 							case TTIME_DATA:
@@ -164,13 +166,13 @@ void LinkSum::Write_Link_Data (Data_Group_Itr &group)
 								group->field == CONG_PMT_DATA || group->field == CONG_PHT_DATA)) {
 								value *= data.Persons () / data.Volume ();
 							}
-							if (ab_flag) {
-								group->file->Data_AB (j, value);
-							} else {
-								group->file->Data_BA (j, value);
-							}
 							save = true;
 						}
+					}
+					if (ab_flag) {
+						group->file->Data_AB (j, value);
+					} else {
+						group->file->Data_BA (j, value);
 					}
 				}
 			}

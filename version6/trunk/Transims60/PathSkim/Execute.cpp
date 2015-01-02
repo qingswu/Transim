@@ -96,6 +96,28 @@ void PathSkim::Execute (void)
 		Build_Paths ();
 	} else if (zone_skim_flag || district_flag) {
 		Zone_Skims ();
+
+		if (accessibility_flag) {
+			int zone;
+			Int_Map *org_map;
+			Int_Map_Itr org_itr, int_itr;
+
+			org_map = skim_file->Org_Map ();
+
+			for (org_itr = org_map->begin (); org_itr != org_map->end (); org_itr++) {
+
+				int_itr = zone_map.find (org_itr->first);
+				if (int_itr == zone_map.end ()) continue;
+
+				zone = int_itr->second;
+
+				accessibility_file.Put_Field (0, org_itr->first);
+				accessibility_file.Put_Field (1, org_wt [zone]);
+				accessibility_file.Put_Field (2, des_wt_total [zone]);
+
+				accessibility_file.Write ();
+			}
+		}
 	} else if (skim_flag) {
 		Skim_Paths ();
 	} else {

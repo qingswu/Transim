@@ -15,6 +15,7 @@ void PathSkim::New_Zone_Locations (void)
 	Ints_Map_Itr map_itr;
 	Integers *int_ptr;
 	Int_Itr int_itr;
+	Location_Data *loc_ptr;
 
 	//---- origin zone locations ----
 
@@ -39,7 +40,9 @@ void PathSkim::New_Zone_Locations (void)
 				} else {
 					file << ", ";
 				}
-				file << *int_itr;
+				loc_ptr = &location_array [*int_itr];
+
+				file << loc_ptr->Location ();
 			}
 			file << endl;
 		}
@@ -69,7 +72,9 @@ void PathSkim::New_Zone_Locations (void)
 				} else {
 					file << ", ";
 				}
-				file << *int_itr;
+				loc_ptr = &location_array [*int_itr];
+
+				file << loc_ptr->Location ();
 			}
 			file << endl;
 		}

@@ -185,4 +185,36 @@ void TripPrep::Program_Control (void)
 			new_trip_file->Add_Field ("Notes", DB_STRING, 40);
 		}
 	}
+
+	//---- shift start times ----
+
+	if (Check_Control_Key (SHIFT_START_PERCENTAGE)) {
+		shift_rate = Get_Control_Double (SHIFT_START_PERCENTAGE);
+
+		if (shift_rate > 0.0) {
+			shift_rate /= 100.0;
+			shift_flag = true;
+
+			key = Get_Control_Text (SHIFT_FROM_TIME_RANGE);
+
+			if (key.empty ()) {
+				Error ("Shift From Time Range is Required");
+			}
+			shift_from.Add_Ranges (key);
+			shift_from.Period_Range (0, low_from, high_from);
+
+			key = Get_Control_Text (SHIFT_TO_TIME_RANGE);
+
+			if (key.empty ()) {
+				Error ("Shift To Time Range is Required");
+			}
+			shift_to.Add_Ranges (key);
+			shift_to.Period_Range (0, low_to, high_to);
+
+			if (high_from == low_from) {
+				Error ("Shift Time Range is Out of Range");
+			}
+			shift_factor = (double) (high_to - low_to) / (high_from - low_from);
+		}
+	}
 }

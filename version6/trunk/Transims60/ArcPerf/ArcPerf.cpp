@@ -11,7 +11,7 @@
 ArcPerf::ArcPerf (void) : Data_Service (), Select_Service (), Draw_Service ()
 {
 	Program ("ArcPerf");
-	Version (10);
+	Version (12);
 	Title ("ArcView Performance Files");
 
 	System_File_Type required_files [] = {
@@ -26,7 +26,7 @@ ArcPerf::ArcPerf (void) : Data_Service (), Select_Service (), Draw_Service ()
 	};
 	int data_service_keys [] = {
 		DAILY_WRAP_FLAG, SUMMARY_TIME_RANGES, SUMMARY_TIME_INCREMENT, 
-		CONGESTED_TIME_RATIO, MAXIMUM_TIME_RATIO, EXCLUDE_TIME_RATIO, 0
+		CONGESTED_TIME_RATIO, MAXIMUM_TIME_RATIO, 0
 	};
 	int select_service_keys [] = {
 		SELECT_FACILITY_TYPES, SELECT_LINKS, SELECT_SUBAREAS, SELECTION_POLYGON, 0

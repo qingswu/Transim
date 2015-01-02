@@ -103,7 +103,8 @@ private:
 	Db_Header activity_file, zone_file, group_file, summary_file, group_sum_file, link_map_file;
 	Integers field_list;
 
-	Int_Map zone_list, compare_link_map;
+	Int_Map zone_list;
+	Ints_Map compare_link_map;
 
 	typedef struct {
 		int group;

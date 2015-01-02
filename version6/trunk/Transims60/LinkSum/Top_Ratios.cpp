@@ -83,7 +83,7 @@ void LinkSum::Top_100_Ratios (int type)
 				data.Start (low);
 				data.End (high);
 
-				if (data.Get_Data (&perf_data, dir_ptr, &(*link_itr), Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
+				if (data.Get_Data (&perf_data, dir_ptr, &(*link_itr), Maximum_Time_Ratio ())) {
 
 					ratio = 0;
 

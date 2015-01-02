@@ -22,6 +22,7 @@ public:
 	Skim_File (string filename, Access_Type access = READ, Format_Type format = DEFAULT_FORMAT, Matrix_Type type = SKIM_TABLE, Units_Type od = ZONE_OD);
 	~Skim_File (void)                    { Clear_Table (); }
 
+	int    Count (void)                  { return (Get_Integer (count)); }
 	Dtime  Time (void)                   { return (Get_Time (time)); }
 	Dtime  Walk (void)                   { return (Get_Time (walk)); }
 	Dtime  Drive (void)                  { return (Get_Time (drive)); }
@@ -32,6 +33,7 @@ public:
 	double Cost (void)                   { return (Get_Double (cost)); }
 	int    Impedance (void)              { return (Get_Integer (impedance)); }
 
+	void   Count (int value)             { Put_Field (count, value); }
 	void   Time (Dtime value)            { Put_Field (time, value); }
 	void   Walk (Dtime value)            { Put_Field (walk, value); }
 	void   Drive (Dtime value)           { Put_Field (drive, value); }
@@ -81,7 +83,7 @@ protected:
 private:
 	virtual void Setup (void);
 
-	int  time, walk, drive, transit, wait, other, length, cost, impedance, near_factor;
+	int  count, time, walk, drive, transit, wait, other, length, cost, impedance, near_factor;
 	Units_Type time_format, len_format;
 	Mode_Type mode;
 	bool time_flag, table_flag, len_flag;

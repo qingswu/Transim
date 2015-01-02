@@ -92,6 +92,8 @@ void Data_Service::Read_Ridership (Ridership_File &file)
 	for (line_itr = line_array.begin (); line_itr != line_array.end (); line_itr++) {
 
 		stops = (int) line_itr->size ();
+		if (stops == 0) continue;
+
 		runs = (int) line_itr->begin ()->size ();
 
 		for (run=0; run < runs; run++) {

@@ -50,6 +50,8 @@ void Router::Execute (void)
 	if (Memory_Flag ()) {
 		Input_Trips ();
 		Initialize_Trip_Gap ();
+	} else if (save_trip_gap && plan_memory_flag) {
+		Initialize_Trip_Gap ();
 	}
 	Print (1);
 
@@ -104,8 +106,8 @@ void Router::Execute (void)
 			} else {
 				file->Create ();
 			}
-			Write_Turn_Delays (full_flag);
 		}
+		Write_Turn_Delays (full_flag);
 	}
 
 	//---- save the transit ridership ----

@@ -138,6 +138,24 @@ void Reschedule::Program_Control (void)
 		}
 	}
 
+	//---- performance update file ----
+
+	key = Get_Control_String (PERFORMANCE_UPDATE_FILE);
+
+	if (!key.empty ()) {
+		Print (1);
+
+		update_file.File_Type ("Performance Update File");
+		update_flag = true;
+
+		//---- get the file format ----
+
+		if (Check_Control_Key (PERFORMANCE_UPDATE_FORMAT)) {
+			update_file.Dbase_Format (Get_Control_String (PERFORMANCE_UPDATE_FORMAT));
+		}
+		update_file.Open (Project_Filename (key));
+	}
+
 	//---- read report types ----
 
 	List_Reports ();
