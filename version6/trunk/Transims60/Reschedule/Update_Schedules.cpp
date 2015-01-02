@@ -24,6 +24,8 @@ void Reschedule::Update_Schedules (void)
 	Link_Data *link_ptr;
 	Perf_Period *perf0_ptr, *perf1_ptr;
 
+	//---- process each transit route ----
+
 	for (line_itr = line_array.begin (); line_itr != line_array.end (); line_itr++) {
 		Show_Progress ();
 
@@ -34,6 +36,8 @@ void Reschedule::Update_Schedules (void)
 
 		runs = (int) first_itr->size ();
 
+		//---- update the schedules for each run ----
+
 		for (run=0; run < runs; run++) {
 			org_tod = new_tod = first_itr->at (run).Schedule ();
 
@@ -42,6 +46,8 @@ void Reschedule::Update_Schedules (void)
 			offset = 0;
 			num_stops = 0;
 			stop_itr = line_itr->begin ();
+
+			//---- find travel time changes for links along the route ----
 
 			for (driver_itr = line_itr->driver_array.begin (); driver_itr != line_itr->driver_array.end (); driver_itr++) {
 				dir_ptr = &dir_array [*driver_itr];
@@ -55,6 +61,8 @@ void Reschedule::Update_Schedules (void)
 
 				perf0_ptr = perf_period_array.Period_Ptr (new_tod);
 				perf1_ptr = update_array.Period_Ptr (new_tod);
+
+				//---- skip links that are not included in both performance files ----
 
 				if (perf0_ptr == 0 || perf1_ptr == 0) continue;
 
