@@ -120,6 +120,7 @@ bool Skim_File::Set_Field_Numbers (void)
 
 	//---- optional fields ----
 
+	count = Optional_Field ("COUNT");
 	time = Optional_Field (TIME_SKIM_FIELD_NAMES);
 	walk = Optional_Field (WALK_SKIM_FIELD_NAMES);
 	drive = Optional_Field (DRIVE_SKIM_FIELD_NAMES);

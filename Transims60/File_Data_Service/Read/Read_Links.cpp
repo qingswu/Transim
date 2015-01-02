@@ -317,9 +317,19 @@ bool Data_Service::Get_Link_Data (Link_File &file, Link_Data &link_rec, Dir_Data
 
 	if (link_rec.Type () == FREEWAY) {
 		lane_cap = 2000;
-	} else if (link_rec.Type () == EXPRESSWAY || link_rec.Type () == PRINCIPAL) {
-		lane_cap = 1400;
-	} else {
+	} else if (link_rec.Type () == EXPRESSWAY) {
+		lane_cap = 1500;
+	} else if (link_rec.Type () == PRINCIPAL) {
+		lane_cap = 1200;
+	} else if (link_rec.Type () == MAJOR) {
+		lane_cap = 1000;
+	} else if (link_rec.Type () == COLLECTOR) {
+		lane_cap = 600;
+	} else if (link_rec.Type () == LOCAL) {
+		lane_cap = 400;
+	} else if (link_rec.Type () == BRIDGE || link_rec.Type () == RAMP) {
+		lane_cap = 1000;
+	} else {               //---- MINOR, OTHER, etc. -----
 		lane_cap = 800;
 	}
 

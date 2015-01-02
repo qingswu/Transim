@@ -94,7 +94,9 @@
     <ClCompile Include="Add_Buffer_Nodes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
->>>>>>> .merge-right.r1529
+    <ClCompile Include="Get_Ridership_Data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\SubareaNet.hpp">

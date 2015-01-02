@@ -11,20 +11,20 @@
 Reschedule::Reschedule (void) : Data_Service (), Select_Service ()
 {
 	Program ("Reschedule");
-	Version (1);
+	Version (2);
 	Title ("Reschedule Transit Routes");
 
 	System_File_Type required_files [] = {
 		NODE, LINK, TRANSIT_STOP, TRANSIT_ROUTE, TRANSIT_SCHEDULE, NEW_TRANSIT_SCHEDULE, END_FILE
 	};
 	System_File_Type optional_files [] = {
-		VEHICLE_TYPE, END_FILE
+		VEHICLE_TYPE, LANE_USE, TRANSIT_DRIVER, PERFORMANCE, END_FILE
 	};
 	int select_service_keys [] = {
 		SELECT_MODES, 0
 	};
 	int file_service_keys [] = {
-		NOTES_AND_NAME_FIELDS, 0
+		NOTES_AND_NAME_FIELDS, 	SAVE_LANE_USE_FLOWS, 0
 	};
 	Control_Key keys [] = { //--- code, key, level, status, type, default, range, help ----
 		{ RUN_SCHEDULE_FILE, "RUN_SCHEDULE_FILE", LEVEL1, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
@@ -34,6 +34,8 @@ Reschedule::Reschedule (void) : Data_Service (), Select_Service ()
 		{ RUN_SCHEDULE_LINE, "RUN_SCHEDULE_LINE", LEVEL2, OPT_KEY, INT_KEY, "0", ">0", NO_HELP },
 		{ RUN_FILTER_RANGE, "RUN_FILTER_RANGE", LEVEL2, OPT_KEY, TEXT_KEY, "ALL", "0..10000000", NO_HELP },
 		{ RUN_STOP_FIELD_FILE, "RUN_STOP_FIELD_FILE", LEVEL2, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
+		{ PERFORMANCE_UPDATE_FILE, "PERFORMANCE_UPDATE_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
+		{ PERFORMANCE_UPDATE_FORMAT, "PERFORMANCE_UPDATE_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, FORMAT_HELP },
 		END_CONTROL
 	};
 	const char *reports [] = {
@@ -49,7 +51,7 @@ Reschedule::Reschedule (void) : Data_Service (), Select_Service ()
 	Key_List (keys);
 	Report_List (reports);
 
-	run_flag = match_dump = false;
+	run_flag = match_dump = update_flag = false;
 }
 #ifdef _CONSOLE
 //---------------------------------------------------------

@@ -56,6 +56,9 @@
     <ClCompile Include="Skim_Check.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Get_Zone_Data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\PathSkim.hpp">

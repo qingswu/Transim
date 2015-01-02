@@ -26,20 +26,19 @@ bool SubareaNet::Get_Location_Data (Location_File &file, Location_Data &data)
 
 		Link_Data *link_ptr = &link_array [data.Link ()];
 
-		if (link_ptr->Type () > 0) {
+		if (link_ptr->Type () == 0)  return (false);
 
-			//---- copy the fields to the subarea file ----
+		//---- copy the fields to the subarea file ----
 
-			Db_Header *new_file = System_File_Header (NEW_LOCATION);
+		Db_Header *new_file = System_File_Header (NEW_LOCATION);
 
-			new_file->Copy_Fields (file);
+		new_file->Copy_Fields (file);
 
-			if (!new_file->Write ()) {
-				Error (String ("Writing %s") % new_file->File_Type ());
-			}
-			nlocation++;
-			return (true);
+		if (!new_file->Write ()) {
+			Error (String ("Writing %s") % new_file->File_Type ());
 		}
+		nlocation++;
+		return (true);
 	}
 	return (false);
 }

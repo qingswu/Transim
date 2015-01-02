@@ -753,9 +753,14 @@ Dtime Perf_Period_Array::Load_Flow (int dir_index, Dtime time, Dtime ttime, doub
 
 		if (len_factor <= 0.0) goto link_end;
 
+		if (perf_ptr->Time () < ttime) {
+			tt = perf_ptr->Time ();
+		} else {
+			tt = ttime;
+		}
 		perf_time += (int) (perf_ptr->Time () * len_factor + 0.5);
 
-		tt = ttime * len_factor;
+		tt = tt * len_factor;
 		ttim = (int) (tt + 0.5);
 		if (ttim < 0) return (-1);
 		if (ttim < 1) ttim = 1;
@@ -804,20 +809,19 @@ link_end:
 //	Get_Data
 //---------------------------------------------------------
 
-bool Performance_Data::Get_Data (Perf_Data *perf_ptr, int dir_index, int max_ratio, int delete_ratio) 
+bool Performance_Data::Get_Data (Perf_Data *perf_ptr, int dir_index, int max_ratio) 
 {
 	Dir_Data *dir_ptr = &dat->dir_array [dir_index];
 	Link_Data *link_ptr = &dat->link_array [dir_ptr->Link ()];
 
-	return (Get_Data (perf_ptr, dir_ptr, link_ptr, max_ratio, delete_ratio));
+	return (Get_Data (perf_ptr, dir_ptr, link_ptr, max_ratio));
 }
 
-bool Performance_Data::Get_Data (Perf_Data *perf_ptr, Dir_Data *dir_ptr, Link_Data *link_ptr, int max_ratio, int delete_ratio)
+bool Performance_Data::Get_Data (Perf_Data *perf_ptr, Dir_Data *dir_ptr, Link_Data *link_ptr, int max_ratio)
 {
 	int i, lanes;
 	double length, len, lane_len, speed, ratio, factor, min_vol, volume;
 	Dtime time, increment;
-	bool ratio_flag = true;
 		
 	increment = End () - Start ();
 	if (increment <= 0) increment = Dtime (15, MINUTES);
@@ -859,7 +863,6 @@ bool Performance_Data::Get_Data (Perf_Data *perf_ptr, Dir_Data *dir_ptr, Link_Da
 	} else {
 		ratio = 100;
 	}
-	ratio_flag = (ratio <= delete_ratio);
 
 	if (ratio > max_ratio) {
 		ratio = max_ratio / ratio;
@@ -867,7 +870,7 @@ bool Performance_Data::Get_Data (Perf_Data *perf_ptr, Dir_Data *dir_ptr, Link_Da
 
 		time = (int) (time * ratio + 0.5);
 		if (time < dir_ptr->Time0 ()) time = dir_ptr->Time0 ();
-		
+
 		speed = length / time;
 		ratio = max_ratio;
 
@@ -891,7 +894,7 @@ bool Performance_Data::Get_Data (Perf_Data *perf_ptr, Dir_Data *dir_ptr, Link_Da
 	Time (time);
 	Delay (time - dir_ptr->Time0 ());
 
-	Veh_Delay (Delay () * Volume ());
+	Veh_Delay (Delay () * Flow ());
 		
 	lanes = dir_ptr->Lanes ();
 	i = dir_ptr->First_Lane_Use ();
@@ -941,25 +944,23 @@ bool Performance_Data::Get_Data (Perf_Data *perf_ptr, Dir_Data *dir_ptr, Link_Da
 	} else {
 		VC_Ratio (0.0);
 	}
-
 	Ratio_Dist (exe->UnRound (perf_ptr->Ratio_Dist ()));
 	Ratio_Time (perf_ptr->Ratio_Time ());
 	Ratios (perf_ptr->Ratios ());
 	Count (perf_ptr->Count ());
 
-	return (ratio_flag);
+	return (true);
 }
 
 //---------------------------------------------------------
 //	Get_Data
 //---------------------------------------------------------
 
-bool Performance_Data::Get_Data (Vol_Spd_Data *vol_spd_ptr, Dir_Data *dir_ptr, Link_Data *link_ptr, int max_ratio, int delete_ratio)
+bool Performance_Data::Get_Data (Vol_Spd_Data *vol_spd_ptr, Dir_Data *dir_ptr, Link_Data *link_ptr, int max_ratio)
 {
 	int i, lanes;
 	double length, lane_len, speed, ratio;
 	Dtime time;
-	bool ratio_flag = true;
 
 	length = link_ptr->Length ();
 
@@ -983,8 +984,7 @@ bool Performance_Data::Get_Data (Vol_Spd_Data *vol_spd_ptr, Dir_Data *dir_ptr, L
 	} else {
 		ratio = 100;
 	}
-	ratio_flag = (ratio <= delete_ratio);
-	
+
 	if (ratio > max_ratio) {
 		ratio = max_ratio / ratio;
 
@@ -1050,5 +1050,5 @@ bool Performance_Data::Get_Data (Vol_Spd_Data *vol_spd_ptr, Dir_Data *dir_ptr, L
 	Ratios (0);
 	Count (0);
 
-	return (ratio_flag);
+	return (true);
 }

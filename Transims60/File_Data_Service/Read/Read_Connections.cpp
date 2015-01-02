@@ -111,6 +111,21 @@ void Data_Service::Initialize_Connects (Connect_File &file)
 			connect_array.reserve (num);
 			if (num > (int) connect_array.capacity ()) Mem_Error (file.File_ID ());
 		}
+	} else {
+
+		//---- reset the connection list ----
+
+		Dir_Itr dir_itr;
+		Connect_Itr connect_itr;
+
+		for (dir_itr = dir_array.begin (); dir_itr != dir_array.end (); dir_itr++) {
+			dir_itr->First_Connect_To (-1);
+			dir_itr->First_Connect_From (-1);
+		}
+		for (connect_itr = connect_array.begin (); connect_itr != connect_array.end (); connect_itr++) {
+			connect_itr->Next_From (-1);
+			connect_itr->Next_To (-1);
+		}
 	}
 }
 

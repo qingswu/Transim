@@ -14,6 +14,7 @@ void TripPrep::Trip_Processing::Read_Trips (int part)
 	double share, total, prob;
 	string process_type;
 	bool first_flag;
+	Dtime shift, duration;
 
 	Int_Map_Itr map_itr;
 	Vehicle_Index veh_index;
@@ -189,6 +190,23 @@ void TripPrep::Trip_Processing::Read_Trips (int part)
 		if (exe->delete_travelers && exe->traveler_delete.In_Range (trip_ptr->Type ())) continue;
 
 		if (exe->percent_flag && exe->random.Probability () > exe->select_percent) continue;
+
+		//---- shift start times ----
+
+		if (exe->shift_flag) {
+			if (trip_ptr->Start () >= exe->low_from && trip_ptr->Start () <= exe->high_from) {
+				prob = random_part.Probability ();
+
+				if (exe->shift_rate > prob) {
+					duration = trip_ptr->End () - trip_ptr->Start ();
+					shift = (int) (exe->shift_factor * (trip_ptr->Start () - exe->low_from));
+
+					trip_ptr->Start (exe->low_to + shift);
+					trip_ptr->End (trip_ptr->Start () + duration);
+				}
+
+			}
+		}
 
 		//---- save the sort key ----
 

@@ -33,7 +33,7 @@ bool Relocate::Dir_Path (int dir1, int dir2, Use_Type use, Integers &path_array)
 	//---- link leaving the previous link ----
 
 	dir_ptr = &dir_array [dir1];
-//Write (1, "**path from=") << dir1 << " (" << link_array [dir_ptr->Link ()].Link () << ") to=" << dir2 << " (" << link_array [dir_array [dir2].Link ()].Link () << ") use=" << use;
+
 	//---- process each link leaving the node ----
 
 	for (index = dir_ptr->First_Connect (); index >= 0; index = connect_ptr->Next_Index ()) {
@@ -127,8 +127,6 @@ bool Relocate::Dir_Path (int dir1, int dir2, Use_Type use, Integers &path_array)
 
 	while (dir2 != dir1 && dir2 >= 0) {
 		path_array.push_back (dir2);
-
-//Write (1, " path=") << dir2;
 
 		path_ptr = &dir_path_array [dir2];
 

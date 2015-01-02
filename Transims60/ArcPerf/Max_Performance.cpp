@@ -76,7 +76,7 @@ use_link:
 					perf_data = period_itr->at (index);
 				}
 
-				if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
+				if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio ())) {
 
 					perf_file->Time (data.Time ());
 					perf_file->Persons (data.Persons ());
@@ -127,7 +127,7 @@ use_link:
 				data.Start (low);
 				data.End (high);
 
-				if (data.Get_Data (&best_data, dir_ptr, link_ptr, Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
+				if (data.Get_Data (&best_data, dir_ptr, link_ptr, Maximum_Time_Ratio ())) {
 					
 					perf_file->Time (data.Time ());
 					perf_file->Persons (data.Persons ());

@@ -163,22 +163,18 @@ bool Relocate::Process_Plan (Plan_Ptr plan_ptr)
 
 				if (link_ptr->Divided () == 0 || link_ptr->Divided () == 3) {
 					copy_flag = false;
-//Write (1, " link=") << link_ptr->Link () << " divided=" << link_ptr->Divided ();
 				} else {
 					if (!copy_flag) {
 						Plan_Leg leg_data;
 						Integers path_array;
 						Int_RItr ritr;
-//Write (1, " to link=") << link_ptr->Link () << " divided=" << link_ptr->Divided ();
 
 						dir2 = (dir == 0) ? link_ptr->AB_Dir () : link_ptr->BA_Dir ();
 
 						if (!Dir_Path (dir1, dir2, use, path_array)) {
-//Write (1, " path failed");
 							flag = true;
 							break;
 						}
-//Write (1, "GOOD hhold=") << plan_ptr->Household ();
 						leg_data.Mode (leg_itr->Mode ());
 
 						for (ritr = path_array.rbegin (); ritr != path_array.rend (); ritr++) {
@@ -193,8 +189,6 @@ bool Relocate::Process_Plan (Plan_Ptr plan_ptr)
 							leg_data.Length (link_ptr->Length ());
 							leg_data.Cost (0);
 							leg_data.Impedance (dir_ptr->Time0 ());
-
-//Write (1, " save=") << *ritr << " link=" << link_ptr->Link ();
 
 							leg_array.push_back (leg_data);
 							leg_flag = true;

@@ -370,6 +370,7 @@
     <ClCompile Include="Control.cpp" />
     <ClCompile Include="Execute.cpp" />
     <ClCompile Include="Flow_Skims.cpp" />
+    <ClCompile Include="Get_Zone_Data.cpp" />
     <ClCompile Include="Location_List.cpp" />
     <ClCompile Include="New_Zone_Loc.cpp" />
     <ClCompile Include="Output_Skims.cpp" />

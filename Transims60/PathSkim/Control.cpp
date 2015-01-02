@@ -25,6 +25,7 @@ void PathSkim::Program_Control (void)
 
 	if (System_File_Flag (ZONE)) {
 		zone_flag = true;
+		zone_file = System_Zone_File ();
 	}
 	zone_loc_flag = Zone_Loc_Flag ();
 
@@ -381,6 +382,61 @@ void PathSkim::Program_Control (void)
 			Error ("A Ridership file is Required for Load Factor Processing");
 		}
 		Skim_Check_Flag (true);
+	}
+
+	//---- open the new accessibility file ----
+
+	key = Get_Control_String (NEW_ACCESSIBILITY_FILE);
+
+	if (!key.empty ()) {
+		Print (1);
+		accessibility_file.File_Type ("New Accessibility File");
+
+		if (Check_Control_Key (NEW_ACCESSIBILITY_FORMAT)) {
+			accessibility_file.Dbase_Format (Get_Control_String (NEW_ACCESSIBILITY_FORMAT));
+		}
+		accessibility_file.Add_Field ("ZONE", DB_INTEGER, 10);
+		accessibility_file.Add_Field ("ORG_WT", DB_DOUBLE, 12.2);
+		accessibility_file.Add_Field ("DES_WT", DB_DOUBLE, 12.2);
+
+		if (!accessibility_file.Create (Project_Filename (key))) {
+			File_Error ("Creating New Accessibility File", key);
+		}
+		accessibility_flag = true;
+		if (!zone_flag) {
+			Error ("A Zone File is Required for Accessibility Processing");
+		}
+		if (!zone_skim_flag) {
+			Error ("Accessibility Requires Zone Skims");
+		}
+
+		//---- origin weight field ----
+
+		key = Get_Control_Text (ORIGIN_WEIGHT_FIELD);
+
+		if (!key.empty ()) {
+			org_wt_fld = zone_file->Field_Number (key);
+			if (org_wt_fld < 0) {
+				Error (String ("Origin Weight Field %s was Not Found") % key);
+			}
+			Print (0, ", Number = ") << (org_wt_fld + 1);
+		}
+
+		//---- destination weight field ----
+
+		key = Get_Control_Text (DESTINATION_WEIGHT_FIELD);
+
+		if (!key.empty ()) {
+			des_wt_fld = zone_file->Field_Number (key);
+			if (des_wt_fld < 0) {
+				Error (String ("Destination Weight Field %s was Not Found") % key);
+			}
+			Print (0, ", Number = ") << (des_wt_fld + 1);
+		}
+
+		//---- maximum travel time ----
+
+		max_travel_time = Get_Control_Time (MAXIMUM_TRAVEL_TIME);
 	}
 
 	//---- read report types ----

@@ -29,6 +29,7 @@ protected:
 		MERGE_TRIP_FILE = 1, MERGE_TRIP_FORMAT, MERGE_VEHICLE_FILE, MERGE_VEHICLE_FORMAT,
 		MAXIMUM_SORT_SIZE, UPDATE_TRIP_PARTITIONS, UPDATE_TRAVELER_TYPE, TRIP_PROCESSING_SCRIPT,
 		NUMBER_OF_PARTITIONS, SORT_HOUSEHOLD_TOURS, SYNTHESIZE_VEHICLES, CHECK_ACTIVITY_PATTERNS,
+		SHIFT_START_PERCENTAGE, SHIFT_FROM_TIME_RANGE, SHIFT_TO_TIME_RANGE, 
 	};
 	virtual void Program_Control (void);
 	virtual void Page_Header (void);
@@ -44,10 +45,13 @@ private:
 	int sort_size, new_format, num_out, num_parts, check_count, error_count;
 	bool select_flag, merge_flag, combine_flag, output_flag, new_trip_flag, new_select_flag;
 	bool update_flag, type_flag, script_flag, merge_veh_flag, veh_part_flag;
-	bool sort_tours, make_veh_flag, check_flag;
+	bool sort_tours, make_veh_flag, check_flag, shift_flag;
+	Dtime low_from, high_from, low_to, high_to;
+	double shift_rate, shift_factor;
 	String pathname;
 	Integers part_count;
 	Int_Map location_parking;
+	Time_Periods shift_from, shift_to;
 
 	void Check_Trips (void);
 	void Person_Trips (Trip_Array &trip_array);

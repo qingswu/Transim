@@ -23,9 +23,13 @@ bool SubareaNet::Get_Zone_Data (Zone_File &file, Zone_Data &data)
 
 		if (box_flag) {
 			if (data.X () < x_min || data.X () > x_max || data.Y () < y_min || data.Y() > y_max) {
+				if (!outside_flag) return (false);
+			} else if (outside_flag) {
 				return (false);
 			}
 		} else if (!In_Polygon (subarea_boundary, UnRound (data.X ()), UnRound (data.Y ()))) {
+			if (!outside_flag) return (false);
+		} else if (outside_flag) {
 			return (false);
 		}
 

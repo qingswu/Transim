@@ -19,21 +19,20 @@ bool SubareaNet::Get_Signal_Data (Signal_File &file, Signal_Data &data)
 		if (data.nodes.size () == 0) return (false);
 
 		Node_Data *node_ptr = &node_array [data.nodes [0]];
+		
+		if (node_ptr->Subarea () != 1)  return (false);
 
-		if (node_ptr->Subarea () == 1) {
+		//---- copy the fields to the subarea file ----
 
-			//---- copy the fields to the subarea file ----
+		Db_Header *new_file = System_File_Header (NEW_SIGNAL);
 
-			Db_Header *new_file = System_File_Header (NEW_SIGNAL);
+		new_file->Copy_Fields (file);
 
-			new_file->Copy_Fields (file);
-
-			if (!new_file->Write (file.Nested ())) {
-				Error (String ("Writing %s") % new_file->File_Type ());
-			}
-			nsignal++;
-			return (true);
+		if (!new_file->Write (file.Nested ())) {
+			Error (String ("Writing %s") % new_file->File_Type ());
 		}
+		nsignal++;
+		return (true);
 	}
 	return (false);
 }

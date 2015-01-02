@@ -18,20 +18,19 @@ bool SubareaNet::Get_Lane_Use_Data (Lane_Use_File &file, Lane_Use_Data &data)
 
 		Dir_Data *dir_ptr = &dir_array [data.Dir_Index ()];
 		Link_Data *link_ptr = &link_array [dir_ptr->Link ()];
+	
+		if (link_ptr->Type () == 0)  return (false);
 
-		if (link_ptr->Type () > 0) {
+		//---- copy the fields to the subarea file ----
 
-			//---- copy the fields to the subarea file ----
+		Db_Header *new_file = System_File_Header (NEW_LANE_USE);
 
-			Db_Header *new_file = System_File_Header (NEW_LANE_USE);
+		new_file->Copy_Fields (file);
 
-			new_file->Copy_Fields (file);
-
-			if (!new_file->Write ()) {
-				Error (String ("Writing %s") % new_file->File_Type ());
-			}
-			nlane_use++;
+		if (!new_file->Write ()) {
+			Error (String ("Writing %s") % new_file->File_Type ());
 		}
+		nlane_use++;
 	}
 	
 	//---- don't save the record ----

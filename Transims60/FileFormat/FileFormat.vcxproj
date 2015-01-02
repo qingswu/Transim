@@ -313,6 +313,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Combine_Fields.cpp" />
+    <ClCompile Include="Combine_Index.cpp" />
     <ClCompile Include="Control.cpp" />
     <ClCompile Include="Execute.cpp" />
     <ClCompile Include="FileFormat.cpp" />

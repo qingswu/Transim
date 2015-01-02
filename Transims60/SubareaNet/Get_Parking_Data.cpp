@@ -25,20 +25,19 @@ bool SubareaNet::Get_Parking_Data (Parking_File &file, Parking_Data &data)
 
 		Link_Data *link_ptr = &link_array [data.Link ()];
 
-		if (link_ptr->Type () > 0) {
+		if (link_ptr->Type () == 0)  return (false);
 
-			//---- copy the fields to the subarea file ----
+		//---- copy the fields to the subarea file ----
 
-			Db_Header *new_file = System_File_Header (NEW_PARKING);
+		Db_Header *new_file = System_File_Header (NEW_PARKING);
 
-			new_file->Copy_Fields (file);
+		new_file->Copy_Fields (file);
 
-			if (!new_file->Write (file.Nested ())) {
-				Error (String ("Writing %s") % new_file->File_Type ());
-			}
-			nparking++;
-			return (true);
+		if (!new_file->Write (file.Nested ())) {
+			Error (String ("Writing %s") % new_file->File_Type ());
 		}
+		nparking++;
+		return (true);
 	}
 	return (false);
 }

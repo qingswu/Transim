@@ -28,7 +28,7 @@ void PerfPrep::Execute (void)
 
 	//---- check the performance data ----
 
-	if (method < 0) {
+	if (method == UPDATE_TIMES) {
 		Check_Performance ();
 	}
 

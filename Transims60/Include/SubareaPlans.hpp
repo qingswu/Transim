@@ -31,9 +31,9 @@ private:
 	enum SubareaPlans_Reports { TRIP_REPORT = 1, ZONE_EQUIV, TIME_EQUIV };
 
 	bool transit_flag, thread_flag, select_flag, access_flag, trip_flag;
-	//int ***trips;
-
 	int num_trips;
+
+	Int_Map pnr_loc;
 	
 	Trip_File *new_trip_file;
 	Plan_File *plan_file, *new_plan_file;

@@ -86,34 +86,25 @@ void PerfPrep::Program_Control (void)
 		}
 	}
 
-	if (merge_flag || turn_merge_flag) {
-		Print (1);
+	//---- processing method ----
 
-		//---- processing method ----
+	Print (1);
+	key = Get_Control_Text (PROCESSING_METHOD);
 
-		method = Combine_Code (Get_Control_Text (PROCESSING_METHOD));
+	if (!key.empty ()) {
+		method = Combine_Code (key);
 
-		if (method == WEIGHTED_LINK_AVG || method == REPLACE_AVERAGE) {
+		if (method != UPDATE_TIMES) {
+			if (merge_flag || turn_merge_flag) {
+				if (method == WEIGHTED_LINK_AVG || method == REPLACE_AVERAGE) {
 
-			//---- merge weighting factor ----
+					//---- merge weighting factor ----
 
-			factor = Get_Control_Double (MERGE_WEIGHTING_FACTOR);
-		}
-	} else {
-		key = Get_Control_String (PROCESSING_METHOD);
-
-		if (!key.empty ()) {
-			Print (1);
-			Get_Control_Text (PROCESSING_METHOD);
-
-			if (!key.Starts_With ("CHECK")) {
-				if (Combine_Code (key)) {
-					Error (String ("Processing Method %s requires Merge Files") % key);
-				} else {
-					Error (String ("Processing Method %s was Not Recognized") % key);
+					factor = Get_Control_Double (MERGE_WEIGHTING_FACTOR);
 				}
+			} else {
+				//Error (String ("Processing Method %s requires Merge Files") % key);
 			}
-			method = -1;
 		}
 	}
 

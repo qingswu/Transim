@@ -27,9 +27,6 @@ void PerfPrep::Read_Time_Constraints (void)
 
 		constraint_data.period = constraint_file.Get_Time (time_field);
 		constraint_data.max_ratio = (int) (constraint_file.Get_Double (max_field) * 100);
-		constraint_data.del_ratio = (int) (constraint_file.Get_Double (del_field) * 100);
-
-		if (constraint_data.del_ratio == 0) constraint_data.del_ratio = Delete_Time_Ratio ();
 
 		constraint_array.push_back (constraint_data);
 	}

@@ -28,6 +28,7 @@ protected:
 		DATA_FILE = 1, DATA_FORMAT, NEW_DATA_FILE, NEW_DATA_FORMAT, 
 		DATA_SELECT_FIELD, COPY_EXISTING_FIELDS, 
 		NEW_FILE_HEADER, NEW_DATA_FIELD, SORT_BY_FIELDS,
+		DATA_FIELD_MAP, DATA_INDEX_FIELD, NEW_COMBINE_FIELDS_FILE, NEW_COMBINE_FIELDS_FORMAT, 
 		MATRIX_FILE, MATRIX_FORMAT, NEW_MATRIX_FILE, NEW_MATRIX_FORMAT,
 		SELECT_TABLES, CONVERSION_SCRIPT,
 	};
@@ -40,7 +41,8 @@ private:
 	String filename;
 	int num_records;
 
-	bool script_flag, data_flag, matrix_flag, stats_flag;
+	bool script_flag, data_flag, matrix_flag, stats_flag, combine_flag, index_flag;
+	Db_Header combine_file;
 
 	//---- field statistics ----
 
@@ -62,6 +64,7 @@ private:
 		bool select_flag;
 		bool int_flag;
 		int  sel_field;
+		int  index_field;
 		Integers  sel_values;
 		Strings sel_strings;
 		Db_Header *file;
@@ -71,6 +74,9 @@ private:
 		Str_ID sort_id;
 		Stats_Array input;
 		Stats_Array output;
+		Integers in_fields;
+		Integers out_fields;
+		Integers field_types;
 	} Data_Group;
 
 	typedef vector <Data_Group>     Data_Array;
@@ -96,6 +102,8 @@ private:
 	User_Program program;
 	Db_Base_Array file_array;
 	
+	void Combine_Index (void);
+	void Combine_Fields (void);
 	void Format_Data (void);
 	void Format_Matrix (void);
 	

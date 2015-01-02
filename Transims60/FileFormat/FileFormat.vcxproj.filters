@@ -29,6 +29,12 @@
     <ClCompile Include="Stats_Report.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Combine_Fields.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Combine_Index.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\FileFormat.hpp">

@@ -87,6 +87,18 @@ void Data_Service::Initialize_Pockets (Pocket_File &file)
 			pocket_array.reserve (num);
 			if (num > (int) pocket_array.capacity ()) Mem_Error (file.File_ID ());
 		}
+	} else {
+		Pocket_Itr pocket_itr;
+		Dir_Itr dir_itr;
+
+		for (dir_itr = dir_array.begin (); dir_itr != dir_array.end (); dir_itr++) {
+			dir_itr->First_Pocket (-1);
+			dir_itr->Left (0);
+			dir_itr->Right (0);
+		}
+		for (pocket_itr = pocket_array.begin (); pocket_itr != pocket_array.end (); pocket_itr++) {
+			pocket_itr->Next_Index (-1);
+		}
 	}
 }
 

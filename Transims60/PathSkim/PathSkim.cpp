@@ -11,7 +11,7 @@
 PathSkim::PathSkim (void) : Router_Service ()
 {
 	Program ("PathSkim");
-	Version (9);
+	Version (11);
 	Title ("Build and Skim Network Paths");
 
 	System_File_Type optional_files [] = {
@@ -45,9 +45,14 @@ PathSkim::PathSkim (void) : Router_Service ()
 		{ DESTINATION_ZONE_FILE, "DESTINATION_ZONE_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		{ ORIGIN_LOCATION_FILE, "ORIGIN_LOCATION_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		{ DESTINATION_LOCATION_FILE, "DESTINATION_LOCATION_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
-		{ NEW_ORIGIN_LOCATION_FILE, "NEW_ORIGIN_LOCATION_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
-		{ NEW_DESTINATION_LOCATION_FILE, "NEW_DESTINATION_LOCATION_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
+		{ NEW_ORIGIN_LOCATION_FILE, "NEW_ORIGIN_LOCATION_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
+		{ NEW_DESTINATION_LOCATION_FILE, "NEW_DESTINATION_LOCATION_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
 		{ SKIM_TRANSIT_LOAD_FACTOR, "SKIM_TRANSIT_LOAD_FACTOR", LEVEL0, OPT_KEY, FLOAT_KEY, "0.0", "0.0..1000.0", NO_HELP },
+		{ NEW_ACCESSIBILITY_FILE, "NEW_ACCESSIBILITY_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
+		{ NEW_ACCESSIBILITY_FORMAT, "NEW_ACCESSIBILITY_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, NO_HELP },
+		{ ORIGIN_WEIGHT_FIELD, "ORIGIN_WEIGHT_FIELD", LEVEL0, OPT_KEY, TEXT_KEY, "", "", NO_HELP },
+		{ DESTINATION_WEIGHT_FIELD, "DESTINATION_WEIGHT_FIELD", LEVEL0, OPT_KEY, TEXT_KEY, "", "", NO_HELP },
+		{ MAXIMUM_TRAVEL_TIME, "MAXIMUM_TRAVEL_TIME", LEVEL0, OPT_KEY, TIME_KEY, "60 minutes", MINUTE_RANGE, NO_HELP },
 		END_CONTROL
 	};
 	const char *reports [] = {
@@ -65,8 +70,10 @@ PathSkim::PathSkim (void) : Router_Service ()
 	Location_XY_Flag (true);
 
 	mode_flag = select_org = select_des = select_time = skim_flag = zone_skim_flag = district_flag = false;
-	zone_loc_flag = zone_flag = org_loc_flag = des_loc_flag = user_loc_flag = false;
+	zone_loc_flag = zone_flag = org_loc_flag = des_loc_flag = user_loc_flag = accessibility_flag = false;
 	new_mode = nprocess = constraint = total_records = num_org = num_des = cells_out = 0;
+	org_wt_fld = des_wt_fld = -1;
+	max_travel_time = Dtime (60, MINUTES);
 	use_type = CAR;
 	veh_type = -1;
 	traveler_type = 0;

@@ -82,7 +82,7 @@ void Data_Service::Read_Performance (Performance_File &file, Perf_Period_Array &
 					index = dir_ptr->Use_Index ();
 					sum_flag = false;
 				}
-				if (index < 0) continue;
+				if (index < 0 || index >= (int) perf_period_ptr->size ()) continue;
 
 				perf_ptr = perf_period_ptr->Data_Ptr (index);
 
@@ -293,7 +293,6 @@ bool Data_Service::Get_Performance_Data (Performance_File &file, Performance_Dat
 	perf_rec.Veh_Time (file.Veh_Time ());
 	perf_rec.Veh_Delay (file.Veh_Delay ());
 
-	if (perf_rec.Time_Ratio () > Delete_Time_Ratio ()) return (false);
 	return (true);
 }
 

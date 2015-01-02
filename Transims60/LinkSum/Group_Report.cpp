@@ -98,7 +98,7 @@ void LinkSum::Group_Report (void)
 
 				perf_data = period_itr->Total_Performance (index, use_index);
 
-				if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
+				if (data.Get_Data (&perf_data, dir_ptr, link_ptr, Maximum_Time_Ratio ())) {
 
 					//---- check the time ratio ----
 

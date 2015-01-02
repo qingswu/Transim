@@ -182,38 +182,5 @@ void PerfPrep::Merge_Performance (void)
 		}
 	}
 	End_Progress ();
-
-	//---- apply max travel time ratio ----
-
-	//if (!ratio_flag) return;
-
-	//Show_Message ("Checking Travel Time Ratio -- Record");
-	//Set_Progress ();
-
-	//for (period=0, period_itr = perf_period_array.begin (); period_itr != perf_period_array.end (); period_itr++, period++) {
-
-	//	//---- process each link direction ----
-
-	//	for (index=0, perf_itr = period_itr->begin (); perf_itr != period_itr->end (); perf_itr++, index++) {
-	//		Show_Progress ();
-
-	//		if (index < (int) dir_array.size ()) {
-	//			rec = index;
-	//		} else {
-	//			rec = lane_use_flow_index [index - (int) dir_array.size ()];
-	//		}
-	//		dir_ptr = &dir_array [rec];
-	//		
-	//		if (dir_ptr->Time0 () <= 0) continue;
-
-	//		ratio = (double) perf_itr->Time () / dir_ptr->Time0 ();
-	//		if (ratio <= time_ratio) continue;
-
-	//		ratio = time_ratio / ratio;
-
-	//		perf_itr->Time (DTOI (perf_itr->Time () * ratio));
-	//	}
-	//}
-	//End_Progress ();
 }
 

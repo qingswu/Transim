@@ -13,8 +13,9 @@ void LinkSum::Compare_Links (void)
 	int compare, link, dir, compare_field, link_field, dir_field;
 
 	Link_Data *link_ptr;
-	Int_Map_Stat map_stat;
-	Int_Map_Itr map_itr;
+	Ints_Map_Stat map_stat;
+	Ints_Map_Itr map_itr;
+	Integers link_list;
 
 	//---- read the link map file ----
 
@@ -47,10 +48,8 @@ void LinkSum::Compare_Links (void)
 		} else {
 			dir = link_ptr->AB_Dir ();
 		}
-		map_stat = compare_link_map.insert (Int_Map_Data (compare, dir));
-		if (!map_stat.second) {
-			Warning (String ("Compare Link %d was Mapped to %d and %d") % compare % map_stat.first->second % dir);
-		}
+		map_stat = compare_link_map.insert (Ints_Map_Data (compare, link_list));
+		map_stat.first->second.push_back (dir);
 	}
 	End_Progress ();
 	Print (2, String ("Number of %s Records = %d") % link_map_file.File_Type () % Progress_Count ());

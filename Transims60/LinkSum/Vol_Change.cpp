@@ -61,7 +61,7 @@ void LinkSum::Volume_Change (void)
 				data.Start (low);
 				data.End (high);
 
-				if (data.Get_Data (&perf_data, dir_ptr, &(*link_itr), Maximum_Time_Ratio (), Delete_Time_Ratio ())) {
+				if (data.Get_Data (&perf_data, dir_ptr, &(*link_itr), Maximum_Time_Ratio ())) {
 				
 					period_ptr = &compare_perf_array [j];
 

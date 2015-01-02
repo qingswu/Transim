@@ -178,7 +178,7 @@ void Router::DUE_Loop (void)
 
 			Write (1, "Skim Convergence Gap  = ") << last_gap;
 		} else {
-			Update_Travel_Times (Average_Times ());
+			Update_Travel_Times (Average_Times () && iteration != max_iteration);
 			num_time_updates++;
 		}
 		update_time = (clock () - update_time);

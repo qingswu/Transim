@@ -23,10 +23,11 @@ void FileFormat::Program_Control (void)
 	Db_Field *fld_ptr;
 	Units_Type units;
 	double size;
-	bool flag;
+	bool flag, warning;
 
 	data_rec.sort_flag = data_rec.select_flag = data_rec.int_flag = false;
 	data_rec.sel_field = -1;
+	data_rec.index_field = -1;
 
 	//---- create the network files ----
 
@@ -37,9 +38,11 @@ void FileFormat::Program_Control (void)
 	//---- initialize the file list ----
 
 	num = Highest_Control_Group (DATA_FILE, 0);
+	combine_flag = Check_Control_Key (NEW_COMBINE_FIELDS_FILE);
 
 	if (num > 0) {
 		data_flag = true;
+		warning = false;
 
 		//---- open each file ----
 
@@ -113,120 +116,202 @@ void FileFormat::Program_Control (void)
 			key = Get_Control_String (NEW_DATA_FILE, i);
 
 			if (key.empty ()) {
-				Error (String ("New Data File %d is Required") % i);
-			}
-			data_ptr->new_file = new Db_Header ();
-
-			data_ptr->new_file->File_Type (String ("New Data File #%d") % i);
-			data_ptr->new_file->File_ID (String ("NewData%d") % i);
-
-			//---- get the file format ----
-
-			if (Check_Control_Key (NEW_DATA_FORMAT, i)) {
-				data_ptr->new_file->Dbase_Format (Get_Control_String (NEW_DATA_FORMAT, i));
-			}
-			data_ptr->new_file->Nest (data_ptr->file->Nest ());
-			data_ptr->new_file->Create (Project_Filename (key));
-
-			//---- copy existing fields ----
-
-			flag = Get_Control_Flag (COPY_EXISTING_FIELDS, i);
-
-			if (flag) {
-				data_ptr->new_file->Replicate_Fields (data_ptr->file);
-			}
-			if (Get_Control_Flag (NEW_FILE_HEADER, i)) {
-				data_ptr->new_file->Header_Lines (data_ptr->file->Header_Lines ());
-				data_ptr->new_file->Header_Record (data_ptr->file->Header_Record ());
-			} else if (data_ptr->new_file->Dbase_Format () == FIXED_COLUMN || 
-				data_ptr->new_file->Dbase_Format () == BINARY) {
-				data_ptr->new_file->Header_Lines (1);
-			} else {
-				data_ptr->new_file->Header_Lines (0);
-			}
-
-			//---- get the new data fields ----
-
-			num_fld = Highest_Control_Group (NEW_DATA_FIELD, i, 0);
-
-			if (num_fld == 0) {
-				if (!flag) {
-					Error ("No New Data Fields");
+				if (!combine_flag) {
+					Error (String ("New Data File %d is Required") % i);
 				}
-			} else {
-				Print (1);
+			} else if (combine_flag) {
+				Error ("New Data File and Combine Fields File are Not Supported");
+			}
+			if (!combine_flag) {
+				data_ptr->new_file = new Db_Header ();
 
-				for (j=1; j <= num_fld; j++) {
-					key = Get_Control_Text (NEW_DATA_FIELD, i, j);
-					if (key.empty ()) continue;
+				data_ptr->new_file->File_Type (String ("New Data File #%d") % i);
+				data_ptr->new_file->File_ID (String ("NewData%d") % i);
 
-					key.Split (name, ",");
-					if (name.empty ()) {
-						Error (String ("New Data Field %d-%d is Improperly Specified") %i % j);
+				//---- get the file format ----
+
+				if (Check_Control_Key (NEW_DATA_FORMAT, i)) {
+					data_ptr->new_file->Dbase_Format (Get_Control_String (NEW_DATA_FORMAT, i));
+				}
+				data_ptr->new_file->Nest (data_ptr->file->Nest ());
+				data_ptr->new_file->Create (Project_Filename (key));
+
+				//---- copy existing fields ----
+
+				flag = Get_Control_Flag (COPY_EXISTING_FIELDS, i);
+
+				if (flag) {
+					data_ptr->new_file->Replicate_Fields (data_ptr->file);
+				}
+				if (Get_Control_Flag (NEW_FILE_HEADER, i)) {
+					data_ptr->new_file->Header_Lines (data_ptr->file->Header_Lines ());
+					data_ptr->new_file->Header_Record (data_ptr->file->Header_Record ());
+				} else if (data_ptr->new_file->Dbase_Format () == FIXED_COLUMN || 
+					data_ptr->new_file->Dbase_Format () == BINARY) {
+					data_ptr->new_file->Header_Lines (1);
+				} else {
+					data_ptr->new_file->Header_Lines (0);
+				}
+
+				//---- get the new data fields ----
+
+				num_fld = Highest_Control_Group (NEW_DATA_FIELD, i, 0);
+
+				if (num_fld == 0) {
+					if (!flag) {
+						Error ("No New Data Fields");
 					}
-					field = data_ptr->new_file->Field_Number (name);
-					if (field >= 0) {
-						Error (String ("New Data Field %s already exists as Field %d") % name % field);
-					}
-					key.Split (buf, ",");
-					units = NO_UNITS;
-					if (buf.empty () || buf.Starts_With ("I")) {
-						type = DB_INTEGER;
-					} else if (buf.Starts_With ("D") || buf.Starts_With ("R")) {
-						type = DB_DOUBLE;
-					} else if (buf.Starts_With ("S") || buf.Starts_With ("C")) {
-						type = DB_STRING;
-					} else if (buf.Starts_With ("T")) {
-						type = DB_TIME;
-						units = Time_Format ();
-					} else {
-						Error (String ("New Data Field %d-%d is Improperly Specified") %i % j);
-					}
-					key.Split (buf, ",");
-					if (buf.empty ()) {
-						if (type == DB_DOUBLE) {
-							size = 10.2;
-						} else {
-							size = 10.0;
+				} else {
+					Print (1);
+
+					for (j=1; j <= num_fld; j++) {
+						key = Get_Control_Text (NEW_DATA_FIELD, i, j);
+						if (key.empty ()) continue;
+
+						key.Split (name, ",");
+						if (name.empty ()) {
+							Error (String ("New Data Field %d-%d is Improperly Specified") %i % j);
 						}
-					} else {
-						size = buf.Double ();
+						field = data_ptr->new_file->Field_Number (name);
+						if (field >= 0) {
+							Error (String ("New Data Field %s already exists as Field %d") % name % field);
+						}
+						key.Split (buf, ",");
+						units = NO_UNITS;
+						if (buf.empty () || buf.Starts_With ("I")) {
+							type = DB_INTEGER;
+						} else if (buf.Starts_With ("D") || buf.Starts_With ("R")) {
+							type = DB_DOUBLE;
+						} else if (buf.Starts_With ("S") || buf.Starts_With ("C")) {
+							type = DB_STRING;
+						} else if (buf.Starts_With ("T")) {
+							type = DB_TIME;
+							units = Time_Format ();
+						} else {
+							Error (String ("New Data Field %d-%d is Improperly Specified") %i % j);
+						}
+						key.Split (buf, ",");
+						if (buf.empty ()) {
+							if (type == DB_DOUBLE) {
+								size = 10.2;
+							} else {
+								size = 10.0;
+							}
+						} else {
+							size = buf.Double ();
+						}
+						data_ptr->new_file->Add_Field (name, type, size, units);
 					}
-					data_ptr->new_file->Add_Field (name, type, size, units);
 				}
+				data_ptr->new_file->Write_Header ();
 			}
-			data_ptr->new_file->Write_Header ();
 			
 			file_array.push_back (data_ptr->file);
 
 			//---- process the sort option ----
 
-			key = Get_Control_Text (SORT_BY_FIELDS, i);
+			if (!combine_flag) {
 
-			if (!key.empty ()) {
-				if (data_ptr->new_file->Nest_Flag ()) {
-					Error ("Nested Files can not be Sorted");
+				key = Get_Control_Text (SORT_BY_FIELDS, i);
+
+				if (!key.empty ()) {
+					if (data_ptr->new_file->Nest_Flag ()) {
+						Error ("Nested Files can not be Sorted");
+					}
+					data_ptr->sort_flag = true;
+					key.Parse (strings);
+					data_ptr->sort_string = new Db_Base (MODIFY, FIXED_COLUMN);
+					data_ptr->dbase = new Db_Data_Array ();
+					data_ptr->dbase->Dbase_Format (FIXED_COLUMN);
+
+					data_ptr->dbase->Replicate_Fields (data_ptr->new_file, true);
+					data_ptr->dbase->File_ID (data_ptr->new_file->File_ID ());
+
+					for (str_itr = strings.begin (); str_itr != strings.end (); str_itr++) {
+						j = data_ptr->new_file->Required_Field (*str_itr);
+						fld_ptr = data_ptr->new_file->Field (j);
+						data_ptr->sort_string->Add_Field (fld_ptr->Name (), fld_ptr->Type (), fld_ptr->Size ());
+					}
+					file_array.push_back (data_ptr->dbase);
+				} else {
+					data_ptr->sort_flag = false;
+					file_array.push_back (data_ptr->new_file);
 				}
-				data_ptr->sort_flag = true;
-				key.Parse (strings);
-				data_ptr->sort_string = new Db_Base (MODIFY, FIXED_COLUMN);
-				data_ptr->dbase = new Db_Data_Array ();
-				data_ptr->dbase->Dbase_Format (FIXED_COLUMN);
 
-				data_ptr->dbase->Replicate_Fields (data_ptr->new_file, true);
-				data_ptr->dbase->File_ID (data_ptr->new_file->File_ID ());
-
-				for (str_itr = strings.begin (); str_itr != strings.end (); str_itr++) {
-					j = data_ptr->new_file->Required_Field (*str_itr);
-					fld_ptr = data_ptr->new_file->Field (j);
-					data_ptr->sort_string->Add_Field (fld_ptr->Name (), fld_ptr->Type (), fld_ptr->Size ());
-				}
-				file_array.push_back (data_ptr->dbase);
 			} else {
-				data_ptr->sort_flag = false;
-				file_array.push_back (data_ptr->new_file);
+
+				//---- get the data field map ----
+
+				num_fld = Highest_Control_Group (DATA_FIELD_MAP, i, 0);
+
+				if (num_fld == 0) {
+					Error ("No Data Field Maps");
+				} else {
+					for (j=1; j <= num_fld; j++) {
+						key = Get_Control_Text (DATA_FIELD_MAP, i, j);
+						if (key.empty ()) continue;
+
+						key.Split (name, "=");
+
+						field = data_ptr->file->Field_Number (name);
+						if (field < 0) {
+							Error (String ("Data Field %s was Not Found") % name);
+						}
+						data_ptr->in_fields.push_back (field);
+				
+						fld_ptr = data_ptr->file->Field (field);
+						data_ptr->field_types.push_back (fld_ptr->Type ());
+
+						if (key.empty ()) {
+							key = name;
+						}
+						field = combine_file.Field_Number (key);
+						if (field >= 0) {
+							Warning (String ("Combine Data Field %s already exists as Field %d") % key % field);
+							warning = true;
+						} else {
+							size = fld_ptr->Size ();
+
+							if (fld_ptr->Type () == DB_DOUBLE || fld_ptr->Type () == DB_FLOAT || fld_ptr->Type () == DB_FIXED) {
+								size += fld_ptr->Decimal () / 10;
+							}
+							field = combine_file.Add_Field (key, fld_ptr->Type (), size, fld_ptr->Units ());
+						}
+						data_ptr->out_fields.push_back (field);
+					}
+				}
+			}
+
+			//---- get the data index field ----
+
+			key = Get_Control_Text (DATA_INDEX_FIELD, i);
+			if (!key.empty ()) {
+				field = data_ptr->file->Field_Number (key);
+				if (field < 0) {
+					Error (String ("Data Index Field %s was Not Found") % key);
+				}
+				data_ptr->index_field = field;
+				index_flag = true;
 			}
 		}
+
+		//---- open the combine fields file ----
+
+		if (combine_flag) {
+			Print (1);
+			key = Get_Control_String (NEW_COMBINE_FIELDS_FILE);
+
+			combine_file.File_Type ("New Combine Fields File");
+			combine_file.File_ID ("NewCombine");
+
+			//---- get the file format ----
+
+			if (Check_Control_Key (NEW_COMBINE_FIELDS_FORMAT)) {
+				combine_file.Dbase_Format (Get_Control_String (NEW_COMBINE_FIELDS_FORMAT));
+			}
+			combine_file.Create (Project_Filename (key));
+		}
+		if (warning) Write (1);
 	}
 
 	//---- process matrix keys ----

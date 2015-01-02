@@ -48,7 +48,7 @@ void Data_Service::Write_Performance (Performance_File &file, Perf_Period_Array 
 
 			for (dir=0; dir < 2; dir++) {
 				index = (dir) ? link_ptr->BA_Dir () : link_ptr->AB_Dir ();
-				if (index < 0) continue;
+				if (index < 0 || index >= (int) perf_period_itr->size ()) continue;
 
 				Show_Progress ();
 
@@ -66,7 +66,7 @@ void Data_Service::Write_Performance (Performance_File &file, Perf_Period_Array 
 
 				//---- lane use flows ----
 
-				if (dir_ptr->Use_Index () >= 0) {
+				if (dir_ptr->Use_Index () >= 0 && dir_ptr->Use_Index () < (int) perf_period_itr->size ()) {
 					perf_ptr = perf_period_itr->Data_Ptr (dir_ptr->Use_Index ());
 					if (!fill_flag && !perf_ptr->Output_Check ()) continue;
 
@@ -81,9 +81,10 @@ void Data_Service::Write_Performance (Performance_File &file, Perf_Period_Array 
 	}
 	Show_Progress (count);
 	End_Progress ();
-	file.Close ();
 	
 	Print (2, String ("%s Records = %d") % file.File_Type () % count);
+
+	file.Close ();
 }
 
 //---------------------------------------------------------

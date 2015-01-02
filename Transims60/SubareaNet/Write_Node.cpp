@@ -42,7 +42,6 @@ void SubareaNet::Write_Node (void)
 		node_ptr = &node_array [map_itr->second];
 
 		if (node_ptr->Subarea () == 0) continue;
-
 		node_file->Copy_Fields (node_db);
 
 		node_file->Put_Field ("NOTES", ext_dir [node_ptr->Subarea () - 1]);

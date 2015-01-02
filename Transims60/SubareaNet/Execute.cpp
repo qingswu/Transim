@@ -44,11 +44,13 @@ void SubareaNet::Execute (void)
 
 	//---- write the boundary records ----
 
-	Write_Boundary ();
+	if (!outside_flag) {
+		Write_Boundary ();
+	}
 
 	//---- save the transit files ----
 
-	if (transit_flag) {
+	if (transit_flag && !outside_flag) {
 		Write_Route ();
 	}
 
@@ -106,6 +108,9 @@ void SubareaNet::Execute (void)
 	}
 	if (System_File_Flag (NEW_TURN_DELAY)) {
 		Write (1, "Number of Subarea Turn Delay Records = ") << ndelay;
+	}
+	if (System_File_Flag (NEW_RIDERSHIP)) {
+		Write (1, "Number of Subarea Ridership Records = ") << nrider;
 	}
 	Break_Check (7);
 	Write (2, "Number of Boundary Links = ") << nboundary;

@@ -11,7 +11,7 @@
 FileFormat::FileFormat (void) : Execution_Service ()
 {
 	Program ("FileFormat");
-	Version (3);
+	Version (5);
 	Title ("File Format Conversion");
 
 	Control_Key keys [] = { //--- code, key, level, status, type, default, range, help ----
@@ -24,6 +24,11 @@ FileFormat::FileFormat (void) : Execution_Service ()
 		{ NEW_FILE_HEADER, "NEW_FILE_HEADER", LEVEL1, OPT_KEY, BOOL_KEY, "TRUE", BOOL_RANGE, NO_HELP },
 		{ NEW_DATA_FIELD, "NEW_DATA_FIELD", LEVEL2, OPT_KEY, TEXT_KEY, "", "NAME, INTEGER, 10", NO_HELP },
 		{ SORT_BY_FIELDS, "SORT_BY_FIELDS", LEVEL1, OPT_KEY, TEXT_KEY, "", "", NO_HELP },
+		{ DATA_FIELD_MAP, "DATA_FIELD_MAP", LEVEL2, OPT_KEY, TEXT_KEY, "", "DATA_FIELD = COMBINE_FIELD", NO_HELP },	
+		{ DATA_INDEX_FIELD, "DATA_INDEX_FIELD", LEVEL1, OPT_KEY, TEXT_KEY, "", "", NO_HELP },
+
+		{ NEW_COMBINE_FIELDS_FILE, "NEW_COMBINE_FIELDS_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
+		{ NEW_COMBINE_FIELDS_FORMAT, "NEW_COMBINE_FIELDS_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, FORMAT_HELP },
 
 		{ MATRIX_FILE, "MATRIX_FILE", LEVEL1, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		{ MATRIX_FORMAT, "MATRIX_FORMAT", LEVEL1, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", MATRIX_RANGE, FORMAT_HELP },
@@ -43,7 +48,7 @@ FileFormat::FileFormat (void) : Execution_Service ()
 	Key_List (keys);
 	Report_List (reports);
 
-	script_flag = data_flag = matrix_flag = stats_flag = false;
+	script_flag = data_flag = matrix_flag = stats_flag = combine_flag = index_flag = false;
 	num_records = 0;
 
 	int ignore_keys [] = {

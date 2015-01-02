@@ -118,7 +118,7 @@ int Data_Service::Put_Skim_Data (Skim_File &file, Skim_Record &data)
 	file.Origin (data.Origin ());
 	file.Destination (data.Destination ());
 	file.Period (data.Period ());
-	file.Table (0, data.Count ());
+	file.Count (data.Count ());
 
 	if (file.Data_Type () == TIME_TABLE  || file.Total_Time_Flag ()) {
 		file.Time (Dtime (data.Time ()).Round_Seconds ());

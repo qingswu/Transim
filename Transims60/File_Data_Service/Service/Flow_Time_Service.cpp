@@ -166,9 +166,9 @@ void Flow_Time_Service::Build_Turn_Arrays (Turn_Period_Array &turn_delay)
 
 void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, bool avg_times, bool zero_flows)
 {
-	int i, num, nrec, type, lanes, lanes0, lanes1, cap, capacity, tod_cap, max_cap, len, index, rec, use_index;
-	Dtime time0, time, time1, tod1, tod, period, prv, prv1, prev, prev1;
-	double volume, vol_fac, length, speed, avg_tt;
+	int i, num, nrec, type, lanes, lanes0, lanes1, cap, capacity, tod_cap, len, index, rec, use_index;
+	Dtime time0, time, tim, tim1, tod1, tod, period, prv, prv1, prev, prev1;
+	double volume, volume1, vol_fac, length, speed, avg_tt;
 
 	Dir_Itr dir_itr;
 	Link_Data *link_ptr;
@@ -200,6 +200,7 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 		tod = tod1;
 		prev_ptr = prev1_ptr = 0;
 		prv = prev = prv1 = prev1 = time0;
+		perf1_ptr = 0;
 
 		for (per_itr = dat->perf_period_array.begin (); per_itr != dat->perf_period_array.end (); per_itr++, tod += period) {
 			if (tod < first_time) continue;
@@ -210,6 +211,8 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 			cap = capacity;
 			lanes0 = lanes;
 			lanes1 = 0;
+			volume1 = 0;
+
 			rec = dir_itr->First_Lane_Use ();
 
 			if (rec >= 0) {
@@ -249,126 +252,129 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 
 			perf_ptr = per_itr->Data_Ptr (index);
 
-			volume = perf_ptr->Volume () * vol_fac;
+			volume = perf_ptr->Enter () * vol_fac;
 
-			use_index = dir_itr->Use_Index ();
-
-			if (use_index >= 0) {
-				perf1_ptr = per_itr->Data_Ptr (use_index);
-
-				if (!dat->Lane_Use_Flows ()) {
-					volume += perf1_ptr->Volume () * vol_fac;
-					use_index = -1;
-				}
-			} else {
-				perf1_ptr = 0;
-			}
 			if (lanes0 < 1) {
-				time1 = (int) (len / 0.1 + 0.5);
-				if (time1 < time0) time1 = time0;
+				tim = (int) (len / 0.1 + 0.5);
+				if (tim < time0) tim = time0;
 			} else if (volume == 0.0) {
-				time1 = time;
+				tim = time;
 			} else {
 				if (lanes0 != lanes) {
 					tod_cap = (cap * lanes0 + lanes0 / 2) / lanes;
 				} else {
 					tod_cap = cap;
 				}
-				if (avg_times) {
-					max_cap = 4 * tod_cap;
-					if (volume > max_cap) {
-						volume = max_cap;
-					}
-				}
-				time1 = equation.Apply_Equation (type, time, volume, tod_cap, len);
-				if (time1 < time0) time1 = time0;
-			}
-			if (avg_times) {
-				time1 = (MAX (perf_ptr->Time (), time0) + time1) / 2;
-				perf_ptr->Time (time1);
-
-				if (prev_ptr > 0) {
-					avg_tt = (prv + 2.0 * prev + time1) / 4.0;
-					if (avg_tt >= MAX_INTEGER) avg_tt = MAX_INTEGER - 1;
-					prev_ptr->Time ((int) avg_tt);
-				}
-				prev_ptr = perf_ptr;
-				prv = prev;
-				prev = time1;
-			} else {
-				perf_ptr->Time (time1);
-			}
-			if (zero_flows) {
-				perf_ptr->Clear_Flows ();
-			} else {
-				time1 = perf_ptr->Time ();
-				if (time1 < time0) time1 = time0;
-
-				speed = length / time1.Seconds ();
-				if (speed < 0.1) speed = 0.1;
-
-				perf_ptr->Veh_Time (perf_ptr->Veh_Dist () / speed);
+				tim = equation.Apply_Equation (type, time, volume, tod_cap, len);
+				if (tim < time0) tim = time0;
 			}
 
 			//---- managed lanes ----
 
-			if (perf1_ptr > 0) {
-				volume = perf1_ptr->Volume () * vol_fac;
+			use_index = dir_itr->Use_Index ();
+
+			if (use_index >= 0) {
+				perf1_ptr = per_itr->Data_Ptr (use_index);
+
+				volume1 = perf1_ptr->Enter () * vol_fac;
 
 				if (lanes1 == 0) {
-					time1 = (int) (len / 0.1 + 0.5);
-					if (time1 < time0) time1 = time0;
-				} else if (volume == 0.0) {
-					time1 = time;
+					tim1 = (int) (len / 0.1 + 0.5);
+					if (tim1 < time0) tim1 = time0;
+				} else if (volume1 == 0.0) {
+					tim1 = time;
 				} else {
 					tod_cap = (cap * lanes1 + lanes1 / 2) / lanes;
 
-					if (avg_times) {
-						max_cap = 4 * tod_cap;
-						if (volume > max_cap) {
-							volume = max_cap;
-						}
-					}
-					time1 = equation.Apply_Equation (type, time, volume, tod_cap, len);
-					if (time1 < time0) time1 = time0;
+					tim1 = equation.Apply_Equation (type, time, volume1, tod_cap, len);
+					if (tim1 < time0) tim1 = time0;
 				}
+			}
+
+			//---- save the results ----
+			
+			if (dat->Lane_Use_Flows () && use_index >= 0) {
 				if (avg_times) {
-					time1 = (MAX (perf1_ptr->Time (), time0) + time1) / 2;
-					perf1_ptr->Time (time1);
+					tim = (MAX (perf_ptr->Time (), time0) + tim) / 2;
+					perf_ptr->Time (tim);
+
+					if (prev_ptr > 0) {
+						avg_tt = (prv + 2.0 * prev + tim) / 4.0;
+						if (avg_tt >= MAX_INTEGER) avg_tt = MAX_INTEGER - 1;
+						prev_ptr->Time ((int) avg_tt);
+					}
+					prev_ptr = perf_ptr;
+					prv = prev;
+					prev = tim;
+
+					tim1 = (MAX (perf1_ptr->Time (), time0) + tim1) / 2;
+					perf1_ptr->Time (tim1);
 
 					if (prev1_ptr > 0) {
-						avg_tt = (prv1 + 2.0 * prev1 + time1) / 4.0;
+						avg_tt = (prv1 + 2.0 * prev1 + tim1) / 4.0;
 						if (avg_tt >= MAX_INTEGER) avg_tt = MAX_INTEGER - 1;
 						prev1_ptr->Time ((int) avg_tt);
 					}
 					prev1_ptr = perf1_ptr;
 					prv1 = prev1;
-					prev1 = time1;
+					prev1 = tim1;
+
 				} else {
-					perf1_ptr->Time (time1);
+					perf_ptr->Time (tim);
+					perf1_ptr->Time (tim1);
 				}
 				if (zero_flows) {
+					perf_ptr->Clear_Flows ();
 					perf1_ptr->Clear_Flows ();
 				} else {
-					time1 = perf1_ptr->Time ();
-					if (time1 < time0) time1 = time0;
+					tim = perf_ptr->Time ();
+					if (tim < time0) tim = time0;
 
-					speed = length / time1.Seconds ();
+					speed = length / tim.Seconds ();
 					if (speed < 0.1) speed = 0.1;
 
-					perf_ptr->Veh_Time (perf1_ptr->Veh_Dist () / speed);
-				}
-			} else if (avg_times) {
-				time1 = perf_ptr->Time ();
+					perf_ptr->Veh_Time (perf_ptr->Veh_Dist () / speed);
 
-				if (perf1_ptr > 0) {
-					avg_tt = (prv1 + 2.0 * prev1 + time1) / 4.0;
-					if (avg_tt >= MAX_INTEGER) avg_tt = MAX_INTEGER - 1;
-					prev1_ptr->Time ((int) avg_tt);
+					tim1 = perf1_ptr->Time ();
+					if (tim1 < time0) tim1 = time0;
+
+					speed = length / tim1.Seconds ();
+					if (speed < 0.1) speed = 0.1;
+
+					perf1_ptr->Veh_Time (perf1_ptr->Veh_Dist () / speed);
 				}
-				prev1_ptr = perf1_ptr;
-				prv1 = prev1;
-				prev1 = time1;
+			} else {
+				if (use_index >= 0 && volume1 > 0) {
+					perf_ptr->Add_Flows (perf1_ptr);
+					tim = (tim * volume + tim1 * volume1) / (volume + volume1);
+				}
+				if (avg_times) {
+					tim = (MAX (perf_ptr->Time (), time0) + tim) / 2;
+					perf_ptr->Time (tim);
+
+					if (prev_ptr > 0) {
+						avg_tt = (prv + 2.0 * prev + tim) / 4.0;
+						if (avg_tt >= MAX_INTEGER) avg_tt = MAX_INTEGER - 1;
+						prev_ptr->Time ((int) avg_tt);
+					}
+					prev_ptr = perf_ptr;
+					prv = prev;
+					prev = tim;
+
+				} else {
+					perf_ptr->Time (tim);
+				}
+				if (zero_flows) {
+					perf_ptr->Clear_Flows ();
+				} else {
+					tim = perf_ptr->Time ();
+					if (tim < time0) tim = time0;
+
+					speed = length / tim.Seconds ();
+					if (speed < 0.1) speed = 0.1;
+
+					perf_ptr->Veh_Time (perf_ptr->Veh_Dist () / speed);
+				}
 			}
 		}
 	}

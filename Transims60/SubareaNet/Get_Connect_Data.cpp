@@ -25,7 +25,7 @@ bool SubareaNet::Get_Connect_Data (Connect_File &file, Connect_Data &data)
 			dir_ptr = &dir_array [data.To_Index ()];
 			link_ptr = &link_array [dir_ptr->Link ()];
 
-			if (link_ptr->Type () == 0) return (false);
+			if (link_ptr->Type () == 0)  return (false);
 		}
 
 		//---- copy the fields to the subarea file ----

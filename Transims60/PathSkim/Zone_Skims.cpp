@@ -14,6 +14,7 @@ void PathSkim::Zone_Skims (void)
 {
 	int mode, period, periods, out_period, last_period, loc, zone, count;
 	int org_zones, des_zones, num_periods, num_cells;
+	Doubles des_data;
 	Dtime low, high;
 
 	Path_Loc_Array path_locations;
@@ -62,6 +63,10 @@ void PathSkim::Zone_Skims (void)
 	Write (1, "Number of Selected Destinations  = ") << des_zones;
 	Write (1, "Number of Specified Time Periods = ") << num_periods;
 	Write (1, "Number of Potential Skim Cells   = ") << num_cells;
+
+	if (accessibility_flag) {
+		des_wt_total.assign (zone_array.size (), 0.0);
+	}
 
 	//---- select activity locations within each zone ----
 
