@@ -39,7 +39,8 @@ protected:
 		PRIMARY_MODE_CHOICE, MODE_CHOICE_NEST, NESTING_COEFFICIENT, 
 		VEHICLE_TIME_VALUE, WALK_TIME_VALUE, DRIVE_ACCESS_VALUE,
 		WAIT_TIME_VALUE, LONG_WAIT_VALUE, TRANSFER_TIME_VALUE, PENALTY_TIME_VALUE, 
-		TERMINAL_TIME_VALUE, TRANSFER_COUNT_VALUE, COST_VALUE_TABLE, 
+		TERMINAL_TIME_VALUE, TRANSFER_COUNT_VALUE, DIFFERENCE_VALUE, 
+		DISTANCE_VALUE, COST_VALUE_TABLE, USER_VALUE_TABLE,  
 		MODE_ACCESS_MARKET, ACCESS_MARKET_NAME, 
 		NEW_TABLE_MODES, OUTPUT_TRIP_FACTOR, NEW_MODE_SUMMARY_FILE,
 		NEW_MARKET_SEGMENT_FILE, NEW_MODE_SEGMENT_FILE, NEW_FTA_SUMMIT_FILE, 
@@ -54,18 +55,18 @@ private:
 	enum ModeChoice_Reports { PRINT_SCRIPT = 1, PRINT_STACK, MODE_SUMMARY, MARKET_REPORT, 
 		CALIB_REPORT, TARGET_DATA, MODE_VALUES, SEGMENT_VALUES, ACCESS_MARKET, LOST_TRIPS 
 	};
-	int num_modes, num_tables, num_nests, num_access, num_market, no_field;
+	int num_modes, num_tables, num_nests, num_access, num_market, no_field, user_field;
 	int org_map_field, des_map_field, segment_field, zone_field, zones, purpose, period, market_field;
-	int time_field, walk_field, auto_field, wait_field, lwait_field, xwait_field, tpen_field, term_field;
-	int cost_field, xfer_field, bias_field, pef_field, cbd_field, const_field, tab_field, header_value, max_iter;
+	int time_field, walk_field, auto_field, wait_field, lwait_field, xwait_field, tpen_field, term_field, diff_field;
+	int dist_field, cost_field, xfer_field, bias_field, pef_field, cbd_field, const_field, tab_field, header_value, max_iter;
 	double time_value, walk_value, drive_value, wait_value, lwait_value, xwait_value, tpen_value, term_value;
-	double xfer_value, scale_fac, exit_rmse, trip_factor;
+	double diff_value, dist_value, xfer_value, scale_fac, exit_rmse, trip_factor;
 	bool summary_flag, market_flag, segment_flag, constant_flag, mode_value_flag, seg_value_flag;
 	bool calib_flag, calib_seg_flag, calib_tab_flag, calib_report, output_flag, data_flag, mode_seg_flag;
 	bool summit_flag, prod_flag, attr_flag, access_flag, lost_flag;
 	bool org_flag, initial_flag, sum_flag, prod_sum_flag, attr_sum_flag, save_summit_flag, save_flag;
 
-	Doubles cost_values, zero_values, zero_tab;
+	Doubles cost_values, user_values, zero_values, zero_tab;
 	Dbls_Array min_const, max_const;
 	String purpose_label;
 	Strings mode_names, access_names;

@@ -51,7 +51,6 @@ void PathSkim::Zone_Skims (void)
 		num_periods = 1;
 	} else {
 		num_periods = skim_file->Num_Periods ();
-
 		if (First_Partition () >= 0 && num_periods > Num_Partitions ()) num_periods = Num_Partitions ();
 	}
 	num_cells = org_zones * des_zones * num_periods;
@@ -155,12 +154,14 @@ void PathSkim::Zone_Skims (void)
 		if (out_period != last_period) {
 			if (last_period >= 0) {
 				End_Progress ();
+
 				skim_processor.Stop_Processing ();
 
 				Output_Skims (last_period);
 
 				Show_Message ("Aggregating Zone Skims -- Record");
 				Set_Progress ();
+
 				skim_processor.Start_Processing ();
 			}
 			last_period = out_period;

@@ -12,16 +12,13 @@
 
 void Gravity::Read_Trips (void)
 {
-	int period, num_periods, index, org, des;
+	int period, index, org, des;
 	double trips, skim;
 
 	Int_Map *org_ptr, *des_ptr;
 	Int_Map_Itr org_itr, des_itr;
 
 	trip_file->Allocate_Data ();
-
-	num_periods = skim_file->Num_Periods ();
-	if (num_periods < 1) num_periods = 1;
 
 	org_ptr = skim_file->Org_Map ();
 	des_ptr = skim_file->Des_Map ();

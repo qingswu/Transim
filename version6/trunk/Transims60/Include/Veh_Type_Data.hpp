@@ -37,8 +37,9 @@ public:
 	int      Method (void)             { return (method); }
 	Dtime    Min_Dwell (void)          { return (min_dwell); }
 	Dtime    Max_Dwell (void)          { return (max_dwell); }
-	bool     Grade_Flag (void)         { return (grade_flag); }
-	double   Grade (int num)           { return ((num > 0 && num <= 100) ? grade [num-1] : 1.0); }
+	int      Grade_Func (void)         { return (grade); }
+	int      Fuel_Func (void)          { return (fuel); }
+	int      Fuel_Cap (void)           { return (fuel_cap); }
 	int      PCE (void)                { return (pce); }
 	int      Cells (void)              { return (cells); }
 
@@ -58,8 +59,9 @@ public:
 	void     Method (int value)        { method = value; }
 	void     Min_Dwell (Dtime value)   { min_dwell = value; }
 	void     Max_Dwell (Dtime value)   { max_dwell = value; }
-	void     Grade_Flag (bool flag)    { grade_flag = flag; }
-	void     Grade (int n, double fac) { grade [n] = (float) fac; }
+	void     Grade_Func (int value)    { grade = value; }
+	void     Fuel_Func (int value)     { fuel = value; }
+	void     Fuel_Cap (int value)      { fuel_cap = value; }
 	void     PCE (int value)           { pce = value; }
 	void     Cells (int value)         { cells = value; }
 
@@ -71,13 +73,14 @@ public:
 	void     Occupancy (double value)  { occupancy = exe->Round (value * 10.0); }
 	void     Loading (double value)    { loading = exe->Round (value * 10.0); }
 	void     Unloading (double value)  { unloading = exe->Round (value * 10.0); } 
+	void     Fuel_Cap (double value)   { fuel_cap = exe->Round (value); }
 	void     PCE (double value)        { pce = exe->Round (value); }
 
 
 	void     Clear (void)
 	{
 		type = length = max_speed = max_accel = max_decel = capacity = max_load = occupancy = loading = unloading = method = min_dwell = max_dwell = op_cost = 0;
-		use = ANY; grade_flag = false; memset (grade, '\0', sizeof (grade)); pce = 10; cells = 1; Notes_Data::Clear ();
+		use = ANY; grade = fuel = fuel_cap = 0; pce = 10; cells = 1; Notes_Data::Clear ();
 	}
 private:
 	int      type;
@@ -95,8 +98,9 @@ private:
 	int      method;
 	Dtime    min_dwell; 
 	Dtime    max_dwell; 
-	bool     grade_flag;
-	float    grade [100];
+	int      grade;
+	int      fuel;
+	int      fuel_cap;
 	int      pce;
 	int      cells;
 };

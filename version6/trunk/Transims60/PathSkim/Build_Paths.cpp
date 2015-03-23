@@ -116,6 +116,7 @@ void PathSkim::Build_Paths (void)
 		}
 	}
 	End_Progress ();
+
 	plan_processor.Stop_Processing ();
 
 	if (skim_flag && last_period >= 0) {
@@ -124,6 +125,8 @@ void PathSkim::Build_Paths (void)
 
 	//---- write the path summary ----
 
-	Show_Message (1, "Number of Paths Written = ") << plan_file->Num_Trips ();
-	plan_file->Print_Summary ();
+	if (plan_flag) {
+		Show_Message (1, "Number of Paths Written = ") << plan_file->Num_Trips ();
+		plan_file->Print_Summary ();
+	}
 }

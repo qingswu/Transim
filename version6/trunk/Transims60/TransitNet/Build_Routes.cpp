@@ -697,7 +697,7 @@ void TransitNet::Build_Routes (void)
 				head0 = headway;
 				continue;
 			}
-			schedule_periods.Period_Range (p, low, high);
+			transit_time_periods.Period_Range (p, low, high);
 
 			if (period_itr->TTime () > 0) {
 				line_stop_itr = --line_ptr->end ();

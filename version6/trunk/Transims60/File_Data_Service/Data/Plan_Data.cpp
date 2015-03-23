@@ -141,14 +141,14 @@ bool Plan_Data::External_IDs (void)
 {
 	if (!Trip_Data::External_IDs ()) return (false);
 
-	if (Problem () > 0) return (true);
+	if (Path_Problem ()) return (true);
 
 	Plan_Leg_Itr itr;
 
 	for (itr = begin (); itr != end (); itr++) {
 		if (!itr->External_IDs ()) {
-			exe->Warning (String ("Plan %d-%d-%d-%d Leg Type %d was Not Implemented") % Household () % 
-				Person () % Tour () % Trip () % itr->Type ());
+			exe->Warning (String ("Plan %d-%d-%d-%d Leg Type %s was Not Implemented") % Household () % 
+				Person () % Tour () % Trip () % exe->ID_Code ((ID_Type) itr->Type ()));
 			return (false);
 		}
 	}
@@ -157,10 +157,17 @@ bool Plan_Data::External_IDs (void)
 
 bool Plan_Leg::External_IDs (void)
 {
+#ifdef CHECK
+	int size;
+#endif
 	Dir_Data *dir_ptr;
 
 	switch (Type ()) {
 		case DIR_ID:
+#ifdef CHECK
+			size = (int) dat->dir_array.size ();
+			if (id < 0 || id >= size) goto error_msg;
+#endif
 			dir_ptr = &dat->dir_array [id];
 			id = dat->link_array [dir_ptr->Link ()].Link ();
 
@@ -171,6 +178,10 @@ bool Plan_Leg::External_IDs (void)
 			}
 			break;
 		case USE_ID:
+#ifdef CHECK
+			size = (int) dat->dir_array.size ();
+			if (id < 0 || id >= size) goto error_msg;
+#endif
 			dir_ptr = &dat->dir_array [id];
 			id = dat->link_array [dir_ptr->Link ()].Link ();
 
@@ -181,6 +192,10 @@ bool Plan_Leg::External_IDs (void)
 			}
 			break;
 		case LINK_ID:
+#ifdef CHECK
+			size = (int) dat->link_array.size ();
+			if (abs (id) >= size) goto error_msg;
+#endif
 			if (id >= 0) {
 				id = dat->link_array [id].Link ();
 			} else {
@@ -191,18 +206,38 @@ bool Plan_Leg::External_IDs (void)
 		case USE_AB:
 		case LINK_BA:
 		case USE_BA:
+#ifdef CHECK
+			size = (int) dat->link_array.size ();
+			if (id < 0 || id >= size) goto error_msg;
+#endif
 			id = dat->link_array [id].Link ();
 			break;
 		case NODE_ID:
+#ifdef CHECK
+			size = (int) dat->node_array.size ();
+			if (id < 0 || id >= size) goto error_msg;
+#endif
 			id = dat->node_array [id].Node ();
 			break;
 		case LOCATION_ID:
+#ifdef CHECK
+			size = (int) dat->location_array.size ();
+			if (id < 0 || id >= size) goto error_msg;
+#endif
 			id = dat->location_array [id].Location ();
 			break;
 		case PARKING_ID:
+#ifdef CHECK
+			size = (int) dat->parking_array.size ();
+			if (id < 0 || id >= size) goto error_msg;
+#endif
 			id = dat->parking_array [id].Parking ();
 			break;
 		case ACCESS_ID:
+#ifdef CHECK
+			size = (int) dat->access_array.size ();
+			if (abs (id) >= size) goto error_msg;
+#endif
 			if (id >= 0) {
 				id = dat->access_array [id].Link ();
 			} else {
@@ -211,16 +246,34 @@ bool Plan_Leg::External_IDs (void)
 			break;
 		case ACCESS_AB:
 		case ACCESS_BA:
+#ifdef CHECK
+			size = (int) dat->access_array.size ();
+			if (id < 0 || id >= size) goto error_msg;
+#endif
 			id = dat->access_array [id].Link ();
 			break;
 		case STOP_ID:
+#ifdef CHECK
+			size = (int) dat->stop_array.size ();
+			if (id < 0 || id >= size) goto error_msg;
+#endif
 			id = dat->stop_array [id].Stop ();
 			break;
 		case ROUTE_ID:
+#ifdef CHECK
+			size = (int) dat->line_array.size ();
+			if (id < 0 || id >= size) goto error_msg;
+#endif
 			id = dat->line_array [id].Route ();
 			break;
 		default:
 			return (false);
 	}
 	return (true);
+
+#ifdef CHECK
+error_msg:
+	exe->Error (String ("Path_Leg::External_IDs %s index=%d vs %d") % exe->ID_Code ((ID_Type) Type ()) % id % size);
+	return (false);
+#endif
 }

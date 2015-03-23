@@ -4,6 +4,8 @@
 
 #include "TripPrep.hpp"
 
+#include "TDF_Matrix.hpp"
+
 //---------------------------------------------------------
 //	Program_Control
 //---------------------------------------------------------
@@ -157,6 +159,12 @@ void TripPrep::Program_Control (void)
 		}
 	}
 
+	//---- check for selection processing ----
+
+	if (!new_select_flag && System_File_Flag (NEW_SELECTION)) {
+		new_select_flag = true;
+	}
+
 	//---- sort household tours ----
 
 	sort_tours = Get_Control_Flag (SORT_HOUSEHOLD_TOURS);
@@ -190,31 +198,80 @@ void TripPrep::Program_Control (void)
 
 	if (Check_Control_Key (SHIFT_START_PERCENTAGE)) {
 		shift_rate = Get_Control_Double (SHIFT_START_PERCENTAGE);
+		shift_start_flag = (shift_rate > 0.0);
+	} else if (Check_Control_Key (SHIFT_END_PERCENTAGE)) {
+		shift_rate = Get_Control_Double (SHIFT_START_PERCENTAGE);
+		shift_end_flag = (shift_rate > 0.0);
+	}
+	if (shift_rate > 0.0) {
+		shift_rate /= 100.0;
 
-		if (shift_rate > 0.0) {
-			shift_rate /= 100.0;
-			shift_flag = true;
+		key = Get_Control_Text (SHIFT_FROM_TIME_RANGE);
 
-			key = Get_Control_Text (SHIFT_FROM_TIME_RANGE);
+		if (key.empty ()) {
+			Error ("Shift From Time Range is Required");
+		}
+		shift_from.Add_Ranges (key);
+		shift_from.Period_Range (0, low_from, high_from);
 
-			if (key.empty ()) {
-				Error ("Shift From Time Range is Required");
+		key = Get_Control_Text (SHIFT_TO_TIME_RANGE);
+
+		if (key.empty ()) {
+			Error ("Shift To Time Range is Required");
+		}
+		shift_to.Add_Ranges (key);
+		shift_to.Period_Range (0, low_to, high_to);
+
+		if (high_from == low_from) {
+			Error ("Shift Time Range is Out of Range");
+		}
+		shift_factor = (double) (high_to - low_to) / (high_from - low_from);
+	}
+
+	//---- zone factor file ----
+
+	key = Get_Control_String (ZONE_FACTOR_FILE);
+
+	if (!key.empty ()) {
+		if (!System_File_Flag (ZONE) || !System_File_Flag (LOCATION)) {
+			Error ("Zone and Location Files are Required for Factoring");
+		}
+		if (!new_trip_flag) {
+			Error ("New Trip File is Required for Factoring");
+		}
+		key = Project_Filename (key);
+
+		String format = Db_Header::Def_Format (key);
+
+		if (format.empty ()) {
+			if (Check_Control_Key (ZONE_FACTOR_FORMAT)) {
+				format = Get_Control_String (ZONE_FACTOR_FORMAT);
+			} else {
+				format = Get_Default_Text (ZONE_FACTOR_FORMAT);
 			}
-			shift_from.Add_Ranges (key);
-			shift_from.Period_Range (0, low_from, high_from);
+		}
+		factor_file = (Factor_File *) TDF_Matrix (READ, format);
 
-			key = Get_Control_Text (SHIFT_TO_TIME_RANGE);
+		factor_file->File_Type ("Zone Factor File");
+		factor_file->File_ID ("Factor");
 
-			if (key.empty ()) {
-				Error ("Shift To Time Range is Required");
-			}
-			shift_to.Add_Ranges (key);
-			shift_to.Period_Range (0, low_to, high_to);
+		Print (1);
+		factor_file->Open (key);
+		factor_flag = true;
 
-			if (high_from == low_from) {
-				Error ("Shift Time Range is Out of Range");
-			}
-			shift_factor = (double) (high_to - low_to) / (high_from - low_from);
+		if (factor_file->Num_Periods () > 1) {
+			Print (0, " (Periods=") << factor_file->Num_Periods () << " Zones=" << factor_file->Num_Des () << " Tables=" << factor_file->Tables () << ")";
+		} else {
+			Print (0, " (Zones=") << factor_file->Num_Des () << " Tables=" << factor_file->Tables () << ")";
+		}
+		if (!factor_file->Allocate_Data (true)) {
+			Error ("Insufficient Memory for Factor Matrix");
+		}
+
+		move_flag = Get_Control_Flag (NEW_DESTINATION_FLAG);
+
+		if (!move_flag) {
+			new_hhold = Get_Control_Integer (NEW_HOUSEHOLD_NUMBER);
 		}
 	}
 }

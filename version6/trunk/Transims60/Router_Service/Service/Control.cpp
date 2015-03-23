@@ -33,7 +33,6 @@ void Router_Service::Program_Control (void)
 	if (kissride_path_flag && !transit_path_flag) kissride_path_flag = false;
 
 	if (parkride_path_flag || kissride_path_flag) Location_XY_Flag (true);
-	path_param.grade_flag = false;
 
 	//---- impedance sort method ----
 
@@ -90,21 +89,6 @@ void Router_Service::Program_Control (void)
 	
 	path_param.random_imped = Get_Control_Double (PERCENT_RANDOM_IMPEDANCE);
 
-	//---- open traveler type script ----
-
-	if (System_File_Flag (HOUSEHOLD)) {
-		hhfile_flag = true;
-		text = Get_Control_String (TRAVELER_TYPE_SCRIPT);
-
-		if (!text.empty ()) {
-			Print (1);
-			script_file.File_Type ("Traveler Type Script");
-
-			script_file.Open (Project_Filename (text));
-			script_flag = true;
-		}
-	}
-
 	//---- open traveler parameter file ----
 
 	text = Get_Control_String (TRAVELER_PARAMETER_FILE);
@@ -112,7 +96,6 @@ void Router_Service::Program_Control (void)
 	if (!text.empty ()) {
 		Db_File file;
 		file.File_Type ("Traveler Parameter File");
-		if (!script_flag) Print (1);
 
 		if (file.Open (Project_Filename (text))) {
 			bool first = true;

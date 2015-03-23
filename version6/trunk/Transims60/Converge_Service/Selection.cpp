@@ -1,14 +1,14 @@
 //*********************************************************
-//	Read_Trips.cpp - Read the Trip File
+//	Selection.cpp - check the selection criteria
 //*********************************************************
 
-#include "Router.hpp"
+#include "Converge_Service.hpp"
 
 //---------------------------------------------------------
-//	Read_Trips
+//	Selection
 //---------------------------------------------------------
 
-bool Router::Selection (Trip_Data *trip_ptr)
+bool Converge_Service::Selection (Trip_Data *trip_ptr)
 {
 	int hhold, person, tour, trip, mode, origin, destination, type;
 	
@@ -95,7 +95,7 @@ bool Router::Selection (Trip_Data *trip_ptr)
 	if (select_vehicles && !vehicle_range.In_Range (trip_ptr->Veh_Type ())) return (false);
 
 	if (percent_flag) {
-		double prob = random_select.Probability (trip_ptr->Household () + random_seed);
+		double prob = random_select.Probability (Random_Seed () + trip_ptr->Household ());
 		return (prob <= select_percent);
 	} else {
 		return (true);

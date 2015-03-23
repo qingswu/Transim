@@ -58,7 +58,9 @@ int Path_Builder::Drive_Plan (int lot)
 
 int Path_Builder::Set_Drive_Error (void)
 {
-	if (zero_flag) {
+	if (constraint_flag) {
+		return (CONSTRAINT_PROBLEM);
+	} else if (zero_flag) {
 		return (ZERO_PROBLEM);
 	} else if (time_flag) {
 		return (TIME_PROBLEM);

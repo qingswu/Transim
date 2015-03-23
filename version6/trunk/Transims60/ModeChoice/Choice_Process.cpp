@@ -13,7 +13,7 @@
 void ModeChoice::Choice_Process (int iteration)
 {
 	int i, j, k, org, des, o1, d1, n, nest, table, org_seg, des_seg, segment, seg, group, no_flag;
-	double trips, sum_trips, access, sum, value, cost, zero_sum, level, dvalue, tot_lost;
+	double trips, sum_trips, access, sum, value, cost, user, zero_sum, level, dvalue, tot_lost;
 	double can_walk_market, can_walk_share, must_drive_market, must_drive_share, auto_exp, *data;
 	bool save_access_flag;
 
@@ -112,6 +112,10 @@ void ModeChoice::Choice_Process (int iteration)
 		}
 		new_file->Zero_Data ();
 
+#ifdef DUMP
+		Write (1, "ORIGIN=") << org;
+#endif
+
 		for (des_itr = des_map->begin (); des_itr != des_map->end (); des_itr++) {
 			des = des_itr->first;
 			d1 = des_itr->second;
@@ -142,6 +146,9 @@ void ModeChoice::Choice_Process (int iteration)
 					seg = segment = 0;
 				}
 			}
+#ifdef DUMP
+			Write (1, "DESTINATION=") << des;
+#endif
 			trip_file->Set_Fields (org, des);
 
 			for (mat_itr = skim_files.begin (); mat_itr != skim_files.end (); mat_itr++) {
@@ -176,7 +183,7 @@ void ModeChoice::Choice_Process (int iteration)
 			if (program.Execute () == 0) continue;
 
 			//---- calculate mode utilities ----
-	
+
 			mode_sum.assign (num_modes, zero_tab);
 
 			if (sum_flag) {
@@ -186,14 +193,20 @@ void ModeChoice::Choice_Process (int iteration)
 				mode_file = data_rec [i];
 
 				constant [i] = value = mode_file->Get_Double (const_field);
-
+#ifdef DUMP
+				Write (1, "MODE=") << mode_names [i];
+#endif
 				if (initial_flag && value != 0.0) {
 					seg_constant [seg] [i] [num_tables] = value;
 				}
 				value = mode_file->Get_Double (time_field);
-				if (value <= 0.0) continue;
-
+				if (value <= 0.0) {
+					if (mode_file->Get_Double (walk_field) <= 0.0) continue;
+				}
 				sum = value * time_value;
+#ifdef DUMP
+				Write (1, "\ttime=") << value << " value=" << time_value << " sum=" << sum;
+#endif
 				if (sum_flag) {
 					values [i] [time_field] = value;
 					values [i] [const_field] = 1;
@@ -201,49 +214,86 @@ void ModeChoice::Choice_Process (int iteration)
 				value = mode_file->Get_Double (walk_field);
 				if (value > 0.0) sum += value * walk_value;
 				if (sum_flag) values [i] [walk_field] = value;
-
+#ifdef DUMP
+				Write (1, "\twalk=") << value << " value=" << walk_value << " sum=" << sum;
+#endif
 				value = mode_file->Get_Double (auto_field);
 				if (value > 0.0) sum += value * drive_value;
 				if (sum_flag) values [i] [auto_field] = value;
-
+#ifdef DUMP
+				Write (1, "\tauto=") << value << " value=" << drive_value << " sum=" << sum;
+#endif
 				value = mode_file->Get_Double (wait_field);
 				if (value > 0.0) sum += value * wait_value;
 				if (sum_flag) values [i] [wait_field] = value;
-
+#ifdef DUMP
+				Write (1, "\twait=") << value << " value=" << wait_value << " sum=" << sum;
+#endif
 				value = mode_file->Get_Double (lwait_field);
 				if (value > 0.0) sum += value * lwait_value;
 				if (sum_flag) values [i] [lwait_field] = value;
-
+#ifdef DUMP
+				Write (1, "\tlwait=") << value << " value=" << lwait_value << " sum=" << sum;
+#endif
 				value = mode_file->Get_Double (xwait_field);
 				if (value > 0.0) sum += value * xwait_value;
 				if (sum_flag) values [i] [xwait_field] = value;
-
+#ifdef DUMP
+				Write (1, "\txwait=") << value << " value=" << xwait_value << " sum=" << sum;
+#endif
 				value = mode_file->Get_Double (tpen_field);
 				if (value > 0.0) sum += value * tpen_value;
 				if (sum_flag) values [i] [tpen_field] = value;
-
+#ifdef DUMP
+				Write (1, "\ttpen=") << value << " value=" << tpen_value << " sum=" << sum;
+#endif
 				value = mode_file->Get_Double (term_field);
 				if (value > 0.0) sum += value * term_value;
 				if (sum_flag) values [i] [term_field] = value;
-
+#ifdef DUMP
+				Write (1, "\tterm=") << value << " value=" << term_value << " sum=" << sum;
+#endif				
+				value = mode_file->Get_Double (diff_field);
+				if (value != 0.0) sum += value * diff_value;
+				if (sum_flag) values [i] [diff_field] = value;
+#ifdef DUMP
+				Write (1, "\tdiff=") << value << " value=" << diff_value << " sum=" << sum;
+#endif
+				value = mode_file->Get_Double (dist_field);
+				if (value > 0.0) sum += value * dist_value;
+				if (sum_flag) values [i] [dist_field] = value;
+#ifdef DUMP
+				Write (1, "\tdist=") << value << " value=" << dist_value << " sum=" << sum;
+#endif
 				value = mode_file->Get_Double (xfer_field);
 				if (value > 0.0) sum += value * xfer_value;
 				if (sum_flag) values [i] [xfer_field] = value;
-
+#ifdef DUMP
+				Write (1, "\txfer=") << value << " value=" << xfer_value << " sum=" << sum;
+#endif
 				value = mode_file->Get_Double (bias_field);
 				sum += value;
 				if (sum_flag) values [i] [bias_field] = value;
-
+#ifdef DUMP
+				Write (1, "\tbias=") << value << " sum=" << sum;
+#endif
 				value = mode_file->Get_Double (pef_field);
 				sum += value;
 				if (sum_flag) values [i] [pef_field] = value;
-
+#ifdef DUMP
+				Write (1, "\tpef=") << value << " sum=" << sum;
+#endif
 				value = mode_file->Get_Double (cbd_field);
 				sum += value;
 				if (sum_flag) values [i] [cbd_field] = value;
-
+#ifdef DUMP
+				Write (1, "\tcbd=") << value << " sum=" << sum;
+#endif
 				cost = mode_file->Get_Double (cost_field);
 				if (sum_flag) values [i] [cost_field] = cost;
+				
+				user = mode_file->Get_Double (user_field);
+				if (sum_flag) values [i] [user_field] = user;
 
 				level = nest_levels [i];
 
@@ -252,13 +302,21 @@ void ModeChoice::Choice_Process (int iteration)
 					if (no_flag != 0) continue;
 
 					value = mode_file->Get_Double (tab_field + j);
-
+#ifdef DUMP
+					Write (1, "\ttable=") << j << " constant=" << value;
+					Write (1, "\ttable=") << j << " cost=" << cost << " value=" << cost_values [j];
+					Write (1, "\ttable=") << j << " user=" << user << " value=" << user_values [j];
+#endif
 					if (initial_flag && value != 0.0) {
 						seg_constant [seg] [i] [j] = value;
 					}
 					if (cost > 0.0) value += cost * cost_values [j];
+					if (user != 0.0) value += user * user_values [j];
 
 					mode_sum [i] [j] = (sum + value) / level + constant [i];
+#ifdef DUMP
+					Write (1, "\ttable=") << j << " sum=" << (sum + value) << " level=" << level << " constant=" << constant [i] << " impedance=" << mode_sum [i] [j];
+#endif
 				}
 			}
 
@@ -267,12 +325,17 @@ void ModeChoice::Choice_Process (int iteration)
 			for (i=0; i < num_tables; i++) {
 				trips = trip_file->Get_Double (table_map [i]);
 				if (trips == 0.0) continue;
-
+#ifdef DUMP
+				Write (1, "TABLE=") << i << " trips=" << trips;
+#endif
 				sum_trips = 0;
 				can_walk_market = can_walk_share = must_drive_market = must_drive_share = auto_exp = 0.0;
 
 				for (j=0; j < num_access; j++) {
 					access = trips * trip_file->Get_Double (market_field + j);
+#ifdef DUMP
+					Write (1, "\taccess market=") << j << " trips=" << access;
+#endif
 					if (access == 0.0) continue;
 
 					if (save_summit_flag) {
@@ -294,6 +357,9 @@ void ModeChoice::Choice_Process (int iteration)
 						if (sum <= zero_sum) continue;
 
 						utility [*mode_itr] = exp (sum);
+#ifdef DUMP
+						Write (1, "\tmarket mode=") << mode_names [*mode_itr] << " impedance=" << sum << " utility=" << utility [*mode_itr];
+#endif
 					}
 
 					//---- calculate the nest sum ----
@@ -310,8 +376,14 @@ void ModeChoice::Choice_Process (int iteration)
 						}
 						nest_sum [n] = sum;
 						if (nest >= 0 && sum > 0) {
+#ifdef DUMP
+							Write (1, "\tnest=") << mode_names [nest] << " impedance=" << sum << " coef=" << nest_coef [n] << " constant=" << constant [nest];
+#endif
 							sum = log (sum) * nest_coef [n] + constant [nest];
 							utility [nest] = exp (sum);
+#ifdef DUMP
+							Write (0, " utility=") << utility [nest];
+#endif
 						}
 					}
 					auto_exp = utility [0];
@@ -326,13 +398,24 @@ void ModeChoice::Choice_Process (int iteration)
 						nest_ptr = &nested_modes [n];
 
 						if (nest < 0) {
+#ifdef DUMP
+							Write (1, "\tn=") << n << " impedance=" << sum << " access=" << access;
+#endif
 							sum = access / sum;
 						} else {
+#ifdef DUMP
+							Write (1, "\tn=") << n << " impedance=" << sum << " nest utility=" << utility [nest];
+#endif
 							sum = utility [nest] / sum;
 						}
+#ifdef DUMP
+						Write (0, " sum=") << sum;
+#endif
 						for (mode_itr = nest_ptr->begin (); mode_itr != nest_ptr->end (); mode_itr++) {
 							value = utility [*mode_itr] *= sum;
-
+#ifdef DUMP
+							Write (1, "\t\tmode=") << mode_names [*mode_itr] << " value=" << value;
+#endif
 							if (save_flag) {
 								table = output_table [*mode_itr] [i];
 

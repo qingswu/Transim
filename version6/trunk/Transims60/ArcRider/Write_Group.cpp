@@ -26,8 +26,7 @@ void ArcRider::Write_Group (void)
 	alight_field = arcview_group.Field_Number ("ALIGHT");
 	total_field = arcview_group.Field_Number ("TOTAL");
 
-	arcview_group.clear ();
-	arcview_group.push_back (point);
+	arcview_group.Num_Points (1);
 
 	Show_Message (String ("Writing %s -- Record") % arcview_group.File_Type ());
 	Set_Progress ();
@@ -78,7 +77,8 @@ void ArcRider::Write_Group (void)
 		arcview_group.Put_Field (alight_field, alight);
 		arcview_group.Put_Field (total_field, (board + alight));
 
-		arcview_group [0] = point;
+		arcview_group.clear ();
+		arcview_group.push_back (point);
 
 		if (!arcview_group.Write_Record ()) {
 			Error ("Writing ArcView Stop Group File");

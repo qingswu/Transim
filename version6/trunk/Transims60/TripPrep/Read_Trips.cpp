@@ -10,8 +10,8 @@
 
 void TripPrep::Trip_Processing::Read_Trips (int part)
 {
-	int merge_part, partition, last_hhold, person, vehicle, parking;
-	double share, total, prob;
+	int merge_part, partition, last_hhold, person, vehicle, parking, period, org, des, zone;
+	double share, total, prob, factor, row_fac;
 	string process_type;
 	bool first_flag;
 	Dtime shift, duration;
@@ -21,6 +21,9 @@ void TripPrep::Trip_Processing::Read_Trips (int part)
 	Select_Map_Itr sel_itr;
 
 	Trip_Data *trip_ptr, *merge_ptr;
+	Zone_Data *zone_ptr;
+	Location_Data *loc_ptr;
+	Int_Map *des_map;
 
 	Trip_Index trip_index, last_trip, trip_rec, last_sort;
 	Time_Index time_index, last_time, time_rec;
@@ -68,8 +71,12 @@ void TripPrep::Trip_Processing::Read_Trips (int part)
 		process_type = "Partitioning";
 	} else if (exe->sort_tours) {
 		process_type = "Tour Sorting";
-	} else {
+	} else if (exe->factor_flag) {
+		process_type = "Factoring";
+	} else if (exe->new_trip_flag) {
 		process_type = "Copying";
+	} else {
+		process_type = "Reading";
 	}
 	if (thread_flag) {
 		MAIN_LOCK
@@ -130,7 +137,9 @@ void TripPrep::Trip_Processing::Read_Trips (int part)
 				partition = sel_itr->second.Partition ();
 				trip_ptr->Partition (partition);
 			}
-		} else if (exe->update_flag) {
+
+		} else if (exe->update_flag) {		//---- update partitions ----
+
 			if (trip_ptr->Household () != last_hhold) {
 				last_hhold = trip_ptr->Household ();
 				person = vehicle = 0;
@@ -193,7 +202,7 @@ void TripPrep::Trip_Processing::Read_Trips (int part)
 
 		//---- shift start times ----
 
-		if (exe->shift_flag) {
+		if (exe->shift_start_flag) {
 			if (trip_ptr->Start () >= exe->low_from && trip_ptr->Start () <= exe->high_from) {
 				prob = random_part.Probability ();
 
@@ -205,6 +214,19 @@ void TripPrep::Trip_Processing::Read_Trips (int part)
 					trip_ptr->End (trip_ptr->Start () + duration);
 				}
 
+			}
+
+		} else if (exe->shift_end_flag) {		//---- shift the end time ----
+
+			if (trip_ptr->End () >= exe->low_from && trip_ptr->End () <= exe->high_from) {
+				prob = random_part.Probability ();
+
+				if (exe->shift_rate > prob) {
+					duration = trip_ptr->End () - trip_ptr->Start ();
+					shift = (int) (exe->shift_factor * (trip_ptr->End () - exe->low_from));
+
+					trip_ptr->End (exe->low_to + shift);
+				}
 			}
 		}
 
@@ -228,7 +250,9 @@ void TripPrep::Trip_Processing::Read_Trips (int part)
 					Write_Temp ();
 				}
 			}
-		} else if (exe->Trip_Sort () == TIME_SORT) {
+
+		} else if (exe->Trip_Sort () == TIME_SORT) {	//---- time-based sort ----
+
 			trip_ptr->Get_Index (time_index);
 
 			time_stat = time_sort.insert (Time_Map_Data (time_index, (int) trip_ptr_array.size ()));
@@ -247,7 +271,9 @@ void TripPrep::Trip_Processing::Read_Trips (int part)
 					Write_Temp ();
 				}
 			}
-		} else if (exe->merge_flag) {
+
+		} else if (exe->merge_flag) {		//---- merge two trip files ----
+
 			trip_ptr->Get_Index (trip_rec);
 
 			if (trip_rec < last_sort) {
@@ -300,7 +326,9 @@ next:
 					new_trip_file->Write_Trip (*trip_ptr);
 				}
 			}
-		} else if (exe->sort_tours) {
+
+		} else if (exe->sort_tours) {		//----  short tour legs ----
+
 			if (trip_ptr->Household () != last_hhold) {
 				if (last_hhold > 0) {
 					Sort_Tours ();
@@ -309,55 +337,173 @@ next:
 			}
 			trip_ptr_array.push_back (trip_ptr);
 			trip_ptr = new Trip_Data ();
-		} else {
-			if (exe->new_trip_flag) {
-				if (exe->update_flag) {
-					exe->new_file_set [partition]->Write_Trip (*trip_ptr);
-				} else {
-					if (exe->make_veh_flag) {
-						if (trip_ptr->Household () != last_hhold) {
-							last_hhold = trip_ptr->Household ();
-							person = vehicle = parking = 0;
-						}
-						if (person != trip_ptr->Person ()) {
-							person = trip_ptr->Person ();
-							parking = 0;
-						}
-						if (trip_ptr->Mode () == DRIVE_MODE) {
-							if (parking > 0) {
-								map_itr = exe->location_parking.find (trip_ptr->Origin ());
-								if (map_itr != exe->location_parking.end ()) {
-									if (parking != map_itr->second) {
-										parking = 0;
+
+		} else if (exe->factor_flag) {		//---- apply zone factors ----
+
+			period = exe->factor_file->Period (trip_ptr->Start ());
+			if (period < 0) continue;
+
+			//---- origin zone ----
+
+			map_itr = exe->location_map.find (trip_ptr->Origin ());
+
+			if (map_itr == exe->location_map.end ()) continue;
+			loc_ptr = &exe->location_array [map_itr->second];
+
+			zone = loc_ptr->Zone ();
+			if (zone < 0) continue;
+
+			zone_ptr = &exe->zone_array [zone];
+			org = zone_ptr->Zone ();
+
+			//---- destination zone ----
+
+			map_itr = exe->location_map.find (trip_ptr->Destination ());
+
+			if (map_itr == exe->location_map.end ()) continue;
+			loc_ptr = &exe->location_array [map_itr->second];
+
+			des = loc_ptr->Zone ();
+			if (des < 0) continue;
+
+			zone_ptr = &exe->zone_array [des];
+			des = zone_ptr->Zone ();
+
+			//---- process the cell factor ----
+
+			if (exe->factor_file->Get_Cell (period, org, des, 0, factor)) {
+				if (factor < 1.0) {
+					prob = random_fac.Probability ();
+
+					if ((1.0 - factor) > prob) {
+						if (!exe->move_flag) continue;		//---- delete the trip ----
+
+						//---- move to a new destination ----
+
+						row_fac = exe->row_factor [period] [zone];
+						if (row_fac <= 0.0) continue;
+
+						prob = random_move.Probability () * row_fac;
+
+						row_fac = 0.0;
+						des_map = exe->factor_file->Des_Map ();
+
+						for (map_itr = des_map->begin (); map_itr != des_map->end (); map_itr++) {
+							des = map_itr->first;
+
+							if (exe->factor_file->Get_Cell (period, org, des, 0, factor)) {
+								if (factor > 1.0) {
+									row_fac += (factor - 1.0);
+
+									if (row_fac >= prob) {
+										map_itr = exe->zone_map.find (des);
+										if (map_itr == exe->zone_map.end ()) break;
+
+										zone = map_itr->second;
+
+										des = exe->zone_location [zone];
+										if (des < 0) break;
+
+										for (org=0; des >= 0; des = exe->next_location [des]) {
+											org++;
+										}
+										prob = random_part.Probability () * org;
+										org = 0;
+
+										for (des = exe->zone_location [zone]; des >= 0; des = exe->next_location [des]) {
+											if (++org >= prob) break;
+										}
+
+										//---- select a location within the new destination ----
+
+										if (des >= 0) {
+											trip_ptr->Destination (des);
+										}
+										break;
 									}
-								} else {
+								}
+							}
+						}
+					}
+				} else if (factor > 1.0 && !exe->move_flag) {
+					prob = random_fac.Probability ();
+
+					if ((factor - 1.0) > prob) {
+
+						//---- replicate the trip ----
+
+						new_trip_file->Write_Trip (*trip_ptr);
+
+						trip_ptr->Household (exe->new_hhold++);
+					}
+				}
+			}
+			new_trip_file->Write_Trip (*trip_ptr);
+
+		} else if (exe->new_trip_flag) {		//---- create a new trip file ----
+
+			if (exe->update_flag) {
+				exe->new_file_set [partition]->Write_Trip (*trip_ptr);
+			} else {
+				if (exe->make_veh_flag) {
+					if (trip_ptr->Household () != last_hhold) {
+						last_hhold = trip_ptr->Household ();
+						person = vehicle = parking = 0;
+					}
+					if (person != trip_ptr->Person ()) {
+						person = trip_ptr->Person ();
+						parking = 0;
+					}
+					if (trip_ptr->Mode () == DRIVE_MODE) {
+						if (parking > 0) {
+							map_itr = exe->location_parking.find (trip_ptr->Origin ());
+							if (map_itr != exe->location_parking.end ()) {
+								if (parking != map_itr->second) {
 									parking = 0;
 								}
-							}
-							if (parking == 0) {
-								vehicle++;
-								map_itr = exe->location_parking.find (trip_ptr->Origin ());
-
-								if (map_itr != exe->location_parking.end ()) {
-									parking = map_itr->second;
-								} else {
-									parking = trip_ptr->Origin ();
-								}
-							}
-							trip_ptr->Vehicle (vehicle);
-
-							map_itr = exe->location_parking.find (trip_ptr->Destination ());
-							if (map_itr != exe->location_parking.end ()) {
-								parking = map_itr->second;
 							} else {
 								parking = 0;
 							}
-						} else {
-							trip_ptr->Vehicle (0);
 						}
+						if (parking == 0) {
+							vehicle++;
+							map_itr = exe->location_parking.find (trip_ptr->Origin ());
+
+							if (map_itr != exe->location_parking.end ()) {
+								parking = map_itr->second;
+							} else {
+								parking = trip_ptr->Origin ();
+							}
+						}
+						trip_ptr->Vehicle (vehicle);
+
+						map_itr = exe->location_parking.find (trip_ptr->Destination ());
+						if (map_itr != exe->location_parking.end ()) {
+							parking = map_itr->second;
+						} else {
+							parking = 0;
+						}
+					} else {
+						trip_ptr->Vehicle (0);
 					}
-					new_trip_file->Write_Trip (*trip_ptr);
 				}
+				new_trip_file->Write_Trip (*trip_ptr);
+			}
+
+		} else if (exe->new_select_flag) {		//---- create a new seletion file ----
+
+			Trip_Index trip_index;
+			Select_Data select_data;
+
+			trip_ptr->Get_Index (trip_index);
+
+			select_data.Type (trip_ptr->Type ());
+			select_data.Partition (part);
+
+			if (thread_flag) {
+				select_map.insert (Select_Map_Data (trip_index, select_data));
+			} else {
+				exe->select_map.insert (Select_Map_Data (trip_index, select_data));	
 			}
 		}
 	}
@@ -400,6 +546,9 @@ next:
 	} else if (exe->sort_tours && last_hhold > 0) {
 		Sort_Tours ();
 	}
+
+	//---- close the files ----
+
 	trip_file->Close ();
 	if (exe->new_trip_flag && !exe->update_flag && !exe->output_flag) {
 		new_trip_file->Close ();

@@ -539,18 +539,14 @@ void ArcNet::Program_Control (void)
 			}
 		}
 		if (schedule_flag) {
-			key = Get_Control_String (TRANSIT_TIME_PERIODS);
 
-			if (!key.empty ()) {
-				if (!sched_breaks.Add_Breaks (key)) {
-					Error ("Adding Transit Time Period Breaks");
-				}
+			if (transit_time_periods.Num_Periods () > 0) {
 				run_field = arcview_route.Num_Fields ();
 
-				for (i=0; i < sched_breaks.Num_Ranges (); i++) {
+				for (i=0; i < transit_time_periods.Num_Ranges (); i++) {
 					Dtime low, high;
 
-					sched_breaks.Period_Range (i, low, high);
+					transit_time_periods.Period_Range (i, low, high);
 
 					key = "RUNS_" + low.Time_Label ();
 
@@ -626,23 +622,15 @@ void ArcNet::Program_Control (void)
 		arcview_service.Set_Units (1, METERS);
 		arcview_service.Set_Units (2, METERS);
 
-		if (sched_breaks.Num_Ranges () == 0) {
-			key = Get_Control_String (TRANSIT_TIME_PERIODS);
-
-			if (!key.empty ()) {
-				if (!sched_breaks.Add_Breaks (key)) {
-					Error ("Adding Transit Time Period Breaks");
-				}
-			} else {
-				sched_breaks.Add_Breaks ("24:00");
-			}
+		if (transit_time_periods.Num_Ranges () == 0) {
+			transit_time_periods.Add_Breaks ("24:00");
 		}
 		service_field = arcview_service.Num_Fields ();
 
-		for (i=0; i < sched_breaks.Num_Ranges (); i++) {
+		for (i=0; i < transit_time_periods.Num_Ranges (); i++) {
 			Dtime low, high;
 
-			sched_breaks.Period_Range (i, low, high);
+			transit_time_periods.Period_Range (i, low, high);
 
 			key = "RUNS_" + low.Time_Label ();
 

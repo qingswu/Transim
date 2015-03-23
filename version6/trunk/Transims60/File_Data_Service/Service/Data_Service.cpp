@@ -32,6 +32,7 @@ Data_Service::Data_Service (void) : File_Service ()
 
 	num_fare_zone = num_lane_flows = 0;
 	trip_sort = UNKNOWN_SORT;
+	trip_sort_flag = time_sort_flag = true;
 	turn_shape_setback = TURN_SHAPE_SETBACK;
 
 	dat = this;
@@ -55,6 +56,8 @@ void Data_Service::Data_Service_Keys (int *keys)
 		{ HIGHEST_ZONE_NUMBER, "HIGHEST_ZONE_NUMBER", LEVEL0, OPT_KEY, INT_KEY, "0", "0..32000", NO_HELP },
 		{ UPDATE_LINK_BEARINGS, "UPDATE_LINK_BEARINGS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ LINK_BEARING_WARNINGS, "LINK_BEARING_WARNINGS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
+		{ ROUTE_MODE_MAP, "ROUTE_MODE_MAP", LEVEL1, OPT_KEY, LIST_KEY, "1=BUS", "#=BUS, #=EXPRESS, #=BRT, #=STREETCAR, #=LRT, #=RAPIDRAIL, #=REGIONRAIL", NO_HELP },
+		{ MODE_VEH_TYPE_MAP, "MODE_VEH_TYPE_MAP", LEVEL1, OPT_KEY, LIST_KEY, "BUS=4", "BUS=4, EXPRESS=5, BRT=6, STREETCAR=7, LRT=8, RAPIDRAIL=9, REGIONRAIL=10", NO_HELP },
 		END_CONTROL
 	};
 
@@ -83,7 +86,11 @@ void Data_Service::Data_Service_Keys (int *keys)
 
 void Data_Service::Program_Control (void)
 {
+	int count, index, mode, num;
 	String key;
+	String_List str_list;
+	Str_Itr str_itr;
+	Strings parts;
 
 	File_Service::Program_Control ();
 	
@@ -166,6 +173,11 @@ void Data_Service::Program_Control (void)
 				Trip_Sort (Trip_Sort_Code (Get_Control_Text (TRIP_SORT_TYPE)));
 			}
 		}
+		if (Trip_Sort () == TRAVELER_SORT) {
+			trip_sort_flag = true;
+		} else if (Trip_Sort () == TIME_SORT) {
+			time_sort_flag = true;
+		}
 	}
 
 	//---- highest zone number ----
@@ -190,6 +202,88 @@ void Data_Service::Program_Control (void)
 	//---- set the turn shape setback based on internal units ----
 
 	turn_shape_setback = Internal_Units ((double) TURN_SHAPE_SETBACK, FEET);
+
+	//---- process the mode map ----
+
+	if (Control_Key_Status (ROUTE_MODE_MAP) && Highest_Control_Group (ROUTE_MODE_MAP, 0) > 0) {
+		if (!Get_Control_List_Groups (ROUTE_MODE_MAP, str_list)) {
+			Error ("Route Mode Map was Not Found");
+		}
+		num = 0;
+
+		for (count=0, str_itr = str_list.begin (); str_itr != str_list.end (); str_itr++, count++) {
+			if (count == 0) continue;
+			key = *str_itr;
+			key.Parse (parts, "=");
+
+			if (parts.size () != 2) {
+				key = *str_itr;
+				index = (count % 3);
+
+				if (index == 1) {
+					mode = key.Integer ();
+				} else if (index == 2) {
+					if (!key.Equals ("=")) {
+						Error ("Route Mode Map Syntax (input_mode_number = TRANSIMS_mode_name)");
+					}
+				} else {
+					num = Transit_Code (key);
+					if (num == ANY_TRANSIT) {
+						Error ("Route Mode Map is Out of Range");
+					}
+					route_mode_map.insert (Int_Map_Data (mode, num));	
+				}
+			} else {
+				mode = parts [0].Integer ();
+				num = Transit_Code (parts [1]);
+				if (num == ANY_TRANSIT) {
+					Error ("Route Mode Map is Out of Range");
+				}
+				route_mode_map.insert (Int_Map_Data (mode, num));
+				count = 0;
+			}
+		}
+	}
+
+	//---- process the mode veh_type map ----
+
+	memset (mode_type_map, '\0', sizeof (mode_type_map));
+
+	if (Control_Key_Status (MODE_VEH_TYPE_MAP) && Highest_Control_Group (MODE_VEH_TYPE_MAP, 0) > 0) {
+		if (Get_Control_List_Groups (MODE_VEH_TYPE_MAP, str_list)) {
+			num = 0;
+
+			for (count=0, str_itr = str_list.begin (); str_itr != str_list.end (); str_itr++, count++) {
+				key = *str_itr;
+				key.Parse (parts, "=");
+
+				if (parts.size () != 2) {
+					key = *str_itr;
+					index = (count % 3);
+
+					if (index == 1) {
+						num = Transit_Code (key);
+						if (num == ANY_TRANSIT) {
+							Error ("Mode Veh Type Map is Out of Range");
+						}
+					} else if (index == 2) {
+						if (!key.Equals ("=")) {
+							Error ("Mode Veh Type Map Syntax (TRANSIMS_mode_name = vehicle_type_number)");
+						}
+					} else {
+						mode_type_map [num] = key.Integer ();
+					}
+				} else {
+					num = Transit_Code (parts [0]);
+					if (num == ANY_TRANSIT) {
+						Error ("Mode Veh_Type Map is Out of Range");
+					}
+					mode_type_map [num] = parts [1].Integer ();
+					count = 0;
+				}
+			}
+		}
+	}
 }
 
 //---------------------------------------------------------

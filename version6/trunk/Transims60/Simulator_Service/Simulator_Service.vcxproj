@@ -405,6 +405,9 @@
     <ClCompile Include="Sim_Update\Traffic_Control.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Converge_Service\Converge_Service.vcxproj">
+      <Project>{fa951fb9-9c33-44a5-b42a-28bd481d293c}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\File_Data_Service\File_Data_Service.vcxproj">
       <Project>{34c8daaa-8bc6-4e4d-a8ac-fb86e62e79e7}</Project>
     </ProjectReference>

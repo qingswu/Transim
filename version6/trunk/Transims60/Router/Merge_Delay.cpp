@@ -12,9 +12,9 @@
 
 double Router::Merge_Delay (double factor, bool zero_flag)
 {
-	int period, record, gap_period, last_period, first_period;
+	int i, num, period, record, gap_period, last_period, first_period;
 	double flow, merge_flow, factor1, gap, vht, diff, merge_vht, diff_vht, sum_vht;
-	double period_diff, period_sum;
+	double period_diff, period_sum, last_gap;
 	bool report_flag;
 
 	Perf_Itr perf_itr;
@@ -100,9 +100,29 @@ double Router::Merge_Delay (double factor, bool zero_flag)
 	}
 
 	//---- update the travel time ----
+	
+	num = max_speed_updates;
 
-	Update_Travel_Times (1, reroute_time);
-	num_time_updates++;
+	if (num > 0) {
+		Show_Message (0, " -- Reskim");
+		Set_Progress ();
+
+		last_gap = 0.0;
+
+		for (i=1; i <= num; i++) {
+			gap = Reskim_Plans ((i != num));
+			if (i < num && last_gap > 0) {
+				if ((fabs (gap - last_gap) / last_gap) < min_speed_diff) num = i + 1;
+			}
+			last_gap = gap;
+		}
+		End_Progress ();
+
+		Write (1, "Skim Convergence Gap  = ") << last_gap;
+	} else {
+		Update_Travel_Times (1, reroute_time);
+		num_time_updates++;
+	}
 	
 	//---- calculate the link gap ----
 	

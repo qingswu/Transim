@@ -61,6 +61,7 @@ void Validate::Sum_Group (int group, Link_Data *link_ptr, int dir)
 		if (use_index > 0) {
 			count += link_count_array.Volume (i, use_index);
 		}
+		count *= factor;
 		volume = link_volume_array.Volume (i, dir);
 		if (use_index > 0) {
 			volume += link_volume_array.Volume (i, use_index);
@@ -93,7 +94,7 @@ void Validate::Sum_Group (int group, Link_Data *link_ptr, int dir)
 		}
 
 		if (method) {
-			double length = UnRound (link_ptr->Length ()) / 1000.0;
+			double length = UnRound (link_ptr->Length ()) / (Metric_Flag () ? 1000.0 : 5280.0);
 
 			volume *= length;
 			count *= length;

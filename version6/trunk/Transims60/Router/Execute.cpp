@@ -14,48 +14,7 @@ void Router::Execute (void)
 
 	//---- read the network data ----
 
-	Router_Service::Execute ();
-
-	//---- build performance arrays ----
-
-	if (Flow_Updates () || Time_Updates ()) {
-
-		Build_Perf_Arrays (old_perf_period_array);
-		if (Turn_Updates ()) {
-			Build_Turn_Arrays (old_turn_period_array);
-		}
-
-		if (!System_File_Flag (PERFORMANCE)) {
-			Build_Perf_Arrays ();
-		} else {
-			if (reroute_flag && Time_Updates ()) {
-				Update_Travel_Times (1, reroute_time);
-				num_time_updates++;
-			}
-			old_perf_period_array.Copy_Flow_Data (perf_period_array, true, reroute_time);
-		}
-		if (!System_File_Flag (TURN_DELAY)) {
-			Build_Turn_Arrays ();
-		} else if (Turn_Updates ()) {
-			old_turn_period_array.Copy_Turn_Data (turn_period_array, true, reroute_time);
-		}
-	}
-
-	//---- create the file partitions ----
-
-	Set_Partitions ();
-
-	//---- allocate memory ----
-
-	if (Memory_Flag ()) {
-		Input_Trips ();
-		Initialize_Trip_Gap ();
-	} else if (save_trip_gap && plan_memory_flag) {
-		Initialize_Trip_Gap ();
-	}
-	Print (1);
-
-	first_iteration = !(System_File_Flag (PLAN) && System_File_Flag (PERFORMANCE));
+	Converge_Service::Execute ();
 
 	//---- processing method ----
 
@@ -93,7 +52,7 @@ void Router::Execute (void)
 				file->Create ();
 			}
 		}
-		Write_Performance (full_flag);
+		Write_Performance ();
 	}
 
 	//---- save the turn time data ----
@@ -107,7 +66,7 @@ void Router::Execute (void)
 				file->Create ();
 			}
 		}
-		Write_Turn_Delays (full_flag);
+		Write_Turn_Delays ();
 	}
 
 	//---- save the transit ridership ----
@@ -116,6 +75,18 @@ void Router::Execute (void)
 		part_processor.Save_Riders ();
 		if (save_iter_flag) System_Ridership_File (true)->Create ();
 		Write_Ridership ();
+	}
+
+	//---- write the capcity constraint file ----
+
+	if (cap_const_flag) {
+		Write_Constraint ();
+	}
+
+	//---- write the fuel constraint file ----
+
+	if (fuel_const_flag) {
+		Write_Fuel_Demand ();
 	}
 
 	//---- gather summary statistics ----
@@ -209,28 +180,5 @@ void Router::Execute (void)
 
 	Report_Problems (total_records);
 	Exit_Stat (DONE);
-}
-
-//---------------------------------------------------------
-//	Print_Reports
-//---------------------------------------------------------
-
-void Router::Print_Reports (void)
-{
-	Router_Service::Print_Reports ();
-}
-
-//---------------------------------------------------------
-//	Page_Header
-//---------------------------------------------------------
-
-void Router::Page_Header (void)
-{
-	switch (Header_Number ()) {
-		case 0:
-		default:
-			Router_Service::Page_Header ();
-			break;
-	}
 }
 

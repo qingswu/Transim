@@ -17,7 +17,7 @@ void LineSum::Link_Rider (Link_Rider_Data &data)
 	bool shape_found, offset_flag;
 	String question;
 
-	int aname_fld, bname_fld, anode_fld, bnode_fld;
+	int line_fld, aname_fld, bname_fld, anode_fld, bnode_fld;
 	int ab_pk_ride_fld, ab_pk_freq_fld, ab_op_ride_fld, ab_op_freq_fld, ab_day_ride_fld;
 	int ba_pk_ride_fld, ba_pk_freq_fld, ba_op_ride_fld, ba_op_freq_fld, ba_day_ride_fld;
 	int pk_ride_fld, pk_freq_fld, pk_dist_fld, pk_time_fld, pk_pmt_fld, pk_pht_fld, pk_vmt_fld, pk_vht_fld;
@@ -31,7 +31,8 @@ void LineSum::Link_Rider (Link_Rider_Data &data)
 	Str_Map_Itr name_itr;
 	String name;
 	Int_Itr int_itr;
-	Int2_Key ab_key, ba_key;
+	AB_Name_Key ab_key, ba_key;
+	Int2_Key ab, ba;
 	Range_Array_Itr range_itr;
 	XYZ_Point point;
 	I2_Points_Map_Itr shape_itr;
@@ -61,6 +62,11 @@ void LineSum::Link_Rider (Link_Rider_Data &data)
 
 	anode_fld = data.file->Add_Field ("ANODE", DB_INTEGER, 10);
 	bnode_fld = data.file->Add_Field ("BNODE", DB_INTEGER, 10);
+	if (data.each_line) {
+		line_fld = data.file->Add_Field ("LINE", DB_STRING, 40);
+	} else {
+		line_fld = -1;
+	}
 	if (!offset_flag) {
 		ab_pk_ride_fld = data.file->Add_Field ("AB_PK_RIDE", DB_INTEGER, 10);
 		ab_pk_freq_fld = data.file->Add_Field ("AB_PK_FREQ", DB_DOUBLE, 6.2, MINUTES);
@@ -145,7 +151,7 @@ void LineSum::Link_Rider (Link_Rider_Data &data)
 
 		name = map_itr->first.name;
 
-		if (!data.all_lines) {
+		if (!data.all_lines && !data.each_line) {
 			for (str_itr = data.lines.begin (); str_itr != data.lines.end (); str_itr++) {
 				if (name.In_Range (*str_itr)) break;
 			}
@@ -158,16 +164,18 @@ void LineSum::Link_Rider (Link_Rider_Data &data)
 		//---- search for the link ----
 
 		dir = 0;
-		ab_key.first = abs (leg_ptr->b);
-		ab_key.second = abs (leg_ptr->a);
-
+		ab_key.a = abs (leg_ptr->b);
+		ab_key.b = abs (leg_ptr->a);
+		if (data.each_line) {
+			ab_key.name = name;
+		}
 		link_itr = link_map.find (ab_key);
 
 		if (link_itr != link_map.end ()) {
 			dir = 2;
 		} else {
-			ab_key.first = abs (leg_ptr->a);
-			ab_key.second = abs (leg_ptr->b);
+			ab_key.a = abs (leg_ptr->a);
+			ab_key.b = abs (leg_ptr->b);
 
 			link_itr = link_map.find (ab_key);
 
@@ -252,7 +260,7 @@ void LineSum::Link_Rider (Link_Rider_Data &data)
 
 		name = map_itr->first.name;
 
-		if (!data.all_lines) {
+		if (!data.all_lines && !data.each_line) {
 			for (str_itr = data.lines.begin (); str_itr != data.lines.end (); str_itr++) {
 				if (name.In_Range (*str_itr)) break;
 			}
@@ -265,16 +273,19 @@ void LineSum::Link_Rider (Link_Rider_Data &data)
 		//---- search for the link ----
 
 		dir = 0;
-		ab_key.first = abs (leg_ptr->b);
-		ab_key.second = abs (leg_ptr->a);
+		ab_key.a = abs (leg_ptr->b);
+		ab_key.b = abs (leg_ptr->a);
+		if (data.each_line) {
+			ab_key.name = name;
+		}
 
 		link_itr = link_map.find (ab_key);
 
 		if (link_itr != link_map.end ()) {
 			dir = 2;
 		} else {
-			ab_key.first = abs (leg_ptr->a);
-			ab_key.second = abs (leg_ptr->b);
+			ab_key.a = abs (leg_ptr->a);
+			ab_key.b = abs (leg_ptr->b);
 
 			link_itr = link_map.find (ab_key);
 
@@ -335,16 +346,20 @@ void LineSum::Link_Rider (Link_Rider_Data &data)
 			link_ptr = &link_itr->second;
 
 			if (dir == 0) {
-				anode = ab_key.first;
-				bnode = ab_key.second;
+				anode = ab_key.a;
+				bnode = ab_key.b;
 			} else {
-				anode = ab_key.second;
-				bnode = ab_key.first;
-				ab_key.first = anode;
-				ab_key.second = bnode;
+				anode = ab_key.b;
+				bnode = ab_key.a;
+				ab_key.a = anode;
+				ab_key.b = bnode;
 			}
 			data.file->Put_Field (anode_fld, anode);
 			data.file->Put_Field (bnode_fld, bnode);
+
+			if (data.each_line) {
+				data.file->Put_Field (line_fld, ab_key.name);
+			}
 
 			if (offset_flag) {
 				if (dir == 0) {
@@ -517,13 +532,16 @@ void LineSum::Link_Rider (Link_Rider_Data &data)
 				//---- look for a link shape ----
 
 				if (shape_flag) {
-					shape_itr = points_map.find (ab_key);
+					ab.first = ab_key.a;
+					ab.second = ab_key.b;
+
+					shape_itr = points_map.find (ab);
 
 					if (shape_itr == points_map.end ()) {
-						ba_key.first = ab_key.second;
-						ba_key.second = ab_key.first;
+						ba.first = ab.second;
+						ba.second = ab.first;
 
-						shape_itr = points_map.find (ba_key);
+						shape_itr = points_map.find (ba);
 
 						if (shape_itr != points_map.end ()) {
 							shape_found = true;
@@ -546,14 +564,14 @@ void LineSum::Link_Rider (Link_Rider_Data &data)
 				//---- use the node coordinates ----
 
 				if (!shape_found) {
-					xy_itr = xy_map.find (ab_key.first);
+					xy_itr = xy_map.find (ab_key.a);
 
 					if (xy_itr != xy_map.end ()) {
 						point.x = xy_itr->second.x;
 						point.y = xy_itr->second.y;
 						data.arc_file->push_back (point);
 					}
-					xy_itr = xy_map.find (ab_key.second);
+					xy_itr = xy_map.find (ab_key.b);
 
 					if (xy_itr != xy_map.end ()) {
 						point.x = xy_itr->second.x;
@@ -562,7 +580,7 @@ void LineSum::Link_Rider (Link_Rider_Data &data)
 					}
 				}
 				if (data.arc_file->size () < 2) {
-					Warning (String ("Coordinates Missing for Link %d-%d") % ab_key.first % ab_key.second);
+					Warning (String ("Coordinates Missing for Link %d-%d") % ab_key.a % ab_key.b);
 				} else {
 					if (offset_flag) {
 						Shift_Shape (*(data.arc_file), data.offset);

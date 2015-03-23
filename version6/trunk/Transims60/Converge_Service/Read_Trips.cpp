@@ -2,16 +2,16 @@
 //	Read_Trips.cpp - Read the Trip File
 //*********************************************************
 
-#include "Router.hpp"
+#include "Converge_Service.hpp"
 
 //---------------------------------------------------------
 //	Read_Trips
 //---------------------------------------------------------
 
-bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
+bool Converge_Service::Read_Trips (int partition)
 {
 	int p, p0, num, num_car, max_hhold, hhold, person, mode;
-	int last_hhold, last_person, partition;
+	int last_hhold, last_person, part;
 
 	bool keep_flag, old_flag, duration_flag, last_skip, gap_flag, first;
 
@@ -38,18 +38,17 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 	old_flag = duration_flag = last_skip = false;
 
 	gap_flag = (Trip_Gap_Map_Parts () && first_iteration);
-	partition = part;
 
 	num = 1;
 	ptr_array = new Plan_Ptr_Array ();
 	new_ptr = new Plan_Data ();
 
 	if (!trip_memory_flag) {
-		file = (trip_set_flag) ? trip_file_set [part] : trip_file;
+		file = (trip_set_flag) ? trip_file_set [partition] : trip_file;
 	}
 	if (trip_set_flag) {
-		p0 = part;
-		num = part + 1;
+		p0 = partition;
+		num = partition + 1;
 	} else {
 		p0 = 0;
 		num = num_file_sets;
@@ -88,7 +87,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 				}
 			} else {
 				plan_ptr = new Plan_Data ();
-				plan_file = Router::plan_file;
+				plan_file = Converge_Service::plan_file;
 
 				for (;;) {
 					if (!plan_file->Read_Plan (*plan_ptr)) {
@@ -170,7 +169,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 
 		if (hhold > max_hhold) {
 			if (last_hhold > 0 && ptr_array->size () > 0) {
-				part_processor.Plan_Build (ptr_array, partition, plan_process_ptr);
+				part_processor.Plan_Build (ptr_array, partition);
 				ptr_array = new Plan_Ptr_Array ();
 			}
 			last_hhold = 0;
@@ -219,7 +218,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 
 				if (plan_ptr->Household () != last_hhold) {
 					if (last_hhold > 0 && ptr_array->size () > 0) {
-						part_processor.Plan_Build (ptr_array, partition, plan_process_ptr);
+						part_processor.Plan_Build (ptr_array, partition);
 						ptr_array = new Plan_Ptr_Array ();
 					}
 					last_hhold = plan_ptr->Household ();
@@ -238,7 +237,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 					gap_data.current = 0;
 					gap_data.previous = (int) plan_ptr->Impedance ();
 
-					trip_gap_map_ptr = trip_gap_map_array [part];
+					trip_gap_map_ptr = trip_gap_map_array [partition];
 
 					map_stat = trip_gap_map_ptr->insert (Trip_Gap_Map_Data (plan_ptr->Get_Trip_Index (), gap_data));
 
@@ -247,17 +246,8 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 					}
 				}	
 
-				//---- save the old plan to the household array ----
+				Set_Method (*plan_ptr);
 
-				if (method == DTA_FLOWS) {
-					plan_ptr->Method (BUILD_PATH);
-				} else if (update_flag) {
-					plan_ptr->Method (UPDATE_PLAN);
-				} else if (Link_Flows ()) {
-					plan_ptr->Method (PATH_FLOWS);
-				} else {
-					plan_ptr->Method (COPY_PLAN);
-				}
 				ptr_array->push_back (plan_ptr);
 
 				//---- read the next plan ----
@@ -279,7 +269,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 						if (!plan_file->Read_Plan (*plan_ptr)) {
 							plan_ptr->Household (0);
 						} else {
-							plan_ptr->Partition (part);
+							plan_ptr->Partition (partition);
 							if (!Selection (plan_ptr)) continue;
 							if (!plan_ptr->Internal_IDs ()) continue;
 						}
@@ -302,7 +292,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 					gap_data.current = 0;
 					gap_data.previous = (int) plan_ptr->Impedance ();
 
-					trip_gap_map_ptr = trip_gap_map_array [part];
+					trip_gap_map_ptr = trip_gap_map_array [partition];
 
 					map_stat = trip_gap_map_ptr->insert (Trip_Gap_Map_Data (plan_ptr->Get_Trip_Index (), gap_data));
 
@@ -341,7 +331,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 						if (!plan_file->Read_Plan (*plan_ptr)) {
 							plan_ptr->Household (0);
 						} else {
-							plan_ptr->Partition (part);
+							plan_ptr->Partition (partition);
 							if (!Selection (plan_ptr)) continue;
 							if (!plan_ptr->Internal_IDs ()) continue;
 						}
@@ -350,7 +340,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 				}
 			}
 			if (plan_set_flag && !plan_memory_flag) {
-				plan_ptr_arrays [part] = plan_ptr;
+				plan_ptr_arrays [partition] = plan_ptr;
 			}
 		}
 
@@ -359,7 +349,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 		}
 		if (hhold != last_hhold) {
 			if (last_hhold > 0 && ptr_array->size () > 0) {
-				part_processor.Plan_Build (ptr_array, partition, plan_process_ptr);
+				part_processor.Plan_Build (ptr_array, partition);
 				ptr_array = new Plan_Ptr_Array ();
 			}
 			last_hhold = hhold;
@@ -371,33 +361,8 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 
 		//---- reroute the existing plan ----
 
-		if (old_flag) {
+		Set_Method (*new_ptr);
 
-			if (new_ptr->Depart () >= reroute_time) {
-				new_ptr->Method (BUILD_PATH);
-				new_ptr->Depart (new_ptr->Start ());
-				new_ptr->Arrive (new_ptr->End ());
-				new_ptr->Activity (new_ptr->Duration ());
-
-			} else if (new_ptr->Arrive () < reroute_time) {
-				//if (Link_Flows ()) {
-				//	new_ptr->Method (PATH_FLOWS);
-				//} else {
-					new_ptr->Method (COPY_PLAN);
-				//}
-			} else {
-				new_ptr->Method (REROUTE_PATH);
-				new_ptr->Arrive (reroute_time);
-			}
-		} else {
-			
-			//---- initialize the plan data ----
-					
-			new_ptr->Method (BUILD_PATH);
-			new_ptr->Depart (new_ptr->Start ());
-			new_ptr->Arrive (new_ptr->End ());
-			new_ptr->Activity (new_ptr->Duration ());
-		}
 		ptr_array->push_back (new_ptr);
 		mode = new_ptr->Mode ();
 
@@ -410,14 +375,14 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 				mode != TRANSIT_MODE && mode != RIDE_MODE && mode != OTHER_MODE) {
 
 				if (!(++num_car % update_rate)) {
-					plan_process_ptr->Save_Flows ();
+					part_processor.Save_Flows ();
 					Update_Travel_Times (MPI_Size (), reroute_time);
 					num_time_updates++;
 				}
 			}
 		}
 	}
-	if (!thread_flag) End_Progress ();
+	if (!thread_flag) End_Progress (max_speed_updates == 0);
 	if (!trip_memory_flag) file->Close ();
 	delete new_ptr;
 
@@ -447,7 +412,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 
 				if (plan_ptr->Household () != last_hhold) {
 					if (last_hhold > 0 && ptr_array->size () > 0) {
-						part_processor.Plan_Build (ptr_array, partition, plan_process_ptr);
+						part_processor.Plan_Build (ptr_array, partition);
 						ptr_array = new Plan_Ptr_Array ();
 					}
 					last_hhold = plan_ptr->Household ();
@@ -475,30 +440,8 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 					}
 				}
 
-				//---- save the old plan to the household array ----
+				Set_Method (*plan_ptr);
 
-				if (method == DTA_FLOWS) {
-					plan_ptr->Method (BUILD_PATH);
-				} else if (reroute_flag) {
-					if (plan_ptr->Depart () < reroute_time && plan_ptr->Arrive () > reroute_time) {
-						plan_ptr->Method (REROUTE_PATH);
-						plan_ptr->Arrive (reroute_time);
-					} else if (plan_ptr->Depart () >= reroute_time) {
-						plan_ptr->Method (BUILD_PATH);
-					} else if (plan_ptr->Arrive () < reroute_time) {
-						//if (Link_Flows ()) {
-						//	plan_ptr->Method (PATH_FLOWS);
-						//} else {
-							plan_ptr->Method (COPY_PLAN);
-						//}
-					}
-				} else if (update_flag) {
-					plan_ptr->Method (UPDATE_PLAN);
-				} else if (Link_Flows ()) {
-					plan_ptr->Method (PATH_FLOWS);
-				} else {
-					plan_ptr->Method (COPY_PLAN);
-				}
 				ptr_array->push_back (plan_ptr);
 
 				//---- read the next plan ----
@@ -528,7 +471,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 				}
 			}
 			if (last_hhold > 0 && ptr_array->size () > 0) {
-				part_processor.Plan_Build (ptr_array, partition, plan_process_ptr);
+				part_processor.Plan_Build (ptr_array, partition);
 				ptr_array = new Plan_Ptr_Array ();
 			}
 			if (plan_set_flag && !plan_memory_flag) {
@@ -540,7 +483,7 @@ bool Router::Read_Trips (int part, Plan_Processor *plan_process_ptr)
 		}
 	}
 	if (last_hhold > 0 && ptr_array->size () > 0) {
-		part_processor.Plan_Build (ptr_array, partition, plan_process_ptr);
+		part_processor.Plan_Build (ptr_array, partition);
 	} else {
 		delete ptr_array;
 	}

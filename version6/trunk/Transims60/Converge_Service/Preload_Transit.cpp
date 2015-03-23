@@ -2,13 +2,13 @@
 //	Preload_Transit.cpp - load transit vehicles to links
 //*********************************************************
 
-#include "Router.hpp"
+#include "Converge_Service.hpp"
 
 //---------------------------------------------------------
 //	Preload_Transit
 //---------------------------------------------------------
 
-void Router::Preload_Transit (void)
+void Converge_Service::Preload_Transit (void)
 {
 	int index;
 	Dtime time, dwell, ttime;

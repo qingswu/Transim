@@ -15,6 +15,7 @@ double Router::Minimize_VHT (double &factor, bool zero_flag)
 	int period, type, lanes, lanes0, lanes1, cap, tod_cap, len, index, rec, use_index, gap_period, last_period, first_period;
 	Dtime time0, tod1, tod, increment;
 	double flow_fac, factor1, vht, vht1, vht2, fac1, fac2, gap, sum_vht, diff_vht, period_diff, period_sum, diff, exit_diff;
+	double volume, enter;
 	bool report_flag, first_flag, last_flag, gap_flag;
 
 	Perf_Period *period_ptr;
@@ -160,17 +161,20 @@ double Router::Minimize_VHT (double &factor, bool zero_flag)
 				//---- general purpose lanes ----
 
 				if (lanes0 > 0) {
-					if (perf_rec.Volume () > 0) {
+					volume = perf_rec.Volume () * flow_fac;
+					enter = perf_rec.Enter () * flow_fac;
+
+					if (volume <= 0 && enter <= 0) {
+						perf_rec.Update_Time (time0);
+					} else {
 						if (lanes0 != lanes) {
 							tod_cap = (cap * lanes0 + lanes0 / 2) / lanes;
 						} else {
 							tod_cap = cap;
 						}
-						perf_rec.Update_Time (equation.Apply_Equation (type, time0, (perf_rec.Volume () * flow_fac), tod_cap, len));
+						perf_rec.Update_Time (equation.Apply_Equation (type, time0, volume, enter, tod_cap, len));
 
 						vht += perf_rec.Veh_Time ();
-					} else {
-						perf_rec.Update_Time (time0);
 					}
 					if (last_flag) {
 						if (gap_flag) {
@@ -208,17 +212,20 @@ double Router::Minimize_VHT (double &factor, bool zero_flag)
 					perf_rec.Weight_Flows (old_ptr, factor1, new_ptr, factor);
 					perf_rec.Time (old_ptr->Time ());
 
-					if (perf_rec.Volume () > 0.0) {
+					volume = perf_rec.Volume () * flow_fac;
+					enter = perf_rec.Enter () * flow_fac;
+
+					if (volume <= 0 && enter <= 0) {
+						perf_rec.Update_Time (time0);
+					} else {
 						if (lanes1 != lanes) {
 							tod_cap = (cap * lanes1 + lanes1 / 2) / lanes;
 						} else {
 							tod_cap = cap;
 						}
-						perf_rec.Update_Time (equation.Apply_Equation (type, time0, (perf_rec.Volume () * flow_fac), tod_cap, len));
+						perf_rec.Update_Time (equation.Apply_Equation (type, time0, volume, enter, tod_cap, len));
 
 						vht += perf_rec.Veh_Time ();
-					} else {
-						perf_rec.Update_Time (time0);
 					}
 					if (last_flag) {
 						if (gap_flag) {

@@ -73,6 +73,7 @@ public:
 	bool  Read (void *record, int size);
 	bool  Read (void);
 	bool  Read (bool nested)                 { Nested (nested); return (Read ()); }
+	bool  Read (void *record, size_t size)   { return (Read (record, (int) size)); }
 	bool  Read (void *record, int size, size_t offset);
 
 	virtual bool  Write_Record (int number = 0);
@@ -81,6 +82,7 @@ public:
 	bool  Write (void);
 	bool  Write (bool nested);
 	bool  Write (char *record)               { return (Write (record, (int) strlen (record))); }
+	bool  Write (void *record, size_t size)  { return (Write (record, (int) size)); };
 	bool  Write (void *record, int size, size_t offset);
 
 	virtual bool  Close (void);

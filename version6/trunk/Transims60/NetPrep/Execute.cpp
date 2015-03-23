@@ -64,6 +64,12 @@ void NetPrep::Execute (void)
 		Split_Loops ();
 	}
 
+	//---- split ab links ----
+
+	if (split_ab_flag && ab_map2.size () > 0) {
+		Split_AB_Links ();
+	}
+
 	//---- build node list ----
 
 	if (loop_flag || collapse_flag || drop_flag || short_flag || spacing_flag || segment_flag || 
@@ -143,6 +149,8 @@ void NetPrep::Execute (void)
 
 	if (input_route_flag) {
 		Input_Routes ();
+	} else if (expand_flag) {
+		Expand_Routes ();
 	}
 
 	//---- write the network files ----

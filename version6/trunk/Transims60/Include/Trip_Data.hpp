@@ -67,6 +67,11 @@ public:
 	bool Internal_IDs (void);
 	bool External_IDs (void);
 
+	bool Transit_Mode_Flag (void) {
+		return (mode == TRANSIT_MODE || mode == PNR_IN_MODE || mode == PNR_OUT_MODE ||
+				mode == KNR_IN_MODE || mode == KNR_OUT_MODE);
+	}
+
 	void  Clear (void)
 	{
 		hhold = origin = destination = index = 0; person = 0;

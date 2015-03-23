@@ -323,6 +323,8 @@
     <ClCompile Include="Write_Group_Rider.cpp" />
     <ClCompile Include="Write_Line_Rider.cpp" />
     <ClCompile Include="Write_Stop_Details.cpp" />
+    <ClCompile Include="Write_Stop_Group.cpp" />
+    <ClCompile Include="Write_Stop_Lines.cpp" />
     <ClCompile Include="Write_Stop_Profile.cpp" />
     <ClCompile Include="Write_Stop_Route.cpp" />
   </ItemGroup>

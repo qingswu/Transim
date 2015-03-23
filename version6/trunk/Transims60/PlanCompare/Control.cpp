@@ -98,6 +98,28 @@ void PlanCompare::Program_Control (void)
 
 	merge_flag = Get_Control_Flag (MERGE_PLAN_FILES);
 
+	//---- time distribution parameters ----
+
+	Dtime time_inc;
+	int min_time, time_count;
+
+	min_time = Get_Control_Integer (TIME_DISTRIBUTION_MINIMUM);
+	time_count = Get_Control_Integer (TIME_DISTRIBUTION_COUNT);
+	time_inc = Get_Control_Time (TIME_DISTRIBUTION_INCREMENT);
+
+	time_diff.Set_Resolution (min_time, time_count, time_inc.Minutes ());
+
+	//---- cost distribution parameters ----
+
+	int min_cost, cost_count;
+	double cost_inc;
+
+	min_cost = Get_Control_Integer (COST_DISTRIBUTION_MINIMUM);
+	cost_count = Get_Control_Integer (COST_DISTRIBUTION_COUNT);
+	cost_inc = Get_Control_Double (COST_DISTRIBUTION_INCREMENT);
+
+	cost_diff.Set_Resolution (min_cost, cost_count, cost_inc);
+
 	//---- new time distribution file ----
 
 	time_diff.Open_Distribution (Get_Control_String (NEW_TIME_DISTRIBUTION_FILE));

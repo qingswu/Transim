@@ -219,6 +219,7 @@ void File_Service::File_Service_Keys (int *keys)
 		{ NOTES_AND_NAME_FIELDS, "NOTES_AND_NAME_FIELDS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ SAVE_LANE_USE_FLOWS, "SAVE_LANE_USE_FLOWS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 
+		{ TRANSIT_TIME_PERIODS, "TRANSIT_TIME_PERIODS", LEVEL0, OPT_KEY, TEXT_KEY, "NONE", TIME_BREAK_RANGE, NO_HELP },
 		{ ROUTE_NODE_OFFSET_FLAG, "ROUTE_NODE_OFFSET_FLAG", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ ROUTE_NODE_RUN_TIME_FLAG, "ROUTE_NODE_RUN_TIME_FLAG", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ ROUTE_NODE_PATTERN_FLAG, "ROUTE_NODE_PATTERN_FLAG", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
@@ -330,6 +331,13 @@ void File_Service::Program_Control (void)
 
 	if (Control_Key_Status (SAVE_LANE_USE_FLOWS)) {
 		Lane_Use_Flows (Set_Control_Flag (SAVE_LANE_USE_FLOWS));
+	}
+	if (Control_Key_Status (TRANSIT_TIME_PERIODS)) {
+		key = Get_Control_String (TRANSIT_TIME_PERIODS);
+
+		if (!key.empty ()) {
+			transit_time_periods.Add_Breaks (key);
+		}
 	}
 	if (Control_Key_Status (NOTES_AND_NAME_FIELDS)) {
 		Notes_Name_Flag (Set_Control_Flag (NOTES_AND_NAME_FIELDS));
@@ -487,6 +495,11 @@ void File_Service::Program_Control (void)
 					Route_Nodes_File *route_file = (Route_Nodes_File *) file->file;
 					flag = false;
 
+					if (Control_Key_Status (TRANSIT_TIME_PERIODS)) {
+						Get_Control_Text (TRANSIT_TIME_PERIODS);
+						route_file->Num_Periods (transit_time_periods.Num_Periods ());
+						if (route_file->Num_Periods () > 0) flag = true;
+					}
 					if (Check_Control_Key (ROUTE_NODE_OFFSET_FLAG)) {
 						route_file->Offset_Flag (Get_Control_Flag (ROUTE_NODE_OFFSET_FLAG));
 						if (route_file->Offset_Flag () == true) flag = true;
@@ -607,6 +620,11 @@ void File_Service::Program_Control (void)
 	if (Control_Key_Status (SAVE_LANE_USE_FLOWS)) {
 		Print (1);
 		Get_Control_Flag (SAVE_LANE_USE_FLOWS);
+	}
+
+	if (Control_Key_Status (TRANSIT_TIME_PERIODS) && !System_File_Flag (NEW_ROUTE_NODES)) {
+		Print (1);
+		key = Get_Control_Text (TRANSIT_TIME_PERIODS);
 	}
 
 	//---- skim keys  ----

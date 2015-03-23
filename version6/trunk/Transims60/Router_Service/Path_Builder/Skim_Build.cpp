@@ -70,6 +70,7 @@ bool Path_Builder::Skim_Build (One_To_Many *data)
 	from_ptr->push_back (trip_end);
 
 	loc_ptr = &exe->location_array [trip_end.Index ()];
+
 	path_end.Clear ();
 
 	path_end.Trip_End (0);

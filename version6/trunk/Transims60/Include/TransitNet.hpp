@@ -33,7 +33,7 @@ protected:
 		ROUTE_DATA_FILE = 1, ROUTE_DATA_FORMAT, ROUTE_JOIN_FIELD,
 		PARK_AND_RIDE_FILE, PNR_ACCESS_DISTANCE, STATION_ACCESS_DISTANCE, 
 		STOP_SPACING_BY_AREA_TYPE, STOP_FACILITY_TYPE_RANGE,
-		TRANSIT_TIME_PERIODS, TRANSIT_TRAVEL_TIME_FACTORS, MINIMUM_DWELL_TIME,
+		TRANSIT_TRAVEL_TIME_FACTORS, MINIMUM_DWELL_TIME,
 		INTERSECTION_STOP_TYPE, INTERSECTION_STOP_OFFSET, COORDINATE_SCHEDULES,
 		IGNORE_PATH_ERRORS, NEW_ROUTE_CHANGE_FILE, NEW_ROUTE_CHANGE_FORMAT
 	};
@@ -55,7 +55,6 @@ private:
 	int change_route_fld, change_mode_fld, change_name_fld, change_in_len_fld, change_out_len_fld, change_in_stops_fld, change_out_stops_fld;
 
 	Double_List min_stop_spacing, time_factor;
-	Time_Periods schedule_periods;
 
 	Db_Header route_data_file, parkride_file, change_file;
 	Db_Sort_Array route_data_array;

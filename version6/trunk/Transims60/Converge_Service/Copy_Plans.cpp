@@ -2,13 +2,13 @@
 //	Copy_Plans.cpp - Copy the Plan File
 //*********************************************************
 
-#include "Router.hpp"
+#include "Converge_Service.hpp"
 
 //---------------------------------------------------------
 //	Copy_Plans
 //---------------------------------------------------------
 
-bool Router::Copy_Plans (int part, Plan_Processor *plan_process_ptr)
+bool Converge_Service::Copy_Plans (int partition)
 {
 	int last_hhold, hhold, max_hhold, part_number;
 	string process_type, process_name;
@@ -35,18 +35,20 @@ bool Router::Copy_Plans (int part, Plan_Processor *plan_process_ptr)
 		process_type = "Updating";
 	} else if (reroute_flag) {
 		process_type = "Re-Routing";
-	} else {
+	} else if (new_plan_flag) {
 		process_type = "Copying";
+	} else {
+		process_type = "Processing";
 	}
     if (plan_memory_flag) {
         process_name = "Travel Plans"; 
         part_flag = false;
-        part_number = part;
+        part_number = partition;
 	} else {
 	    if (new_set_flag) {
-		    plan_file = plan_file_set [part];
+		    plan_file = plan_file_set [partition];
 	    } else {
-		    plan_file = Router::plan_file;
+		    plan_file = Converge_Service::plan_file;
 	    }
         process_name = plan_file->File_Type ();
         part_flag = plan_file->Part_Flag ();
@@ -93,7 +95,7 @@ bool Router::Copy_Plans (int part, Plan_Processor *plan_process_ptr)
 		    if (hhold > max_hhold) break;
 		    if (hhold != last_hhold) {
 			    if (last_hhold > 0 && plan_ptr_array->size () > 0) {
-				    plan_process_ptr->Plan_Build (plan_ptr_array);
+				    part_processor.Plan_Build (plan_ptr_array, partition);
 				    plan_ptr_array = new Plan_Ptr_Array ();
 			    }
 			    last_hhold = hhold;
@@ -141,7 +143,7 @@ bool Router::Copy_Plans (int part, Plan_Processor *plan_process_ptr)
 
 		    if (hhold != last_hhold) {
 			    if (last_hhold > 0 && plan_ptr_array->size () > 0) {
-				    plan_process_ptr->Plan_Build (plan_ptr_array);
+				    part_processor.Plan_Build (plan_ptr_array, partition);
 				    plan_ptr_array = new Plan_Ptr_Array ();
 			    }
 			    last_hhold = hhold;
@@ -178,7 +180,7 @@ bool Router::Copy_Plans (int part, Plan_Processor *plan_process_ptr)
 	    plan_file->Close ();
 	}
 	if (last_hhold > 0 && plan_ptr_array->size () > 0) {
-		plan_process_ptr->Plan_Build (plan_ptr_array);
+		part_processor.Plan_Build (plan_ptr_array, partition);
 		plan_ptr_array = new Plan_Ptr_Array ();
 	}
 	if (!thread_flag) {

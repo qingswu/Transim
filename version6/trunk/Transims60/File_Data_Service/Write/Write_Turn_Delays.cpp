@@ -8,14 +8,14 @@
 //	Write_Turn_Delays
 //---------------------------------------------------------
 
-void Data_Service::Write_Turn_Delays (bool fill_flag)
+void Data_Service::Write_Turn_Delays (void)
 {
 	Turn_Delay_File *file = System_Turn_Delay_File (true);
 
-	Write_Turn_Delays (*file, turn_period_array, fill_flag);
+	Write_Turn_Delays (*file, turn_period_array);
 }
 
-void Data_Service::Write_Turn_Delays (Turn_Delay_File &file, Turn_Period_Array &array, bool fill_flag)
+void Data_Service::Write_Turn_Delays (Turn_Delay_File &file, Turn_Period_Array &array)
 {
 	int i, index, count;
 	Dtime low, high, time;
@@ -48,7 +48,7 @@ void Data_Service::Write_Turn_Delays (Turn_Delay_File &file, Turn_Period_Array &
 			Show_Progress ();
 
 			turn_ptr = turn_period_itr->Data_Ptr (index);
-			if (!fill_flag && turn_ptr->Turn () == 0) continue;
+			if (turn_ptr->Turn () == 0) continue;
 
 			turn_rec.Dir_Index (connect_ptr->Dir_Index ());
 			turn_rec.To_Index (connect_ptr->To_Index ());

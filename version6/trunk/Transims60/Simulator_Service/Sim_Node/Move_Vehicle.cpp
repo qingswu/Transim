@@ -483,7 +483,7 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 					goto output;
 				}
 				sim->sim_dir_array.Lock (new_dir_ptr, ID ());
-
+//sim->Warning (String ("Sim_Node_Process::Mode_Vehicle: Lock %d") % new_dir_ptr->Lock ());
 				in_cell = new_dir_ptr->In_Cell ();
 				out_cell = new_dir_ptr->Out_Cell ();
 				max_cell = new_dir_ptr->Max_Cell ();
@@ -557,6 +557,9 @@ bool Sim_Node_Process::Move_Vehicle (Travel_Step &step)
 			}
 			if (!move_flag) {
 				if (new_link) {
+#ifdef CHECK
+					if (ID () > 0 && new_dir_ptr->Lock () != ID ()) sim->Error (String ("Move_Vehicle::Unlock (% vs %d)") % new_dir_ptr->Lock () % ID ());
+#endif
 					sim->sim_dir_array.UnLock (new_dir_ptr, ID ());
 				}
 				break;
@@ -666,11 +669,16 @@ make_move:
 
 			new_index = (int) step.size () - 2;
 			index = sim_travel_ptr->Vehicle ();
-
+#ifdef CHECK
+			if (index < 0) sim->Error (String ("Sim_Node_Process::Move_Vehicle: vehicle index, index=%d") % index);
+#endif
 			for (cell=1; cell < veh_type_ptr->Cells (); cell++, new_index--) {
 				if (new_index >= 0) {
 					to_step.push_back (step [new_index]);
 				} else {
+#ifdef CHECK
+					if ((index - new_index) < 0) sim->Error (String ("Sim_Node_Process::Move_Vehicle: sim_veh_ptr, index=%d, new_index=%d") % index % new_index);
+#endif
 					to_step.push_back (sim->sim_veh_array [index - new_index]);
 				}
 			}

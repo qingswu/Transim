@@ -15,7 +15,7 @@ void Validate::Turn_Stats (void)
 	double total, volume;
 	double left_obs, thru_obs, right_obs, uturn_obs;
 	double left_est, thru_est, right_est, uturn_est;
-	double per_left_est, per_thru_est, per_right_est, per_uturn_est, factor;
+	double per_left_est, per_thru_est, per_right_est, per_uturn_est, fac;
 	double per_left_obs, per_thru_obs, per_right_obs, per_uturn_obs;
 	String label, bearing;
 	bool count_flag;
@@ -85,6 +85,7 @@ void Validate::Turn_Stats (void)
 			if (volume == 0 && total == 0) continue;
 
 			if (total > 0) count_flag = true;
+			total *= factor;
 
 			//---- sum the movement type ----
 
@@ -147,12 +148,12 @@ void Validate::Turn_Stats (void)
 
 		total = left_est + thru_est + right_est + uturn_est;
 		if (total < 1) total = 1;
-		factor = 100.0 / total;
+		fac = 100.0 / total;
 
-		per_left_est = left_est * factor;
-		per_thru_est = thru_est * factor;
-		per_right_est = right_est * factor;
-		per_uturn_est = uturn_est * factor;
+		per_left_est = left_est * fac;
+		per_thru_est = thru_est * fac;
+		per_right_est = right_est * fac;
+		per_uturn_est = uturn_est * fac;
 
 		Print (0, String ("  %6.1lf %6.1lf %6.1lf %6.1lf") % 
 			per_left_est % per_thru_est % per_right_est % per_uturn_est);
@@ -164,12 +165,12 @@ void Validate::Turn_Stats (void)
 
 		total = left_obs + thru_obs + right_obs + uturn_obs;
 		if (total < 1) total = 1;
-		factor = 100.0 / total;
+		fac = 100.0 / total;
 
-		per_left_obs = left_obs * factor;
-		per_thru_obs = thru_obs * factor;
-		per_right_obs = right_obs * factor;
-		per_uturn_obs = uturn_obs * factor;
+		per_left_obs = left_obs * fac;
+		per_thru_obs = thru_obs * fac;
+		per_right_obs = right_obs * fac;
+		per_uturn_obs = uturn_obs * fac;
 
 		Print (0, String ("  %6.1lf %6.1lf %6.1lf %6.1lf") % 
 			per_left_obs % per_thru_obs % per_right_obs % per_uturn_obs);

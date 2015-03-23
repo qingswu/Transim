@@ -46,14 +46,17 @@ void ModeChoice::Compile_Script (void)
 	xwait_field = 5;
 	tpen_field = 6;
 	term_field = 7;
-	cost_field = 8;
-	xfer_field = 9;
-	bias_field = 10;
-	pef_field = 11;
-	cbd_field = 12;
-	const_field = 13;
-	tab_field = 14;
-	no_field = 14 + num_tables;
+	diff_field = 8;
+	dist_field = 9;
+	cost_field = 10;
+	xfer_field = 11;
+	user_field = 12;
+	bias_field = 13;
+	pef_field = 14;
+	cbd_field = 15;
+	const_field = 16;
+	tab_field = 17;
+	no_field = 17 + num_tables;
 
 	for (mode_itr = mode_names.begin (); mode_itr != mode_names.end (); mode_itr++) {
 		file = new Db_Base (MODIFY, BINARY);
@@ -67,8 +70,11 @@ void ModeChoice::Compile_Script (void)
 		file->Add_Field ("XWAIT", DB_DOUBLE, sizeof (double), NO_UNITS, true);
 		file->Add_Field ("TPEN", DB_DOUBLE, sizeof (double), NO_UNITS, true);
 		file->Add_Field ("TERM", DB_DOUBLE, sizeof (double), NO_UNITS, true);
+		file->Add_Field ("DIFF", DB_DOUBLE, sizeof (double), NO_UNITS, true);
+		file->Add_Field ("DIST", DB_DOUBLE, sizeof (double), NO_UNITS, true);
 		file->Add_Field ("COST", DB_DOUBLE, sizeof (double), NO_UNITS, true);
 		file->Add_Field ("XFER", DB_DOUBLE, sizeof (double), NO_UNITS, true);
+		file->Add_Field ("USER", DB_DOUBLE, sizeof (double), NO_UNITS, true);
 		file->Add_Field ("BIAS", DB_DOUBLE, sizeof (double), NO_UNITS, true);
 		file->Add_Field ("PEF", DB_DOUBLE, sizeof (double), NO_UNITS, true);
 		file->Add_Field ("CBD", DB_DOUBLE, sizeof (double), NO_UNITS, true);

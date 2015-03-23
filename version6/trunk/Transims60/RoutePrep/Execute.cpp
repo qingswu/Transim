@@ -96,6 +96,12 @@ void RoutePrep::Execute (void)
 		Input_Routes ();
 	}
 
+	//---- read transcad route system -----
+
+	if (tcad_route_flag) {
+		Read_Tcad_Routes ();
+	}
+
 	//---- write the network files ----
 
 	if (System_File_Flag (NEW_NODE)) {
@@ -108,12 +114,12 @@ void RoutePrep::Execute (void)
 		Write_Links ();
 	}
 	if (new_route_flag) {
-		if (mode_type_map.size () > 0) {
-			Route_Nodes_Itr route_itr; 
-			Route_Node_Itr node_itr;
+		Route_Nodes_Itr route_itr; 
+		Route_Node_Itr node_itr;
 
-			for (route_itr = route_nodes_array.begin (); route_itr != route_nodes_array.end (); route_itr++) {
-				route_itr->Veh_Type (mode_type_map.Best (route_itr->Mode ()));
+		for (route_itr = route_nodes_array.begin (); route_itr != route_nodes_array.end (); route_itr++) {
+			if (route_itr->Veh_Type () == 0) {
+				route_itr->Veh_Type (mode_type_map [route_itr->Mode ()]); 
 			}
 		}
 		Write_Route_Nodes ();

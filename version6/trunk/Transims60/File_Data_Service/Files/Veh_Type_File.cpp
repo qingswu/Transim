@@ -47,7 +47,7 @@ void Veh_Type_File::Setup (void)
 
 	type = length = max_speed = max_accel = max_decel = op_cost = use = capacity = max_load = -1;
 	occupancy = load = unload = method = min_dwell = max_dwell = subtype = -1;
-	memset (grade, -1, sizeof (grade));
+	grade = fuel = fuel_cap = -1;
 }
 
 //---------------------------------------------------------
@@ -80,16 +80,10 @@ bool Veh_Type_File::Create_Fields (void)
 	}
 	Add_Field ("MIN_DWELL", DB_TIME, 6.1, SECONDS);
 	Add_Field ("MAX_DWELL", DB_TIME, 6.1, SECONDS);
-	Add_Field ("GRADE_1", DB_DOUBLE, 6.2);
-	Add_Field ("GRADE_2", DB_DOUBLE, 6.2);
-	Add_Field ("GRADE_3", DB_DOUBLE, 6.2);
-	Add_Field ("GRADE_4", DB_DOUBLE, 6.2);
-	Add_Field ("GRADE_5", DB_DOUBLE, 6.2);
-	Add_Field ("GRADE_6", DB_DOUBLE, 6.2);
-	Add_Field ("GRADE_7", DB_DOUBLE, 6.2);
-	Add_Field ("GRADE_8", DB_DOUBLE, 6.2);
-	Add_Field ("GRADE_9", DB_DOUBLE, 6.2);
-	Add_Field ("GRADE_10", DB_DOUBLE, 6.2);
+	Add_Field ("GRADE_FUNC", DB_INTEGER, 3);
+	Add_Field ("FUEL_FUNC", DB_INTEGER, 3);
+	Add_Field ("FUEL_CAP", DB_INTEGER, 5.1, GALLONS);
+
 	if (exe->Notes_Name_Flag ()) {
 		Add_Field ("NOTES", DB_STRING, STRING_FIELD_SIZE);
 	}
@@ -126,16 +120,9 @@ bool Veh_Type_File::Set_Field_Numbers (void)
 	min_dwell = Optional_Field ("MIN_DWELL", "MINDWELL", "DWELL");
 	max_dwell = Optional_Field ("MAX_DWELL", "MAXDWELL", "DWELL");
 
-	grade [0] = Optional_Field ("GRADE_1", "GRADE1", "GRADE_FAC_1", "GRADEFAC1");
-	grade [1] = Optional_Field ("GRADE_2", "GRADE2", "GRADE_FAC_2", "GRADEFAC2");
-	grade [2] = Optional_Field ("GRADE_3", "GRADE3", "GRADE_FAC_3", "GRADEFAC3");
-	grade [3] = Optional_Field ("GRADE_4", "GRADE4", "GRADE_FAC_4", "GRADEFAC4");
-	grade [4] = Optional_Field ("GRADE_5", "GRADE5", "GRADE_FAC_5", "GRADEFAC5");
-	grade [5] = Optional_Field ("GRADE_6", "GRADE6", "GRADE_FAC_6", "GRADEFAC6");
-	grade [6] = Optional_Field ("GRADE_7", "GRADE7", "GRADE_FAC_7", "GRADEFAC7");
-	grade [7] = Optional_Field ("GRADE_8", "GRADE8", "GRADE_FAC_8", "GRADEFAC8");
-	grade [8] = Optional_Field ("GRADE_9", "GRADE9", "GRADE_FAC_9", "GRADEFAC9");
-	grade [9] = Optional_Field ("GRADE_10", "GRADE10", "GRADE_FAC_10", "GRADEFAC10");
+	grade = Optional_Field ("GRADE", "GRADE_FUNC", "GRADE_FUNCTION", "GRADE_NUM");
+	fuel = Optional_Field ("FUEL", "FUEL_FUNC", "FUEL_FUNCTION", "FUEL_NUM");
+	fuel_cap = Optional_Field ("FUEL_CAP", "MAX_FUEL", "TANK_SIZE", "FUELCAP");
 
 	//---- Version 4.0 compatibility ----
 
@@ -160,6 +147,7 @@ bool Veh_Type_File::Set_Field_Numbers (void)
 		Set_Units (method, LOADING_CODE);
 		Set_Units (min_dwell, SECONDS);
 		Set_Units (max_dwell, SECONDS);
+		Set_Units (fuel_cap, LITERS);
 	} else {
 		Set_Units (type, VEH_TYPE);
 		Set_Units (length, FEET);
@@ -176,6 +164,7 @@ bool Veh_Type_File::Set_Field_Numbers (void)
 		Set_Units (method, LOADING_CODE);
 		Set_Units (min_dwell, SECONDS);
 		Set_Units (max_dwell, SECONDS);
+		Set_Units (fuel_cap, GALLONS);
 	}
 
 	return (true);

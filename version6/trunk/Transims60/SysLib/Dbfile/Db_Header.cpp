@@ -91,7 +91,7 @@ bool Db_Header::Open (string filename)
 
 	filename = Filename ();
 
-	if (!filename.empty () && File_Access () != CREATE && File_Format () != UNFORMATED) {
+	if (!filename.empty () && File_Access () != CREATE && (File_Format () != UNFORMATED || Model_Format () == TRANSCAD)) {
 		stat = Read_Def_Header ();
 	} else {
 		stat = false;
@@ -1287,6 +1287,16 @@ bool Db_Header::Read_Def_Header (void)
 
 	def = f_open (name, "rt");
 
+	if (def == 0 && Model_Format () == TRANSCAD) {
+		if (File_Format () == MATRIX) return (true);
+
+		name = Filename ();
+		name.Split_Last (token, ".");
+		if (name.Equals ("MTX")) return (true);
+
+		if (!Read_TCAD_Header ()) goto error;
+		def = f_open (name, "rt");
+	}
 	if (def == 0) return (Default_Definition ());
 
 	//---- get the header line ----
@@ -1529,7 +1539,117 @@ bool Db_Header::Write_Def_Header (string user_lines)
 	return (true);
 
 error:
+exe->Write (1, "write def header");
 	return (Status (DEF_FORMAT));
+}
+
+//-----------------------------------------------------------
+//	Read_TCAD_Header
+//-----------------------------------------------------------
+
+bool Db_Header::Read_TCAD_Header (void) 
+{
+	bool binary;
+	int width, decimal, offset;
+	double size;
+	Field_Type type;
+	char buffer [4094];
+	const char *delim = ",";
+	String name, record, token;
+	Strings parts;
+	FILE *def;
+
+	//---- construct the definition filename ----
+
+	name = Filename ();
+
+	if (name.Ends_With (".bin")) {
+		if (name.size () > 4 && name [name.size () - 4] == '.') {
+			name.erase (name.size () - 3, 3);
+		} else {
+			name += ".";
+		}
+		name += "dcb";
+		binary = true;
+		Dbase_Format (BINARY);
+	} else {
+		if (name.size () > 4 && name [name.size () - 4] == '.') {
+			name.erase (name.size () - 3, 3);
+		} else {
+			name += ".";
+		}
+		name += "dct";
+		binary = false;
+		Dbase_Format (FIXED_COLUMN);
+	}
+
+	//---- open the definition file ----
+
+	def = f_open (name, "rt");
+
+	if (def == 0) return (false);
+
+	//---- get the header line ----
+
+	if (fgets (buffer, sizeof (buffer), def) == 0) return (false);
+	if (fgets (buffer, sizeof (buffer), def) == 0) return (false);
+
+	Header_Lines (1);
+
+	//---- read the fields ----
+
+	while (fgets (buffer, sizeof (buffer), def) != 0) {
+		record = buffer;
+		record.Clean ();
+
+		record.Parse (parts, delim);
+
+		if (parts.size () < 4) continue;
+
+		name = parts [0];
+
+		token = parts [1];
+
+		if (token.Starts_With ("I")) {
+			type = DB_INTEGER;
+		} else if (token.Starts_With ("F") || token.Starts_With ("R")) {
+			type = DB_DOUBLE;
+		} else if (token.Starts_With ("C") || token.Starts_With ("S")) {
+			type = DB_STRING;
+		} else {
+			return (false);
+		}
+
+		token = parts [2];
+
+		offset = token.Integer () - 1;
+
+		token = parts [3];
+
+		width = token.Integer ();
+
+		if (type == DB_DOUBLE && parts.size () > 6) {
+			token = parts [6];
+
+			decimal = token.Integer ();
+
+			size = (double) width + (decimal / 10.0);
+		} else {
+			size = width;
+
+			if (width == 1 && type == DB_STRING) {
+				type = DB_CHAR;
+			}
+		}
+		if (Add_Field (name, type, size, NO_UNITS, binary, NO_NEST, offset) < 0) return (false);
+	}
+	fclose (def);
+
+	Write_Def_Header ("");
+
+	Clear_Fields ();
+
+	return (true);
 }
 
 //-----------------------------------------------------------

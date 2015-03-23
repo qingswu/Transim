@@ -11,8 +11,12 @@ Simulator_Service *sim = 0;
 //---------------------------------------------------------
 
 #ifdef ROUTING
-Simulator_Service::Simulator_Service (void) : Router_Service ()
+Simulator_Service::Simulator_Service (void) : Converge_Service ()
 #else
+
+const char * Simulator_Service::reports [] = {
+	""
+};
 Simulator_Service::Simulator_Service (void) : Data_Service (), Select_Service ()
 #endif
 {
@@ -28,6 +32,7 @@ Simulator_Service::Simulator_Service (void) : Data_Service (), Select_Service ()
 		TRANSIT_STOP, TRANSIT_FARE, TRANSIT_ROUTE, TRANSIT_SCHEDULE, TRANSIT_DRIVER, 
 		HOUSEHOLD, TRIP, PLAN, NEW_PROBLEM, END_FILE
 	};
+	Converge_Service_Keys ();
 #else
 	System_File_Type required_files [] = {
 		NODE, LINK, POCKET, CONNECTION, PARKING, LOCATION, 
@@ -54,7 +59,7 @@ Simulator_Service::Simulator_Service (void) : Data_Service (), Select_Service ()
 	random_time = 0;
 	num_travelers = 1000;
 	avg_cell_per_veh = 1.25;
-	active = false;
+	active = router_flag = read_all_flag = false;
 	step_code = -1;
 
 #ifdef THREADS
@@ -131,12 +136,7 @@ void Simulator_Service::Simulator_Service_Keys (int *keys)
 			}
 		}
 	}
-	int select_service_keys [] = {
-		SELECT_HOUSEHOLDS, SELECT_MODES, SELECT_PURPOSES, SELECT_START_TIMES, SELECT_END_TIMES, 
-		SELECT_TRAVELER_TYPES, SELECT_VEHICLE_TYPES, SELECT_PROBLEM_TYPES, 0
-	};
-	Select_Service_Keys (select_service_keys);
-	
+#ifdef ROUTING
 	int converge_service_keys [] = {
 		MAXIMUM_NUMBER_OF_ITERATIONS, LINK_CONVERGENCE_CRITERIA, TRIP_CONVERGENCE_CRITERIA, 
 		TRANSIT_CAPACITY_CRITERIA, INITIAL_WEIGHTING_FACTOR, ITERATION_WEIGHTING_INCREMENT, 
@@ -145,6 +145,12 @@ void Simulator_Service::Simulator_Service_Keys (int *keys)
 		NEW_TRIP_CONVERGENCE_FILE, 0
 	};
 	Converge_Service_Keys (converge_service_keys);
+#endif
+	int select_service_keys [] = {
+		SELECT_HOUSEHOLDS, SELECT_MODES, SELECT_PURPOSES, SELECT_START_TIMES, SELECT_END_TIMES, 
+		SELECT_TRAVELER_TYPES, SELECT_VEHICLE_TYPES, SELECT_PROBLEM_TYPES, 0
+	};
+	Select_Service_Keys (select_service_keys);
 
 	sim_output_step.Add_Keys ();
 }

@@ -83,7 +83,7 @@ void ArcNet::Draw_Route (void)
 		//---- save the number of runs in each period ----
 
 		if (schedule_flag) {
-			for (i=j=0; i < sched_breaks.Num_Ranges (); i++, j++) {
+			for (i=j=0; i < transit_time_periods.Num_Ranges (); i++, j++) {
 				runs = 0;
 				time = 0;
 
@@ -91,7 +91,7 @@ void ArcNet::Draw_Route (void)
 				run2_itr = stop2_itr->begin ();
 
 				for (; run_itr != stop_itr->end (); run_itr++, run2_itr++) {
-					if (sched_breaks.In_Index (run_itr->Schedule ()) == i) {
+					if (transit_time_periods.In_Index (run_itr->Schedule ()) == i) {
 						runs++;
 						time = time + (run2_itr->Schedule () - run_itr->Schedule ());
 					}

@@ -40,8 +40,9 @@ void Sim_Plan_Process::operator()()
 		if (plan_ptr == 0) break;
 
 		sim_trip_ptr = Plan_Processing (plan_ptr);
-		delete plan_ptr;
-
+		if (!sim->router_flag) {
+			delete plan_ptr;
+		}
 		if (sim_trip_ptr == 0) break;
 		if (!trip_queue->Put_Result (sim_trip_ptr, number)) break;
 	}

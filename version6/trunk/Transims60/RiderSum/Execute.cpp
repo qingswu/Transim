@@ -40,10 +40,22 @@ void RiderSum::Execute (void)
 		Write_Stop_Route ();
 	}
 
+	//---- write the stop group file ----
+
+	if (stop_group_flag) {
+		Write_Stop_Group ();
+	}
+
 	//---- write the stop profile ----
 
 	if (stop_profile_flag) {
 		Write_Stop_Profile ();
+	}
+
+	//---- write the stop lines ----
+
+	if (stop_lines_flag) {
+		Write_Stop_Lines ();
 	}
 
 	//---- write the stop details ----

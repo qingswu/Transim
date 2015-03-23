@@ -29,7 +29,7 @@ void ArcNet::Draw_Stop_Service (void)
 	y_field = arcview_service.Required_Field (Y_FIELD_NAMES);
 	routes_field = arcview_service.Optional_Field ("ROUTES");
 
-	num_service = sched_breaks.Num_Ranges () + 1;
+	num_service = transit_time_periods.Num_Ranges () + 1;
 	num_user = (int) user_fields.size ();
 
 	service_data.assign (num_service, 0);
@@ -58,11 +58,11 @@ void ArcNet::Draw_Stop_Service (void)
 
 			service_ptr->at (0) += 1;
 
-			for (i=0; i < sched_breaks.Num_Ranges (); i++) {
+			for (i=0; i < transit_time_periods.Num_Ranges (); i++) {
 				runs = 0;
 
 				for (run_itr = stop_itr->begin (); run_itr != stop_itr->end (); run_itr++) {
-					if (sched_breaks.In_Index (run_itr->Schedule ()) == i) {
+					if (transit_time_periods.In_Index (run_itr->Schedule ()) == i) {
 						runs++;
 					}
 				}
@@ -89,7 +89,7 @@ void ArcNet::Draw_Stop_Service (void)
 		arcview_service.Put_Field (y_field, stop_pt_itr->second.y);
 		arcview_service.Put_Field (routes_field, service_ptr->at (0));
 
-		for (j=0; j < sched_breaks.Num_Ranges (); j++) {
+		for (j=0; j < transit_time_periods.Num_Ranges (); j++) {
 			arcview_service.Put_Field (service_field + j, service_ptr->at (j+1));
 		}
 		if (num_user > 0) {

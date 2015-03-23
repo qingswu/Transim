@@ -168,7 +168,7 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 {
 	int i, num, nrec, type, lanes, lanes0, lanes1, cap, capacity, tod_cap, len, index, rec, use_index;
 	Dtime time0, time, tim, tim1, tod1, tod, period, prv, prv1, prev, prev1;
-	double volume, volume1, vol_fac, length, speed, avg_tt;
+	double volume, volume1, enter, enter1, vol_fac, length, speed, avg_tt;
 
 	Dir_Itr dir_itr;
 	Link_Data *link_ptr;
@@ -211,7 +211,7 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 			cap = capacity;
 			lanes0 = lanes;
 			lanes1 = 0;
-			volume1 = 0;
+			volume1 = enter1 = 0;
 
 			rec = dir_itr->First_Lane_Use ();
 
@@ -252,12 +252,13 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 
 			perf_ptr = per_itr->Data_Ptr (index);
 
-			volume = perf_ptr->Enter () * vol_fac;
+			enter = perf_ptr->Enter () * vol_fac;
+			volume = perf_ptr->Volume () * vol_fac;
 
 			if (lanes0 < 1) {
 				tim = (int) (len / 0.1 + 0.5);
 				if (tim < time0) tim = time0;
-			} else if (volume == 0.0) {
+			} else if (volume == 0.0 && enter == 0.0) {
 				tim = time;
 			} else {
 				if (lanes0 != lanes) {
@@ -265,7 +266,7 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 				} else {
 					tod_cap = cap;
 				}
-				tim = equation.Apply_Equation (type, time, volume, tod_cap, len);
+				tim = equation.Apply_Equation (type, time, volume, enter, tod_cap, len);
 				if (tim < time0) tim = time0;
 			}
 
@@ -276,17 +277,18 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 			if (use_index >= 0) {
 				perf1_ptr = per_itr->Data_Ptr (use_index);
 
-				volume1 = perf1_ptr->Enter () * vol_fac;
+				enter1 = perf1_ptr->Enter () * vol_fac;
+				volume1 = perf1_ptr->Volume () * vol_fac;
 
 				if (lanes1 == 0) {
 					tim1 = (int) (len / 0.1 + 0.5);
 					if (tim1 < time0) tim1 = time0;
-				} else if (volume1 == 0.0) {
+				} else if (volume1 == 0.0 && enter1 == 0.0) {
 					tim1 = time;
 				} else {
 					tod_cap = (cap * lanes1 + lanes1 / 2) / lanes;
 
-					tim1 = equation.Apply_Equation (type, time, volume1, tod_cap, len);
+					tim1 = equation.Apply_Equation (type, time, volume1, enter1, tod_cap, len);
 					if (tim1 < time0) tim1 = time0;
 				}
 			}
@@ -581,4 +583,3 @@ void Flow_Time_Service::Update_Travel_Times (int mpi_size, Dtime first_time, boo
 		}
 	}
 }
-

@@ -41,7 +41,7 @@ void Validate::Execute (void)
 	if (link_flag) {
 		if (delay_flag) {
 			Performance_File *file = System_Performance_File ();
-			Read_Performance (*file, link_volume_array);
+			Read_Performance (*file, link_volume_array, entry_flag);
 		} else {
 			Read_Link_Data (volume_file, link_volume_array);
 		}

@@ -133,12 +133,7 @@ void TransitNet::Program_Control (void)
 
 	//---- get the time periods ----
 
-	key = Get_Control_Text (TRANSIT_TIME_PERIODS);
-
-	if (!key.empty ()) {
-		schedule_periods.Add_Breaks (key);
-	}
-	num_periods = schedule_periods.Num_Periods ();
+	num_periods = transit_time_periods.Num_Periods ();
 
 	Route_Nodes_File *fh = System_Route_Nodes_File ();
 

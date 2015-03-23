@@ -13,6 +13,7 @@
 #include "Trip_Sum_Data.hpp"
 #include "Db_Header.hpp"
 #include "TypeDefs.hpp"
+#include "Db_Matrix.hpp"
 
 //---------------------------------------------------------
 //	TripSum - execution class definition
@@ -53,7 +54,8 @@ private:
 	bool diurnal_flag, time_file_flag, len_file_flag, link_trip_flag, loc_trip_flag, zone_trip_flag, trip_table_flag;
 	
 	Db_File diurnal_file, trip_time_file, trip_len_file;
-	Db_Header link_trip_file, loc_trip_file, zone_trip_file, trip_table_file;
+	Db_Header link_trip_file, loc_trip_file, zone_trip_file;
+	Db_Matrix *trip_table_file;
 
 	Integers start_time, mid_time, end_time;
 	Ints_Array link_trip_data, loc_trip_data, zone_trip_data;

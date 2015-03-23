@@ -46,6 +46,13 @@ public:
 		Access_Key (void) : stop(0), mode(0), node(0) {};
 	};
 
+	struct AB_Name_Key {
+		int    a;
+		int    b;
+		String name;
+		AB_Name_Key (void) : a(0), b(0) {};
+	};
+	
 protected:
 	enum LineSum_Keys { 
 		PEAK_RIDERSHIP_FILE = 1, PEAK_RIDERSHIP_FORMAT, OFFPEAK_RIDERSHIP_FILE, OFFPEAK_RIDERSHIP_FORMAT, 
@@ -264,6 +271,7 @@ private:
 		double       offset;
 		bool         all_modes;
 		bool         all_lines;
+		bool         each_line;
 		bool         arcview_flag;
 		Data_Range   modes;
 		Strings      lines;
@@ -273,7 +281,7 @@ private:
 
 		Link_Rider_Data (void) : number(0), node_fld(-1), xcoord_fld(-1), ycoord_fld(-1), 
 			peak_hours(0), peak_fac(0), peak_cap(0), offpeak(0), offset(0), all_modes(0), 
-			all_lines(0), arcview_flag(0), file(0), xy_file(0), arc_file(0) {};
+			all_lines(0), each_line(0), arcview_flag(0), file(0), xy_file(0), arc_file(0) {};
 	};
 	typedef vector <Link_Rider_Data>   Link_Rider_Array;
 	typedef Link_Rider_Array::iterator Link_Rider_Itr;
@@ -425,10 +433,10 @@ private:
 			ba_pk_ride(0), ba_op_ride(0), ab_pk_service(0), ab_op_service(0), ba_pk_service(0), ba_op_service(0), 
 			ab_pk_runs(0), ab_op_runs(0), ba_pk_runs(0), ba_op_runs(0), max_load_fac(0) {};
 	};
-	typedef map <Int2_Key, Rider_Data>   Rider_Map;
-	typedef pair <Int2_Key, Rider_Data>  Rider_Map_Data;
-	typedef Rider_Map::iterator          Rider_Map_Itr;
-	typedef pair <Rider_Map_Itr, bool>   Rider_Map_Stat;
+	typedef map <AB_Name_Key, Rider_Data>   Rider_Map;
+	typedef pair <AB_Name_Key, Rider_Data>  Rider_Map_Data;
+	typedef Rider_Map::iterator             Rider_Map_Itr;
+	typedef pair <Rider_Map_Itr, bool>      Rider_Map_Stat;
 
 	//---- stop data sort ----
 
@@ -475,5 +483,6 @@ private:
 SYSLIB_API bool operator < (LineSum::Sort_Key left, LineSum::Sort_Key right);
 SYSLIB_API bool operator < (LineSum::On_Off_Key left, LineSum::On_Off_Key right);
 SYSLIB_API bool operator < (LineSum::Access_Key left, LineSum::Access_Key right);
+SYSLIB_API bool operator < (LineSum::AB_Name_Key left, LineSum::AB_Name_Key right);
 
 #endif

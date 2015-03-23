@@ -19,6 +19,7 @@ void PathSkim::Zone_Locations (void)
 	Int_Itr from_itr, to_itr, int_itr;
 	Int_Map_Itr loc_map_itr;
 	Location_Itr loc_itr;
+	Location_Data *loc_ptr;
 	Zone_Data *zone_ptr;
 
 	//---- build a zone number list ----
@@ -26,6 +27,9 @@ void PathSkim::Zone_Locations (void)
 	num_zone = Max_Zone_Number ();
 	if (num_zone == 0) {
 		Error ("No Zones were found in the Activity Location File");
+	}
+	if (num_zone > 65535) {
+		Warning (String ("Maximum Zone Number %d is Out of Skim Range (1..65535)") % num_zone);
 	}
 	if (zone_loc_flag) {
 		map_itr = --zone_loc_map.end ();
@@ -97,7 +101,7 @@ void PathSkim::Zone_Locations (void)
 		if (Location_List (zone, num_org, &map_itr->second, locations)) {
 			if (zone_skim_flag) {
 				org_zone_loc.insert (Ints_Map_Data (zone, locations));
-				skim_file->Add_Org (zone);
+				index = skim_file->Add_Org (zone);
 			} else if (district_flag) {
 				zone = zone_equiv.Zone_Group (zone);
 				loc_stat = org_zone_loc.insert (Ints_Map_Data (zone, locations));
@@ -112,7 +116,8 @@ void PathSkim::Zone_Locations (void)
 				org_loc.insert (org_loc.end (), locations.begin (), locations.end ());
 				if (skim_flag) {
 					for (int_itr = locations.begin (); int_itr != locations.end (); int_itr++) {
-						skim_file->Add_Org (*int_itr);
+						loc_ptr = &location_array [*int_itr];
+						skim_file->Add_Org (loc_ptr->Location ());
 					}
 				}
 			}
@@ -128,7 +133,7 @@ void PathSkim::Zone_Locations (void)
 		if (Location_List (zone, num_des, &map_itr->second, locations)) {
 			if (zone_skim_flag) {
 				des_zone_loc.insert (Ints_Map_Data (zone, locations));
-				skim_file->Add_Des (zone);
+				index = skim_file->Add_Des (zone);
 			} else if (district_flag) {
 				zone = zone_equiv.Zone_Group (zone);
 				loc_stat = des_zone_loc.insert (Ints_Map_Data (zone, locations));
@@ -143,7 +148,8 @@ void PathSkim::Zone_Locations (void)
 				des_loc.insert (des_loc.end (), locations.begin (), locations.end ());
 				if (skim_flag) {
 					for (int_itr = locations.begin (); int_itr != locations.end (); int_itr++) {
-						skim_file->Add_Des (*int_itr);
+						loc_ptr = &location_array [*int_itr];
+						skim_file->Add_Des (loc_ptr->Location ());
 					}
 				}
 			}

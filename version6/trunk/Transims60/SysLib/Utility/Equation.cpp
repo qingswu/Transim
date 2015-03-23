@@ -127,11 +127,11 @@ bool Equation_Array::Add_Equation (int number, string &parameters)
 //	Apply_Equation
 //---------------------------------------------------------
 
-int Equation_Array::Apply_Equation (int number, int time0, double volume, int capacity, int length)
+int Equation_Array::Apply_Equation (int number, int time0, double volume, double enter, int capacity, int length)
 {
 	if (time0 < 1) time0 = 1;
 
-	if (volume <= 0) {
+	if (volume <= 0 && enter <= 0) {
 		return (time0);
 	} else {
 		double cap, len, ttime;
@@ -143,6 +143,13 @@ int Equation_Array::Apply_Equation (int number, int time0, double volume, int ca
 
 		eq_ptr = &(eq_itr->second);
 
+		if (eq_ptr->type == FLOW_DENSITY) {
+			if (volume <= 0) {
+				return (time0);
+			}
+		} else if (enter <= 0) {
+			return (time0);
+		}
 		if (capacity < 1) capacity = 1;
 		cap = capacity;
 
@@ -150,7 +157,7 @@ int Equation_Array::Apply_Equation (int number, int time0, double volume, int ca
 			cap *= eq_ptr->c;
 			if (cap < 1.0) cap = 1.0;
 
-			ttime = time0 * (1.0 + eq_ptr->a * pow ((volume / cap), eq_ptr->b));
+			ttime = time0 * (1.0 + eq_ptr->a * pow ((enter / cap), eq_ptr->b));
 
 			if (eq_ptr->type == BPR_PLUS) {
 				int max_time = (int) (length / eq_ptr->d + 0.5);
@@ -162,10 +169,10 @@ int Equation_Array::Apply_Equation (int number, int time0, double volume, int ca
 			} else {
 				len = length / 5280.0;
 			}
-			ttime = time0 + len * MIN (eq_ptr->a * exp (eq_ptr->b * (volume / cap)), eq_ptr->c);
+			ttime = time0 + len * MIN (eq_ptr->a * exp (eq_ptr->b * (enter / cap)), eq_ptr->c);
 
 		} else if (eq_ptr->type == CONICAL) {
-			cap = 1 - (volume / cap);
+			cap = 1 - (enter / cap);
 
 			ttime = time0 * (2 - eq_ptr->c - eq_ptr->a * cap + 
 				sqrt (eq_ptr->a * eq_ptr->a * cap * cap + eq_ptr->c * eq_ptr->c));
@@ -178,7 +185,7 @@ int Equation_Array::Apply_Equation (int number, int time0, double volume, int ca
 			}
 		} else if (eq_ptr->type == AKCELIK && length > 0) {
 			double vc, fac, spd;
-			vc = volume / cap;
+			vc = enter / cap;
 			fac = vc - 1;
 			
 			if (exe->Metric_Flag ()) {

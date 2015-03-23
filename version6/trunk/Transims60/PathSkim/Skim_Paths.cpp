@@ -28,12 +28,11 @@ void PathSkim::Skim_Paths (void)
 	org_locs = (int) org_loc.size ();
 	des_locs = (int) des_loc.size ();
 
-	if (Single_Partition ()) {
+	if (Single_Partition () || skim_file->Merge_Flag ()) {
 		num_periods = 1;
 	} else {
 		num_periods = skim_file->Num_Periods ();
 		if (First_Partition () >= 0 && num_periods > Num_Partitions ()) num_periods = Num_Partitions ();
-		if (num_periods > Num_Partitions ()) num_periods = Num_Partitions ();
 	}
 	num_cells = org_locs * des_locs * num_periods;
 	cells_out = 0;
@@ -68,6 +67,7 @@ void PathSkim::Skim_Paths (void)
 		if (!route_periods.Period_Range (period, low, high)) continue;
 
 		out_period = skim_file->Period ((forward_flag) ? low : (high - 1));
+
 		if (out_period < 0) continue;
 		if (Partition_Index (out_period) < 0) continue;
 

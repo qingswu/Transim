@@ -2,16 +2,18 @@
 //	Input_Trips.cpp - Read the Trips into Memory
 //*********************************************************
 
-#include "Router.hpp"
+#include "Converge_Service.hpp"
 
 //---------------------------------------------------------
 //	Input_Trips
 //---------------------------------------------------------
 
-void Router::Input_Trips (void)
+void Converge_Service::Input_Trips (void)
 {
 	int part, num_rec, part_num, first, num_selected, priority;
-	Trip_File *file = (Trip_File *) System_File_Handle (TRIP);
+	Dtime shift, new_time, duration;
+
+	Trip_File *file = System_Trip_File ();
 
 	Trip_Data trip_rec;
 	Trip_Index trip_index;
@@ -63,10 +65,12 @@ void Router::Input_Trips (void)
 				trip_rec.Priority (priority);
 			} else if (trip_rec.Priority () == NO_PRIORITY) {
 				trip_rec.Priority (MEDIUM);
+			} else if (trip_rec.Priority () == SKIP) {
+				trip_rec.Priority (NO_PRIORITY);
 			}
 			if (!Selection (&trip_rec)) {
-				trip_rec.Priority (NO_PRIORITY);
-				priority = NO_PRIORITY;
+				trip_rec.Priority (SKIP);
+				priority = SKIP;
 			} else {
 				num_selected++;
 			}
@@ -83,16 +87,29 @@ void Router::Input_Trips (void)
 				plan_rec.Priority (CRITICAL);
 
 			    map_stat = plan_trip_map.insert (Trip_Map_Data (trip_index, plan_rec.Index ()));
+				if (!map_stat.second) {
+					Warning (String ("Problem Inserting Plan %d-%d-%d-%d") % plan_rec.Household () %
+						plan_rec.Person () % plan_rec.Tour () % plan_rec.Trip ());
+					continue;
+				}
+				if (time_order_flag) {
+					plan_rec.Depart (trip_rec.Start ());
+					plan_rec.Arrive (trip_rec.End ());
 
+					if (!plan_time_map.insert (Time_Map_Data (plan_rec.Get_Time_Index (), plan_rec.Index ())).second) {
+						Error (String ("Time Index Problem Plan %d-%d-%d-%d") % plan_rec.Household () %
+							plan_rec.Person () % plan_rec.Tour () % plan_rec.Trip ());
+					}
+				}
 			    plan_array.push_back (plan_rec);
 			    plan_array.Max_Partition (plan_rec);
 				plan_ptr = &plan_rec;
 		    } else {
 				plan_ptr = &plan_array [map_itr->second];
-				if (plan_ptr->Priority () == 0) {
+				if (plan_ptr->Priority () == NO_PRIORITY) {
 					plan_ptr->Priority (MEDIUM);
 				}
-				if (priority_flag || priority == NO_PRIORITY) {
+				if (priority_flag || priority == SKIP) {
 					plan_ptr->Priority (priority);
 				}
 				if (plan_ptr->Start () != trip_rec.Start ()) {

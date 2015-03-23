@@ -14,34 +14,6 @@ void Router_Service::Execute (void)
 	Int2_Map_Stat ab_stat;
 	Int_Map_Itr map_itr;
 
-	//---- compile the type script ----
-
-	if (script_flag) {
-		if (Report_Flag (TRAVELER_SCRIPT)) {
-			Header_Number (TRAVELER_SCRIPT);
-
-			if (!Break_Check (10)) {
-				Print (1);
-				Page_Header ();
-			}
-		}
-		Db_Base_Array files;
-
-		files.push_back (System_File_Base (HOUSEHOLD));
-
-		type_script.Initialize (files, random.Seed () + 1);
-
-		if (!type_script.Compile (script_file, Report_Flag (TRAVELER_SCRIPT))) {
-			Error ("Compiling Traveler Type Script");
-		}
-		if (Report_Flag (TRAVELER_STACK)) {
-			Header_Number (TRAVELER_STACK);
-
-			type_script.Print_Commands (false);
-		}
-		Header_Number (0);
-	}
-
 	//---- read the data files ----
 
 	Data_Service::Execute ();
@@ -302,14 +274,6 @@ void Router_Service::Execute (void)
 
 			*next_ptr = *link_ptr;
 			*link_ptr = index;
-		}
-		for (link_itr = link_array.begin (); link_itr != link_array.end (); link_itr++) {
-			Show_Progress ();
-
-			if (link_itr->Grade () != 0) {
-				path_param.grade_flag = true;
-				break;
-			}
 		}
 	}
 
@@ -594,50 +558,3 @@ void Router_Service::Execute (void)
 	End_Progress ();
 }
 
-//---------------------------------------------------------
-//	Print_Reports
-//---------------------------------------------------------
-
-void Router_Service::Print_Reports (void)
-{
-	//---- print reports ----
-
-	for (int i=First_Report (); i != 0; i=Next_Report ()) {
-		switch (i) {
-			case LINK_GAP:			//---- Link Gap Report ----
-				if (iteration_flag) Link_Gap_Report (LINK_GAP);
-				break;
-			case TRIP_GAP:			//---- Trip Gap Report ----
-				if (iteration_flag) Trip_Gap_Report (TRIP_GAP);
-				break;
-			default:
-				break;
-		}
-	}
-}
-
-//---------------------------------------------------------
-//	Page_Header
-//---------------------------------------------------------
-
-void Router_Service::Page_Header (void)
-{
-	switch (Header_Number ()) {
-		case TRAVELER_SCRIPT:		//---- Type Script ----
-			Print (1, "Traveler Type Script");
-			Print (1);
-			break;
-		case TRAVELER_STACK:		//---- Type Stack ----
-			Print (1, "Traveler Type Stack");
-			Print (1);
-			break;
-		case LINK_GAP:			//---- Link Gap Report ----
-			Link_Gap_Header ();
-			break;
-		case TRIP_GAP:			//---- Trip Gap Report ----
-			Trip_Gap_Header ();
-			break;
-		default:
-			break;
-	}
-}

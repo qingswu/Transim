@@ -15,7 +15,7 @@ int Validate::volume_level [] = {
 Validate::Validate (void) : Data_Service ()
 {
 	Program ("Validate");
-	Version (14);
+	Version (17);
 	Title ("Compare Volumes to Counts");
 
 	System_File_Type required_files [] = {
@@ -43,7 +43,8 @@ Validate::Validate (void) : Data_Service ()
 		{ STOP_GROUP_COUNT_FILE, "STOP_GROUP_COUNT_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		{ NEW_VOLUME_FILE, "NEW_VOLUME_FILE", LEVEL0, OPT_KEY,  OUT_KEY, "", FILE_RANGE, NO_HELP},
 		{ NEW_VOLUME_COUNT_FILE, "NEW_VOLUME_COUNT_FILE", LEVEL0, OPT_KEY,  OUT_KEY, "", FILE_RANGE, NO_HELP},
-		{ ANALYSIS_METHOD, "ANALYSIS_METHOD", LEVEL0, OPT_KEY, TEXT_KEY, "VOLUME", "VOLUME, VMT", NO_HELP },
+		{ ANALYSIS_METHOD, "ANALYSIS_METHOD", LEVEL0, OPT_KEY, TEXT_KEY, "VOLUME", "VOLUME, VMT, VKT", NO_HELP },
+		{ ENTRY_DATA_FLAG, "ENTRY_DATA_FLAG", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ ADJUSTMENT_FACTOR, "ADJUSTMENT_FACTOR", LEVEL0, OPT_KEY, FLOAT_KEY, "1.0", "0.05..10.0", NO_HELP },
 		{ FACILITY_TYPE_LABELS, "FACILITY_TYPE_LABELS", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP},
 		{ AREA_TYPE_LABELS, "AREA_TYPE_LABELS", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
@@ -85,7 +86,8 @@ Validate::Validate (void) : Data_Service ()
 	Page_Size (120, 47);
 
 	problem_node_flag = problem_link_flag = problem_coord_flag = cnt_dir_flag = false;
-	delay_flag = link_flag = turn_flag = output_flag = zone_flag = method = line_flag = stop_flag = vc_flag = check_net_flag = false;
+	delay_flag = link_flag = turn_flag = output_flag = zone_flag = method = entry_flag = false;
+	line_flag = stop_flag = vc_flag = check_net_flag = false;
 	factor = 1.0;
 	hours = 1.0;
 

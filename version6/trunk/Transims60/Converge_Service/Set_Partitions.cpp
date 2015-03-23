@@ -2,13 +2,13 @@
 //	Set_Partitions.cpp - set file partitions
 //*********************************************************
 
-#include "Router.hpp"
+#include "Converge_Service.hpp"
 
 //---------------------------------------------------------
 //	Set_Partitions
 //---------------------------------------------------------
 
-void Router::Set_Partitions (void)
+void Converge_Service::Set_Partitions (void)
 {
 	if (trip_set_flag) {
 		num_file_sets = trip_file->Num_Parts ();

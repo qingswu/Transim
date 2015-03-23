@@ -2,13 +2,13 @@
 //	Part_Processor.cpp - partition processing thread
 //*********************************************************
 
-#include "Router.hpp"
+#include "Converge_Service.hpp"
 
 //---------------------------------------------------------
 //	Part_Processor constructor
 //---------------------------------------------------------
 
-Router::Part_Processor::Part_Processor (void)
+Converge_Service::Part_Processor::Part_Processor (void)
 {
 	exe = 0;
 	num_processors = num_path_builders = 0;
@@ -24,7 +24,7 @@ Router::Part_Processor::Part_Processor (void)
 //	Part_Processor destructor
 //---------------------------------------------------------
 
-Router::Part_Processor::~Part_Processor (void)
+Converge_Service::Part_Processor::~Part_Processor (void)
 {
 	if (plan_process != 0) {
 		delete plan_process;
@@ -49,7 +49,7 @@ Router::Part_Processor::~Part_Processor (void)
 //	Initialize
 //---------------------------------------------------------
 
-bool Router::Part_Processor::Initialize (Router *_exe)
+bool Converge_Service::Part_Processor::Initialize (Converge_Service *_exe)
 {
 	exe = _exe;
 	if (exe == 0) return (false);
@@ -140,7 +140,7 @@ bool Router::Part_Processor::Initialize (Router *_exe)
 //	Part_Processor -- Read_Trips
 //---------------------------------------------------------
 
-void Router::Part_Processor::Read_Trips (void)
+void Converge_Service::Part_Processor::Read_Trips (void)
 {
 	int p;
 
@@ -183,14 +183,14 @@ void Router::Part_Processor::Read_Trips (void)
 #endif
 
 	if (exe->Memory_Flag ()) {
-		exe->Memory_Loop (0, plan_process);
+		exe->Trip_Loop (false);
 	} else {
 		if (exe->trip_set_flag) {
 			for (p=0; p < exe->num_file_sets; p++) {
-				exe->Read_Trips (p, plan_process);
+				exe->Read_Trips (p);
 			}
 		} else {
-			exe->Read_Trips (0, plan_process);
+			exe->Read_Trips (0);
 		}
 	}
 	plan_process->Stop_Processing (exe->Flow_Updates () || exe->Time_Updates ());
@@ -200,7 +200,7 @@ void Router::Part_Processor::Read_Trips (void)
 //	Part_Processor -- Copy_Plans
 //---------------------------------------------------------
 
-void Router::Part_Processor::Copy_Plans (void)
+void Converge_Service::Part_Processor::Copy_Plans (void)
 {
 	int p;
 
@@ -227,17 +227,17 @@ void Router::Part_Processor::Copy_Plans (void)
 	plan_process->Start_Processing ();
 
 	if (exe->Memory_Flag ()) {
-        exe->Copy_Plans (0, plan_process);
+        exe->Copy_Plans (0);
 	} else {
 	    if (exe->new_set_flag) {
 		    for (p=0; p < exe->num_file_sets; p++) {
-			    exe->Copy_Plans (p, plan_process);
+			    exe->Copy_Plans (p);
 		    }
 	    } else {
 		    for (p=0; ; p++) {
 			    if (!exe->plan_file->Open (p)) break;
 			    if (exe->new_plan_flag) exe->new_plan_file->Open (p);
-			    exe->Copy_Plans (p, plan_process);
+			    exe->Copy_Plans (p);
 		    }
 	    }
 	}
@@ -248,24 +248,24 @@ void Router::Part_Processor::Copy_Plans (void)
 //	Part_Processor -- Plan_Build
 //---------------------------------------------------------
 
-void Router::Part_Processor::Plan_Build (Plan_Ptr_Array *ptr_array, int partition, Plan_Processor *ptr)
+void Converge_Service::Part_Processor::Plan_Build (Plan_Ptr_Array *ptr_array, int partition)
 {
 #ifdef THREADS
-	if (ptr == 0) {
+	if (num_processors > 1) {
 		partition = partition_map [partition];
 		trip_queue [partition]->Put (ptr_array);
 		return;
 	}
 #endif
+	plan_process->Plan_Build (ptr_array);
 	partition = 0;
-	ptr->Plan_Build (ptr_array);
 }
 
 //---------------------------------------------------------
 //	Part_Processor -- Sum_Ridership
 //---------------------------------------------------------
 
-void Router::Part_Processor::Sum_Ridership (Plan_Data &plan, int part)
+void Converge_Service::Part_Processor::Sum_Ridership (Plan_Data &plan, int part)
 {
 	if (!exe->rider_flag || part < 0) return;
 
@@ -285,13 +285,12 @@ void Router::Part_Processor::Sum_Ridership (Plan_Data &plan, int part)
 //	Part_Processor -- Save_Riders
 //---------------------------------------------------------
 
-void Router::Part_Processor::Save_Riders (void)
+void Converge_Service::Part_Processor::Save_Riders (void)
 {
 #ifdef THREADS
 	if (Thread_Flag () && exe->rider_flag) {
 		int p, l, s, r;
 		Line_Array *ptr;
-
 		for (p=0; p < num_processors; p++) {
 			ptr = &part_thread [p]->line_array;
 
@@ -323,12 +322,31 @@ void Router::Part_Processor::Save_Riders (void)
 #endif
 }
 
+//---------------------------------------------------------
+//	Part_Processor -- Save_Flows
+//---------------------------------------------------------
+
+void Converge_Service::Part_Processor::Save_Flows (void)
+{
+#ifdef THREADS
+	if (num_processors > 1) {
+MAIN_LOCK
+		for (int p=0; p < num_processors; p++) {
+			part_thread [p]->plan_process->Save_Flows ();
+		}
+END_LOCK
+		return;
+	}
+#endif
+	plan_process->Save_Flows ();
+}
+
 #ifdef THREADS
 //---------------------------------------------------------
 //	Part_Thread constructor
 //---------------------------------------------------------
 
-Router::Part_Processor::Part_Thread::Part_Thread (int num, Part_Processor *_ptr)
+Converge_Service::Part_Processor::Part_Thread::Part_Thread (int num, Part_Processor *_ptr)
 {
 	ptr = _ptr;
 	number = num;
@@ -348,21 +366,17 @@ Router::Part_Processor::Part_Thread::Part_Thread (int num, Part_Processor *_ptr)
 //	Part_Thread operator
 //---------------------------------------------------------
 
-void Router::Part_Processor::Part_Thread::operator()()
+void Converge_Service::Part_Processor::Part_Thread::operator()()
 {
-	int part;
+	int partition;
 	plan_process->Start_Processing ();
 
 	if (ptr->exe->thread_flag) {
-		while (ptr->partition_queue.Get (part)) {
+		while (ptr->partition_queue.Get (partition)) {
 			if (ptr->exe->trip_flag) {
-				if (ptr->exe->Memory_Flag ()) {
-					ptr->exe->Memory_Loop (part, plan_process);
-				} else {
-					ptr->exe->Read_Trips (part, plan_process);
-				}
+				ptr->exe->Read_Trips (partition);
 			} else {
-				ptr->exe->Copy_Plans (part, plan_process);
+				ptr->exe->Copy_Plans (partition);
 			}		
 		}
 	} else {

@@ -11,10 +11,7 @@
 LineSum::LineSum (void) : Execution_Service ()
 {
 	Program ("LineSum");
-<<<<<<< .working
-	Version (4);
-=======
-	Version (6);
+	Version (7);
 >>>>>>> .merge-right.r1529
 	Title ("Transit Ridership Summary");
 
@@ -187,6 +184,22 @@ bool operator < (LineSum::Access_Key left, LineSum::Access_Key right)
 		if (left.mode < right.mode) return (true);
 		if (left.mode == right.mode) {
 			if (left.node < right.node) return (true);
+		}
+	}
+	return (false); 
+}
+
+//---------------------------------------------------------
+//	ab_name map less than operator
+//---------------------------------------------------------
+
+bool operator < (LineSum::AB_Name_Key left, LineSum::AB_Name_Key right)
+{
+	if (left.a < right.a) return (true);
+	if (left.a == right.a) {
+		if (left.b < right.b) return (true);
+		if (left.b == right.b) {
+			if (left.name < right.name) return (true);
 		}
 	}
 	return (false); 

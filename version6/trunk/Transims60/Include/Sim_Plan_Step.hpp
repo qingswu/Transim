@@ -39,6 +39,7 @@ private:
 	Partition_Files <Plan_File> file_set;
 	Partition_Data <Plan_Data> plan_set;
 	Partition_Data <Time_Index> time_set;
+	Time_Map_Itr time_map_itr;
 
 	bool Sim_Plan_Result (Sim_Trip_Ptr ptr);
 

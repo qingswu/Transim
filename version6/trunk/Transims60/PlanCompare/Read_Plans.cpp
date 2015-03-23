@@ -11,8 +11,8 @@
 void PlanCompare::Plan_Processing::Read_Plans (int part)
 {
 	double percent;
-	int time1, time2, cost1, cost2, diff;
-	Dtime tod;
+	int cost1, cost2, diff;
+	Dtime tod, time1, time2;
 
 	Select_Map_Stat map_stat;
 	Select_Data select_rec;
@@ -197,9 +197,9 @@ void PlanCompare::Plan_Processing::Read_Plans (int part)
 
 		if (exe->time_sum_flag) {
 			if (thread_flag) {
-				time_diff->Add_Trip (tod, time1, time2);
+				time_diff->Add_Trip (tod, time1.Minutes (), time2.Minutes ());
 			} else {
-				exe->time_diff.Add_Trip (tod, time1, time2);
+				exe->time_diff.Add_Trip (tod, time1.Minutes (), time2.Minutes ());
 			}
 		}
 		if (exe->cost_sum_flag) {

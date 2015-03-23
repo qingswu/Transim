@@ -2,24 +2,23 @@
 //	Save_Plans.cpp -  write the path building results
 //*********************************************************
 
-#include "Router.hpp"
+#include "Converge_Service.hpp"
 
 //---------------------------------------------------------
 //	Save_Plans
 //---------------------------------------------------------
 
-bool Router::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
+bool Converge_Service::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 {
 	if (array_ptr == 0) return (false);
 
-	bool keep_new;
+	bool keep_new, copy_flag;
 	Dtime time1, time2, time_diff;
 	int cost1, cost2, cost_diff, priority;
 	double prob, ran;
 
 	Plan_Ptr_Itr itr;
 	Plan_Ptr plan_ptr, new_ptr;
-	Random random;
 
 	//---- process each plan in the array ----
 
@@ -28,15 +27,6 @@ bool Router::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 		if (new_ptr == 0) continue;
 
 		if (new_ptr->Method () == RESKIM_PLAN) {
-<<<<<<< .working
-			if (save_trip_gap) {
-				Gap_Data *gap_ptr;
-
-				gap_ptr = &gap_data_array [new_ptr->Index ()];
-				gap_ptr->current = new_ptr->Impedance ();
-				gap_ptr->time = (new_ptr->Constraint () == END_TIME) ? new_ptr->End (): new_ptr->Start ();
-			}
-=======
 			if (save_trip_gap) {
 				Gap_Data *gap_ptr;
 
@@ -45,7 +35,6 @@ bool Router::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 				gap_ptr->time = (new_ptr->Constraint () == END_TIME) ? new_ptr->End (): new_ptr->Start ();
 			}
 MAIN_LOCK
->>>>>>> .merge-right.r1529
 			num_reskim++;
 END_LOCK
 			continue;
@@ -56,6 +45,7 @@ END_LOCK
 
 MAIN_LOCK
 		total_records++;
+		copy_flag = false;
 
 		if (new_ptr->Problem () > 0) {
 			Set_Problem ((Problem_Type) new_ptr->Problem ());
@@ -63,7 +53,8 @@ MAIN_LOCK
 			num_reroute++;
 		} else if (new_ptr->Method () == UPDATE_PLAN) {
 			num_update++;
-		} else if (new_ptr->Method () == COPY_PLAN) {
+		} else if (new_ptr->Method () == COPY_PLAN || new_ptr->Method () == EXTEND_COPY) {
+			copy_flag = true;
 			num_copied++;
 		} else {
 			num_build++;
@@ -82,7 +73,7 @@ END_LOCK
 			time1 = 0;
 			priority = CRITICAL;
 
-			if (plan_ptr->Priority () == NO_PRIORITY) {
+			if (plan_ptr->Priority () == SKIP) {
 				if (plan_ptr->Problem () == 0 && new_ptr->Problem () > 0) {
 					priority = HIGH;
 					goto select_plans;
@@ -90,7 +81,7 @@ END_LOCK
 					priority = NO_PRIORITY;
 					keep_new = true;
 				}
-			} else if (new_ptr->Method () == COPY_PLAN) {
+			} else if (copy_flag) {
 				time1 = new_ptr->Activity ();
 				new_ptr->Activity (new_ptr->Duration ());
 
@@ -105,12 +96,12 @@ END_LOCK
 				//---- select the plan to keep ----
 
 				if (!keep_new && plan_ptr->Impedance () > 0) {
-					priority = LOW;	
+					priority = NO_PRIORITY;	
 
 					//---- compare plan times ----
 
 					if (time_diff_flag) {
-						if (new_ptr->Method () != COPY_PLAN) {
+						if (!copy_flag) {
 							time1 = new_ptr->Arrive () - new_ptr->Depart ();
 						}
 						time2 = plan_ptr->Arrive () - plan_ptr->Depart ();
@@ -173,7 +164,7 @@ END_LOCK
 				//---- compare trip times ----
 
 				if (trip_diff_flag && (!keep_new || priority < HIGH)) {
-					if (new_ptr->Method () != COPY_PLAN) {
+					if (!copy_flag) {
 						time1 = new_ptr->Arrive () - new_ptr->Depart ();
 					}
 					time2 = new_ptr->End () - new_ptr->Start ();
@@ -200,6 +191,7 @@ END_LOCK
 					keep_new = true;
 				}
 			}
+
 			if (keep_new) {
 				plan_ptr->clear ();
 				*plan_ptr = *new_ptr;
@@ -221,22 +213,41 @@ MAIN_LOCK
 END_LOCK
 			}
 
-			if ((save_trip_gap || trip_gap_map_flag) && plan_ptr->Problem () == 0) {
-				Gap_Data *gap_ptr;
+			//---- process completed plans ----
 
-				gap_ptr = &gap_data_array [plan_ptr->Index ()];
-				gap_ptr->current = (int) plan_ptr->Impedance ();
+			if (plan_ptr->Problem () == 0) {
 
-				if (new_ptr->Method () == COPY_PLAN) {
-					time2 = plan_ptr->Arrive () - plan_ptr->Depart ();
-					if (time2 > 0) {
-						gap_ptr->current = (int) ((double) gap_ptr->current * time1 / time2 + 0.5);
+				//---- check the fuel supply ----
+
+				if (fuel_flag) {
+					Fuel_Check (*plan_ptr);
+				}
+
+				//---- calculate the trip gap ----
+
+				if (save_trip_gap || trip_gap_map_flag) {
+					Gap_Data *gap_ptr;
+
+					gap_ptr = &gap_data_array [plan_ptr->Index ()];
+					gap_ptr->current = (int) plan_ptr->Impedance ();
+
+					if (copy_flag) {
+						time2 = plan_ptr->Arrive () - plan_ptr->Depart ();
+						if (time2 > 0) {
+							gap_ptr->current = (int) ((double) gap_ptr->current * time1 / time2 + 0.5);
+						}
+					}
+					if (plan_ptr->Constraint () == END_TIME) {
+						gap_ptr->time = plan_ptr->End ();
+					} else {
+						gap_ptr->time = plan_ptr->Start ();
 					}
 				}
-				if (plan_ptr->Constraint () == END_TIME) {
-					gap_ptr->time = plan_ptr->End ();
-				} else {
-					gap_ptr->time = plan_ptr->Start ();
+
+				//---- check for a capacity constraint ----
+
+				if (capacity_flag) {
+					Capacity_Check (*plan_ptr);
 				}
 			}
 
@@ -244,12 +255,12 @@ END_LOCK
 
 			if (new_ptr->Problem () == 0) {
 				if (new_plan_flag) {
-					new_ptr->External_IDs ();
-
-					if (new_set_flag) {
-						new_file_set [new_ptr->Partition ()]->Write_Plan (*new_ptr);
-					} else {
-						new_plan_file->Write_Plan (*new_ptr);
+					if (new_ptr->External_IDs ()) {
+						if (new_set_flag) {
+							new_file_set [new_ptr->Partition ()]->Write_Plan (*new_ptr);
+						} else {
+							new_plan_file->Write_Plan (*new_ptr);
+						}
 					}
 				}
 
@@ -267,7 +278,7 @@ END_LOCK
 					gap_data.current = (int) new_ptr->Impedance ();
 					gap_data.previous = 0;
 
-						trip_gap_map_ptr = trip_gap_map_array [new_ptr->Partition ()];
+					trip_gap_map_ptr = trip_gap_map_array [new_ptr->Partition ()];
 
 					map_stat = trip_gap_map_ptr->insert (Trip_Gap_Map_Data (new_ptr->Get_Trip_Index (), gap_data));
 
@@ -275,18 +286,31 @@ END_LOCK
 						map_stat.first->second.current = (int) new_ptr->Impedance ();
 					}
 				}
-
+				if (save_plan_flag && iteration < max_iteration && save_iter_range.In_Range (iteration)) {
+					if (save_hhold_range.In_Range (new_ptr->Household ())) {
+						if (!new_plan_flag) {
+							if (!new_ptr->External_IDs ()) {
+								delete new_ptr;
+								continue;
+							}
+						}
+						if (!save_plan_file.Part_Flag ()) {
+							new_ptr->Person (iteration);
+						}
+						save_plan_file.Write_Plan (*new_ptr);
+					}
+				}
 			} else if (problem_flag) {
-				new_ptr->External_IDs ();
-
-				if (problem_set_flag) {
-					Write_Problem (problem_set [new_ptr->Partition ()], new_ptr);
-				} else if (thread_flag) {
-					problem_file->Lock ();
-					Write_Problem (problem_file, new_ptr);
-					problem_file->UnLock ();
-				} else {
-					Write_Problem (problem_file, new_ptr);
+				if (new_ptr->External_IDs ()) {
+					if (problem_set_flag) {
+						Write_Problem (problem_set [new_ptr->Partition ()], new_ptr);
+					} else if (thread_flag) {
+						problem_file->Lock ();
+						Write_Problem (problem_file, new_ptr);
+						problem_file->UnLock ();
+					} else {
+						Write_Problem (problem_file, new_ptr);
+					}
 				}
 			}
 		}
@@ -294,36 +318,4 @@ END_LOCK
 	}
 	delete array_ptr;
 	return (true);
-}
-
-//---------------------------------------------------------
-//	Write_Problem
-//---------------------------------------------------------
-
-void Router::Write_Problem (Problem_File *file, Plan_Data *plan_ptr)
-{
-	file->Problem (plan_ptr->Problem ());
-	file->Household (plan_ptr->Household ());
-	file->Person (plan_ptr->Person ());
-	file->Tour (plan_ptr->Tour ());
-	file->Trip (plan_ptr->Trip ());
-	file->Start (plan_ptr->Start ());
-	file->End (plan_ptr->End ());
-	file->Duration (plan_ptr->Duration ());
-	file->Origin (plan_ptr->Origin ());
-	file->Destination (plan_ptr->Destination ());
-	file->Purpose (plan_ptr->Purpose ());
-	file->Mode (plan_ptr->Mode ());
-	file->Constraint (plan_ptr->Constraint ());
-	file->Priority (plan_ptr->Priority ());
-	file->Veh_Type (plan_ptr->Veh_Type ());
-	file->Vehicle (plan_ptr->Vehicle ());
-	file->Type (plan_ptr->Type ());
-	file->Notes ((char *) Problem_Code ((Problem_Type) plan_ptr->Problem ()));
-
-	if (!file->Write ()) {
-		Warning ("Writing ") << file->File_Type ();
-		problem_flag = false;
-	}
-	file->Add_Trip (plan_ptr->Household (), plan_ptr->Person (), plan_ptr->Tour ());
 }

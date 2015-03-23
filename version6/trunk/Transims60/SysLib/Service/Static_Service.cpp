@@ -80,6 +80,7 @@ Static_Service::Code_Text  Static_Service::units_codes [] = {
 	{ VHT, "VEH_HOURS" }, { VHD, "VEH_HOURS" }, { VMT, "VEH_MILES" }, { VKT, "VEH_KILOMETERS" },
 	{ EHT, "PCE_HOURS" }, { EHD, "PCE_HOURS" }, { EMT, "PCE_MILES" }, { EKT, "PCE_KILOMETERS" },
 	{ PHT, "PER_HOURS" }, { PHD, "PER_HOURS" }, { PMT, "PER_MILES" }, { PKT, "PER_KILOMETERS" },
+	{ LITERS, "LITERS" }, { GALLONS, "GALLONS" },
 	//---- unconverted units ----	
 	{ NEST_COUNT, "NEST_COUNT" }, { CENTS, "CENTS" }, { DOLLARS_HR, "DOLLARS/HOUR" }, 
 	{ IMPEDANCE, "IMPEDANCE" }, { IMPEDANCE, "UNITS" },	{ IMP_SECOND, "IMPEDANCE/SECOND" }, 
@@ -225,7 +226,7 @@ Static_Service::Code_Text Static_Service::transit_codes [] = {
 	{ ANY_TRANSIT, "ANY_MODE" }, { NO_TRANSIT, "NO_MODE" }, { NO_TRANSIT, "N/A" }, { NO_TRANSIT, "" },
 	{ LOCAL_BUS, "BUS" }, { LOCAL_BUS, "LOCAL" }, { EXPRESS_BUS, "EXPRESS" }, { BRT, "TROLLEY" }, 
 	{ LRT, "LRT" }, { RAPIDRAIL, "METRORAIL" }, { REGIONRAIL, "AMTRAK" },  { ANY_TRANSIT, "ANY" }, 
-	{ 0, 0 }
+	{ NO_TRANSIT, "" },	{ 0, 0 }
 };
 
 //---- transit class codes ----
@@ -346,10 +347,11 @@ Static_Service::Code_Text  Static_Service::problem_codes [] = {
 	{ DURATION_PROBLEM, "Activity Duration" }, { KISS_PROBLEM, "Kiss-&-Ride Lot", }, 
 	{ VEHICLE_PROBLEM, "Vehicle ID" }, { SORT_PROBLEM, "Data Sort" }, { WALK_LOC_PROBLEM, "Walk Location" }, 
 	{ BIKE_LOC_PROBLEM, "Bike Location" }, { TRANSIT_LOC_PROBLEM, "Transit Location" }, 
-	{ MATCH_PROBLEM,  "Person Match" }, { CONSTRAINT_PROBLEM, "Schedule Constraint" }, 
+	{ MATCH_PROBLEM,  "Person Match" }, { CONSTRAINT_PROBLEM, "Capacity Constraint" }, 
 	{ BOARDING_PROBLEM, "Transit Capacity" }, { DWELL_PROBLEM, "Transit Dwell" }, 
 	{ TRANSFER_PROBLEM, "Number of Transfers" }, { LOCAL_PROBLEM, "Local Facility" }, 
-	{ TRACE_PROBLEM, "Path Tracing" }, { PARK_USE_PROBLEM, "Parking Restriction" }, { 0, 0 }
+	{ TRACE_PROBLEM, "Path Tracing" }, { PARK_USE_PROBLEM, "Parking Restriction" }, 
+	{ FUEL_PROBLEM, "Fuel Supply" }, { 0, 0 }
 };
 
 //---- simulation type codes ----
@@ -399,7 +401,7 @@ Static_Service::Code_Text  Static_Service::constraint_codes [] = {
 
 Static_Service::Code_Text  Static_Service::priority_codes [] = {
 	{ NO_PRIORITY, "NO"}, { LOW, "LOW" }, { MEDIUM, "MEDIUM" }, { HIGH, "HIGH" }, { CRITICAL, "CRITICAL" }, 
-	{ NO_PRIORITY, "NO_PRIORITY" }, { 0, 0 }
+	{ NO_PRIORITY, "NO_PRIORITY" }, { SKIP, "SKIP"}, { SKIP, "IGNORE" }, { SKIP, "NO_CHANGE" }, { 0, 0 }
 };
 
 //---- time point type codes ----
@@ -477,9 +479,9 @@ Static_Service::Code_Text  Static_Service::equation_codes [] = {
 Static_Service::Code_Text  Static_Service::function_codes [] = {
 	{ LINEAR, "LINEAR" }, { LOGIT, "LOGIT" }, { EXPONENTIAL, "EXPONENTIAL" }, 
 	{ LOGARITHMIC, "LOGARITHMIC" }, { POLYNOMIAL, "POLYNOMIAL" }, { POWER, "POWER" }, 
-	{ GAMMA, "GAMMA" }, { MAX_LOGIT, "MAX_LOGIT" }, { LINEAR, "LINE" }, { EXPONENTIAL, "EXP" }, 
-	{ LOGARITHMIC, "LOG" }, { POLYNOMIAL, "POLY" }, { POWER, "POW" }, { MAX_LOGIT, "MLOGIT" } , 
-	{ MAX_LOGIT, "LOGIT2" } , { 0 , 0 }
+	{ GAMMA, "GAMMA" }, { MAX_LOGIT, "MAX_LOGIT" }, { LINEAR, "LINE" }, 
+	{ EXPONENTIAL, "EXP" }, { LOGARITHMIC, "LOG" }, { POLYNOMIAL, "POLY" }, 
+	{ POWER, "POW" }, { MAX_LOGIT, "MLOGIT" } , { MAX_LOGIT, "LOGIT2" }, { 0 , 0 }
 };
 
 //---- projection type codes ----
@@ -850,7 +852,7 @@ const char * Static_Service::Type_Code (int code, Code_Text *codes)
 			return (codes [i].text);
 		}
 	}
-	return (0);
+	return ("Error");
 }
 
 Mode_Type Static_Service::Trip_Mode_Map (int code)
@@ -1521,6 +1523,18 @@ double Static_Service::Internal_Units (double data, Units_Type *units)
 				*units = PMT;
 			}
 			break;
+		case GALLONS:
+			if (Metric_Flag ()) {
+				data *= GALTOLITER;
+				*units = LITERS;
+			}
+			break;
+		case LITERS:
+			if (!Metric_Flag ()) {
+				data /= GALTOLITER;
+				*units = GALLONS;
+			}
+			break;
 		default:
 			break;
 	}
@@ -1748,6 +1762,16 @@ double Static_Service::External_Units (double data, Units_Type units)
 		case PHD:
 			data /= Dtime (1.0, HOURS);
 			break;
+		case GALLONS:
+			if (Metric_Flag ()) {
+				data /= GALTOLITER;
+			}
+			break;
+		case LITERS:
+			if (!Metric_Flag ()) {
+				data *= GALTOLITER;
+			}
+			break;
 		default:
 			break;
 	}
@@ -1965,6 +1989,16 @@ double Static_Service::Convert_Units (double data, Units_Type units)
 		case EHD:
 		case PHD:
 			data /= Dtime (1.0, HOURS);
+			break;
+		case GALLONS:
+			if (Metric_Flag ()) {
+				data /= GALTOLITER;
+			}
+			break;
+		case LITERS:
+			if (!Metric_Flag ()) {
+				data *= GALTOLITER;
+			}
 			break;
 		default:
 			break;

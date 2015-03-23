@@ -47,6 +47,7 @@ Execution_Service::Execution_Service (void) : Control_Service ()
 		{ MAX_WARNING_EXIT_FLAG, "MAX_WARNING_EXIT_FLAG", LEVEL0, OPT_KEY, BOOL_KEY, "TRUE", BOOL_RANGE, NO_HELP },
 		{ MAX_PROBLEM_COUNT, "MAX_PROBLEM_COUNT", LEVEL0, OPT_KEY, INT_KEY, "0", ">= 0", NO_HELP },
 		{ NUMBER_OF_THREADS, "NUMBER_OF_THREADS", LEVEL0, OPT_KEY, INT_KEY, "1", "1..128", NO_HELP },
+		{ USER_FUNCTIONS, "USER_FUNCTIONS", LEVEL1, OPT_KEY, TEXT_KEY, "", "TYPE, A, B, C, D", NO_HELP },
 		END_CONTROL
 	};
 
@@ -169,7 +170,7 @@ int Execution_Service::Start_Execution (Strings keys)
 	if (Check_Control_Key (TITLE)) {
 		Title (Get_Control_String (TITLE));
 	}
-	Open_Report (Get_Control_String (REPORT_DIRECTORY), Get_Control_String (REPORT_FILE), Set_Control_Flag (REPORT_FILE));
+	Open_Report (Get_Control_String (REPORT_DIRECTORY), Get_Control_String (REPORT_FILE), Set_Control_Flag (REPORT_FLAG));
 	
 	if (report_flag) Read_Reports ();
 		
@@ -395,7 +396,7 @@ bool Execution_Service::Command_Line (Strings &commands)
 #else
 	if (Master ()) {
 #endif
-		Open_Report (Get_Control_String (REPORT_DIRECTORY), Get_Control_String (REPORT_FILE), Set_Control_Flag (REPORT_FILE));
+		Open_Report (Get_Control_String (REPORT_DIRECTORY), Get_Control_String (REPORT_FILE), Set_Control_Flag (REPORT_FLAG));
 	}
 	
 	//---- show parameter warning ----
@@ -516,6 +517,18 @@ void Execution_Service::Program_Control (void)
 			Warning (key);
 			Write (1);
 			num_threads = 1;
+		}
+	}
+
+	int num = Highest_Control_Group (USER_FUNCTIONS, 0);
+
+	if (num > 0) {
+		for (int i=1; i <= num; i++) {
+			key = Get_Control_String (USER_FUNCTIONS, i);
+
+			if (!key.empty ()) {
+				functions.Add_Function (i, key);
+			}
 		}
 	}
 }

@@ -151,8 +151,11 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 
 			//---- adjust the travel time ----
 
-			if (path_param.grade_flag && link_ptr->Grade (ab_flag) > 0) {
-				ttime = ttime / path_param.veh_type_ptr->Grade (link_ptr->Grade (ab_flag));
+			if (path_param.grade_func > 0 && link_ptr->Grade () != 0) {
+				factor = exe->functions.Apply_Function (path_param.grade_func, UnRound (link_ptr->Grade (ab_flag)));
+				if (factor != 0.0) {
+					ttime = (int) (ttime * factor + 0.5);
+				}
 			}
 			ttime += delay;
 
@@ -296,8 +299,11 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 
 			//---- adjust the travel time ----
 
-			if (path_param.grade_flag && link_ptr->Grade (ab_flag) > 0) {
-				ttime = ttime / path_param.veh_type_ptr->Grade (link_ptr->Grade (ab_flag));
+			if (path_param.grade_func > 0 && link_ptr->Grade () != 0) {
+				factor = exe->functions.Apply_Function (path_param.grade_func, UnRound (link_ptr->Grade (ab_flag)));
+				if (factor != 0.0) {
+					ttime = (int) (ttime * factor + 0.5);
+				}
 			}
 			ttime += delay;
 
@@ -670,8 +676,11 @@ int Path_Builder::Drive_Path (Path_End_Array *from_ptr, Path_End_Array *to_ptr, 
 			if (path_param.turn_delay_flag && period >= 0) {
 				penalty += turn_ptr->Time ();
 			}
-			if (path_param.grade_flag && link_ptr->Grade (ab_flag) > 0) {
-				ttime = ttime / path_param.veh_type_ptr->Grade (link_ptr->Grade (ab_flag));
+			if (path_param.grade_func > 0 && link_ptr->Grade () > 0) {
+				factor = exe->functions.Apply_Function (path_param.grade_func, UnRound (link_ptr->Grade (ab_flag)));
+				if (factor != 0.0) {
+					ttime = (int) (ttime * factor + 0.5);
+				}
 			}
 			ttime += delay;
 			pen_imp = DTOI (penalty * path_param.value_time);

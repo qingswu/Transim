@@ -101,8 +101,8 @@ void Data_Service::Initialize_Veh_Types (Veh_Type_File &file)
 
 bool Data_Service::Get_Veh_Type_Data (Veh_Type_File &file, Veh_Type_Data &veh_type_rec)
 {
-	int i, j, k, type;
-	double dvalue, fac1, fac2;
+	int type;
+	double dvalue;
 
 	//---- check the vehicle type ----
 
@@ -207,23 +207,14 @@ bool Data_Service::Get_Veh_Type_Data (Veh_Type_File &file, Veh_Type_Data &veh_ty
 	veh_type_rec.Min_Dwell (file.Min_Dwell ());
 	veh_type_rec.Max_Dwell (file.Max_Dwell ());
 
-	//---- grade factors ----
+	//---- grade function ----
 
-	veh_type_rec.Grade_Flag (false);
-	fac1 = 1.0;
+	veh_type_rec.Grade_Func (file.Grade_Func ());
 
-	for (i=k=0; i < 10; i++) {
-		fac2 = file.Grade (i);
-		if (fac2 == 0.0) fac2 = 1.0;
+	//---- fuel function ----
 
-		dvalue = (fac2 - fac1) / 10.0;
+	veh_type_rec.Fuel_Func (file.Fuel_Func ());
+	veh_type_rec.Fuel_Cap (file.Fuel_Cap ());
 
-		for (j=0; j < 10; j++) {
-			fac1 += dvalue;
-			if (fac1 <= 0.0) fac1 = 0.01;
-			veh_type_rec.Grade (k++, fac1);
-			if (fac1 != 1.0) veh_type_rec.Grade_Flag (true);
-		}
-	}
 	return (true);
 }

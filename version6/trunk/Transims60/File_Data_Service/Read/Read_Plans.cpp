@@ -76,7 +76,7 @@ void Data_Service::Read_Plans (Plan_File &file)
 
 				plan_rec.Index ((int) plan_array.size ());
 
-				if (Trip_Sort () == TRAVELER_SORT) {
+				if (Trip_Sort () == TRAVELER_SORT || Trip_Sort_Flag ()) {
 					plan_rec.Get_Index (trip_index);
 
 					trip_stat = plan_trip_map.insert (Trip_Map_Data (trip_index, plan_rec.Index ()));
@@ -86,7 +86,8 @@ void Data_Service::Read_Plans (Plan_File &file)
 							trip_index.Household () % trip_index.Person () % trip_index.Tour () % trip_index.Trip ());
 						keep_flag = false;
 					}
-				} else if (Trip_Sort () == TIME_SORT) {
+				}
+				if (Trip_Sort () == TIME_SORT || Time_Sort_Flag ()) {
 					plan_rec.Get_Index (time_index);
 
 					time_stat = plan_time_map.insert (Time_Map_Data (time_index, plan_rec.Index ()));

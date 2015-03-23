@@ -11,7 +11,7 @@
 Gravity::Gravity (void) : Data_Service ()
 {
 	Program ("Gravity");
-	Version (5);
+	Version (6);
 	Title ("File Format Conversion");
 	
 	System_File_Type required_files [] = {
@@ -20,6 +20,7 @@ Gravity::Gravity (void) : Data_Service ()
 	Control_Key keys [] = { //--- code, key, level, status, type, default, range, help ----
 		{ ZONE_PRODUCTION_FIELD, "ZONE_PRODUCTION_FIELD", LEVEL0, OPT_KEY, TEXT_KEY, "PRODUCTION", "", NO_HELP },
 		{ ZONE_ATTRACTION_FIELD, "ZONE_ATTRACTION_FIELD", LEVEL0, OPT_KEY, TEXT_KEY, "ATTRACTION", "", NO_HELP },
+		{ ZONE_PERIOD_FIELDS, "ZONE_PERIOD_FIELDS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 
 		{ SKIM_FILE, "SKIM_FILE", LEVEL0, REQ_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		{ SKIM_FORMAT, "SKIM_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "CUBE", MATRIX_RANGE, FORMAT_HELP },

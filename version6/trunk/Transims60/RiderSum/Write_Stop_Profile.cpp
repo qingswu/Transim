@@ -109,12 +109,16 @@ void RiderSum::Write_Stop_Profile (void)
 			file << "\n" << stop_ptr->Stop () << "\t" << group_name;
 
 			if (Notes_Name_Flag ()) {
+				file << "\t";
 				if (!stop_ptr->Name ().empty ()) {
-					file << "\t" << stop_ptr->Name ();
+					file << stop_ptr->Name ();
 				}
+				file << "\t";
 				if (!stop_ptr->Notes ().empty ()) {
-					file << "\t" << stop_ptr->Notes ();
+					file << stop_ptr->Notes ();
 				}
+			} else {
+				file <<"\t\t";
 			}
 
 			//---- process each time period ----

@@ -22,7 +22,7 @@ double Router::Reskim_Plans (bool average_flag)
 	
 	//---- initialize data ----
 
-	plan_processor->Start_Processing (true, true);
+	part_processor.plan_process->Start_Processing (true, true);
 
 	//---- reskim the plans ----
 
@@ -41,9 +41,9 @@ double Router::Reskim_Plans (bool average_flag)
 			
 		ptr_array->push_back (&(*plan_itr));
 					
-		plan_processor->Plan_Build (ptr_array);
+		part_processor.plan_process->Plan_Build (ptr_array);
 	}
-	plan_processor->Stop_Processing (true);
+	part_processor.plan_process->Stop_Processing (true);
 
 	return (Skim_Gap ());
 }

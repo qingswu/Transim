@@ -468,9 +468,6 @@
     <ClCompile Include="Write\Write_Link_Data.cpp">
       <Filter>Write</Filter>
     </ClCompile>
-    <ClCompile Include="Service\Converge_Service.cpp">
-      <Filter>Service\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Read\Read_Link_Dir.cpp">
       <Filter>Read</Filter>
     </ClCompile>
@@ -811,9 +808,6 @@
     </ClInclude>
     <ClInclude Include="..\Include\Volume_Array.hpp">
       <Filter>Data\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Converge_Service.hpp">
-      <Filter>Service\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

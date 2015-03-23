@@ -11,7 +11,7 @@
 MatrixData::MatrixData (void) : Data_Service (), Select_Service ()
 {
 	Program ("MatrixData");
-	Version (4);
+	Version (5);
 	Title ("Matrix Data Processing");
 
 	int file_service_keys [] = {
@@ -31,6 +31,7 @@ MatrixData::MatrixData (void) : Data_Service (), Select_Service ()
 		{ PERIOD_FIELD, "PERIOD_FIELD", LEVEL1, OPT_KEY, TEXT_KEY, "PERIOD", "NAME", NO_HELP },
 		{ LOW_TIME_FIELD, "LOW_TIME_FIELD", LEVEL1, OPT_KEY, TEXT_KEY, "LOW", "NAME", NO_HELP },
 		{ HIGH_TIME_FIELD, "HIGH_TIME_FIELD", LEVEL1, OPT_KEY, TEXT_KEY, "HIGH", "NAME", NO_HELP },
+		{ DATA_FACTOR_FIELD, "DATA_FACTOR_FIELD", LEVEL1, OPT_KEY, TEXT_KEY, "DATE", "NAME", NO_HELP },
 		{ TABLE_DATA_FIELD, "TABLE_DATA_FIELD", LEVEL2, OPT_KEY, TEXT_KEY, "TRIPS", "NAME", NO_HELP },
 
 		{ MATRIX_FILE, "MATRIX_FILE", LEVEL1, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },

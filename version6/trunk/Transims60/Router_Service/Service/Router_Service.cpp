@@ -4,20 +4,11 @@
 
 #include "Router_Service.hpp"
 
-const char * Router_Service::reports [] = {
-	"TRAVELER_TYPE_SCRIPT",
-	"TRAVELER_TYPE_STACK",
-	"LINK_GAP_REPORT",
-	"TRIP_GAP_REPORT",
-	"ITERATION_PROBLEMS", 
-	""
-};
-
 //---------------------------------------------------------
 //	Router_Service constructor
 //---------------------------------------------------------
 
-Router_Service::Router_Service (void) : Data_Service (), Flow_Time_Service (), Converge_Service ()
+Router_Service::Router_Service (void) : Data_Service (), Flow_Time_Service ()
 {
 	Service_Level (ROUTER_SERVICE);
 	
@@ -35,10 +26,9 @@ Router_Service::Router_Service (void) : Data_Service (), Flow_Time_Service (), C
 
 	walk_path_flag = bike_path_flag = drive_path_flag = access_link_flag = true;
 	transit_path_flag = parkride_path_flag = kissride_path_flag = skim_check_flag = true;
-	script_flag = hhfile_flag = select_flag = update_flag = thread_flag = false;
+	select_flag = update_flag = thread_flag = false;
 
 	Reset_Skim_Gap ();
-	System_Data_Reserve (HOUSEHOLD, 0);
 
 #ifdef THREADS
 	Enable_Threads (true);
@@ -154,15 +144,6 @@ void Router_Service::Router_Service_Keys (int *keys)
 		UPDATE_TRAVEL_TIMES, TIME_UPDATE_RATE, AVERAGE_TRAVEL_TIMES, LINK_FLOW_FACTOR, EQUATION_PARAMETERS, 0
 	};
 	Flow_Time_Service_Keys (flow_time_service_keys);
-
-	int converge_service_keys [] = {
-		MAXIMUM_NUMBER_OF_ITERATIONS, LINK_CONVERGENCE_CRITERIA, TRIP_CONVERGENCE_CRITERIA, 
-		TRANSIT_CAPACITY_CRITERIA, INITIAL_WEIGHTING_FACTOR, ITERATION_WEIGHTING_INCREMENT, 
-		MAXIMUM_WEIGHTING_FACTOR, MINIMIZE_VEHICLE_HOURS, MAXIMUM_RESKIM_ITERATIONS, 
-		RESKIM_CONVERGENCE_CRITERIA, SAVE_AFTER_ITERATIONS, NEW_LINK_CONVERGENCE_FILE, 
-		NEW_TRIP_CONVERGENCE_FILE, 0
-	};
-	Converge_Service_Keys (converge_service_keys);
 }
 
 //---------------------------------------------------------

@@ -8,14 +8,14 @@
 //	Write_Performance
 //---------------------------------------------------------
 
-void Data_Service::Write_Performance (bool fill_flag)
+void Data_Service::Write_Performance (void)
 {
 	Performance_File *file = System_Performance_File (true);
 
-	Write_Performance (*file, perf_period_array, fill_flag);
+	Write_Performance (*file, perf_period_array);
 }
 
-void Data_Service::Write_Performance (Performance_File &file, Perf_Period_Array &array, bool fill_flag)
+void Data_Service::Write_Performance (Performance_File &file, Perf_Period_Array &array)
 {
 	int i, index, dir, count;
 	Dtime low, high;
@@ -53,7 +53,7 @@ void Data_Service::Write_Performance (Performance_File &file, Perf_Period_Array 
 				Show_Progress ();
 
 				perf_ptr = perf_period_itr->Data_Ptr (index);
-				if (!fill_flag && !perf_ptr->Output_Check ()) continue;
+				if (!perf_ptr->Output_Check ()) continue;
 
 				dir_ptr = &dir_array [index];
 
@@ -68,7 +68,7 @@ void Data_Service::Write_Performance (Performance_File &file, Perf_Period_Array 
 
 				if (dir_ptr->Use_Index () >= 0 && dir_ptr->Use_Index () < (int) perf_period_itr->size ()) {
 					perf_ptr = perf_period_itr->Data_Ptr (dir_ptr->Use_Index ());
-					if (!fill_flag && !perf_ptr->Output_Check ()) continue;
+					if (!perf_ptr->Output_Check ()) continue;
 
 					perf_rec.Type (1);
 
@@ -137,7 +137,7 @@ int Data_Service::Put_Performance_Data (Performance_File &file, Performance_Data
 //	Write_Performance
 //---------------------------------------------------------
 
-void Data_Service::Write_Performance (Vol_Spd_Period_Array &array, bool fill_flag)
+void Data_Service::Write_Performance (Vol_Spd_Period_Array &array)
 {
 	int i, index, dir, count;
 	Dtime low, high;
@@ -177,7 +177,7 @@ void Data_Service::Write_Performance (Vol_Spd_Period_Array &array, bool fill_fla
 				Show_Progress ();
 
 				vol_spd_ptr = period_itr->Data_Ptr (index);
-				if (!fill_flag && vol_spd_ptr->Volume () == 0) continue;
+				if (vol_spd_ptr->Volume () == 0) continue;
 
 				dir_ptr = &dir_array [index];
 
@@ -192,7 +192,7 @@ void Data_Service::Write_Performance (Vol_Spd_Period_Array &array, bool fill_fla
 
 				if (dir_ptr->Use_Index () >= 0) {
 					vol_spd_ptr = period_itr->Data_Ptr (dir_ptr->Use_Index ());
-					if (!fill_flag && vol_spd_ptr->Volume () == 0) continue;
+					if (vol_spd_ptr->Volume () == 0) continue;
 
 					perf_rec.Type (1);
 

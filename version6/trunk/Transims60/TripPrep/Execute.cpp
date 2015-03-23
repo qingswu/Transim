@@ -81,6 +81,12 @@ void TripPrep::Execute (void)
 		}
 	}
 
+	//---- read the factor file ----
+
+	if (factor_flag) {
+		Read_Factors ();
+	}
+
 	//---- check the activity patterns ----
 
 	if (check_flag) {
@@ -174,7 +180,7 @@ void TripPrep::Execute (void)
 	if (merge_flag) {
 		merge_file.Print_Summary ();
 	}
-	if (System_File_Flag (NEW_TRIP)) {
+	if (new_trip_flag) {
 		if (update_flag) {
 			num = (int) new_file_set.size ();
 			for (int p=0; p < num; p++) {

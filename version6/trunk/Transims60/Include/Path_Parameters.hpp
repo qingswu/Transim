@@ -20,7 +20,6 @@ typedef struct {
 	bool      skim_only;                    //---- save only the path summary to the plan record ----
 	bool      skim_total_time;              //---- save only total travel time in the path skim ----
 	bool      walk_detail;                  //---- save detailed walk paths to the plan record ----
-	bool      grade_flag;                   //---- link file includes grade data ----
 
 	bool      adjust_schedule;              //---- adjust activity schedule -----
 	bool      ignore_duration;              //---- ignore activity duration ----
@@ -114,6 +113,9 @@ typedef struct {
 	bool      kissride_type [EXTLOAD+1];     //---- transit stop types where kiss-&-ride is permitted ----
 
 	double    duration_factor [CRITICAL+1];  //---- minimum duration factor by trip priority level ----
+
+	int       grade_func;                    //---- link file includes grade data ----
+	int       fuel_func;                     //---- link file includes grade data ----
 
 	Veh_Type_Data *veh_type_ptr;             //---- vehicle type data for grade processing
 } Path_Parameters;

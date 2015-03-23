@@ -21,7 +21,7 @@ void Simulator_Service::Execute (void)
 	Integers subarea_group;
 
 #ifdef ROUTING
-	Router_Service::Execute ();
+	Converge_Service::Execute ();
 #else
 	Data_Service::Execute ();
 #endif

@@ -8,7 +8,7 @@
 //	Load_Flow
 //---------------------------------------------------------
 
-Dtime Path_Builder::Load_Flow (Plan_Data *plan_data)
+Dtime Path_Builder::Load_Flow (void)
 {
 	int mode, index, dir_index, use_index;
 	Dtime time, ttime, perf_time, tt;
@@ -23,17 +23,7 @@ Dtime Path_Builder::Load_Flow (Plan_Data *plan_data)
 	Int_Map_Itr map_itr;
 	Int2_Map_Itr map2_itr;
 
-	if (plan_data == 0) {
-		cout << "\tPlan Pointer is Zero" << endl;
-		return (0);
-	}
-	if (!initialized) {
-		cout << "\tPath Building Requires TRANSIMS Router Services" << endl;
-		return (0);
-	}
 	plan_flag = true;
-	plan_ptr = plan_data;
-
 	mode = plan_ptr->Mode ();
 		
 	if (mode == WAIT_MODE || mode == TRANSIT_MODE || mode == WALK_MODE || mode == BIKE_MODE || 
@@ -67,7 +57,11 @@ Dtime Path_Builder::Load_Flow (Plan_Data *plan_data)
 		}
 		if (leg_itr->Link_Type ()) {
 			index = leg_itr->Link_ID ();
-
+#ifdef CHECK
+			if (index >= (int) exe->link_array.size ()) {
+				exe->Error (String ("Path_Builder::Load_Flow Link Index=%d vs %d, hhold=%d, trip=%d") % index % exe->link_array.size () % plan_ptr->Household () % plan_ptr->Trip ());
+			}
+#endif
 			link_ptr = &exe->link_array [index];
 
 			if (leg_itr->Link_Dir ()) {
@@ -78,6 +72,11 @@ Dtime Path_Builder::Load_Flow (Plan_Data *plan_data)
 			use_index = index;
 
 			if (leg_itr->Use_Type ()) {
+#ifdef CHECK
+				if (index >= (int) exe->dir_array.size ()) {
+					exe->Error (String ("Path_Builder::Load_Flow Dir Index=%d vs %d, hhold=%d, trip=%d") % index % exe->dir_array.size () % plan_ptr->Household () % plan_ptr->Trip ());
+				}
+#endif
 				dir_ptr = &exe->dir_array [index];
 				if (dir_ptr->Use_Index () >= 0) {
 					use_index = dir_ptr->Use_Index ();
@@ -85,7 +84,11 @@ Dtime Path_Builder::Load_Flow (Plan_Data *plan_data)
 			}
 		} else if (leg_itr->Dir_Type ()) {
 			use_index = index = leg_itr->ID ();
-
+#ifdef CHECK
+			if (index >= (int) exe->dir_array.size ()) {
+				exe->Error (String ("Path_Builder::Load_Flow Dir Index2=%d vs %d, hhold=%d, trip=%d") % index % exe->dir_array.size () % plan_ptr->Household () % plan_ptr->Trip ());
+			}
+#endif
 			dir_ptr = &exe->dir_array [index];
 			link_ptr = &exe->link_array [dir_ptr->Link ()];
 
@@ -102,6 +105,11 @@ Dtime Path_Builder::Load_Flow (Plan_Data *plan_data)
 		if (use_index >= 0) {
 			if (path_param.flow_flag) {
 				len = leg_itr->Length ();
+#ifdef CHECK
+				if (link_ptr == 0) {
+					exe->Error ("Path_Builder::Load_Flow Link_Ptr");
+				}
+#endif
 				if (len >= link_ptr->Length ()) {
 					len = link_ptr->Length ();
 					len_factor = 1.0;

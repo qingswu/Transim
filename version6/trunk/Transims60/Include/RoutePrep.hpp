@@ -33,10 +33,9 @@ public:
 
 protected:
 	enum RoutePrep_Keys { 
-		FIRST_NODE_NUMBER = 1, FIRST_LINK_NUMBER, FIRST_ROUTE_NUMBER, ROUTE_MODE_MAP, MODE_VEH_TYPE_MAP, 
+		FIRST_NODE_NUMBER = 1, FIRST_LINK_NUMBER, FIRST_ROUTE_NUMBER, 
 		CONVERT_NODE_NUMBERS, INPUT_NODE_FILE, INPUT_NODE_FORMAT, NODE_MAP_FILE, NEW_NODE_MAP_FILE,
 
-		TRANSIT_TIME_PERIODS, TRANSIT_PERIOD_OFFSETS, PERIOD_TRAVEL_TIMES, TRANSIT_NODE_TYPES, 
 		COLLAPSE_ROUTE_DATA, COORDINATE_RESOLUTION, CONVERSION_SCRIPT, 
 
 		ROUTE_SHAPE_FILE, ROUTE_NAME_FIELD, ROUTE_LINK_FIELD, ROUTE_ORDER_FIELD,
@@ -53,6 +52,8 @@ protected:
 		ROUTE_SPEED_FILE, ROUTE_SPEED_FORMAT, SPEED_ROUTE_FIELD, SPEED_PEAK_FIELD, SPEED_OFFPEAK_FIELD,
 		SEGMENT_SPEED_FACTOR_FILE, SEGMENT_SPEED_FACTOR_FORMAT, SEGMENT_FIELD, SPEED_FACTOR_FIELD,
 		IGNORE_EXISTING_SPEEDS,
+
+		TRANSCAD_ROUTE_SYSTEM,
 	};
 	virtual void Program_Control (void);
 
@@ -63,7 +64,7 @@ private:
 	int route_name_field, route_link_field, route_order_field;
 	int rstop_route_field, rstop_stop_field, rstop_offset_field, rstop_order_field;
 	int station_node_field, station_name_field, station_x_field, station_y_field;
-	int speed_route_field, speed_peak_field, speed_offpeak_field, segment_field, speed_fac_field;
+	int speed_route_field, speed_peak_field, speed_offpeak_field, segment_field, speed_fac_field, tcad_route_flag;
 	bool convert_flag, shape_flag, offset_flag, time_flag, collapse_routes, in_route_flag, out_route_flag, segment_report;
 	bool route_freq_flag, route_shape_flag, route_stop_flag, station_flag, platform_flag, new_route_flag, route_speed_flag, seg_fac_flag;
 	bool convert_node_flag, input_node_flag, node_map_flag, new_map_flag, ignore_speeds;
@@ -76,6 +77,7 @@ private:
 	Int_Map input_map;
 
 	Db_Header route_stop_file, station_file, speed_file, seg_fac_file, input_node_file;
+	Db_Header tcad_route_header, tcad_route_link, tcad_stop_node;
 	Db_File script_file, node_map_file, new_map_file;
 	Link_File *new_link_file;
 
@@ -87,10 +89,6 @@ private:
 	
 	Projection projection;
 	Projection_Service proj_service;
-
-	//---- transit line files ----
-
-	Time_Periods schedule_periods;
 
 	typedef struct {
 		Dtimes headways;
@@ -143,9 +141,6 @@ private:
 	typedef pair <Station_Map_Itr, bool>  Station_Map_Stat;
 
 	Station_Map station_map;
-	
-	Integers mode_map;
-	Integer_List mode_type_map;
 
 	typedef struct {
 		int group;
@@ -186,5 +181,6 @@ private:
 	void Read_Node_Map (void);
 	void Read_Node_File (void);
 	void Write_Node_Map (void);
+	void Read_Tcad_Routes (void);
 };
 #endif

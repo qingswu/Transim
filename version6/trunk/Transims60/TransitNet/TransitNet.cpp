@@ -11,7 +11,7 @@
 TransitNet::TransitNet (void) : Data_Service ()
 {
 	Program ("TransitNet");
-	Version (12);
+	Version (13);
 	Title ("Transit Network Conversion Utility");
 	
 	System_File_Type required_files [] = {
@@ -23,7 +23,7 @@ TransitNet::TransitNet (void) : Data_Service ()
 		TRANSIT_STOP, TRANSIT_ROUTE, TRANSIT_SCHEDULE, TRANSIT_DRIVER, END_FILE
 	};
 	int file_service_keys [] = {
-		NOTES_AND_NAME_FIELDS, ZONE_EQUIVALENCE_FILE, 0
+		NOTES_AND_NAME_FIELDS, ZONE_EQUIVALENCE_FILE, TRANSIT_TIME_PERIODS, 0
 	};
 	Control_Key transimsnet_keys [] = { //--- code, key, level, status, type, default, range, help ----
 		{ ROUTE_DATA_FILE, "ROUTE_DATA_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
@@ -34,7 +34,6 @@ TransitNet::TransitNet (void) : Data_Service ()
 		{ STATION_ACCESS_DISTANCE, "STATION_ACCESS_DISTANCE", LEVEL0, OPT_KEY, INT_KEY, "0 feet", "0..10000 feet", NO_HELP },
 		{ STOP_SPACING_BY_AREA_TYPE, "STOP_SPACING_BY_AREA_TYPE", LEVEL1, OPT_KEY, LIST_KEY, "600 feet", "0, 100..10000 feet", NO_HELP },
 		{ STOP_FACILITY_TYPE_RANGE, "STOP_FACILITY_TYPE_RANGE", LEVEL0, OPT_KEY, TEXT_KEY, "PRINCIPAL..FRONTAGE", "FREEWAY..EXTERNAL", NO_HELP },
-		{ TRANSIT_TIME_PERIODS, "TRANSIT_TIME_PERIODS", LEVEL0, OPT_KEY, TEXT_KEY, "NONE", TIME_BREAK_RANGE, NO_HELP },
 		{ TRANSIT_TRAVEL_TIME_FACTORS, "TRANSIT_TRAVEL_TIME_FACTORS", LEVEL1, OPT_KEY, LIST_KEY, "1.0", "0.5..3.0", NO_HELP },
 		{ MINIMUM_DWELL_TIME, "MINIMUM_DWELL_TIME", LEVEL0, OPT_KEY, TIME_KEY, "5 seconds", "0..300 seconds", NO_HELP },
 		{ INTERSECTION_STOP_TYPE, "INTERSECTION_STOP_TYPE", LEVEL0, OPT_KEY, TEXT_KEY, "NEARSIDE", "NEARSIDE, FARSIDE, MIDBLOCK", NO_HELP },

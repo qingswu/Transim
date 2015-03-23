@@ -25,6 +25,7 @@ void MatrixData::Program_Control (void)
 	Field_Type type = DB_INTEGER;
 	Units_Type units;
 	double size;
+	bool flag;
 
 	//---- open network files ----
 
@@ -151,6 +152,16 @@ void MatrixData::Program_Control (void)
 				} else {
 					data_ptr->period_flag = true;
 				}
+			}
+
+			//---- data factor field ----
+
+			if (Check_Control_Key (DATA_FACTOR_FIELD, i)) {
+				key = Get_Control_Text (DATA_FACTOR_FIELD, i);
+				data_ptr->factor_field = data_ptr->file->Required_Field (key);
+				Print (0, ", Number = ") << (data_ptr->factor_field + 1);
+			} else {
+				data_ptr->factor_field = -1;
 			}
 
 			//---- table data fields ----
@@ -534,6 +545,9 @@ void MatrixData::Program_Control (void)
 			Int_Set org_set, des_set;
 
 			for (data_itr = data_group.begin (); data_itr != data_group.end (); data_itr++) {
+				flag = (data_itr->factor_field >= 0);
+				Str_ID factor_map;
+
 				while (data_itr->file->Read ()) {
 					Show_Progress ();
 					zone = data_itr->file->Get_Integer (data_itr->org_field);
@@ -541,6 +555,19 @@ void MatrixData::Program_Control (void)
 
 					zone = data_itr->file->Get_Integer (data_itr->des_field);
 					des_set.insert (zone);
+
+					if (flag) {
+						key = data_itr->file->Get_String (data_itr->factor_field);
+						key.Clean ();
+
+						if (!key.empty ()) {
+							num = (int) factor_map.size ();
+							factor_map.insert (Str_ID_Data (key, num));
+						}
+					}
+				}
+				if (flag) {
+					factor = (double) factor_map.size ();
 				}
 				data_itr->file->Rewind ();
 			}

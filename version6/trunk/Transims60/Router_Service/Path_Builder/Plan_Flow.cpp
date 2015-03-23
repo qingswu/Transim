@@ -8,7 +8,7 @@
 //	Plan_Flow
 //---------------------------------------------------------
 
-bool Path_Builder::Plan_Flow (Plan_Data *plan_data)
+bool Path_Builder::Plan_Flow (void)
 {
 	int mode, index, dir_index, use_index;
 	Dtime time, ttime;
@@ -23,17 +23,7 @@ bool Path_Builder::Plan_Flow (Plan_Data *plan_data)
 	Int_Map_Itr map_itr;
 	Int2_Map_Itr map2_itr;
 
-	if (plan_data == 0) {
-		cout << "\tPlan Pointer is Zero" << endl;
-		return (false);
-	}
-	if (!initialized) {
-		cout << "\tPath Building Requires TRANSIMS Router Services" << endl;
-		return (false);
-	}
 	plan_flag = true;
-	plan_ptr = plan_data;
-
 	mode = plan_ptr->Mode ();
 		
 	if (mode == WAIT_MODE || mode == TRANSIT_MODE || mode == WALK_MODE || mode == BIKE_MODE || 

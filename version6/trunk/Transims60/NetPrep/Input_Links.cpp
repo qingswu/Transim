@@ -35,6 +35,7 @@ void NetPrep::Input_Links (void)
 	Int_Map_Stat map_stat;
 	Int2_Map_Stat ab_stat;
 	Int2_Map_Itr ab_itr;
+	Int2_Map *ab_ptr;
 
 	new_file = (Link_File *) System_File_Base (NEW_LINK);
 	add_node_flag = (!node_flag && !node_shape_flag && !System_File_Flag (NODE) && link_shape_flag);
@@ -277,11 +278,25 @@ void NetPrep::Input_Links (void)
 			}
 		}
 
+		//---- check for duplicate links ----
+
+		if (split_ab_flag) {
+			ab_itr = ab_map.find (Int2_Key (anode, bnode));
+
+			if (ab_itr != ab_map.end ()) {
+				ab_ptr = &ab_map2;
+			} else {
+				ab_ptr = &ab_map;
+			}
+		} else {
+			ab_ptr = &ab_map;
+		}
+
 		//---- check for twoway links ----
 
-		ab_itr = ab_map.find (Int2_Key (bnode, anode));
+		ab_itr = ab_ptr->find (Int2_Key (bnode, anode));
 
-		if (ab_itr == ab_map.end ()) {
+		if (ab_itr == ab_ptr->end ()) {
 
 			//---- create a new record ----
 
@@ -418,7 +433,7 @@ void NetPrep::Input_Links (void)
 			//---- check for short loops ----
 
 			if (anode == bnode) {
-				if (!split_flag || new_file->Length () < split_length) {
+				if (!split_flag || Round (new_file->Length ()) < split_length) {
 					num_loops++;
 					continue;
 				}
@@ -519,7 +534,7 @@ void NetPrep::Input_Links (void)
 
 				index = (int) dir_array.size ();
 
-				ab_stat = ab_map.insert (Int2_Map_Data (Int2_Key (anode, bnode), index));
+				ab_stat = ab_ptr->insert (Int2_Map_Data (Int2_Key (anode, bnode), index));
 
 				if (!ab_stat.second) {
 					Warning ("Duplicate Link Direction Number = ") << link_rec.Link ();

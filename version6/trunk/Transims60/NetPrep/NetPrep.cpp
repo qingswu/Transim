@@ -11,17 +11,17 @@
 NetPrep::NetPrep (void) : Data_Service ()
 {
 	Program ("NetPrep");
-	Version (17);
+	Version (20);
 	Title ("Network Preparation Utility");
 
 	System_File_Type optional_files [] = {
 		LINK, NODE, ZONE, SHAPE, ROUTE_NODES, NEW_NODE, NEW_LINK, NEW_ZONE, NEW_SHAPE, NEW_ROUTE_NODES, END_FILE
 	};
 	int file_service_keys [] = {
-		NOTES_AND_NAME_FIELDS, 0
+		NOTES_AND_NAME_FIELDS, TRANSIT_TIME_PERIODS, 0
 	};
 	int data_service_keys [] = {
-		UPDATE_LINK_BEARINGS, LINK_BEARING_WARNINGS, 0
+		UPDATE_LINK_BEARINGS, LINK_BEARING_WARNINGS, ROUTE_MODE_MAP, MODE_VEH_TYPE_MAP, 0
 	};
 	Control_Key netprep_keys [] = { //--- code, key, level, status, type, default, range, help ----
 		{ INPUT_LINK_FILE, "INPUT_LINK_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
@@ -50,7 +50,8 @@ NetPrep::NetPrep (void) : Data_Service ()
 		{ MINIMUM_SHAPE_LENGTH, "MINIMUM_SHAPE_LENGTH", LEVEL0, OPT_KEY, INT_KEY, "30 feet", "0..600 feet", NO_HELP },
 		{ DROP_DEAD_END_LINKS, "DROP_DEAD_END_LINKS", LEVEL0, OPT_KEY, INT_KEY, "0 feet", "0..6000 feet", NO_HELP },
 		{ DROP_SHORT_LINKS, "DROP_SHORT_LINKS", LEVEL0, OPT_KEY, FLOAT_KEY, "0 feet", "0..600 feet", NO_HELP },
-		{ SPLIT_LARGE_LOOPS, "SPLIT_LARGE_LOOPS", LEVEL0, OPT_KEY, INT_KEY, "0 feet", "0, 300..12000 feet", NO_HELP },
+		{ SPLIT_LARGE_LOOPS, "SPLIT_LARGE_LOOPS", LEVEL0, OPT_KEY, INT_KEY, "0 feet", "0, 100..12000 feet", NO_HELP },
+		{ SPLIT_DUPLICATE_AB_LINKS, "SPLIT_DUPLICATE_AB_LINKS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ CORRECT_LINK_SHAPES, "CORRECT_LINK_SHAPES", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ COLLAPSE_SHAPE_NODES, "COLLAPSE_SHAPE_NODES", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ COLLAPSE_DIVIDED_ARTERIALS, "COLLAPSE_DIVIDED_ARTERIALS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
@@ -69,12 +70,9 @@ NetPrep::NetPrep (void) : Data_Service ()
 		{ NEW_APPROACH_LINK_FILE, "NEW_APPROACH_LINK_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
 		{ NEW_APPROACH_LINK_FORMAT, "NEW_APPROACH_LINK_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, FORMAT_HELP },
 		{ NEW_LINK_NODE_LIST_FILE, "NEW_LINK_NODE_LIST_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
-		{ TRANSIT_TIME_PERIODS, "TRANSIT_TIME_PERIODS", LEVEL0, OPT_KEY, TEXT_KEY, "NONE", TIME_BREAK_RANGE, NO_HELP },
 		{ COLLAPSE_ROUTE_DATA, "COLLAPSE_ROUTE_DATA", LEVEL0, OPT_KEY, BOOL_KEY, "TRUE", BOOL_RANGE, NO_HELP },
 		{ FIRST_ROUTE_NUMBER, "FIRST_ROUTE_NUMBER", LEVEL0, OPT_KEY, INT_KEY, "1", "1..100000", NO_HELP },
 		{ INPUT_ROUTE_FORMAT, "INPUT_ROUTE_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "TPPLUS", "TPPLUS, CUBE", NO_HELP },
-		{ ROUTE_MODE_MAP, "ROUTE_MODE_MAP", LEVEL1, OPT_KEY, LIST_KEY, "1=BUS", "#=BUS, #=EXPRESS, #=BRT, #=STREETCAR, #=LRT, #=RAPIDRAIL, #=REGIONRAIL", NO_HELP },
-		{ MODE_VEH_TYPE_MAP, "MODE_VEH_TYPE_MAP", LEVEL1, OPT_KEY, LIST_KEY, "BUS=4", "BUS=4, EXPRESS=5, BRT=6, STREETCAR=7, LRT=8, RAPIDRAIL=9, REGIONRAIL=10", NO_HELP },
 		{ INPUT_ROUTE_FILE, "INPUT_ROUTE_FILE", LEVEL1, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		{ ROUTE_PERIOD_MAP, "ROUTE_PERIOD_MAP", LEVEL1, OPT_KEY, LIST_KEY, "1", "0..24", NO_HELP },
 		{ ROUTE_PERIOD_FACTOR, "ROUTE_PERIOD_FACTOR", LEVEL1, OPT_KEY, LIST_KEY, "1.0", "0.0..10.0", NO_HELP },
@@ -104,9 +102,9 @@ NetPrep::NetPrep (void) : Data_Service ()
 	fac_fld = at_fld = -1;
 	drop_length = split_length = num_loops = max_angle = min_length = next_loop = num_ratio = 0;
 	convert_flag = spdcap_flag = link_flag = node_flag = zone_flag = route_flag = new_zone_flag = connector_flag = false;
-	link_shape_flag = node_shape_flag = zone_shape_flag = int_zone_flag = centroid_flag = false;
+	link_shape_flag = node_shape_flag = zone_shape_flag = int_zone_flag = centroid_flag = expand_flag= false;
 	units_flag = keep_node_flag = keep_link_flag = drop_node_flag = drop_link_flag = shape_flag = correct_flag = false;
-	length_flag = split_flag = collapse_flag = drop_flag = loop_flag = spacing_flag = false;
+	length_flag = split_flag = split_ab_flag = collapse_flag = drop_flag = loop_flag = spacing_flag = false;
 	divided_flag = segment_flag = speed_flag = link_use_flag = approach_flag = link_node_flag = offset_flag = time_flag = false;
 	node_script_flag = zone_script_flag = oneway_link_flag = false;
 	collapse_routes = true;

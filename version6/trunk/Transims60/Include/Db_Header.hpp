@@ -126,6 +126,9 @@ private:
 
 	bool Read_dBase_Header (bool stat);
 	bool Write_dBase_Header (void);
+	
+	bool Read_TCAD_Header (void);
+
 #ifdef SQLITE	
 	bool Read_SQLite3_Header (bool stat);
 	bool Write_SQLite3_Header (void);

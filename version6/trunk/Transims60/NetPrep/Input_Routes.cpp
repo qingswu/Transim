@@ -110,11 +110,11 @@ void NetPrep::Input_Routes (void)
 					record.Split (text, ",");
 
 					mode = text.Integer ();
-					map_itr = mode_map.find (mode);
+					map_itr = route_mode_map.find (mode);
 
-					if (map_itr == mode_map.end ()) {
+					if (map_itr == route_mode_map.end ()) {
 						Warning (String ("Mode %d was Not Converted") % mode);
-						mode_map.insert (Int_Map_Data (data.mode, NO_TRANSIT));
+						route_mode_map.insert (Int_Map_Data (data.mode, NO_TRANSIT));
 						mode = 0;
 					} else {
 						mode = map_itr->second;

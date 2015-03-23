@@ -11,7 +11,7 @@
 ArcNet::ArcNet (void) : Data_Service (), Draw_Service ()
 {
 	Program ("ArcNet");
-	Version (5);
+	Version (6);
 	Title ("Generate ArcView Shapefiles from a TRANSIMS Network");
 
 	System_File_Type optional_files [] = {
@@ -55,7 +55,6 @@ ArcNet::ArcNet (void) : Data_Service (), Draw_Service ()
 		{ NEW_ARC_ROUTE_NODES_FILE, "NEW_ARC_ROUTE_NODES_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
 		{ NEW_ARC_SUBZONE_DATA_FILE, "NEW_ARC_SUBZONE_DATA_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
 		{ SELECT_TIME, "SELECT_TIME", LEVEL0, OPT_KEY, TIME_KEY, "0:00", "0:00..24:00", NO_HELP },
-		{ TRANSIT_TIME_PERIODS, "TRANSIT_TIME_PERIODS", LEVEL0, OPT_KEY, TEXT_KEY, "0:00", "0:00..24:00", NO_HELP },
 		END_CONTROL
 	};
 	const char *reports [] = {

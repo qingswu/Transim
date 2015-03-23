@@ -52,8 +52,7 @@ void Route_Nodes_File::Setup (void)
 		Nest (NESTED);
 		Header_Lines (2);
 	}
-	dwell_flag = time_flag = speed_flag = type_flag = ttime_flag = offset_flag = true;
-	pattern_flag = false;
+	dwell_flag = time_flag = speed_flag = type_flag = ttime_flag = offset_flag = pattern_flag = false;
 
 	num_periods = 8;
 	route = mode = veh_type = oneway = nodes = name = node = type = dwell = time = speed = -1;

@@ -44,13 +44,12 @@ protected:
 		FIRST_NODE_NUMBER, FIRST_LINK_NUMBER, SPEED_FACTOR_BY_FACILITY, 
 		SPEED_ROUNDING_INCREMENT, COORDINATE_RESOLUTION, MAXIMUM_LENGTH_TO_XY_RATIO, 
 		MAXIMUM_SHAPE_ANGLE, MINIMUM_SHAPE_LENGTH, DROP_DEAD_END_LINKS, DROP_SHORT_LINKS, 
-		SPLIT_LARGE_LOOPS, CORRECT_LINK_SHAPES, COLLAPSE_SHAPE_NODES, COLLAPSE_DIVIDED_ARTERIALS, 
-		LOCAL_THRU_SEGMENT_LENGTHS, LOCAL_SELECTION_SPACING, 
+		SPLIT_LARGE_LOOPS, SPLIT_DUPLICATE_AB_LINKS, CORRECT_LINK_SHAPES, COLLAPSE_SHAPE_NODES, 
+		COLLAPSE_DIVIDED_ARTERIALS, LOCAL_THRU_SEGMENT_LENGTHS, LOCAL_SELECTION_SPACING, 
 		KEEP_NODE_RANGE, KEEP_NODE_FILE, KEEP_LINK_RANGE, KEEP_LINK_FILE,
 		DELETE_NODE_RANGE, DELETE_NODE_FILE, DELETE_LINK_RANGE, DELETE_LINK_FILE,
 		NEW_LINK_USE_FILE, NEW_LINK_USE_FORMAT, NEW_APPROACH_LINK_FILE, NEW_APPROACH_LINK_FORMAT,
-		NEW_LINK_NODE_LIST_FILE, TRANSIT_TIME_PERIODS, TRANSIT_NODE_TYPES, COLLAPSE_ROUTE_DATA, 
-		FIRST_ROUTE_NUMBER, INPUT_ROUTE_FORMAT, ROUTE_MODE_MAP, MODE_VEH_TYPE_MAP, 
+		NEW_LINK_NODE_LIST_FILE, COLLAPSE_ROUTE_DATA, FIRST_ROUTE_NUMBER, INPUT_ROUTE_FORMAT, 
 		INPUT_ROUTE_FILE, ROUTE_PERIOD_MAP, ROUTE_PERIOD_FACTOR, ROUTE_VEHICLE_TYPE, FLIP_ROUTE_FLAG, 
 	};
 	virtual void Program_Control (void);
@@ -73,9 +72,9 @@ private:
 	int straight_diff, thru_diff, forward_diff, short_links, cross_min, cross_max, next_loop, num_ratio;
 	int num_periods, new_route, num_match;
 	bool convert_flag, spdcap_flag, link_flag, node_flag, zone_flag, route_flag, new_zone_flag, connector_flag;
-	bool link_shape_flag, node_shape_flag, zone_shape_flag, int_zone_flag, centroid_flag;
+	bool link_shape_flag, node_shape_flag, zone_shape_flag, int_zone_flag, centroid_flag, expand_flag;
 	bool units_flag, keep_node_flag, keep_link_flag, drop_node_flag, drop_link_flag, shape_flag, correct_flag;
-	bool length_flag, split_flag, collapse_flag, drop_flag, short_flag, loop_flag, spacing_flag;
+	bool length_flag, split_flag, split_ab_flag, collapse_flag, drop_flag, short_flag, loop_flag, spacing_flag;
 	bool divided_flag, segment_flag, speed_flag, link_use_flag, approach_flag, link_node_flag, offset_flag, time_flag;
 	bool node_script_flag, zone_script_flag, input_route_flag, collapse_routes, oneway_link_flag;
 	double length_ratio, resolution;
@@ -83,6 +82,7 @@ private:
 	List_Array node_list;
 	Integer_List area_spacing, thru_length;
 	Integers select_links;
+	Int2_Map ab_map2;
 
 	Db_Header link_file, node_file, zone_file;
 	Db_Base spdcap_file;
@@ -140,9 +140,6 @@ private:
 	//---- transit line files ----
 	
 	Format_Type route_format;
-	Int_Map mode_map;
-	int mode_type_map [ANY_TRANSIT];
-	Time_Periods schedule_periods;
 
 	typedef struct {
 		Dtimes headways;
@@ -179,6 +176,18 @@ private:
 
 	File_Group_Array file_groups;
 
+	typedef struct {
+		int group;
+		Integer_List period_map;
+		Double_List period_fac;
+		bool flip;
+	} Expand_Group;
+
+	typedef vector <Expand_Group>        Expand_Group_Array;
+	typedef Expand_Group_Array::iterator Expand_Group_Itr;
+
+	Expand_Group_Array expand_groups;
+
 	void Read_Scripts (void);
 	void Input_SpdCap (void);
 	void Input_Nodes (void);
@@ -186,6 +195,7 @@ private:
 	void Input_Links (void);
 	void Input_Routes (void);
 	void Save_Route (Route_Data &data);
+	void Expand_Routes (void);
 	void Node_List (void);
 	int  Closest_Zone (int node);
 	bool Compare_Links (Link_Data *link_ptr, Link_Data *link2_ptr, int node = -1, bool near_flag = false);
@@ -194,6 +204,7 @@ private:
 	void Drop_Links (void);
 	void Short_Links (void);
 	void Split_Loops (void);
+	void Split_AB_Links (void);
 	void Bearing_Update (void);
 	void Thru_Links (void);
 	void Local_Thru_Links (void);

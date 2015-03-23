@@ -10,6 +10,7 @@
 #include "Dtime.hpp"
 #include "Random.hpp"
 #include "Time_Periods.hpp"
+#include "Functions.hpp"
 
 //---------------------------------------------------------
 //	Execution_Service - general execution class
@@ -44,6 +45,8 @@ public:
 	                                         { return (Project_Directory () + name + ext); }
 	Random random;
 	int    Random_Seed (void)                { return (random_seed); }
+
+	Function_Array functions;
 
 	virtual void Execute (void);
 
@@ -84,7 +87,7 @@ protected:
 	enum Execution_Service_Keys { TITLE = EXECUTION_OFFSET, REPORT_DIRECTORY, REPORT_FILE, REPORT_FLAG, PAGE_LENGTH, 
 		PROJECT_DIRECTORY, DEFAULT_FILE_FORMAT, TIME_OF_DAY_FORMAT, MODEL_START_TIME, MODEL_END_TIME, 
 		MODEL_TIME_INCREMENT, UNITS_OF_MEASURE, DRIVE_SIDE_OF_ROAD, RANDOM_NUMBER_SEED, MAX_WARNING_MESSAGES, 
-		MAX_WARNING_EXIT_FLAG, MAX_PROBLEM_COUNT, NUMBER_OF_THREADS, PROGRAM_REPORTS };
+		MAX_WARNING_EXIT_FLAG, MAX_PROBLEM_COUNT, NUMBER_OF_THREADS, USER_FUNCTIONS, PROGRAM_REPORTS };
 
 	virtual void Program_Control (void);
 	void List_Reports (void);

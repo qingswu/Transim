@@ -79,15 +79,36 @@ void Simulator_Service::Program_Control (void)
 	//---- process the data controls ----
 
 #ifdef ROUTING
-	Router_Service::Program_Control ();
+	Converge_Service::Program_Control ();
 
-	Read_Converge_Keys ();
+	//if (plan_memory_flag) {
+	//	Trip_Sort (TRAVELER_SORT);
+
+	//	if (trip_memory_flag) {
+	//		System_Data_Reserve (TRIP, 0);
+	//	}
+	//}
+
+	if (System_File_Flag (TRIP)) {
+		router_flag = true;
+		time_order_flag = true;
+
+		Time_Sort_Flag (true);
+		System_Read_False (TRIP);
+		System_Data_Reserve (TRIP, 0);
+	} else if (!System_File_Flag (PLAN)) {
+		Error ("Simulator requires a Trip or Plan file");
+	}
 #else
 	Data_Service::Program_Control ();
 
 	Read_Select_Keys ();
+
+	if (System_File_Flag (TRIP)) {
+		Error ("Simulator is Not Configured for Routing");
+	}
 #endif
-	
+
 	if (System_File_Flag (NEW_PROBLEM)) {
 		param.problem_flag = true;
 		Problem_File *problem_file = System_Problem_File (true);
@@ -395,6 +416,11 @@ void Simulator_Service::Program_Control (void)
 
 	Print (1);
 	read_all_flag = Get_Control_Flag (READ_ALL_PLANS_INTO_MEMORY);
+
+	if (!read_all_flag && !router_flag) {
+		System_Read_False (PLAN);
+		System_Data_Reserve (PLAN, 0);
+	}
 
 	//---- estimated number of travelers -----
 
