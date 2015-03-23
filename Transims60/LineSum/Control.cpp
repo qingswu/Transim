@@ -806,12 +806,17 @@ void LineSum::Program_Control (void)
 
 			key = Get_Control_Text (LINK_RIDER_LINES, i);
 			link_rider_data.lines.clear ();
+			link_rider_data.all_lines = false;
+			link_rider_data.each_line = false;
 
-			if (!key.empty () && !key.Equals ("ALL")) {
-				link_rider_data.all_lines = false;
-				key.Parse (link_rider_data.lines);
-			} else {
+			if (key.empty ()) {
 				link_rider_data.all_lines = true;
+			} else if (key.Equals ("ALL")) {
+				link_rider_data.all_lines = true;
+			} else if (key.Equals ("EACH")) {
+				link_rider_data.each_line = true;
+			} else {
+				key.Parse (link_rider_data.lines);
 			}
 			
 			//---- peak hours ----

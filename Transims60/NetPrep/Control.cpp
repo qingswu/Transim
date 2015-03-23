@@ -12,7 +12,7 @@ void NetPrep::Program_Control (void)
 {
 	String key;
 	Strings parts;
-	int i, j, num, mode, count, index;
+	int i, j, num;
 
 	//---- create the network files ----
 
@@ -309,6 +309,10 @@ void NetPrep::Program_Control (void)
 		split_length = Round (split_length);
 	}
 	
+	//---- split duplicate ab links ----
+
+	split_ab_flag = Get_Control_Flag (SPLIT_DUPLICATE_AB_LINKS);
+
 	//---- correct link shapes ----
 
 	correct_flag = Get_Control_Flag (CORRECT_LINK_SHAPES);
@@ -507,53 +511,15 @@ void NetPrep::Program_Control (void)
 	if (System_File_Flag (NEW_ROUTE_NODES)) {
 		route_flag = true;
 		File_Group group_rec;
+		Expand_Group expand_rec;
 		Integer_List list;
 		Double_List dlist;
 		Int_Itr itr;
 		Dbl_Itr ditr;
-		String_List str_list;
-		Str_Itr str_itr;
 
 		Route_Nodes_File *route_nodes = System_Route_Nodes_File (true);
 
 		Print (1);
-
-		if (System_File_Flag (ROUTE_NODES)) {
-			Copy_File_Header (ROUTE_NODES, NEW_ROUTE_NODES);
-
-			num_periods = route_nodes->Num_Periods ();
-			offset_flag = route_nodes->Offset_Flag ();
-			time_flag = route_nodes->TTime_Flag ();
-		} else {
-
-			//---- get the time periods ----
-
-			key = Get_Control_Text (TRANSIT_TIME_PERIODS);
-
-			if (!key.empty ()) {
-				schedule_periods.Add_Breaks (key);
-			}
-			num_periods = schedule_periods.Num_Periods ();
-			route_nodes->Num_Periods (num_periods);
-
-			//---- collapse route data ----
-
-			collapse_routes = Get_Control_Flag (COLLAPSE_ROUTE_DATA);
-
-			//---- update the file header ----
-
-			route_nodes->Clear_Fields ();
-			route_nodes->Create_Fields ();
-			route_nodes->Write_Header ();
-
-			if (num_periods > 0 || time_flag) Print (1);
-		}
-		offset_flag = route_nodes->Offset_Flag ();
-		time_flag = route_nodes->TTime_Flag ();
-
-		//---- first route number ----
-
-		new_route = Get_Control_Integer (FIRST_ROUTE_NUMBER);
 
 		//---- determine the number of file groups ----
 
@@ -562,89 +528,44 @@ void NetPrep::Program_Control (void)
 		if (num != 0) {
 			input_route_flag = true;
 
+			if (System_File_Flag (ROUTE_NODES)) {
+				Copy_File_Header (ROUTE_NODES, NEW_ROUTE_NODES);
+
+				num_periods = route_nodes->Num_Periods ();
+				offset_flag = route_nodes->Offset_Flag ();
+				time_flag = route_nodes->TTime_Flag ();
+			} else {
+
+				//---- get the time periods ----
+
+				num_periods = transit_time_periods.Num_Periods ();
+				route_nodes->Num_Periods (num_periods);
+
+				//---- collapse route data ----
+
+				collapse_routes = Get_Control_Flag (COLLAPSE_ROUTE_DATA);
+
+				//---- update the file header ----
+
+				route_nodes->Clear_Fields ();
+				route_nodes->Create_Fields ();
+				route_nodes->Write_Header ();
+
+				if (num_periods > 0 || time_flag) Print (1);
+			}
+			offset_flag = route_nodes->Offset_Flag ();
+			time_flag = route_nodes->TTime_Flag ();
+
+			//---- first route number ----
+
+			new_route = Get_Control_Integer (FIRST_ROUTE_NUMBER);
+
 			//---- input route format ----
 
 			route_format = Format_Code (Get_Control_Text (INPUT_ROUTE_FORMAT));
 
 			if (route_format != TPPLUS) {
 				Error (String ("Input Route Format %s is Not Currently Supported") % Format_Code (route_format));
-			}
-
-			//---- process the mode map ----
-
-			if (!Get_Control_List_Groups (ROUTE_MODE_MAP, str_list)) {
-				Error ("Route Mode Map was Not Found");
-			}
-
-			for (count=0, str_itr = str_list.begin (); str_itr != str_list.end (); str_itr++, count++) {
-				if (count == 0) continue;
-				key = *str_itr;
-				key.Parse (parts, "=");
-
-				if (parts.size () != 2) {
-					key = *str_itr;
-					index = (count % 3);
-
-					if (index == 1) {
-						mode = key.Integer ();
-					} else if (index == 2) {
-						if (!key.Equals ("=")) {
-							Error ("Route Mode Map Syntax (input_mode_number = TRANSIMS_mode_name)");
-						}
-					} else {
-						j = Transit_Code (key);
-						if (j == ANY_TRANSIT) {
-							Error ("Route Mode Map is Out of Range");
-						}
-						mode_map.insert (Int_Map_Data (mode, j));						
-					}
-				} else {
-					mode = parts [0].Integer ();
-					j = Transit_Code (parts [1]);
-					if (j == ANY_TRANSIT) {
-						Error ("Route Mode Map is Out of Range");
-					}
-					mode_map.insert (Int_Map_Data (mode, j));
-					count = 0;
-				}
-			}
-
-			//---- process the mode veh_type map ----
-
-			memset (mode_type_map, '\0', sizeof (mode_type_map));
-
-			if (Get_Control_List_Groups (MODE_VEH_TYPE_MAP, str_list)) {
-				j = 0;
-
-				for (count=0, str_itr = str_list.begin (); str_itr != str_list.end (); str_itr++, count++) {
-					key = *str_itr;
-					key.Parse (parts, "=");
-
-					if (parts.size () != 2) {
-						key = *str_itr;
-						index = (count % 3);
-
-						if (index == 1) {
-							j = Transit_Code (key);
-							if (j == ANY_TRANSIT) {
-								Error ("Mode Veh Type Map is Out of Range");
-							}
-						} else if (index == 2) {
-							if (!key.Equals ("=")) {
-								Error ("Mode Veh Type Map Syntax (TRANSIMS_mode_name = vehicle_type_number)");
-							}
-						} else {
-							mode_type_map [j] = key.Integer ();
-						}
-					} else {
-						j = Transit_Code (parts [0]);
-						if (j == ANY_TRANSIT) {
-							Error ("Mode Veh_Type Map is Out of Range");
-						}
-						mode_type_map [j] = parts [1].Integer ();
-						count = 0;
-					}
-				}
 			}
 
 			//---- read the input route files ----
@@ -669,7 +590,7 @@ void NetPrep::Program_Control (void)
 				Print (1);
 				group_rec.line_file->File_Type (String ("Input Route File #%d") % i);
 
-				group_rec.line_file->Open (Project_Filename (key));
+			group_rec.line_file->Open (Project_Filename (key));
 
 				//---- process the period map ----
 
@@ -709,6 +630,101 @@ void NetPrep::Program_Control (void)
 				//---- save the record ----
 
 				file_groups.push_back (group_rec);
+			}
+
+		} else {
+
+			//---- determine the number of period groups ----
+
+			num = Highest_Control_Group (ROUTE_PERIOD_MAP, 0);
+
+			if (num != 0) {
+				expand_flag = true;
+
+				if (!System_File_Flag (ROUTE_NODES)) {
+					Error ("Route Nodes Files is Required for Period Expansion");
+				}
+
+				//---- get the time periods ----
+
+				num_periods = transit_time_periods.Num_Periods ();
+				offset_flag = route_nodes->Offset_Flag ();
+				time_flag = route_nodes->TTime_Flag ();
+
+				//---- read the input route files ----
+
+				for (i=1; i <= num; i++) {
+
+					expand_rec.group = i;
+					expand_rec.period_map.assign (num_periods, 0);
+					expand_rec.period_fac.assign (num_periods, 1.0);
+					expand_rec.flip = false;
+
+					//---- process the period map ----
+
+					if (!Get_Control_List (ROUTE_PERIOD_MAP, list, i)) {
+						Error ("Route Period Map was Not Found");
+					}
+					itr = list.begin ();
+
+					for (j=0, ++itr;  itr != list.end (); itr++, j++) {
+						if (j < num_periods) {
+							expand_rec.period_map [j] = *itr;
+						}
+					}
+
+					//---- process the period factor ----
+
+					if (Check_Control_Key (ROUTE_PERIOD_FACTOR, i)) {
+						Get_Control_List (ROUTE_PERIOD_FACTOR, dlist, i);
+
+						ditr = dlist.begin ();
+
+						for (j=0, ++ditr;  ditr != dlist.end (); ditr++, j++) {
+							if (j < num_periods && *ditr > 0.0) {
+								expand_rec.period_fac [j] = *ditr;
+							}
+						}
+					}
+
+					//---- check the flip flag ----
+
+					expand_rec.flip = Get_Control_Flag (FLIP_ROUTE_FLAG, i);
+
+					//---- save the record ----
+
+					expand_groups.push_back (expand_rec);
+				}
+
+			} else {
+
+				if (System_File_Flag (ROUTE_NODES)) {
+					Copy_File_Header (ROUTE_NODES, NEW_ROUTE_NODES);
+
+					num_periods = route_nodes->Num_Periods ();
+					offset_flag = route_nodes->Offset_Flag ();
+					time_flag = route_nodes->TTime_Flag ();
+				} else {
+
+					//---- get the time periods ----
+
+					num_periods = transit_time_periods.Num_Periods ();
+					route_nodes->Num_Periods (num_periods);
+
+					//---- collapse route data ----
+
+					collapse_routes = Get_Control_Flag (COLLAPSE_ROUTE_DATA);
+
+					//---- update the file header ----
+
+					route_nodes->Clear_Fields ();
+					route_nodes->Create_Fields ();
+					route_nodes->Write_Header ();
+
+					if (num_periods > 0 || time_flag) Print (1);
+				}
+				offset_flag = route_nodes->Offset_Flag ();
+				time_flag = route_nodes->TTime_Flag ();
 			}
 		}
 	}

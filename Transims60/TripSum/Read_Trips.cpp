@@ -15,6 +15,7 @@ void TripSum::Trip_Processing::Read_Trips (int part)
 {
 	int period, num_periods, code, prev_purp, increment, node;
 	double ttime, distance, dx, dy;
+	Dtime tod;
 
 	Select_Map_Itr sel_itr;
 	Trip_Data trip_data;
@@ -81,6 +82,7 @@ void TripSum::Trip_Processing::Read_Trips (int part)
 		if (exe->select_households && !exe->hhold_range.In_Range (trip_data.Household ())) continue;
 		if (trip_data.Mode () < MAX_MODE && !exe->select_mode [trip_data.Mode ()]) continue;
 		if (exe->select_purposes && !exe->purpose_range.In_Range (trip_data.Purpose ())) continue;
+		if (exe->select_priorities || !exe->select_priority [trip_data.Priority ()]) continue;
 		if (exe->select_travelers && !exe->traveler_range.In_Range (trip_data.Type ())) continue;
 		if (exe->select_vehicles && !exe->vehicle_range.In_Range (trip_data.Veh_Type ())) continue;
 		if (exe->select_start_times && !exe->start_range.In_Range (trip_data.Start ())) continue;
@@ -194,6 +196,47 @@ void TripSum::Trip_Processing::Read_Trips (int part)
 					if (location_ptr->Zone () >= 0) {
 						ints_ptr = &(*zone_trip_ptr) [location_ptr->Zone ()];
 						(*ints_ptr) [period * 2 + 1]++;
+					}
+				}
+			}
+		}
+
+		//---- summarize trips by trip table ----
+
+		if (exe->trip_table_flag) {
+			int org, des;
+			Zone_Data *zone_ptr;
+
+			tod = (trip_data.Start () + trip_data.End ()) / 2;
+
+			period = exe->sum_periods.Period (tod);
+
+			if (period >= 0) {
+				org = des = 0;
+				map_itr = exe->location_map.find (trip_data.Origin ());
+				if (map_itr != exe->location_map.end ()) {
+					location_ptr = &exe->location_array [map_itr->second];
+
+					if (location_ptr->Zone () >= 0) {
+						zone_ptr = &exe->zone_array [location_ptr->Zone ()];
+						org = zone_ptr->Zone ();
+					}
+				}
+				map_itr = exe->location_map.find (trip_data.Destination ());
+				if (map_itr != exe->location_map.end ()) {
+					location_ptr = &exe->location_array [map_itr->second];
+
+					if (location_ptr->Zone () >= 0) {
+						zone_ptr = &exe->zone_array [location_ptr->Zone ()];
+						des = zone_ptr->Zone ();
+					}
+				}
+				if (org > 0 && des > 0) {
+					org = exe->trip_table_file->Add_Org (org);
+					des = exe->trip_table_file->Add_Des (des);
+
+					if (org >= 0 && des >= 0) {
+						exe->trip_table_file->Add_Cell_Index (period, org, des, 0, 1);
 					}
 				}
 			}

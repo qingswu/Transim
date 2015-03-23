@@ -75,8 +75,13 @@ void Skim_Processor::Start_Processing (void)
 
 		//---- create the path threads ----
 
+		threads.clear ();
 		for (int i=0; i < num_builders; i++) {
-			threads.push_back (thread (ref (*(path_builder [i]))));
+			Path_Builder *ptr = path_builder [i];
+
+			ptr->Parameters ()->one_to_many = true;
+
+			threads.push_back (thread (ref (*ptr)));
 		}
 		threads.push_back (thread (save_results));
 	}

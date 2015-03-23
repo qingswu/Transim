@@ -148,9 +148,6 @@
     <ClCompile Include="Service\Execute.cpp">
       <Filter>Service\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Service\Get_Household_Data.cpp">
-      <Filter>Service\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Service\Plan_Processor.cpp">
       <Filter>Service\Source Files</Filter>
     </ClCompile>
@@ -167,6 +164,12 @@
       <Filter>Path_Builder\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Path_Builder\Load_Flow.cpp">
+      <Filter>Path_Builder\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Path_Builder\Plan_Extend.cpp">
+      <Filter>Path_Builder\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Path_Builder\Plan_Stop.cpp">
       <Filter>Path_Builder\Source Files</Filter>
     </ClCompile>
   </ItemGroup>

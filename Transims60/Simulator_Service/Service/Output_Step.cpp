@@ -184,13 +184,21 @@ bool Simulator_Service::Output_Step (Travel_Step &step)
 		if (Num_Threads () > 0 && (int) step.size () > 1) {
 			int index = step.Dir_Index ();
 			Sim_Veh_Itr sim_veh_itr;
-
+#ifdef CHECK
+			if (index < 0 || index > (int) sim->sim_dir_array.size ()) sim->Error (String ("Output_Step::Unlock Index=%d vs %d") % index % sim->sim_dir_array.size ());
+#endif
 			//---- release link locks ----
 
 			for (sim_veh_itr = step.begin (); sim_veh_itr != step.end (); sim_veh_itr++) {
-				if (sim_veh_itr->link != index && sim_veh_itr->lane > -1) {
+				if (sim_veh_itr->link != index && sim_veh_itr->link >= 0 && sim_veh_itr->lane > -1) {
 					index = sim_veh_itr->link;
+#ifdef CHECK
+					if (index < 0 || index > (int) sim->sim_dir_array.size ()) sim->Error (String ("Output_Step::Unlock Index=%d vs %d") % index % sim->sim_dir_array.size ());
+#endif
 					sim_dir_ptr = &sim->sim_dir_array [index];
+#ifdef CHECK
+					if (step.Process_ID () > 0 && sim_dir_ptr->Lock () != step.Process_ID ()) sim->Error (String ("Output_Step::Unlock (% vs %d), Index=%d, dir=%d") % sim_dir_ptr->Lock () % step.Process_ID () % index % sim_dir_ptr->Dir ());
+#endif
 					sim->sim_dir_array.UnLock (sim_dir_ptr, step.Process_ID ());
 				}
 			}

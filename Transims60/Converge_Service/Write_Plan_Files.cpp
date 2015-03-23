@@ -2,13 +2,13 @@
 //	Write_Plan_Files.cpp - sort and write plan files
 //*********************************************************
 
-#include "Router.hpp"
+#include "Converge_Service.hpp"
 
 //---------------------------------------------------------
 //	Write_Plan_Files
 //---------------------------------------------------------
 
-void Router::Write_Plan_Files (void)
+void Converge_Service::Write_Plan_Files (void)
 {
 	int i, index;
 	bool first;
@@ -23,45 +23,50 @@ void Router::Write_Plan_Files (void)
 	Reset_Problems ();
 
 	if (time_sort_flag) {
-		Show_Message ("Sorting Plans by Time -- Record");
-		Set_Progress ();
+		if (time_order_flag) {
+			plan_time_map = initial_time_map;
+		} else {
+			Show_Message ("Sorting Plans by Time -- Record");
+			Set_Progress ();
 
-		for (index=0, plan_itr = plan_array.begin (); plan_itr != plan_array.end (); plan_itr++, index++) {
-			if (plan_itr->Household () == 0	|| plan_itr->Problem () > 0 || plan_itr->size () == 0) continue;
-			Show_Progress ();
+			for (index=0, plan_itr = plan_array.begin (); plan_itr != plan_array.end (); plan_itr++, index++) {
+				if (plan_itr->Household () == 0) continue;
+				Show_Progress ();
 
-			if (plan_itr->Problem () > 0) {
-				Set_Problem ((Problem_Type) plan_itr->Problem ());
+				if (plan_itr->Problem () > 0) {
+					Set_Problem ((Problem_Type) plan_itr->Problem ());
 
-				if (problem_flag) {
-					plan_itr->External_IDs ();
-
-					if (problem_set_flag) {
-						i = plan_itr->Partition ();
-						Write_Problem (problem_set [i], &(*plan_itr));
-					} else {
-						Write_Problem (problem_file, &(*plan_itr));
+					if (problem_flag) {
+						if (plan_itr->External_IDs ()) {
+							if (problem_set_flag) {
+								i = plan_itr->Partition ();
+								Write_Problem (problem_set [i], &(*plan_itr));
+							} else {
+								Write_Problem (problem_file, &(*plan_itr));
+							}
+						}
 					}
 				}
-			} else if (plan_itr->size () > 0) {
-				if (plan_itr->Depart () < 0) {
-					exe->Warning (String ("Plan %d-%d-%d-%d Departs %s vs. Start Time %s") %
-						plan_itr->Household () % plan_itr->Person () % plan_itr->Tour () % plan_itr->Trip () % 
-						plan_itr->Depart ().Time_String () % plan_itr->Start ().Time_String ());
-					plan_itr->Depart (0);
-				}
-				plan_itr->Get_Index (time_index);
+				if (!plan_itr->Path_Problem () && plan_itr->size () > 0) {
+					if (plan_itr->Depart () < 0) {
+						Warning (String ("Plan %d-%d-%d-%d Departs %s vs. Start Time %s") %
+							plan_itr->Household () % plan_itr->Person () % plan_itr->Tour () % plan_itr->Trip () % 
+							plan_itr->Depart ().Time_String () % plan_itr->Start ().Time_String ());
+						plan_itr->Depart (0);
+					}
+					plan_itr->Get_Index (time_index);
 
-				time_stat = plan_time_map.insert (Time_Map_Data (time_index, index));
+					time_stat = plan_time_map.insert (Time_Map_Data (time_index, index));
 
-				if (!time_stat.second) {
-					Warning (String ("Duplicate Plan Index = %s-%d-%d") % 
-						time_index.Start ().Time_String () % 
-						time_index.Household () % time_index.Person ());
+					if (!time_stat.second) {
+						Warning (String ("Duplicate Plan Index = %s-%d-%d") % 
+							time_index.Start ().Time_String () % 
+							time_index.Household () % time_index.Person ());
+					}
 				}
 			}
+			End_Progress ();
 		}
-		End_Progress ();
 	}
 
 	if (num_file_sets > 1) {
@@ -94,16 +99,17 @@ void Router::Write_Plan_Files (void)
 		plan_ptr = &plan_array [index];
 		if (plan_ptr == 0) continue;
 
-		plan_ptr->External_IDs ();
+		if (!plan_ptr->External_IDs ()) continue;
 
-		if (plan_ptr->Problem () == 0 && plan_ptr->size () > 0) {
+		if (!plan_ptr->Path_Problem () && plan_ptr->size () > 0) {
 			if (new_set_flag) {
 				i = plan_ptr->Partition ();
 				new_file_set [i]->Write_Plan (*plan_ptr);
 			} else {
 				new_plan_file->Write_Plan (*plan_ptr);
 			}
-		} else if (plan_ptr->Problem () > 0) {
+		}
+		if (plan_ptr->Problem () > 0) {
 			Set_Problem ((Problem_Type) plan_ptr->Problem ());
 
 			if (problem_flag) {

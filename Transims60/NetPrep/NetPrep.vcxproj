@@ -321,6 +321,7 @@
     <ClCompile Include="Delete_Link.cpp" />
     <ClCompile Include="Drop_Links.cpp" />
     <ClCompile Include="Execute.cpp" />
+    <ClCompile Include="Expand_Route.cpp" />
     <ClCompile Include="Get_Link_Data.cpp" />
     <ClCompile Include="Get_Node_Data.cpp" />
     <ClCompile Include="Input_Links.cpp" />
@@ -341,6 +342,7 @@
     <ClCompile Include="Select_Best.cpp" />
     <ClCompile Include="Short_Links.cpp" />
     <ClCompile Include="Space_Processing.cpp" />
+    <ClCompile Include="Split_AB_Links.cpp" />
     <ClCompile Include="Split_Loops.cpp" />
     <ClCompile Include="Thru_Links.cpp" />
     <ClCompile Include="Trace_Links.cpp" />

@@ -170,7 +170,7 @@ void FileFormat::Program_Control (void)
 
 						key.Split (name, ",");
 						if (name.empty ()) {
-							Error (String ("New Data Field %d-%d is Improperly Specified") %i % j);
+							Error (String ("New Data Field %d-%d is Improperly Specified") % i % j);
 						}
 						field = data_ptr->new_file->Field_Number (name);
 						if (field >= 0) {
@@ -188,7 +188,7 @@ void FileFormat::Program_Control (void)
 							type = DB_TIME;
 							units = Time_Format ();
 						} else {
-							Error (String ("New Data Field %d-%d is Improperly Specified") %i % j);
+							Error (String ("New Data Field %d-%d is Improperly Specified") % i % j);
 						}
 						key.Split (buf, ",");
 						if (buf.empty ()) {

@@ -13,6 +13,8 @@ bool Trip_Data::Internal_IDs (void)
 {
 	Int_Map_Itr map_itr;
 
+	if (Transit_Mode_Flag () && !dat->System_File_Flag (TRANSIT_ROUTE)) return (false);
+
 	map_itr = dat->location_map.find (Origin ());
 
 	if (map_itr == dat->location_map.end ()) {

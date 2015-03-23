@@ -626,9 +626,11 @@ Dtime  Perf_Period_Array::Flow_Time (int dir_index, Dtime time, double len_facto
 		Perf_Period *period_ptr = &at (period);
 
 		Perf_Data *perf_ptr = period_ptr->Data_Ptr (dir_index);
-		
-		if (perf_ptr->Time () <= 0) return (-1);
 
+		if (perf_ptr->Time () <= 0) {
+			Dir_Data *dir_ptr = &dat->dir_array [dir_index];
+			perf_ptr->Time (dir_ptr->Time0 ());
+		}
 		if (len_factor <= 0.0) {
 			ttime += perf_ptr->Time ();
 			goto link_end;

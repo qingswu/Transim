@@ -11,33 +11,29 @@
 RoutePrep::RoutePrep (void) : Data_Service ()
 {
 	Program ("RoutePrep");
-	Version (11);
+	Version (12);
 	Title ("Transit Route Preparation Utility");
 
 	System_File_Type optional_files [] = {
 		LINK, NODE, SHAPE, ROUTE_NODES, NEW_NODE, NEW_LINK, NEW_SHAPE, NEW_ROUTE_NODES, END_FILE
 	};
 	int file_service_keys [] = {
-		NOTES_AND_NAME_FIELDS, 0
+		NOTES_AND_NAME_FIELDS, TRANSIT_TIME_PERIODS, ROUTE_NODE_OFFSET_FLAG, ROUTE_NODE_RUN_TIME_FLAG, ROUTE_NODE_TYPE_FLAG, 0
 	};
-
+	int data_service_keys [] = {
+		ROUTE_MODE_MAP, MODE_VEH_TYPE_MAP, 0
+	};
 	Control_Key routeprep_keys [] = { //--- code, key, level, status, type, default, range, help ----
 		{ FIRST_NODE_NUMBER, "FIRST_NODE_NUMBER", LEVEL0, OPT_KEY, INT_KEY, "1", "1..1000000000", NO_HELP },
 		{ FIRST_LINK_NUMBER, "FIRST_LINK_NUMBER", LEVEL0, OPT_KEY, INT_KEY, "1", "1..1000000000", NO_HELP },
 		{ FIRST_ROUTE_NUMBER, "FIRST_ROUTE_NUMBER", LEVEL0, OPT_KEY, INT_KEY, "1", "1..100000", NO_HELP },
-		{ ROUTE_MODE_MAP, "ROUTE_MODE_MAP", LEVEL1, OPT_KEY, LIST_KEY, "BUS", "BUS, EXPRESS, TROLLEY, STREETCAR, LIGHTRAIL, RAPIDRAIL, REGIONRAIL", NO_HELP },
-		{ MODE_VEH_TYPE_MAP, "MODE_VEH_TYPE_MAP", LEVEL1, OPT_KEY, LIST_KEY, "1", "1..100", NO_HELP },
-
+		
 		{ CONVERT_NODE_NUMBERS, "CONVERT_NODE_NUMBERS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },		
 		{ INPUT_NODE_FILE, "INPUT_NODE_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		{ INPUT_NODE_FORMAT, "INPUT_NODE_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, FORMAT_HELP },
 		{ NODE_MAP_FILE, "NODE_MAP_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		{ NEW_NODE_MAP_FILE, "NEW_NODE_MAP_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 
-		{ TRANSIT_TIME_PERIODS, "TRANSIT_TIME_PERIODS", LEVEL0, OPT_KEY, TEXT_KEY, "NONE", TIME_BREAK_RANGE, NO_HELP },
-		{ TRANSIT_PERIOD_OFFSETS, "TRANSIT_PERIOD_OFFSETS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
-		{ PERIOD_TRAVEL_TIMES, "PERIOD_TRAVEL_TIMES", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
-		{ TRANSIT_NODE_TYPES, "TRANSIT_NODE_TYPES", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ COLLAPSE_ROUTE_DATA, "COLLAPSE_ROUTE_DATA", LEVEL0, OPT_KEY, BOOL_KEY, "TRUE", BOOL_RANGE, NO_HELP },
 		{ COORDINATE_RESOLUTION, "COORDINATE_RESOLUTION", LEVEL0, OPT_KEY, FLOAT_KEY, "3.0 feet", "0..100 feet", NO_HELP },
 		{ CONVERSION_SCRIPT, "CONVERSION_SCRIPT", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
@@ -86,6 +82,8 @@ RoutePrep::RoutePrep (void) : Data_Service ()
 		{ SEGMENT_FIELD, "SEGMENT_FIELD", LEVEL0, OPT_KEY, TEXT_KEY, "", "", NO_HELP },
 		{ SPEED_FACTOR_FIELD, "SPEED_FACTOR_FIELD", LEVEL0, OPT_KEY, TEXT_KEY, "", "", NO_HELP },
 		{ IGNORE_EXISTING_SPEEDS, "IGNORE_EXISTING_SPEEDS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
+
+		{ TRANSCAD_ROUTE_SYSTEM, "TRANSCAD_ROUTE_SYSTEM", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
 		END_CONTROL
 	};
 	const char *reports [] = {
@@ -96,6 +94,7 @@ RoutePrep::RoutePrep (void) : Data_Service ()
 	};
 	Optional_System_Files (optional_files);
 	File_Service_Keys (file_service_keys);
+	Data_Service_Keys (data_service_keys);
 
 	Key_List (routeprep_keys);
 	Report_List (reports);
@@ -110,7 +109,7 @@ RoutePrep::RoutePrep (void) : Data_Service ()
 	speed_route_field = speed_peak_field = speed_offpeak_field = segment_field = speed_fac_field = -1;
 	convert_flag = shape_flag = offset_flag = time_flag = collapse_routes = in_route_flag = out_route_flag = segment_report = seg_fac_flag = false;
 	route_freq_flag = route_shape_flag = route_stop_flag = station_flag = platform_flag = new_route_flag = route_speed_flag = false;
-	convert_node_flag = input_node_flag = node_map_flag = new_map_flag = ignore_speeds = false;
+	convert_node_flag = input_node_flag = node_map_flag = new_map_flag = ignore_speeds = tcad_route_flag = false;
 	route_shape_file = 0;
 	new_route_nodes = 0;
 

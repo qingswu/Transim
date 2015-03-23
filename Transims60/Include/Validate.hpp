@@ -26,7 +26,7 @@ public:
 protected:
 	enum Validate_Keys { 
 		INPUT_VOLUME_FILE = 1, TRAFFIC_COUNT_FILE, TURN_VOLUME_FILE, TURN_COUNT_FILE, LINE_GROUP_COUNT_FILE, 
-		STOP_GROUP_COUNT_FILE, NEW_VOLUME_FILE, NEW_VOLUME_COUNT_FILE, ANALYSIS_METHOD,
+		STOP_GROUP_COUNT_FILE, NEW_VOLUME_FILE, NEW_VOLUME_COUNT_FILE, ANALYSIS_METHOD, ENTRY_DATA_FLAG, 
 		ADJUSTMENT_FACTOR, FACILITY_TYPE_LABELS, AREA_TYPE_LABELS, 
 		CHECK_NETWORK_FLAG, NEW_PROBLEM_NODE_FILE, NEW_PROBLEM_LINK_FILE, NEW_PROBLEM_COORDINATE_FILE,
 	};
@@ -39,7 +39,7 @@ private:
 		LINE_GROUP, STOP_GROUP, BOARD_GROUP, ALIGHT_GROUP, LINE_EQUIV, STOP_EQUIV};
 
 	bool delay_flag, turn_delay_flag, check_net_flag, problem_node_flag, problem_link_flag, problem_coord_flag;
-	bool link_flag, turn_flag, output_flag, zone_flag, method, line_flag, stop_flag, vc_flag, cnt_dir_flag;
+	bool link_flag, turn_flag, output_flag, zone_flag, method, entry_flag, line_flag, stop_flag, vc_flag, cnt_dir_flag;
 	double factor, hours;
 
 	Db_Header zone_file, line_count_file, stop_count_file;

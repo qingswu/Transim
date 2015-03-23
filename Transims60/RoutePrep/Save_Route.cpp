@@ -114,7 +114,7 @@ void RoutePrep::Save_Route (Route_Data &data)
 
 		route_ptr->Name (data.name);
 		route_ptr->Mode (data.mode);
-		route_ptr->Veh_Type (mode_type_map.Best (data.mode));
+		route_ptr->Veh_Type (mode_type_map [data.mode]);
 		route_ptr->Notes (data.notes);
 
 		for (i=0; i < num_periods; i++) {
@@ -241,7 +241,7 @@ void RoutePrep::Save_Route (Route_Data &data)
 
 			route_ptr->Name (data.name);
 			route_ptr->Mode (data.mode);
-			route_ptr->Veh_Type (mode_type_map.Best (data.mode));
+			route_ptr->Veh_Type (mode_type_map [data.mode]); 
 			route_ptr->Notes (data.notes);
 
 			for (i=0; i < num_periods; i++) {

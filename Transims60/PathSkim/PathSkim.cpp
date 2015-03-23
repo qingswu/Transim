@@ -11,7 +11,7 @@
 PathSkim::PathSkim (void) : Router_Service ()
 {
 	Program ("PathSkim");
-	Version (11);
+	Version (13);
 	Title ("Build and Skim Network Paths");
 
 	System_File_Type optional_files [] = {
@@ -69,6 +69,7 @@ PathSkim::PathSkim (void) : Router_Service ()
 	Enable_Partitions (true);
 	Location_XY_Flag (true);
 
+	plan_flag = problem_flag = false;
 	mode_flag = select_org = select_des = select_time = skim_flag = zone_skim_flag = district_flag = false;
 	zone_loc_flag = zone_flag = org_loc_flag = des_loc_flag = user_loc_flag = accessibility_flag = false;
 	new_mode = nprocess = constraint = total_records = num_org = num_des = cells_out = 0;

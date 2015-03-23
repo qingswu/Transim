@@ -14,6 +14,7 @@ void Sim_Dir_Data::Load_Queue (int traveler)
 	sim->sim_travel_array [traveler].Next_Load (-1);
 
 	sim->sim_dir_array.Lock (this);
+//sim->Warning (String ("Sim_Dir_Data::Load_Queue: Lock %d, dir=%d") % this->Lock () % this->Dir ());
 	if (first_load < 1) {
 		first_load = last_load = traveler;
 	} else {
@@ -29,6 +30,7 @@ void Sim_Dir_Data::Load_Queue (int traveler)
 		ptr->Next_Load (traveler);
 		last_load = traveler;
 	}
+//sim->Warning (String ("Sim_Dir_Data::Load_Queue: UnLock %d, dir=%d") % this->Lock () % this->Dir ());
 	sim->sim_dir_array.UnLock (this);
 }
 
@@ -66,7 +68,7 @@ void Sim_Dir_Array::UnLock (Sim_Dir_Ptr ptr, int id)
 
 	if (id > 0 && ptr->Lock () != id) {
 #ifdef CHECK
-		sim->Error ("Sim_Dir_Array::UnLock: Not Owned");
+		sim->Error (String ("Sim_Dir_Array::UnLock: Not Owned (%d vs %d)") % id % ptr->Lock ());
 #endif
 		return;
 	}

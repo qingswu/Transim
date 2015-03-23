@@ -11,7 +11,7 @@
 ModeChoice::ModeChoice (void) : Execution_Service (), Select_Service ()
 {
 	Program ("ModeChoice");
-	Version (5);
+	Version (8);
 	Title ("Mode Choice Processing");
 	
 	int select_service_keys [] = {
@@ -47,7 +47,10 @@ ModeChoice::ModeChoice (void) : Execution_Service (), Select_Service ()
 		{ PENALTY_TIME_VALUE, "PENALTY_TIME_VALUE", LEVEL0, OPT_KEY, FLOAT_KEY, "0.0", "0, -1.0..-0.01", NO_HELP },
 		{ TERMINAL_TIME_VALUE, "TERMINAL_TIME_VALUE", LEVEL0, OPT_KEY, FLOAT_KEY, "0.0", "0, -1.0..-0.01", NO_HELP },
 		{ TRANSFER_COUNT_VALUE, "TRANSFER_COUNT_VALUE", LEVEL0, OPT_KEY, FLOAT_KEY, "0.0", "0, -1.0..-0.01", NO_HELP },
+		{ DIFFERENCE_VALUE, "DIFFERENCE_VALUE", LEVEL0, OPT_KEY, FLOAT_KEY, "0.0", "0, -5.0..5.0", NO_HELP },
+		{ DISTANCE_VALUE, "DISTANCE_VALUE", LEVEL0, OPT_KEY, FLOAT_KEY, "0.0", "0, -1.0..-0.01", NO_HELP },
 		{ COST_VALUE_TABLE, "COST_VALUE_TABLE", LEVEL1, OPT_KEY, FLOAT_KEY, "0.0", "0, -5.0..0.0", NO_HELP },
+		{ USER_VALUE_TABLE, "USER_VALUE_TABLE", LEVEL1, OPT_KEY, FLOAT_KEY, "0.0", "0, -5.0..5.0", NO_HELP },
 		{ MODE_ACCESS_MARKET, "MODE_ACCESS_MARKET", LEVEL1, OPT_KEY, TEXT_KEY, "", "SOV, SR2, SR3...", NO_HELP },
 		{ ACCESS_MARKET_NAME, "ACCESS_MARKET_NAME", LEVEL1, OPT_KEY, TEXT_KEY, "", "", NO_HELP },
 		{ NEW_TABLE_MODES, "NEW_TABLE_MODES", LEVEL1, OPT_KEY, TEXT_KEY, "", "", NO_HELP },
@@ -89,8 +92,8 @@ ModeChoice::ModeChoice (void) : Execution_Service (), Select_Service ()
 	org_map_field = des_map_field = segment_field = zone_field = market_field = -1;
 	num_modes = num_tables = num_access = num_market = header_value = zones = 0;
 	max_iter = 1;
-	time_field = walk_field = auto_field = wait_field = lwait_field = xwait_field = tpen_field = term_field = -1;
-	cost_field = xfer_field = bias_field = pef_field = cbd_field = const_field = tab_field = no_field = -1;
+	time_field = walk_field = auto_field = wait_field = lwait_field = xwait_field = tpen_field = term_field = diff_field = -1;
+	dist_field = cost_field = xfer_field = bias_field = pef_field = cbd_field = const_field = tab_field = no_field = -1;
 	time_value = walk_value = drive_value = wait_value = lwait_value = xwait_value = tpen_value = term_value = 0.0;
 	xfer_value = scale_fac = 0.0;
 	trip_factor = 1.0;

@@ -106,6 +106,13 @@ void TripSum::Execute (void)
 		Write_Zone_Trips ();
 	}
 
+	//---- write the new matrix ----
+
+	if (trip_table_flag) {
+		trip_table_file->Write_Matrix ();
+		trip_table_file->Close ();
+	}
+
 	//---- print processing summary ----
 
 	trip_file->Print_Summary ();

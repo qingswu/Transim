@@ -67,13 +67,15 @@ public:
 	void Reset_Skim_Gap (void)     { skim_gap = skim_time = 0.0; }
 	void Save_Skim_Gap (void);
 
+	Path_Parameters * Parameters (void) { return (&path_param); }
+
 private:
 	unsigned max_imp, imp_diff;
 	int near_offset, parking_lot;
 	bool time_flag, dist_flag, length_flag, zero_flag, wait_time_flag, use_flag, local_acc_flag, access_flag;
 	bool transfer_flag, reset_veh_flag, mode_path_flag [MAX_MODE], flow_flag, walk_acc_flag, park_flag;
 	bool walk_flag, bike_flag, wait_flag, rail_bias_flag, brt_bias_flag, bus_bias_flag, turn_flag, random_flag;
-	bool zero_flows_flag, update_time_flag;
+	bool zero_flows_flag, update_time_flag, constraint_flag;
 
 	Dtime time_limit, min_time_limit, parking_duration;
 
@@ -108,12 +110,14 @@ private:
 	Transit_Sort transit_sort;
 	Int_Heap imp_sort;
 
-	bool Plan_Build (Plan_Ptr plan_ptr);
-	bool Plan_Update (Plan_Ptr plan_ptr);
-	bool Plan_ReRoute (Plan_Ptr plan_ptr);
-	bool Plan_Flow (Plan_Ptr plan_ptr);
-	bool Plan_Reskim (Plan_Ptr plan_ptr);
-	Dtime Load_Flow (Plan_Ptr plan_ptr);
+	bool Plan_Build (void);
+	bool Plan_Update (void);
+	bool Plan_ReRoute (void);
+	bool Plan_Extend (void);
+	bool Plan_Flow (void);
+	bool Plan_Reskim (void);
+	bool Plan_Stop (void);
+	Dtime Load_Flow (void);
 
 	int  Build_Path (int lot = 0);
 

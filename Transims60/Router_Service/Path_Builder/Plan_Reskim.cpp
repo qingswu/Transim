@@ -8,7 +8,7 @@
 //	Plan_Reskim
 //---------------------------------------------------------
 
-bool Path_Builder::Plan_Reskim (Plan_Ptr plan_ptr)
+bool Path_Builder::Plan_Reskim (void)
 {
 	int mode, index, dir_index, use_index, imped, cum_imp;
 	Dtime time, ttime, tod, old_tod, drive, diff;

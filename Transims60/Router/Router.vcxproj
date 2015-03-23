@@ -373,29 +373,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Control.cpp" />
-    <ClCompile Include="Copy_Plans.cpp" />
     <ClCompile Include="DUE_Loop.cpp" />
     <ClCompile Include="Execute.cpp" />
-    <ClCompile Include="Get_Trip_Data.cpp" />
-    <ClCompile Include="Input_Trips.cpp" />
     <ClCompile Include="Iteration_Loop.cpp" />
-    <ClCompile Include="Memory_Loop.cpp" />
     <ClCompile Include="Merge_Delay.cpp" />
     <ClCompile Include="Minimize_VHT.cpp" />
-    <ClCompile Include="Part_Processor.cpp" />
-    <ClCompile Include="Preload_Transit.cpp" />
-    <ClCompile Include="Read_Trips.cpp" />
     <ClCompile Include="Reskim_Plans.cpp" />
     <ClCompile Include="Router.cpp" />
-    <ClCompile Include="Save_Plans.cpp" />
-    <ClCompile Include="Selection.cpp" />
-    <ClCompile Include="Set_Partitions.cpp" />
-    <ClCompile Include="Write_Plan_Files.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\Router.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Converge_Service\Converge_Service.vcxproj">
+      <Project>{fa951fb9-9c33-44a5-b42a-28bd481d293c}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\File_Data_Service\File_Data_Service.vcxproj">
       <Project>{34c8daaa-8bc6-4e4d-a8ac-fb86e62e79e7}</Project>
     </ProjectReference>

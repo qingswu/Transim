@@ -39,7 +39,7 @@ bool Sim_Node_Process::Link_Processing (int link)
 	//---- check for loaded vehicles ----
 
 	sim->sim_dir_array.Lock (sim_dir_ptr, ID ());
-
+//sim->Warning (String ("Sim_Node_Process::Link_Process: Lock %d") % sim_dir_ptr->Lock ());
 	if (sim_dir_ptr->Count () <= 0) goto load_check;
 
 	//---- calculate maximum macroscopic throughput ----
@@ -247,6 +247,9 @@ load_check:
 			}
 		}
 	}
+#ifdef CHECK
+	if (ID () > 0 && sim_dir_ptr->Lock () != ID ()) sim->Error (String ("Sim_Node_Process::Link_Processing UnLock (% vs %d)") % sim_dir_ptr->Lock () % ID ());
+#endif
 	sim->sim_dir_array.UnLock (sim_dir_ptr, ID ());
 	return (true);
 }

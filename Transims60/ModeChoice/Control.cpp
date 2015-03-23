@@ -356,14 +356,35 @@ void ModeChoice::Program_Control (void)
 
 	xfer_value = Get_Control_Double (TRANSFER_COUNT_VALUE);
 
+	//---- difference value ----
+
+	diff_value = Get_Control_Double (DIFFERENCE_VALUE);
+
+	//---- distance value ----
+
+	dist_value = Get_Control_Double (DISTANCE_VALUE);
+
 	//---- cost value table ----
 
 	num = Highest_Control_Group (COST_VALUE_TABLE, 0);
 
+	cost_values.assign (num_tables, 0.0);
+
 	for (i=1; i <= num; i++) {
 		value = Get_Control_Double (COST_VALUE_TABLE, i);
-		cost_values.push_back (value);
+		cost_values [i-1] = value;
 	}	
+
+	//---- user value table ----
+
+	num = Highest_Control_Group (USER_VALUE_TABLE, 0);
+
+	user_values.assign (num_tables, 0.0);
+
+	for (i=1; i <= num; i++) {
+		value = Get_Control_Double (USER_VALUE_TABLE, i);
+		user_values [i-1] = value;
+	}
 
 	//---- mode access market ----
 

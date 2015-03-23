@@ -42,6 +42,11 @@ void TripPrep::Trip_Processing::operator()()
 		random_part.Seed (exe->random.Seed () + 1000 * (num + 1));
 		if (thread_flag) part_count.assign (exe->num_parts, 0);
 	}
+	if (exe->factor_flag) {
+		random_part.Seed (exe->random.Seed () + 1000 * (num + 1));
+		random_fac.Seed (exe->random.Seed () + 2000 * (num + 1));
+		random_move.Seed (exe->random.Seed () + 3000 * (num + 1));
+	}
 	trip_file = new Trip_File (exe->trip_file->File_Access (), exe->trip_file->Dbase_Format ());
 	trip_file->Part_Flag (exe->trip_file->Part_Flag ());
 	trip_file->Pathname (exe->trip_file->Pathname ());
@@ -97,7 +102,7 @@ void TripPrep::Trip_Processing::operator()()
 		exe->merge_file.Add_Counters (merge_file);
 		merge_file->Close ();
 	}
-	if (exe->update_flag && !exe->select_flag && thread_flag) {
+	if ((exe->update_flag || exe->new_select_flag) && !exe->select_flag && thread_flag) {
 		for (part = 0; part < exe->num_parts; part++) {
 			exe->part_count [part] += part_count [part];
 		}

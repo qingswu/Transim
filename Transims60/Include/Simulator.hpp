@@ -25,17 +25,18 @@ public:
 
 protected:
 	virtual void Program_Control (void);
-	virtual bool Save_Plans (Plan_Ptr_Array *array_ptr, int part=0);
 
 private:
+	enum Simulator_Keys { NEW_SIMULATION_BACKUP_FILE = 1, BACKUP_TIME_POINTS };
+
 	//enum Simulator_Reports { FIRST_REPORT = 1, SECOND_REPORT };
 
-	bool io_flag;
+	bool io_flag, backup_flag;
+	String backup_name, backup_ext;
+	Dtime_List backup_times;
 	Dtime max_time, signal_update_time, timing_update_time, transit_update_time;
 
 	int lane_change_levels, max_vehicles;
-	
-	Plan_File *plan_file;
 
 	void Read_Trips (void);
 };

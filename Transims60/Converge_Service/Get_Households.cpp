@@ -1,14 +1,14 @@
 //*********************************************************
-//	Router_Service.cpp - path building service
+//	Get_Households.cpp - convergence service keys and data
 //*********************************************************
 
-#include "Router_Service.hpp"
+#include "Converge_Service.hpp"
 
 //---------------------------------------------------------
 //	Get_Household_Data
 //---------------------------------------------------------
 
-bool Router_Service::Get_Household_Data (Household_File &file, Household_Data &household_rec, int partition)
+bool Converge_Service::Get_Household_Data (Household_File &file, Household_Data &household_rec, int partition)
 {
 	int hhold, person, type;
 	Int2_Map_Stat map_stat;

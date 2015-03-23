@@ -35,7 +35,9 @@ public:
 	int    Method (void)              { return (Get_Integer (method)); }
 	Dtime  Min_Dwell (void)           { return (Get_Time (min_dwell)); }
 	Dtime  Max_Dwell (void)           { return (Get_Time (max_dwell)); }
-	double Grade (int num)            { return (Get_Double (grade [num])); }
+	int    Grade_Func (void)          { return (Get_Integer (grade)); }
+	int    Fuel_Func (void)           { return (Get_Integer (fuel)); }
+	double Fuel_Cap (void)            { return (Get_Double (fuel_cap)); }
 
 	void   Type (int value)           { Put_Field (type, value); }
 	void   Length (double value)      { Put_Field (length, value); }
@@ -52,7 +54,9 @@ public:
 	void   Method (int value)         { Put_Field (method, value); }
 	void   Min_Dwell (Dtime value)    { Put_Field (min_dwell, value); }
 	void   Max_Dwell (Dtime value)    { Put_Field (max_dwell, value); }
-	void   Grade (int n, double fac)  { Put_Field (grade [n], fac); }
+	void   Grade_Func (int value)     { Put_Field (grade, value); }
+	void   Fuel_Func (int value)      { Put_Field (fuel, value); }
+	void   Fuel_Cap (double value)    { Put_Field (fuel_cap, value); }
 
 	//---- Version 4.0 compatibility ----
 
@@ -71,7 +75,7 @@ private:
 	void Setup (void);
 
 	int type, length, max_speed, max_accel, max_decel, op_cost, use, capacity, max_load;
-	int occupancy, load, unload, method, min_dwell, max_dwell, subtype, grade [10];
+	int occupancy, load, unload, method, min_dwell, max_dwell, subtype, grade, fuel, fuel_cap;
 };
 
 #endif

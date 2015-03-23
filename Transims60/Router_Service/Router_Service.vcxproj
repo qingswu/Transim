@@ -200,13 +200,14 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_MSC_EXTENSIONS;THREADS;CHECK;</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>..\Include;</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -344,9 +345,11 @@
     <ClCompile Include="Path_Builder\Parking_Update.cpp" />
     <ClCompile Include="Path_Builder\Path_Builder.cpp" />
     <ClCompile Include="Path_Builder\Plan_Build.cpp" />
+    <ClCompile Include="Path_Builder\Plan_Extend.cpp" />
     <ClCompile Include="Path_Builder\Plan_Flow.cpp" />
     <ClCompile Include="Path_Builder\Plan_ReRoute.cpp" />
     <ClCompile Include="Path_Builder\Plan_Reskim.cpp" />
+    <ClCompile Include="Path_Builder\Plan_Stop.cpp" />
     <ClCompile Include="Path_Builder\Plan_Update.cpp" />
     <ClCompile Include="Path_Builder\Save_Skims.cpp" />
     <ClCompile Include="Path_Builder\Skim_Build.cpp" />
@@ -360,7 +363,6 @@
     <ClCompile Include="Path_Builder\Walk_Access.cpp" />
     <ClCompile Include="Service\Control.cpp" />
     <ClCompile Include="Service\Execute.cpp" />
-    <ClCompile Include="Service\Get_Household_Data.cpp" />
     <ClCompile Include="Service\Plan_Processor.cpp" />
     <ClCompile Include="Service\Router_Service.cpp" />
     <ClCompile Include="Service\Set_Parameters.cpp" />

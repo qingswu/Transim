@@ -59,7 +59,7 @@ protected:
 	bool select_origins, select_destinations, select_org_zones, select_des_zones, select_links, select_nodes;
 	bool select_vehicles, select_problems, select_subareas, select_polygon, percent_flag, max_percent_flag;
 	bool select_mode [MAX_MODE], select_facility [EXTERNAL+1], select_modes, select_facilities;
-	bool select_transit [ANY_TRANSIT], select_transit_modes, select_priorities, select_priority [CRITICAL+1];
+	bool select_transit [ANY_TRANSIT], select_transit_modes, select_priorities, select_priority [SKIP+1];
 	bool select_stops, select_routes, select_time_of_day, select_parking, select_vc, select_ratio;
 	bool delete_mode [MAX_MODE], delete_modes, delete_travelers, delete_households, delete_flag;
 	bool time_diff_flag, cost_diff_flag, trip_diff_flag, path_diff_flag;

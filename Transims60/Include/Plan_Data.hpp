@@ -85,6 +85,7 @@ public:
 
 	int      Method (void)                  { return (method); }
 	int      Problem (void)                 { return (problem); }
+	bool     Path_Problem (void)            { return (problem > 0 && problem != CONSTRAINT_PROBLEM && problem != FUEL_PROBLEM); }
 
 	Dtime    Depart (void)                  { return (depart); }
 	Dtime    Arrive (void)                  { return (arrive); }
@@ -150,6 +151,14 @@ public:
 
 	bool Internal_IDs (void);
 	bool External_IDs (void);
+
+	//---- overrides ----
+
+	Dtime Reroute_Time (void)               { return (arrive); }
+	void  Reroute_Time (Dtime time)         { arrive = time; }
+
+	int   Stop_Location (void)              { return ((int) depart); }
+	void  Stop_Location (int value)         { depart = (Dtime) value; }
 
 private:
 	Dtime          depart;

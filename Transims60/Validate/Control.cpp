@@ -321,17 +321,19 @@ void Validate::Program_Control (void)
 	if (!key.empty ()) {
 		if (key.Equals ("VOLUME")) {
 			method = false;
-		} else if (key.Equals ("VMT")) {
+		} else if (key.Equals ("VMT") || key.Equals ("VKT")) {
 			method = true;
 		} else {
 			Error (String ("Analysis Method = %s was Unrecognized") % key);
 		}
 	}
 	header1 = String ("\n%29cNum.  ------%s------ ---Difference---  --Abs.Error--    Std.     %%     R   ----V/C----") %
-				BLANK % ((method) ? "--VMT-" : "Volume") % FINISH;
+				BLANK % ((method) ? (Metric_Flag () ? "--VKT-" : "--VMT-") : "Volume") % FINISH;
 
 	header2 = String ("    Obs.  Estimate  Observed   %6.6s      %%     Avg.     %%     Dev.   RMSE   Sq.   Avg.  Max.\n") %
-				((method) ? "VMT" : "Volume") % FINISH;
+				((method) ? (Metric_Flag () ? "VKT" : "VMT") : "Volume") % FINISH;
+
+	entry_flag = Get_Control_Flag (ENTRY_DATA_FLAG);
 	
 	//---- read the adjustment factor ----
 

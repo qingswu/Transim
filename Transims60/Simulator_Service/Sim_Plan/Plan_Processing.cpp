@@ -59,9 +59,10 @@ Sim_Trip_Ptr Sim_Plan_Process::Plan_Processing (Plan_Data *plan_ptr)
 	}
 	if (plan_ptr->Depart () < sim->param.start_time_step) return (sim_trip_ptr);
 
-#ifndef ROUTING
-	if (!plan_ptr->Internal_IDs ()) return (sim_trip_ptr);
-#endif
+	if (!sim->router_flag) {
+		if (!plan_ptr->Internal_IDs ()) return (sim_trip_ptr);
+	}
+
 	//---- process a new travel plan ----
 
 	sim_travel_ptr = &sim_trip_ptr->sim_travel_data;

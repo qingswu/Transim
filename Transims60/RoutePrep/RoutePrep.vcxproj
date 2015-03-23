@@ -236,7 +236,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
@@ -328,6 +328,7 @@
     <ClCompile Include="Read_Scripts.cpp" />
     <ClCompile Include="Read_Speeds.cpp" />
     <ClCompile Include="Read_Stations.cpp" />
+    <ClCompile Include="Read_Tcad_Routes.cpp" />
     <ClCompile Include="RoutePrep.cpp" />
     <ClCompile Include="Route_Segments.cpp" />
     <ClCompile Include="Save_Route.cpp" />

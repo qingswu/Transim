@@ -6,7 +6,7 @@
 #define SIMULATOR_SERVICE_HPP
 
 #ifdef ROUTING
-#include "Router_Service.hpp"
+#include "Converge_Service.hpp"
 #else
 #include "Data_Service.hpp"
 #endif
@@ -51,7 +51,7 @@
 //---------------------------------------------------------
 
 #ifdef ROUTING
-class SYSLIB_API Simulator_Service : public Router_Service
+class SYSLIB_API Simulator_Service : public Converge_Service
 #else
 class SYSLIB_API Simulator_Service : public Data_Service, public Select_Service
 #endif
@@ -104,6 +104,10 @@ protected:
 		MAX_ARRIVAL_TIME_VARIANCE, RELOAD_CAPACITY_PROBLEMS, COUNT_PROBLEM_WARNINGS, 
 		PRINT_PROBLEM_MESSAGES, READ_ALL_PLANS_INTO_MEMORY, NUMBER_OF_TRAVELERS, AVERAGE_LEGS_PER_TRIP
 	};
+#ifndef ROUTING
+	static const char *reports [];
+#endif
+
 	void Simulator_Service_Keys (int *keys = 0);
 
 	virtual void Program_Control (void);
@@ -145,7 +149,7 @@ protected:
 	int sim_period, max_method;
 	Time_Periods sim_periods;
 	Shts_Array period_subarea_method;
-	bool random_node_flag, read_all_flag;
+	bool random_node_flag, read_all_flag, router_flag;
 	bool method_time_flag [MICROSCOPIC + 1];
 	Dtime method_time_step [MICROSCOPIC + 1];
 	Dtime time_step, end_period, half_second, one_second, one_minute, one_hour, random_time;

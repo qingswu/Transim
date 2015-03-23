@@ -8,7 +8,7 @@
 //	Plan_Update
 //---------------------------------------------------------
 
-bool Path_Builder::Plan_Update (Plan_Data *plan_data)
+bool Path_Builder::Plan_Update (void)
 {
 	int i, mode, index, dir_index, nlegs, len, cost, imp, use_index, group;
 	Dtime time, ttime, delay;
@@ -28,12 +28,7 @@ bool Path_Builder::Plan_Update (Plan_Data *plan_data)
 	Vehicle_Map_Itr veh_itr;
 	Access_Data *access_ptr;
 
-	if (plan_data == 0) {
-		cout << "\tPlan Pointer is Zero" << endl;
-		return (false);
-	}
 	plan_flag = true;
-	plan_ptr = plan_data;
 	plan_ptr->Problem (0);
 
 	mode = plan_ptr->Mode ();
@@ -50,7 +45,6 @@ bool Path_Builder::Plan_Update (Plan_Data *plan_data)
 
 	parking_duration = plan_ptr->Duration ();
 	forward_flag = (plan_ptr->Constraint () != END_TIME);
-	reroute_flag = false;
 
 	mode = plan_ptr->Mode ();
 	path_param.mode = (Mode_Type) mode;
@@ -126,14 +120,17 @@ bool Path_Builder::Plan_Update (Plan_Data *plan_data)
 					}
 					imp = 0;
 
-					if (path_param.grade_flag) {
+					if (path_param.grade_func > 0) {
 						if (dir_ptr->Dir ()) {
 							ab_flag = false;
 						} else {
 							ab_flag = true;
-						}
+						}						
 						if (link_ptr->Grade (ab_flag) > 0) {
-							ttime = ttime / path_param.veh_type_ptr->Grade (link_ptr->Grade (ab_flag));
+							factor = exe->functions.Apply_Function (path_param.grade_func, link_ptr->Grade (ab_flag));
+							if (factor != 0.0) {
+								ttime = (int) (ttime * factor + 0.5);
+							}
 						}
 					}
 					ttime += delay;

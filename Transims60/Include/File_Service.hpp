@@ -100,7 +100,7 @@ public:
 	
 	enum File_Service_Keys { 
 		NOTES_AND_NAME_FIELDS = FILE_SERVICE_OFFSET, SAVE_LANE_USE_FLOWS, 
-		ROUTE_NODE_OFFSET_FLAG, ROUTE_NODE_RUN_TIME_FLAG, ROUTE_NODE_PATTERN_FLAG,
+		TRANSIT_TIME_PERIODS, ROUTE_NODE_OFFSET_FLAG, ROUTE_NODE_RUN_TIME_FLAG, ROUTE_NODE_PATTERN_FLAG,
 		ROUTE_NODE_DWELL_FLAG, ROUTE_NODE_TYPE_FLAG, ROUTE_NODE_LEG_TIME_FLAG, ROUTE_NODE_SPEED_FLAG, 
 		SKIM_OD_UNITS, SKIM_TIME_PERIODS, SKIM_TIME_INCREMENT, SKIM_TOTAL_TIME_FLAG, 
 		SKIM_TRAVEL_TIME_FORMAT, SKIM_TRIP_LENGTH_FORMAT, NEAREST_NEIGHBOR_FACTOR, 
@@ -133,6 +133,7 @@ public:
 	Line_Equiv line_equiv;
 	Time_Equiv time_equiv;
 
+	Time_Periods transit_time_periods;
 	Zone_Location_Map zone_loc_map;
 
 	Node_File *        System_Node_File (bool new_flag = false)         { return ((Node_File *) System_File_Handle ((new_flag) ? NEW_NODE : NODE)); }

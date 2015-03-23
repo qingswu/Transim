@@ -62,7 +62,8 @@ void Router_Service::Set_Parameters (Path_Parameters &p, int type, int veh_type)
 	p.veh_type = veh_type;
 
 	if (p.veh_type < 0) {
-		p.grade_flag = false;
+		p.grade_func = 0;
+		p.fuel_func = 0;
 		p.op_cost_rate = 0.0;
 		p.use = CAR;
 		p.pce = 1.0;
@@ -79,7 +80,8 @@ void Router_Service::Set_Parameters (Path_Parameters &p, int type, int veh_type)
 		} else {
 			p.op_cost_rate /= MILETOFEET;
 		}
-		p.grade_flag = p.grade_flag && p.veh_type_ptr->Grade_Flag ();
+		p.grade_func = p.veh_type_ptr->Grade_Func ();
+		p.fuel_func = p.veh_type_ptr->Fuel_Func ();
 		p.pce = UnRound (p.veh_type_ptr->PCE ());
 		p.occupancy = p.veh_type_ptr->Occupancy () / 100.0;
 		if (p.occupancy <= 0.0) p.occupancy = 1.0;

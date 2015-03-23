@@ -222,7 +222,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_MSC_EXTENSIONS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_MSC_EXTENSIONS;TPPLIB;TCADLIB</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -329,6 +329,12 @@
     </ProjectReference>
     <ProjectReference Include="..\SysLib\SysLib.vcxproj">
       <Project>{80b715b5-d1b7-4b64-a8bd-bfa768bfbee3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\TcadLib\TcadLib.vcxproj">
+      <Project>{537c8056-c5d0-4f85-928c-9de6cd96aef8}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\TppLib\TppLib.vcxproj">
+      <Project>{ca1c8848-e40b-4787-bffa-3291d383f209}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -90,7 +90,6 @@ void Path_Builder::operator()()
 
 				exe->Save_Plans (array_ptr);
 				plan_ptr_queue->Finished ();
-
 			}
 		} else {
 			for (;;) {
@@ -246,6 +245,9 @@ void Path_Builder::Initialize (Router_Service *_exe)
 			perf_period_array_ptr = &perf_period_array;
 			perf_period_array.Replicate (exe->perf_period_array);
 
+			if (!exe->System_File_Flag (PERFORMANCE)) {
+				perf_period_array.Set_Time0 ();
+			}
 			if (path_param.turn_flow_flag) {
 				turn_period_array_ptr = &turn_period_array;
 				turn_period_array.Replicate (exe->turn_period_array);

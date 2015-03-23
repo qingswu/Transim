@@ -12,7 +12,7 @@
 
 void Gravity::Calib_Functions (void)
 {
-	int i, j, org, des, period, num_periods, index, num, sum_num, max_func;
+	int i, j, org, des, period, index, num, sum_num, max_func;
 	double trips, skim, prod, attr, friction, hi_diff, hi_percent, factor, diff, sum_sq;
 	double best_value, tot_distb, sum_min, sum_max, ratio1, ratio2;
 	Doubles attr_tot, distb, diff2, *a_ptr, *b_ptr, *c_ptr;
@@ -21,9 +21,6 @@ void Gravity::Calib_Functions (void)
 	Int_Map *org_ptr, *des_ptr;
 	Int_Map_Itr org_itr, des_itr;
 	Function func;
-	
-	num_periods = skim_file->Num_Periods ();
-	if (num_periods < 1) num_periods = 1;
 
 	org_ptr = skim_file->Org_Map ();
 	des_ptr = skim_file->Des_Map ();
@@ -57,28 +54,10 @@ void Gravity::Calib_Functions (void)
 					max_func++;
 				}
 			}
-
-			//for (i=1; i < 3; i++) {
-			//func.a = i * 10.0;
-			//for (j=0; j < 4; j++) {
-			//	func.b = -j / 10.0;
-			//	if (func.b == 0.0) func.b = -0.01;
-			//	for (k=0; k < 4; k++) {
-			//		func.c = -k / 10.0;
-			//		if (func.c == 0.0) func.c = -0.01;
-			//		if (max_func == 1) {
-			//			function.Update_Function (max_func, func);
-			//		} else {
-			//			function.Add_Function (max_func, func);
-			//		}
-			//		max_func++;
-			//	}
-			//}
 		}
 
 		//---- iterate until convergence ----
 
-		//for (i=1; i <= max_iterations; i++) {
 		for (i=1; i < max_func; i++) {
 
 			Show_Progress ();
@@ -173,13 +152,6 @@ void Gravity::Calib_Functions (void)
 			Print (1, String ("Maximum Percent Difference = %.2lf%%") % (hi_percent * 100.0) % FINISH);
 			Print (1, String ("Maximum Trip Difference = %.2lf") % hi_diff);
 
-			//if (best_value > hi_diff) {
-			//	best_function = i;
-			//	best_value = hi_diff;
-			//}
-
-			//sum_sq = sqrt (sum_sq);
-
 			if (sum_num > 1) {
 				sum_sq /= sum_num;
 			}
@@ -214,17 +186,6 @@ void Gravity::Calib_Functions (void)
 			func = function.Get_Function (i);
 			Print (1, String ("Function Type = %s, A = %.3lf, B = %.3lf, C = %.3lf, D = %.3lf") %
 				Function_Code (func.type) % func.a % func.b % func.c % func.d);
-
-			//func.c -= 0.05;
-
-			//function.Add_Function (i+1, func);
-
-			//fun_rec = function.Get_Function (1);
-			//fun_rec.a += 1000;
-
-			//function.Update_Function (1, fun_rec);
-
-			//if (hi_diff <= max_diff && hi_percent <= max_percent) break;
 		}
 		End_Progress ();
 	}

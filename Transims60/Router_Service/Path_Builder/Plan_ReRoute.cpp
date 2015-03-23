@@ -8,7 +8,7 @@
 //	Plan_ReRoute
 //---------------------------------------------------------
 
-bool Path_Builder::Plan_ReRoute (Plan_Data *plan_data)
+bool Path_Builder::Plan_ReRoute (void)
 {
 	int stat, len, cost, imp, link, mode;
 	Dtime tod, time, reroute_time;
@@ -21,12 +21,7 @@ bool Path_Builder::Plan_ReRoute (Plan_Data *plan_data)
 	Link_Data *link_ptr;
 	Plan_Leg_Itr leg_itr;
 
-	if (plan_data == 0) {
-		cout << "\tPlan Pointer is Zero" << endl;
-		return (false);
-	}
 	plan_flag = true;
-	plan_ptr = plan_data;
 
 	//---- set the traveler parameters ----
 
@@ -35,7 +30,6 @@ bool Path_Builder::Plan_ReRoute (Plan_Data *plan_data)
 	path_param.mode = (Mode_Type) plan_ptr->Mode (),
 	parking_duration = plan_ptr->Duration ();
 	forward_flag = true;
-	reroute_flag = false;
 
 	//---- initialize the plan ----
 
@@ -43,7 +37,7 @@ bool Path_Builder::Plan_ReRoute (Plan_Data *plan_data)
 	trip_org.clear ();
 	trip_des.clear ();
 
-	reroute_time = plan_ptr->Arrive ();
+	reroute_time = plan_ptr->Reroute_Time ();
 	start_flag = false;
 	tod = plan_ptr->Depart ();
 
@@ -63,7 +57,7 @@ bool Path_Builder::Plan_ReRoute (Plan_Data *plan_data)
 					return (true);
 				//}
 			} else {
-				return (Plan_Build (plan_data));
+				return (Plan_Build ());
 			}
 		}
 	}

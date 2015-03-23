@@ -23,9 +23,6 @@
     <ClCompile Include="Read_Trips.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Save_Plans.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\Simulator.hpp">

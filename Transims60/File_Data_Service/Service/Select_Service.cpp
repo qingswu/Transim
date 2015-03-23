@@ -188,10 +188,12 @@ void Select_Service::Read_Select_Keys (void)
 			}
 		} else {
 			memset (select_priority, true, sizeof (select_priority));
+			select_priority [SKIP] = false;
 			select_priorities = false;
 		}	
 	} else {
 		memset (select_priority, true, sizeof (select_priority));
+		select_priority [SKIP] = false;
 		select_priorities = false;
 	}
 

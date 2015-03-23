@@ -59,6 +59,8 @@ public:
 
 	bool  Pack (Data_Buffer &data)    { return (data.Add_Data (this, sizeof (*this))); }
 	bool  UnPack (Data_Buffer &data)  { return (data.Get_Data (this, sizeof (*this))); }
+	bool  Pack (Pack_File &file)      { return (file.Write (this, sizeof (*this))); }
+	bool  UnPack (Pack_File &file)    { return (file.Read (this, sizeof (*this))); }
 
 	Random random;
 

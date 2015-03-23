@@ -10,20 +10,31 @@
 
 void Simulator::Program_Control (void)
 {
-	String key;
+	String key, ext;
 
 	Simulator_Service::Program_Control ();
 
-	if (System_File_Flag (PLAN)) {
-		plan_file = System_Plan_File ();
-	}
 	Print (2, String ("%s Control Keys:") % Program ());
 
-#ifdef ROUTING
-	System_Read_False (TRIP);
-	System_Data_Reserve (TRIP, 0);
-#else
-	System_Read_False (PLAN);
-	System_Data_Reserve (PLAN, 0);
-#endif
+	//---- get the new simulation backup file ----
+
+	key = Get_Control_String (NEW_SIMULATION_BACKUP_FILE);
+
+	if (!key.empty ()) {
+		backup_flag = true;
+
+		key.Split_Last (backup_ext, ".");
+
+		backup_name = Project_Filename (key);
+
+		key = backup_name + "_time_of_day." + backup_ext;
+
+		Print_Filename (2, "New Simulation Backup File", key);
+
+		Get_Control_List (BACKUP_TIME_POINTS, backup_times);
+		
+		if ((int) backup_times.size () == 0) {
+			Error ("Backup Time Points are Required for Backup Processing");
+		}
+	}
 }

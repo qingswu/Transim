@@ -8,22 +8,14 @@
 //	Plan_Build
 //---------------------------------------------------------
 
-bool Path_Builder::Plan_Build (Plan_Data *plan_data)
+bool Path_Builder::Plan_Build (void)
 {
 	int stat;
 	
 	Trip_End trip_end;	
 
-	if (plan_data == 0) {
-		cout << "\tPlan Pointer is Zero" << endl;
-		return (false);
-	}
-	if (!initialized) {
-		cout << "\tPath Building Requires TRANSIMS Router Services" << endl;
-		return (false);
-	}
 	plan_flag = true;
-	plan_ptr = plan_data;
+
 	stat = plan_ptr->Depart ();
 	plan_ptr->Clear_Plan ();
 	plan_ptr->Depart (stat);
@@ -38,7 +30,6 @@ bool Path_Builder::Plan_Build (Plan_Data *plan_data)
 	parking_duration = plan_ptr->Duration ();
 	forward_flag = (plan_ptr->Constraint () != END_TIME);
 	time_limit = (forward_flag) ? MAX_INTEGER : 0;
-	reroute_flag = false;
 
 	//---- initialize the plan ----
 

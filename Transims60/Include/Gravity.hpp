@@ -23,7 +23,7 @@ public:
 
 protected:
 	enum Gravity_Keys { 
-		ZONE_PRODUCTION_FIELD = 1, ZONE_ATTRACTION_FIELD, 
+		ZONE_PRODUCTION_FIELD = 1, ZONE_ATTRACTION_FIELD, ZONE_PERIOD_FIELDS, 
 		SKIM_FILE, SKIM_FORMAT, SKIM_TABLE_NAME, TRIP_TABLE_FILE, TRIP_TABLE_FORMAT, TRIP_TABLE_NAME,
 		NEW_TRIP_TABLE_FILE, NEW_TRIP_TABLE_FORMAT, 
 		FUNCTION_INPUT_UNITS, FUNCTION_INPUT_FACTOR, FUNCTION_PARAMETERS, 
@@ -42,7 +42,7 @@ private:
 	enum Balance_Options { PROD_BAL = 1, ATTR_BAL, AVERAGE_BAL };
 
 	bool in_flag, period_flag, script_flag, trip_flag, in_len_flag, out_len_flag, new_flag, calib_flag;
-	int max_iterations, prod_field, attr_field, skim_field, trip_field, balance, best_function;
+	int max_iterations, num_periods, prod_field, attr_field, skim_field, trip_field, balance, best_function;
 	double max_percent, max_diff, increment, max_value, value_factor, units_factor, total_in;
 	Units_Type skim_units, input_units;
 
@@ -50,6 +50,8 @@ private:
 	Db_Header in_len_file, out_len_file;
 
 	Doubles prod_array, attr_array, in_distb, out_distb, org_tot, des_tot;
+	Dbls_Array prod_periods, attr_periods;
+	Integers prod_fields, attr_fields;
 	Dbl3_Array constraints;
 
 	Function_Array function;

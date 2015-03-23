@@ -139,7 +139,7 @@ void ModeChoice::Execute (void)
 					Mode_Summary (j);
 				}
 				break;
-			case MODE_VALUES:		//---- Mode Value Summaryt ----
+			case MODE_VALUES:		//---- Mode Value Summary ----
 				Value_Summary ();
 				break;
 			case SEGMENT_VALUES:	//---- Segment Value Summary ----

@@ -10,21 +10,15 @@
 
 void Router::DUE_Loop (void)
 {
-	int i, num, last_hhold, potential;
-	double gap, last_gap, total_percent;
-	bool converge_flag, build_flag;
+	int i, num;
+	double gap, last_gap;
+	bool converge_flag;
 
 	clock_t path_time, update_time, total_time;
 
-	Trip_Map_Itr map_itr;
-	Plan_Ptr plan_ptr;
-	Plan_Ptr_Array *ptr_array;
+	if (plan_array.size () == 0) return;
 	
 	if (max_iteration == 0) max_iteration = 1;
-
-	if (plan_processor == 0) {
-		plan_processor = new Plan_Processor (this);
-	}
 
 	//---- process each iteration ----
 
@@ -36,121 +30,20 @@ void Router::DUE_Loop (void)
 
 		Iteration_Setup ();
 
-		if (!first_iteration) {
-			Use_Link_Delays (true);
-		}
-<<<<<<< .working
-		Show_Message (1, String ("Iteration Number %d") % iteration);
-		Print (2, "Iteration Number ") << iteration;
-		Set_Progress ();
-
-		Iteration_Setup ();
-
-		if (first_iteration && (rider_flag || (System_File_Flag (RIDERSHIP) && Cap_Penalty_Flag ()))) {
-			line_array.Clear_Ridership ();
-=======
-		if (rider_flag || (System_File_Flag (RIDERSHIP) && Cap_Penalty_Flag ())) {
-			line_array.Clear_Ridership ();
->>>>>>> .merge-right.r1529
-		}
 		converge_flag = true;
-		last_hhold = -1;
 
-		potential = select_records;
-		total_percent = 1.0;
-
-		if (total_records > 0 && max_percent_flag) {
-			percent_selected = ((double) select_records / total_records);
-			total_percent = percent_selected;
-
-			if (percent_selected > max_percent_select) {
-				percent_selected = max_percent_select / percent_selected;
-				if (select_weight > 0) {
-					percent_selected = percent_selected * select_records / select_weight;
-				}
-			} else {
-				percent_selected = 1.0;
-			}
-		} else {
-			percent_selected = 1.0;
-		}
-		total_records = select_records = select_weight = 0;
-
-		//---- preload transit vehicles ----
-
-		if (preload_flag) {
-			Preload_Transit ();
-		}
 		Show_Message (0, " -- Trip");
 		Set_Progress ();
 
 		//---- update the speed before each path building iteration ----
 
-		//Update_Travel_Times (true, true);
-		//num_time_updates++;
-
-		ptr_array = new Plan_Ptr_Array ();
-		plan_processor->Start_Processing (true, true);
+		part_processor.plan_process->Start_Processing (true, true);
 
 		path_time = clock ();
 
-		//---- process each trip ----
+		Trip_Loop ();
 
-		for (map_itr = plan_trip_map.begin (); map_itr != plan_trip_map.end (); map_itr++) {
-			Show_Progress ();
-
-			plan_ptr = new Plan_Data ();
-
-			*plan_ptr = plan_array [map_itr->second];
-
-			//---- check the household id ----
-
-			if (plan_ptr->Household () < 1) continue;
-
-			if (plan_ptr->Household () != last_hhold) {
-				if (last_hhold > 0 && ptr_array->size () > 0) {
-					plan_processor->Plan_Build (ptr_array);
-					ptr_array = new Plan_Ptr_Array ();
-				}
-				last_hhold = plan_ptr->Household ();
-			}
-
-			//---- update the selection priority flag ----
-
-			if (plan_ptr->Priority () == NO_PRIORITY) {
-				plan_ptr->Method (COPY_PLAN);
-			} else if (iteration == 1 && plan_ptr->size () == 0) {
-				plan_ptr->Method (BUILD_PATH);
-			} else if (!first_iteration && select_priorities) {
-				build_flag = select_priority [plan_ptr->Priority ()];
-
-				if (build_flag && max_percent_flag && percent_selected < 1.0) {
-					double prob = random_select.Probability (plan_ptr->Household () + iteration + random_seed);
-					if (plan_ptr->Priority () > 0) {
-						build_flag = (prob <= (percent_selected * plan_ptr->Priority ()));
-					} else {
-						build_flag = (prob <= percent_selected);
-					}
-				}
-				if (build_flag) {
-					plan_ptr->Method (BUILD_PATH);
-				} else {
-					plan_ptr->Method (COPY_PLAN);
-				}
-			} else {
-				plan_ptr->Method (BUILD_PATH);
-			}
-			ptr_array->push_back (plan_ptr);
-		}
-
-		//---- process the last household ----
-
-		if (last_hhold > 0 && ptr_array->size () > 0) {
-			plan_processor->Plan_Build (ptr_array);
-		} else {
-			delete ptr_array;
-		}
-		plan_processor->Stop_Processing (true);
+		part_processor.plan_process->Stop_Processing (true);
 
 		End_Progress (false);
 		
@@ -241,43 +134,7 @@ void Router::DUE_Loop (void)
 		//---- save / reset the iteration summary ----
 
 		if (iteration < max_iteration) {
-			if (save_iter_flag && save_iter_range.In_Range (iteration)) {
-				if (System_File_Flag (NEW_PERFORMANCE)) {
-					Performance_File *file = System_Performance_File (true);
-					if (file->Part_Flag ()) {
-						file->Open (iteration);
-					} else {
-						file->Create ();
-					}
-					Write_Performance (full_flag);
-				}
-				if (System_File_Flag (NEW_TURN_DELAY) && System_File_Flag (SIGNAL)) {
-					Turn_Delay_File *file = System_Turn_Delay_File (true);
-					if (file->Part_Flag ()) {
-						file->Open (iteration);
-					} else {
-						file->Create ();
-					}
-					Write_Turn_Delays (full_flag);
-				}
-			}
-
-
-			//---- copy existing flow data ----
-
-			old_perf_period_array.Copy_Flow_Data (perf_period_array, true, reroute_time);
-
-			if (Turn_Flows ()) {
-				old_turn_period_array.Copy_Turn_Data (turn_period_array, true, reroute_time);
-			}
-
-			//---- print the iteration problems ----
-
-			if (Report_Flag (ITERATION_PROBLEMS)) {
-				Report_Problems (total_records, false);
-			}
-			num_build = num_reroute = num_reskim = num_update = num_copied = 0;
-			Reset_Problems ();
+			Iteration_Output ();
 		}
 	}
 	Show_Message (1);

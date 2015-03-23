@@ -135,6 +135,9 @@ public:
 
 	Timing40_Map  timing40_map;
 	Int2_Map      vehtype40_map;
+	
+	Int_Map route_mode_map;
+	int mode_type_map [ANY_TRANSIT];
 
 	int  Num_Fare_Zones (void)          { return (num_fare_zone); }
 
@@ -180,6 +183,12 @@ public:
 
 	Trip_Sort_Type Trip_Sort (void)     { return (trip_sort); }
 	void Trip_Sort (Trip_Sort_Type t)   { trip_sort = t; }
+
+	bool Time_Sort_Flag (void)          { return (time_sort_flag); }
+	void Time_Sort_Flag (bool flag)     { time_sort_flag = flag; }
+
+	bool Trip_Sort_Flag (void)          { return (trip_sort_flag); }
+	void Trip_Sort_Flag (bool flag)     { trip_sort_flag = flag; }
 	
 	bool Person_Map_Flag (void)         { return (person_map_flag); }
 	void Person_Map_Flag (bool flag)    { person_map_flag = flag; }
@@ -213,12 +222,12 @@ public:
 	virtual void Write_Selections (void);
 	virtual void Write_Households (void);
 
-	virtual void Write_Performance (bool fill_flag = false);
-	virtual void Write_Performance (Performance_File &file, Perf_Period_Array &data, bool fill_flag = false);
-	virtual void Write_Performance (Vol_Spd_Period_Array &data, bool fill_flag = false);
+	virtual void Write_Performance (void);
+	virtual void Write_Performance (Performance_File &file, Perf_Period_Array &data);
+	virtual void Write_Performance (Vol_Spd_Period_Array &data);
 
-	virtual void Write_Turn_Delays (bool fill_flag = false);
-	virtual void Write_Turn_Delays (Turn_Delay_File &file, Turn_Period_Array &data, bool fill_flag = false);
+	virtual void Write_Turn_Delays (void);
+	virtual void Write_Turn_Delays (Turn_Delay_File &file, Turn_Period_Array &data);
 
 	virtual void Write_Ridership (void);
 	virtual void Write_Veh_Types (void);
@@ -272,7 +281,8 @@ public:
 	enum Data_Service_Keys { 
 		DAILY_WRAP_FLAG = DATA_SERVICE_OFFSET, SUMMARY_TIME_RANGES, SUMMARY_TIME_INCREMENT, 
 		PERIOD_CONTROL_POINT, CONGESTED_TIME_RATIO, MAXIMUM_TIME_RATIO, 
-		TRIP_SORT_TYPE, PLAN_SORT_TYPE, HIGHEST_ZONE_NUMBER, UPDATE_LINK_BEARINGS, LINK_BEARING_WARNINGS
+		TRIP_SORT_TYPE, PLAN_SORT_TYPE, HIGHEST_ZONE_NUMBER, UPDATE_LINK_BEARINGS, LINK_BEARING_WARNINGS,
+		ROUTE_MODE_MAP, MODE_VEH_TYPE_MAP, 
 	};
 	void Data_Service_Keys (int *keys = 0);
 
@@ -429,13 +439,13 @@ protected:
 	virtual void Read_Travelers (Traveler_File &file);
 
 	virtual void Read_Link_Data (Link_Data_File &file, Volume_Array &data);
-	virtual void Read_Performance (Performance_File &file, Volume_Array &data);
+	virtual void Read_Performance (Performance_File &file, Volume_Array &data, bool entry_flag = false);
 	virtual void Read_Link_Direction (Link_Direction_File &file, Volume_Array &data, bool base_flag = true);
 
 private:
 
 	bool ratio_flag, loc_xy_flag, sum_flow_flag, clear_flow_flag, time_table_flag, transit_veh_flag;
-	bool person_map_flag, lane_use_flows, update_bearings, bearing_warnings;
+	bool person_map_flag, lane_use_flows, update_bearings, bearing_warnings, trip_sort_flag, time_sort_flag;
 	int bearing_offset, num_fare_zone, congested_ratio, maximum_ratio, max_zone, num_lane_flows;
 
 	Trip_Sort_Type trip_sort;

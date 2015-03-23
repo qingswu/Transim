@@ -27,15 +27,16 @@ public:
 
 	bool Report_Flags (bool total_distrib, bool period_distrib, bool total_sum, bool period_sum);
 	bool Set_Periods (Time_Periods &periods);
+	void Set_Resolution (int min_diff = 0, int num_distb = 0, double units_fac = 0);
 
 	bool Open_Distribution (string filename);
 	bool Output_Flag (void)                      { return (output_flag); }
 	bool Active_Flag (void)                      { return (active_flag); }
 
 	bool Cost_Flag (void)                        { return (cost_flag); }
-	void Cost_Flag (bool flag)                   { cost_flag = flag; }
+	void Cost_Flag (bool flag);
 
-	void Add_Trip (int tod, int current, int base);
+	void Add_Trip (Dtime tod, double current, double base);
 
 	void Distribution_Range (int period, double percent, double &low, double &high);
 
@@ -70,9 +71,10 @@ private:
 		double current;
 		double base;
 		double abs_diff;
+		double max_diff;
+		double min_diff;
 		int num_diff;
-		int max_diff;
-		int min_diff;
+
 #ifdef MAKE_MPI
 		bool Pack (Data_Buffer &data)
 		{

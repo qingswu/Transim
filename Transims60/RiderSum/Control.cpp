@@ -60,7 +60,21 @@ void RiderSum::Program_Control (void)
 
 		stop_route_file.Create (Project_Filename (key));
 	}
-	
+
+	//---- open stop group file ----
+
+	key = Get_Control_String (NEW_STOP_GROUP_FILE);
+
+	if (!key.empty ()) {
+		Print (1);
+		stop_group_flag = true;
+
+		stop_group_file.File_Type ("New Stop Group File");
+		stop_group_file.File_ID ("StopGroup");
+
+		stop_group_file.Create (Project_Filename (key));
+	}
+
 	//---- open stop profile ----
 
 	key = Get_Control_String (NEW_STOP_PROFILE);
@@ -74,7 +88,21 @@ void RiderSum::Program_Control (void)
 
 		stop_profile.Create (Project_Filename (key));
 	}
-	
+
+	//---- open stop lines file ----
+
+	key = Get_Control_String (NEW_STOP_LINES_FILE);
+
+	if (!key.empty ()) {
+		Print (1);
+		stop_lines_flag = true;
+
+		stop_lines.File_Type ("New Stop Lines File");
+		stop_lines.File_ID ("Lines");
+
+		stop_lines.Create (Project_Filename (key));
+	}
+
 	//---- open stop detail file ----
 
 	key = Get_Control_String (NEW_STOP_DETAIL_FILE);
@@ -93,14 +121,19 @@ void RiderSum::Program_Control (void)
 
 	List_Reports ();
 
-	on_off_flag = (Report_Flag (STOP_SUM) || Report_Flag (STOP_GROUP));
+	on_off_flag = (Report_Flag (STOP_SUM) || Report_Flag (STOP_GROUP) || stop_group_flag);
 
 	//---- read the stop equiv ----
 
 	if (Stop_Equiv_Flag ()) {
 		stop_equiv.Read (Report_Flag (STOP_EQUIV));
-	} else if (Report_Flag (STOP_GROUP)) {
-		Error ("A Stop Equivalence File is Required for Reporting");
+	} else {
+		if (stop_group_flag) {
+			Error ("A Stop Equivalance File is Required for Stop Group Output");
+		}
+		if (Report_Flag (STOP_GROUP)) {
+			Error ("A Stop Equivalence File is Required for Reporting");
+		}
 	}
 
 	//---- read the line equiv ----

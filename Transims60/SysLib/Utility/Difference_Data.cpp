@@ -31,6 +31,20 @@ void Difference_Data::Clear (void)
 }
 
 //---------------------------------------------------------
+//	Cost_Flag
+//---------------------------------------------------------
+
+void Difference_Data::Cost_Flag (bool flag)
+{
+	cost_flag = flag;
+	if (cost_flag) {
+		units_factor = 100.0;
+		num_distribution = NUM_DISTRIBUTION;
+		min_difference = MIN_DIFFERENCE * 6;
+	}
+}
+
+//---------------------------------------------------------
 //	Report_Flags -- set report flags
 //---------------------------------------------------------
 
@@ -41,15 +55,6 @@ bool Difference_Data::Report_Flags (bool total, bool distrib, bool tot_sum, bool
 	total_sum = tot_sum;
 	period_sum = per_sum;
 
-	if (cost_flag) {
-		units_factor = 100.0;
-		num_distribution = NUM_DISTRIBUTION * 6;
-		min_difference = MIN_DIFFERENCE * 6;
-	} else {
-		units_factor = Dtime (1.0, MINUTES);
-		num_distribution = NUM_DISTRIBUTION;
-		min_difference = MIN_DIFFERENCE;
-	}
 	Initialize ();
 
 	return (total_distrib || period_distrib || total_sum || period_sum);
@@ -103,6 +108,23 @@ bool Difference_Data::Set_Periods (Time_Periods &per)
 }
 
 //---------------------------------------------------------
+//	Set_Resolution -- set the distribution resolution
+//---------------------------------------------------------
+
+void Difference_Data::Set_Resolution (int min_diff, int num_distb, double units_fac)
+{
+	if (cost_flag) {
+		min_difference = (min_diff == 0) ? MIN_DIFFERENCE * 6 : min_diff;
+		num_distribution = (num_distb == 0) ? NUM_DISTRIBUTION : num_distb;
+		units_factor = (units_fac <= 0.0) ? 100.0 : units_fac;
+	} else {
+		min_difference = (min_diff == 0) ? MIN_DIFFERENCE : min_diff;
+		num_distribution = (num_distb == 0) ? NUM_DISTRIBUTION : num_distb;	
+		units_factor = (units_fac <= 0.0) ? 1.0 : units_fac;
+	}
+}
+
+//---------------------------------------------------------
 //	Open_Distribution -- difference distribution file
 //---------------------------------------------------------
 
@@ -127,17 +149,20 @@ bool Difference_Data::Open_Distribution (string filename)
 //	Add_Trip -- add data to the summary periods
 //---------------------------------------------------------
 
-void Difference_Data::Add_Trip (int tod, int current, int base)
+void Difference_Data::Add_Trip (Dtime tod, double current, double base)
 {
 	if (num_periods < 0 || current < 0 || base < 0) return;
 
+	int period;
+
 	if (period_flag) {
-		tod = periods.Period (tod);
-		if (tod < 0) return;
+		period = periods.Period (tod);
+		if (period < 0) return;
 	} else {
-		tod = num_periods;
+		period = num_periods;
 	}
-	int diff = current - base;
+
+	double diff = current - base;
 
 	Summary_Data *sum_ptr;
 
@@ -146,39 +171,34 @@ void Difference_Data::Add_Trip (int tod, int current, int base)
 	sum_ptr->num_diff++;
 	sum_ptr->current += current;
 	sum_ptr->base += base;
-	sum_ptr->abs_diff += abs (diff);
+	sum_ptr->abs_diff += fabs (diff);
 	if (diff > sum_ptr->max_diff || sum_ptr->num_diff == 1) sum_ptr->max_diff = diff;
 	if (diff < sum_ptr->min_diff || sum_ptr->num_diff == 1) sum_ptr->min_diff = diff;
 
 	//---- period summary ----
 
-	if (period_sum && tod < num_periods) {
-		sum_ptr = &summary_array [tod];
+	if (period_sum && period < num_periods) {
+		sum_ptr = &summary_array [period];
 
 		sum_ptr->num_diff++;
 		sum_ptr->current += current;
 		sum_ptr->base += base;
-		sum_ptr->abs_diff += abs (diff);
+		sum_ptr->abs_diff += fabs (diff);
 		if (diff > sum_ptr->max_diff || sum_ptr->num_diff == 1) sum_ptr->max_diff = diff;
 		if (diff < sum_ptr->min_diff || sum_ptr->num_diff == 1) sum_ptr->min_diff = diff;
 	}
 
 	//---- difference distribution ----
 
-	if (diff < 0) {
-		diff = -(int)(-diff / units_factor) - 1;
-	} else if (diff > 0) {
-		diff = (int)(diff / units_factor) + 1;
-	}
-	diff -= min_difference;
+	int index = exe->DTOI ((diff - min_difference) / units_factor);
 
-	if (diff < 0) diff = 0;
-	if (diff >= num_distribution) diff = num_distribution - 1;
+	if (index < 0) index = 0;
+	if (index >= num_distribution) index = num_distribution - 1;
 
-	diff_distrib [num_periods] [diff]++;
+	diff_distrib [num_periods] [index]++;
 
-	if ((period_distrib || period_sum) && tod < num_periods) {
-		diff_distrib [tod] [diff]++;
+	if ((period_distrib || period_sum || output_flag) && period < num_periods) {
+		diff_distrib [period] [index]++;
 	}
 }
 
@@ -221,7 +241,7 @@ void Difference_Data::Distribution_Range (int period, double percent, double &lo
 		cum2 = cum1 + num;
 
 		if (cum2 >= cum0) {
-			j = i + min_difference;
+			j = (int) ((i * units_factor) + min_difference);
 
 			if (j < 0) {
 				low = j + (double) (cum0 - cum1) / num;
@@ -242,7 +262,7 @@ void Difference_Data::Distribution_Range (int period, double percent, double &lo
 		cum2 = cum1 + num;
 
 		if (cum2 >= cum0) {
-			j = i + min_difference;
+			j = (int) ((i * units_factor) + min_difference);
 
 			if (j < 0) {
 				high = j + 1 - (double) (cum0 - cum1) / num;
@@ -261,7 +281,7 @@ void Difference_Data::Distribution_Range (int period, double percent, double &lo
 
 void Difference_Data::Distribution_Report (int number, bool total_flag)
 {
-	int i, total, num, start, end, max, max_row, first, last, max_lines, low85, high85;
+	int i, total, num, start, end, max, med_row, first, last, max_lines, low85, high85;
 	double percent, low, high;
 	string flag;
 	string stars = "************************************************************";
@@ -280,7 +300,7 @@ void Difference_Data::Distribution_Report (int number, bool total_flag)
 	//---- print each time period's distribution ----
 
 	for (period = first; period <= last; period++) {
-		total = end = max = max_row = 0;
+		total = end = max = med_row = 0;
 		start = num_distribution;
 		
 		for (i=0; i < num_distribution; i++) {
@@ -301,7 +321,7 @@ void Difference_Data::Distribution_Report (int number, bool total_flag)
 		for (i=start; i <= end; i++) {
 			num += diff_distrib [period] [i];
 			if (2 * num >= total) {
-				max_row = i;
+				med_row = i;
 				break;
 			}
 		}
@@ -326,8 +346,8 @@ void Difference_Data::Distribution_Report (int number, bool total_flag)
 
 		max_lines = exe->Page_Lines () - 8;
 
-		if (start < max_row - max_lines / 2) {
-			start = max_row - max_lines / 2;
+		if (start < med_row - max_lines / 2) {
+			start = med_row - max_lines / 2;
 		}
 		if (start + max_lines <= end) {
 			end = start + max_lines - 1;
@@ -339,14 +359,14 @@ void Difference_Data::Distribution_Report (int number, bool total_flag)
 		exe->New_Page ();
 
 		for (i=start; i <= end; i++) {
-			num = i + min_difference;
+			num = (int) (i * units_factor) + min_difference;
 			percent = 100.0 * diff_distrib [period] [i] / total;
 			max = (int) (percent / scaling_factor + 0.5);
 
 			flag = "  ";
 			if (num == low85) flag = ">=";
 			if (num == high85) flag = "<=";
-			if (i == max_row) flag = "==";
+			if (i == med_row) flag = "==";
 
 			exe->Print (1, String ("  %4d %2s %8d %6.1lf%2s%*.*s") % num % flag % 
 				diff_distrib [period] [i] % percent % 
@@ -478,7 +498,7 @@ void Difference_Data::Total_Summary (void)
 {
 	if (num_periods < 0) return;
 
-	double base, diff, factor, low, high, fac;
+	double base, diff, factor, low, high, fac, fac2;
 	string units, measure, total;
 	Summary_Data *sum_ptr;
 
@@ -491,12 +511,13 @@ void Difference_Data::Total_Summary (void)
 	if (base == 0.0) base = 1.0;
 
 	if (cost_flag) {
-		fac = 100.0;
+		fac = fac2 = 100.0;
 		measure = "Cost";
 		units = "dollars";
 		total = "dollars";
 	} else {
-		fac = Dtime (1.0, HOURS);
+		fac = 60.0;
+		fac2 = 1.0;
 		measure = "Time";
 		units = "minutes";
 		total = "hours";
@@ -504,7 +525,7 @@ void Difference_Data::Total_Summary (void)
 	if (sum_ptr->num_diff < 1) {
 		factor = 1.0;
 	} else {
-		factor = 1.0 / (units_factor * sum_ptr->num_diff);
+		factor = 1.0 / sum_ptr->num_diff;
 	}
 	Distribution_Range (0, 85.0, low, high);
 
@@ -517,8 +538,8 @@ void Difference_Data::Total_Summary (void)
 		measure % (diff * factor) % units % (100.0 * diff / base) % FINISH);
 	exe->Print (1, String ("Average Absolute Difference = %.2lf %s (%.2lf%%)") % 
 		(sum_ptr->abs_diff * factor) % units % (100.0 * sum_ptr->abs_diff / base) % FINISH);
-	exe->Print (1, String ("Minimum %s Difference = %.2lf %s") % measure % (sum_ptr->min_diff / units_factor) % units);
-	exe->Print (1, String ("Maximum %s Difference = %.2lf %s") % measure % (sum_ptr->max_diff / units_factor) % units);
+	exe->Print (1, String ("Minimum %s Difference = %.2lf %s") % measure % (sum_ptr->min_diff / fac2) % units);
+	exe->Print (1, String ("Maximum %s Difference = %.2lf %s") % measure % (sum_ptr->max_diff / fac2) % units);
 	exe->Print (1, String ("85th Percentile Range = %.2lf to %.2lf %s") % low % high % units);
 	exe->Print (1, String ("Total Absolute Difference = %g %s") % (sum_ptr->abs_diff / fac) % total);
 	exe->Print (1, String ("Total User Benefit = %g %s") % (diff / fac) % total);
@@ -577,7 +598,7 @@ void Difference_Data::Write_Distribution (void)
 	for (j=start; j <= end; j++) {
 		exe->Show_Progress ();
 
-		file << (j + min_difference);
+		file << (int) ((j * units_factor) + min_difference);
 
 		if (num_periods > 1) {
 			file << "\t" << diff_distrib [num_periods] [j];

@@ -55,10 +55,11 @@ int Data_Service::Put_Veh_Type_Data (Veh_Type_File &file, Veh_Type_Data &data)
 	file.Method (data.Method ());
 	file.Min_Dwell (data.Min_Dwell ());
 	file.Max_Dwell (data.Max_Dwell ());
-	
-	for (int i=0; i < 10; i++) {
-		file.Grade (i, data.Grade (i));
-	}
+
+	file.Grade_Func (data.Grade_Func ());
+	file.Fuel_Func (data.Fuel_Func ());
+	file.Fuel_Cap (UnRound (data.Fuel_Cap ()));
+
 	file.Notes (data.Notes ());
 
 	if (!file.Write ()) {

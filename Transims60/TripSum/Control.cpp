@@ -4,14 +4,17 @@
 
 #include "TripSum.hpp"
 
+#include "TDF_Matrix.hpp"
+
 //---------------------------------------------------------
 //	Program_Control
 //---------------------------------------------------------
 
 void TripSum::Program_Control (void)
 {
-	int p, num_periods;
-	String key, field;
+	int p, num_periods, nzone;
+	String key, field, format;
+	bool period_flag;
 
 	//---- initialize the MPI thread range ----
 
@@ -136,6 +139,11 @@ void TripSum::Program_Control (void)
 		}
 		zone_trip_file.Add_Field ("ZONE", DB_INTEGER, 10);
 
+		if (System_File_Flag (ZONE)) {
+			zone_trip_file.Add_Field ("X_COORD", DB_DOUBLE, 14.1, FEET);
+			zone_trip_file.Add_Field ("Y_COORD", DB_DOUBLE, 14.1, FEET);
+		}
+
 		for (p=0; p < num_periods; p++) {
 			field = "O_" + sum_periods.Range_Label (p);
 			zone_trip_file.Add_Field (field, DB_INTEGER, 10);
@@ -153,18 +161,108 @@ void TripSum::Program_Control (void)
 
 	if (!key.empty ()) {
 		Print (1);
-		trip_table_file.File_Type ("New Trip Table File");
+		trip_table_flag = true;
 
 		if (Check_Control_Key (NEW_TRIP_TABLE_FORMAT)) {
-			trip_table_file.Dbase_Format (Get_Control_String (NEW_TRIP_TABLE_FORMAT));
+			format = Get_Control_String (NEW_TRIP_TABLE_FORMAT);
+		} else {
+			format = Get_Default_Text (NEW_TRIP_TABLE_FORMAT);
 		}
-		trip_table_file.Add_Field ("MEASURE", DB_STRING, 40);
-		trip_table_file.Add_Field ("VALUE", DB_DOUBLE, 12.2);
+		trip_table_file = TDF_Matrix (CREATE, format);
 
-		trip_table_file.Create (Project_Filename (key));
-		trip_table_flag = true;
+		trip_table_file->File_Type ("New Trip Table File");
+		trip_table_file->File_ID ("NewTable");
+
+		trip_table_file->Filename (Project_Filename (key));
+
+		//---- build matrix fields ----
+
+		trip_table_file->Copy_Periods (sum_periods);
+		if (trip_table_file->Num_Periods () > 1) {
+			period_flag = true;
+		} else if (trip_table_file->Num_Periods () == 0) {
+			period_flag = false;
+		} else {
+			Dtime low, high;
+			trip_table_file->Period_Range (0, low, high);
+			period_flag = (low != Model_Start_Time () || high != Model_End_Time ());
+		}
+		trip_table_file->Clear_Fields ();
+
+		trip_table_file->Add_Field ("ORG", DB_INTEGER, 4, NO_UNITS, true);
+		trip_table_file->Add_Field ("DES", DB_INTEGER, 4, NO_UNITS, true);
+
+		if (period_flag) {
+			trip_table_file->Add_Field ("PERIOD", DB_INTEGER, 2, NO_UNITS, true);
+		}
+		trip_table_file->Add_Field ("TRIPS", DB_INTEGER, 4, NO_UNITS, true);
+
+		nzone = Max_Zone_Number ();
+
+		//---- create the matrix and allocation memory ----
+
+		if (nzone <= 0) {
+			Int_Set zones;
+
+			if (System_File_Flag (LOCATION)) {
+
+				Show_Message ("Scanning Location File for Maximum Zone Number -- Record");
+				Set_Progress ();
+
+				Location_File *file = System_Location_File ();
+
+				while (file->Read ()) {
+					Show_Progress ();
+
+					nzone = file->Zone ();
+					if (nzone > 0) {
+						zones.insert (nzone);
+					}
+				}
+				End_Progress ();
+
+				file->Rewind ();
+
+			} else if (System_File_Flag (ZONE)) {
+				Zone_File *file = System_Zone_File ();
+
+				Show_Message ("Scanning Zone File for Maximum Zone Number -- Record");
+				Set_Progress ();
+
+				while (file->Read ()) {
+					Show_Progress ();
+
+					nzone = file->Zone ();
+					if (nzone > 0) {
+						zones.insert (nzone);
+					}
+				}
+				End_Progress ();
+
+				file->Rewind ();
+			}
+			nzone = (int) zones.size ();
+		}
+
+		if (nzone <= 0) {
+			Error ("Highest Zone Number is Not Defined");
+		}
+		trip_table_file->Num_Org (nzone);
+		trip_table_file->Num_Des (nzone);
+
+		Print (1);
+		trip_table_file->Create ();
+
+		if (trip_table_file->Num_Periods () > 1) {
+			Print (0, " (Periods=") << trip_table_file->Num_Periods () << " Zones=" << trip_table_file->Num_Zones () << " Tables=" << trip_table_file->Tables () << ")";
+		} else {
+			Print (0, " (Zones=") << trip_table_file->Num_Zones () << " Tables=" << trip_table_file->Tables () << ")";
+		}
+		if (!trip_table_file->Allocate_Data (true)) {
+			Error ("Insufficient Memory for New Matrix");
+		}
 	}
-
+	
 	//---- trip time increment ----
 
 	time_increment = Get_Control_Time (TRIP_TIME_INCREMENT);

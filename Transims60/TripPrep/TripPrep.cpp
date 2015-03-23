@@ -11,7 +11,7 @@
 TripPrep::TripPrep (void) : Data_Service (), Select_Service ()
 {
 	Program ("TripPrep");
-	Version (3);
+	Version (6);
 	Title ("Trip Processing Utility");
 
 	System_File_Type required_files [] = {
@@ -19,7 +19,7 @@ TripPrep::TripPrep (void) : Data_Service (), Select_Service ()
 	};
 	System_File_Type optional_files [] = {
 		SELECTION, NEW_TRIP, NEW_SELECTION, 
-		NODE, LINK, PARKING, LOCATION, END_FILE
+		NODE, LINK, PARKING, LOCATION, ZONE, END_FILE
 	};
 	int data_service_keys [] = {
 		TRIP_SORT_TYPE, 0
@@ -41,8 +41,13 @@ TripPrep::TripPrep (void) : Data_Service (), Select_Service ()
 		{ SYNTHESIZE_VEHICLES, "SYNTHESIZE_VEHICLES", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ CHECK_ACTIVITY_PATTERNS, "CHECK_ACTIVITY_PATTERNS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
 		{ SHIFT_START_PERCENTAGE, "SHIFT_START_PERCENTAGE", LEVEL0, OPT_KEY, FLOAT_KEY, "0.0", "0.0..100.0", NO_HELP },
+		{ SHIFT_END_PERCENTAGE, "SHIFT_END_PERCENTAGE", LEVEL0, OPT_KEY, FLOAT_KEY, "0.0", "0.0..100.0", NO_HELP },
 		{ SHIFT_FROM_TIME_RANGE, "SHIFT_FROM_TIME_RANGE", LEVEL0, OPT_KEY, TEXT_KEY, "", TIME_RANGE, NO_HELP },
 		{ SHIFT_TO_TIME_RANGE, "SHIFT_TO_TIME_RANGE", LEVEL0, OPT_KEY, TEXT_KEY, "", TIME_RANGE, NO_HELP },
+		{ ZONE_FACTOR_FILE, "ZONE_FACTOR_FILE", LEVEL0, OPT_KEY, IN_KEY, "", FILE_RANGE, NO_HELP },
+		{ ZONE_FACTOR_FORMAT, "ZONE_FACTOR_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", MATRIX_RANGE, FORMAT_HELP },
+		{ NEW_DESTINATION_FLAG, "NEW_DESTINATION_FLAG", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
+		{ NEW_HOUSEHOLD_NUMBER, "NEW_HOUSEHOLD_NUMBER", LEVEL0, OPT_KEY, INT_KEY, "50000000", ">0", NO_HELP },
 		END_CONTROL
 	};
 	const char *reports [] = {
@@ -68,10 +73,11 @@ TripPrep::TripPrep (void) : Data_Service (), Select_Service ()
 
 	sort_size = check_count = error_count = 0;
 	select_flag = merge_flag = combine_flag = output_flag = new_trip_flag = new_select_flag = false;
-	update_flag = type_flag = script_flag = merge_veh_flag = veh_part_flag = false;
-	sort_tours = make_veh_flag = check_flag = shift_flag = false;
+	update_flag = type_flag = script_flag = merge_veh_flag = veh_part_flag = factor_flag = move_flag = false;
+	sort_tours = make_veh_flag = check_flag = shift_start_flag = shift_end_flag = false;
 	shift_rate = 0.0;
 	shift_factor = 1.0;
+	new_hhold = 50000000;
 
 	System_Read_False (TRIP);
 	System_Data_Reserve (TRIP, 0);

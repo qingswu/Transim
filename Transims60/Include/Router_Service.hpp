@@ -7,8 +7,6 @@
 
 #include "Data_Service.hpp"
 #include "Flow_Time_Service.hpp"
-#include "Converge_Service.hpp"
-#include "User_Program.hpp"
 #include "TypeDefs.hpp"
 #include "Best_List.hpp"
 #include "List_Data.hpp"
@@ -24,7 +22,7 @@
 //	Router_Service - router service class definition
 //---------------------------------------------------------
 
-class SYSLIB_API Router_Service : public Data_Service, public Flow_Time_Service, public Converge_Service
+class SYSLIB_API Router_Service : public Data_Service, public Flow_Time_Service
 {
 	friend class Path_Builder;
 
@@ -41,6 +39,7 @@ public:
 	void Use_Link_Delays (bool flag)              { path_param.delay_flag = flag; }
 	void Link_Flows (bool flag)                   { path_param.flow_flag = flag; }
 	void Turn_Flows (bool flag)                   { path_param.turn_flow_flag = flag; }
+
 	void Skim_Total_Time (bool flag)              { path_param.skim_total_time = flag; }
 	void Skim_Check_Flag (bool flag)              { skim_check_flag = flag; }
 	void Reset_Skim_Gap (void)                    { skim_gap = skim_time = 0; }
@@ -84,25 +83,16 @@ protected:
 		LOCAL_ACCESS_DISTANCE, LOCAL_FACILITY_TYPE, LOCAL_IMPEDANCE_FACTOR,
 		MAX_CIRCUITY_RATIO,	MIN_CIRCUITY_DISTANCE, MAX_CIRCUITY_DISTANCE, MIN_DURATION_FACTORS
 	};
-	enum Router_Service_Reports { TRAVELER_SCRIPT = 1, TRAVELER_STACK, LINK_GAP, TRIP_GAP, ITERATION_PROBLEMS };
-	
-	static const char *reports [];
-
 	void Router_Service_Keys (int *keys = 0);
 
 	virtual void Program_Control (void);
 	virtual void Execute (void);
-	virtual void Print_Reports (void);
-	virtual void Page_Header (void);
-
-	virtual bool Get_Household_Data (Household_File &file, Household_Data &data, int partition = 0);
 
 	double skim_gap, skim_time;
 
-	User_Program type_script;
-	Int2_Map hhold_type;
-	Db_File script_file;
-	bool script_flag, hhfile_flag, select_flag, update_flag, thread_flag;
+	double Value_Time (int type)       { return (value_time.Best (type)); }
+
+	bool select_flag, update_flag, thread_flag;
 
 private:
 

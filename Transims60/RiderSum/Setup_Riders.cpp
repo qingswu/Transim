@@ -57,6 +57,8 @@ void RiderSum::Setup_Riders (void)
 	//---- allocate boarding and alighting memory ----
 
 	if (rider_flag || on_off_flag) {
+		int_data.assign (stop_array.size (), 0);
+
 		int_data.assign (nstop, 0);
 		board_data.assign (nperiod, int_data);
 		alight_data.assign (nperiod, int_data);

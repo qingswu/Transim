@@ -70,7 +70,7 @@ bool Control_Service::Read_Control_File (string control_file)
 void Control_Service::Write_Control_File (void) 
 {
 	String key, value, range;
-	bool found, first_file, first_data, first_select, first_flow, first_draw, first_router, first_sim;
+	bool found, first_file, first_data, first_select, first_flow, first_draw, first_converge, first_router, first_sim;
 
 	FILE *file;
 	Control_Key_Itr key_itr;
@@ -84,7 +84,7 @@ void Control_Service::Write_Control_File (void)
 	file = f_open (key, "wt");
 	if (file == 0) return;
 
-	first_file = first_data = first_select = first_flow = first_draw = first_router = first_sim = true;
+	first_file = first_data = first_select = first_flow = first_draw = first_converge = first_router = first_sim = true;
 
 	for (key_itr = keys.begin (); key_itr != keys.end (); key_itr++) {
 		if (key_itr->option == IGNORE_KEY) continue;
@@ -108,9 +108,12 @@ void Control_Service::Write_Control_File (void)
 		} else if (first_draw && key_itr->code >= DRAW_SERVICE_OFFSET && key_itr->code < ROUTER_SERVICE_OFFSET) {
 			first_draw = false;
 			fprintf (file, "\n#---- Draw Service Keys ----\n\n");
-		} else if (first_router && key_itr->code >= ROUTER_SERVICE_OFFSET && key_itr->code < SIM_SERVICE_OFFSET) {
+		} else if (first_router && key_itr->code >= ROUTER_SERVICE_OFFSET && key_itr->code < CONVERGE_SERVICE_OFFSET) {
 			first_router = false;
 			fprintf (file, "\n#---- Path Building Service Keys ----\n\n");
+		} else if (first_converge && key_itr->code >= CONVERGE_SERVICE_OFFSET && key_itr->code < SIM_SERVICE_OFFSET) {
+			first_converge = false;
+			fprintf (file, "\n#---- Convergence Service Keys ----\n\n");
 		} else if (first_sim && key_itr->code >= SIM_SERVICE_OFFSET && key_itr->code < PROJECTION_OFFSET) {
 			first_sim = false;
 			fprintf (file, "\n#---- Simulation Service Keys ----\n\n");

@@ -40,8 +40,10 @@ int Path_Builder::Build_Path (int lot)
 	max_imp = MAX_IMPEDANCE;
 	imp_diff = 0;
 
-	time_flag = dist_flag = length_flag = zero_flag = wait_time_flag = use_flag = false;
+	time_flag = dist_flag = length_flag = zero_flag = wait_time_flag = use_flag = constraint_flag = false;
 	transfer_flag = local_acc_flag = reset_veh_flag = walk_acc_flag = park_flag = access_flag = false;
+
+//if (plan_ptr->Household () == 8910) exe->Write (1, String (" origin=%d") % trip_end.Index ());	
 
 	switch (path_param.mode) {
 		case WALK_MODE:		//---- walk ----

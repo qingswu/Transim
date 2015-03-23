@@ -138,18 +138,14 @@ void RoutePrep::Input_Routes (void)
 
 					data.mode = text.Integer ();
 
-					if (data.mode > 0 && mode_map.size () > 0) {
-						if (data.mode < (int) mode_map.size ()) {
-							data.mode = mode_map [data.mode];
+					map_itr = route_mode_map.find (data.mode);
 
-							if (data.mode == -1) {
-								Warning (String ("Mode %s was Not Converted") % text);
-								mode_map [data.mode] = -2;
-								data.mode = -1;
-							}
-						} else {
-							data.mode = -1;
-						}
+					if (map_itr == route_mode_map.end ()) {
+						Warning (String ("Mode %d was Not Converted") % data.mode);
+						route_mode_map.insert (Int_Map_Data (data.mode, NO_TRANSIT));
+						data.mode = 0;
+					} else {
+						data.mode = map_itr->second;
 					}
 
 				} else if (text.Starts_With ("FREQ")) {

@@ -12,34 +12,39 @@
 
 void Gravity::Processing (void)
 {
-	int i, org, des, period, num_org, num_des, num_periods, index;
+	int i, org, des, period, num_org, num_des, index;
 	double trips, skim, prod, attr, friction, hi_diff, hi_percent, factor, diff;
-	Doubles attr_fac, prod_tot, attr_tot, prod_bal, attr_bal;
+	Doubles attr_fac, prod_tot, attr_tot, prod_bal, attr_bal, *prod_ptr, *attr_ptr;
 
 	new_file->Copy_OD_Map (skim_file);
 	new_file->Allocate_Data (true);
 
 	num_org = new_file->Num_Org ();
 	num_des = new_file->Num_Des ();
-	num_periods = new_file->Num_Periods ();
-	if (num_periods < 1) num_periods = 1;
 
 	Show_Message ("Distribute Trips -- Iteration");
 	Set_Progress ();
 
 	hi_diff = hi_percent = 0.0;
 
+	prod_ptr = &prod_array;
+	attr_ptr = &attr_array;
+
 	for (period = 0; period < num_periods; period++) {
+		if (period_flag) {
+			prod_ptr = &prod_periods [period];
+			attr_ptr = &attr_periods [period];
+		}
 
 		//---- balance production and attractions ----
 
 		prod = attr = 0;
 
 		for (org = 0; org < num_org; org++) {
-			prod += prod_array [org];
+			prod += prod_ptr->at (org);
 		}
 		for (des = 0; des < num_des; des++) {
-			attr += attr_array [des];
+			attr += attr_ptr->at (des);
 		}
 		prod_bal.assign (num_org, 0.0);
 		attr_bal.assign (num_des, 0.0);
@@ -56,14 +61,14 @@ void Gravity::Processing (void)
 			factor = trips / prod;
 
 			for (org = 0; org < num_org; org++) {
-				prod_bal [org] = prod_array [org] * factor;
+				prod_bal [org] = prod_ptr->at (org) * factor;
 			}
 		}
 		if (attr > 0) {
 			factor = trips / attr;
 
 			for (des = 0; des < num_des; des++) {
-				attr_bal [des] = attr_array [des] * factor;
+				attr_bal [des] = attr_ptr->at (des) * factor;
 			}
 		}
 		attr_fac.assign (num_des, 1.0);

@@ -69,29 +69,6 @@ void RoutePrep::Program_Control (void)
 
 	new_route = Get_Control_Integer (FIRST_ROUTE_NUMBER);
 
-	//---- process the mode map ----
-
-	if (Check_Control_Key (ROUTE_MODE_MAP) || Highest_Control_Group (ROUTE_MODE_MAP, 0) > 0) {
-		if (!Get_Control_List_Groups (ROUTE_MODE_MAP, str_list)) {
-			Error ("Route Mode Map was Not Found");
-		}
-		for (str_itr = str_list.begin (); str_itr != str_list.end (); str_itr++) {
-			j = Transit_Code (*str_itr);
-			if (j == ANY_TRANSIT) {
-				Error ("Route Mode Map is Out of Range");
-			}
-			mode_map.push_back (j);
-		}
-	}
-
-	//---- process the mode veh_type map ----
-
-	if (Check_Control_Key (MODE_VEH_TYPE_MAP)) {
-		if (!Get_Control_List_Groups (MODE_VEH_TYPE_MAP, mode_type_map)) {
-			Error ("Mode Vehicle Type Map was Not Found");
-		}
-	}
-
 	//---- convert node numbers ----
 
 	if (Check_Control_Key (CONVERT_NODE_NUMBERS)) Print (1);
@@ -158,45 +135,7 @@ void RoutePrep::Program_Control (void)
 
 		//---- get the time periods ----
 
-		Print (1);
-		key = Get_Control_Text (TRANSIT_TIME_PERIODS);
-
-		if (!key.empty ()) {
-			schedule_periods.Add_Breaks (key);
-		}
-		num_periods = schedule_periods.Num_Periods ();
-
-		if (new_route_flag) {
-			new_route_nodes->Num_Periods (num_periods);
-
-			//---- get the transit period offset flag ----
-
-			offset_flag = Get_Control_Flag (TRANSIT_PERIOD_OFFSETS);
-			new_route_nodes->Offset_Flag (offset_flag);
-
-			//---- get the period travel time flag ----
-
-			time_flag = Get_Control_Flag (PERIOD_TRAVEL_TIMES);
-			new_route_nodes->TTime_Flag (time_flag);
-			
-			//---- get the transit node types flag ----
-
-			new_route_nodes->Type_Flag (Get_Control_Flag (TRANSIT_NODE_TYPES));
-
-			//---- collapse route data ----
-
-			collapse_routes = Get_Control_Flag (COLLAPSE_ROUTE_DATA);
-
-			//---- update the file header ----
-
-			new_route_nodes->Dwell_Flag (false);
-			new_route_nodes->Time_Flag (false);
-			new_route_nodes->Speed_Flag (false);
-
-			new_route_nodes->Clear_Fields ();
-			new_route_nodes->Create_Fields ();
-			new_route_nodes->Write_Header ();
-		}
+		num_periods = transit_time_periods.Num_Periods ();
 	}
 
 	//---- coordinate resolution ----
@@ -619,5 +558,48 @@ void RoutePrep::Program_Control (void)
 
 			ignore_speeds = Get_Control_Flag (IGNORE_EXISTING_SPEEDS);
 		}
+	}
+
+	//---- transcad route system ----
+
+	key = Get_Control_String (TRANSCAD_ROUTE_SYSTEM);
+
+	if (!key.empty ()) {
+		Db_File rts_file;
+		String name, filename;
+
+		Print (1);
+		rts_file.File_Type ("TransCAD Route System");
+
+		filename = Project_Filename (key);
+		tcad_route_flag = true;
+
+		if (filename.Ends_With (".rts")) {
+			if (filename.size () > 4 && filename [filename.size () - 4] == '.') {
+				filename.erase (filename.size () - 4, 4);
+			}
+		}
+
+		//---- route header file ----
+
+		name = filename + "r.bin";
+
+		tcad_route_header.File_Type ("TransCAD Route Header");
+		tcad_route_header.Dbase_Format ("TRANSCAD:BINARY");
+		tcad_route_header.Open (name);
+
+		//---- route line file ----
+
+		name = filename + "l.bin";
+		tcad_route_link.File_Type ("TransCAD Route Link");
+		tcad_route_link.Dbase_Format ("TRANSCAD:BINARY");
+		tcad_route_link.Open (name);
+
+		//---- stop node file ----
+
+		name = filename + "s.bin";
+		tcad_stop_node.File_Type ("TransCAD Stop Node");
+		tcad_stop_node.Dbase_Format ("TRANSCAD:BINARY");
+		tcad_stop_node.Open (name);
 	}
 }

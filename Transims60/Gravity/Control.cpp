@@ -17,7 +17,7 @@ void Gravity::Program_Control (void)
 	String key, range, format;
 	Zone_File *zone_file;
 	Dbls_Array dbls_array, *dbls_ptr;
-	Doubles range_rec, *range_ptr; 
+	Doubles range_rec, *range_ptr;
 
 	//---- create the network files ----
 
@@ -27,17 +27,35 @@ void Gravity::Program_Control (void)
 
 	Print (2, String ("%s Control Keys:") % Program ());
 
+	prod_field = attr_field = -1;
+
 	key = Get_Control_Text (ZONE_PRODUCTION_FIELD);
 
-	prod_field = zone_file->Required_Field (key);
+	if (!key.empty ()) {
+		prod_field = zone_file->Required_Field (key);
 
-	Print (0, ", Number = ") << (prod_field + 1);
-
+		Print (0, ", Number = ") << (prod_field + 1);
+	}
 	key = Get_Control_Text (ZONE_ATTRACTION_FIELD);
 
-	attr_field = zone_file->Required_Field (key);
+	if (!key.empty ()) {
+		attr_field = zone_file->Required_Field (key);
 
-	Print (0, ", Number = ") << (attr_field + 1);
+		Print (0, ", Number = ") << (attr_field + 1);
+	}
+
+	if (prod_field < 0 || attr_field < 0) {
+
+		if (prod_field < 0 && attr_field < 0) {
+			period_flag = Get_Control_Flag (ZONE_PERIOD_FIELDS);
+
+			if (!period_flag) {
+				Error ("Zone Fields or Zone Periods are Required");
+			}
+		} else {
+			Error ("Zone Production and Attraction Fields are Required");
+		}
+	}
 
 	//---- get the skim file ----
 
@@ -74,6 +92,42 @@ void Gravity::Program_Control (void)
 		
 	if (skim_units != NO_UNITS) {
 		Print (0, ", Units = ") << Units_Code (skim_units);
+	}
+	num_periods = skim_file->Num_Periods ();
+	if (num_periods < 1) num_periods = 1;
+
+	//----- check the periods -----
+
+	if (period_flag) {
+		prod_periods.assign (num_periods, range_rec);
+		attr_periods.assign (num_periods, range_rec);
+
+		for (i=0; i < num_periods; i++) {
+			range = skim_file->Range_Label (i);
+			key = "O_" + range;
+			j = zone_file->Field_Number (key);
+
+			if (j < 0) {
+				key [0] = 'P';
+				j = zone_file->Field_Number (key);
+			}
+			if (j < 0) {
+				Error (String ("Zone Period Field %s was Not Found") % range);
+			}
+			prod_fields.push_back (j);
+
+			key [0] = 'D';
+			j = zone_file->Field_Number (key);
+
+			if (j < 0) {
+				key [0] = 'A';
+				j = zone_file->Field_Number (key);
+			}
+			if (j < 0) {
+				Error (String ("Zone Period Field %s was Not Found") % range);
+			}
+			attr_fields.push_back (j);
+		}
 	}
 	Print (1);
 

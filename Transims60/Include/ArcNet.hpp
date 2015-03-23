@@ -57,7 +57,7 @@ protected:
 		NEW_ARC_SIGN_FILE, NEW_ARC_SIGNAL_FILE, NEW_ARC_TIMING_PLAN_FILE, NEW_ARC_PHASING_PLAN_FILE, 
 		NEW_ARC_DETECTOR_FILE, NEW_ARC_TRANSIT_STOP_FILE, NEW_ARC_TRANSIT_ROUTE_FILE, 
 		NEW_ARC_TRANSIT_DRIVER_FILE, NEW_ARC_STOP_SERVICE_FILE, NEW_ARC_ROUTE_NODES_FILE, 
-		NEW_ARC_SUBZONE_DATA_FILE, SELECT_TIME, TRANSIT_TIME_PERIODS
+		NEW_ARC_SUBZONE_DATA_FILE, SELECT_TIME
 	};
 	virtual void Program_Control (void);
 
@@ -86,7 +86,6 @@ private:
 	Dtime time;
 
 	int run_field, service_field, user_field;
-	Time_Periods sched_breaks;
 	Integers user_fields;
 
 	Projection_Service projection;

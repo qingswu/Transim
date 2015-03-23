@@ -14,107 +14,50 @@ void Simulator::Execute (void)
 {
 	int i, count;
 	bool first, read_status;
+	Dtime_Itr time_itr;
 
 	Sim_Statistics *stats;
 
-	clock_t start, input_total, update_total, travel_total, output_total, node_total;
+	clock_t start, input_total, update_total, travel_total, output_total, node_total, path_total;
 
 	//---- read the network data ----
 
 	Simulator_Service::Execute ();
 
-#ifdef ROUTING
-	clock_t path_total = 0;
-
-	Global_Data ();
-
-	//---- read trips into memory ----
-
-	Read_Trips ();
-
-	//---- build paths ----
-
-	Show_Message ("Building Plans -- Trip");
-	Set_Progress ();
-
-	bool build_flag, first_iteration = true;
-	int last_hhold = -1;
-	Trip_Map_Itr map_itr;
-	Plan_Ptr plan_ptr;
-	Plan_Ptr_Array *plan_ptr_array;
-	Plan_Processor plan_processor;
-
-	plan_processor.Initialize (this);
-
-	plan_processor.Start_Processing ();
-	plan_ptr_array = new Plan_Ptr_Array ();
-			
-	start = clock ();
-
-	//---- process each trip ----
+	path_total = 0;
 	
-	for (map_itr = plan_trip_map.begin (); map_itr != plan_trip_map.end (); map_itr++) {
-	//for (map_itr = trip_map.begin (); map_itr != trip_map.end (); map_itr++) {
-		Show_Progress ();
+	if (router_flag) {
+		start = clock ();
 
-		plan_ptr = new Plan_Data ();
+		Global_Data ();
 
-		*plan_ptr = plan_array [map_itr->second];
-		//Trip_Data *trip_ptr = &trip_array [map_itr->second];
-		//*plan_ptr = *trip_ptr;
+#ifdef ROUTING
 
-		//---- check the household id ----
+		//---- build paths ----
 
-		if (plan_ptr->Household () < 1) continue;
+		Show_Message ("Building Plans -- Trip");
+		Set_Progress ();
 
-		if (plan_ptr->Household () != last_hhold) {
-			if (last_hhold > 0 && plan_ptr_array->size () > 0) {
-				plan_processor.Plan_Build (plan_ptr_array);
-				plan_ptr_array = new Plan_Ptr_Array ();
-			}
-			last_hhold = plan_ptr->Household ();
-		}
+		//---- update the speed before each path building iteration ----
 
-		//---- update the selection priority flag ----
+		part_processor.plan_process->Start_Processing ();
 
-		if (plan_ptr->Priority () == NO_PRIORITY) {
-			plan_ptr->Method (COPY_PLAN);
-		} else if (!first_iteration && select_priorities) {
-			build_flag = select_priority [plan_ptr->Priority ()];
+		Trip_Loop ();
 
-			//if (build_flag && max_percent_flag && percent_selected < 1.0) {
-			//	build_flag = (random_select.Probability () <= percent_selected);
-			//}
-			if (build_flag) {
-				plan_ptr->Method (BUILD_PATH);
-			} else {
-				plan_ptr->Method (COPY_PLAN);
-			}
-		} else {
-			plan_ptr->Method (BUILD_PATH);
-		}
-		plan_ptr_array->push_back (plan_ptr);
-	}
+		part_processor.plan_process->Stop_Processing ();
 
-	//---- process the last household ----
-
-	if (last_hhold > 0 && plan_ptr_array->size () > 0) {
-		plan_processor.Plan_Build (plan_ptr_array);
-	} else {
-		delete plan_ptr_array;
-	}
-	plan_processor.Stop_Processing ();
-	End_Progress ();
-
-	path_total += (clock () - start);
-#else
-
-	//---- initialize the global data structures ----
-
-	Show_Message ("Initializing the Simulator");
-
-	Global_Data ();
+		End_Progress ();
 #endif
+		path_total += (clock () - start);
+
+	} else {
+
+		//---- initialize the global data structures ----
+
+		Show_Message ("Initializing the Simulator");
+
+		Global_Data ();
+	}
 
 	time_step = param.start_time_step;
 	sim_period = sim_periods.Period (time_step) - 1;
@@ -132,13 +75,13 @@ void Simulator::Execute (void)
 	read_status = first = true;
 	input_total = update_total = node_total = output_total = travel_total = 0;
 
-#ifndef ROUTING
-	if (read_all_flag) {
-		Show_Message (2, "Reading Plans into Memory -- Trip");
-	} else {
-		Show_Message (1);
+	if (!router_flag) {
+		if (read_all_flag) {
+			Show_Message (2, "Reading Plans into Memory -- Trip");
+		} else {
+			Show_Message (1);
+		}
 	}
-#endif
 	Show_Message (1, "Simulating Time of Day");
 	Set_Progress ();
 
@@ -146,6 +89,23 @@ void Simulator::Execute (void)
 
 	for (; time_step <= param.end_time_step; time_step += param.step_size) {
 		Show_Progress (time_step.Time_String ());
+
+		if (backup_flag) {
+			for (time_itr = backup_times.begin (); time_itr != backup_times.end (); time_itr++) {
+				if (*time_itr == time_step) {
+					Pack_File file;
+					String name = String ("%s_%s.%s") % backup_name % time_step.Time_Label (true) % backup_ext;
+
+					file.Open (name, CREATE);
+
+					sim_veh_array.Pack (file);
+					sim_travel_array.Pack (file);
+
+					file.Close ();
+					break;
+				}
+			}
+		}
 
 		if (time_step >= end_period) {
 			end_period = Set_Sim_Period ();
@@ -228,11 +188,13 @@ void Simulator::Execute (void)
 
 	Break_Check (6);
 	Write (1);
-#ifdef ROUTING
-	start += path_total;
-	Write (1, String ("Seconds in Path Processing = %.1lf (%.1lf%%)") % 
-		((double) input_total / CLOCKS_PER_SEC) % (100.0 * path_total / start) % FINISH);
-#endif
+
+	if (router_flag) {
+		start += path_total;
+		Write (1, String ("Seconds in Path Processing = %.1lf (%.1lf%%)") % 
+			((double) input_total / CLOCKS_PER_SEC) % (100.0 * path_total / start) % FINISH);
+	}
+
 	Write (1, String ("Seconds in Input Processing = %.1lf (%.1lf%%)") % 
 		((double) input_total / CLOCKS_PER_SEC) % (100.0 * input_total / start) % FINISH);
 	Write (1, String ("Seconds in Output Processing = %.1lf (%.1lf%%)") % 
@@ -245,9 +207,12 @@ void Simulator::Execute (void)
 		((double) node_total / CLOCKS_PER_SEC) % (100.0 * node_total / start) % FINISH);
 
 	//---- write summary statistics ----
-#ifndef ROUTING
-	plan_file->Print_Summary ();
-#endif
+
+	if (router_flag) {
+		System_Trip_File ()->Print_Summary ();
+	} else {
+		System_Plan_File ()->Print_Summary ();
+	}
 	Break_Check (4);
 	Write (2, "Number of Person Trips Processed = ") << stats->num_trips;
 	Write (1, "Number of Person Trips Started   = ") << stats->num_start;
@@ -337,7 +302,9 @@ void Simulator::Execute (void)
 
 void Simulator::Print_Reports (void)
 {
-	Router_Service::Print_Reports ();
+#ifdef ROUTING
+	Converge_Service::Print_Reports ();
+#endif
 }
 
 //---------------------------------------------------------
@@ -349,7 +316,9 @@ void Simulator::Page_Header (void)
 	switch (Header_Number ()) {
 		case 0:
 		default:
-			Router_Service::Page_Header ();
+#ifdef ROUTING
+			Converge_Service::Page_Header ();
+#endif
 			break;
 	}
 }

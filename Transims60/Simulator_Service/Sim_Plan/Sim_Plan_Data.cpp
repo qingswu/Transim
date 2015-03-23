@@ -48,7 +48,7 @@ bool  Sim_Plan_Data::Next_Leg (void)
 {
 #ifdef CHECK
 	if (leg_pool < 0 || (int) sim->sim_leg_array.size () <= leg_pool) sim->Error ("Sim_Plan_Data::Next_Leg: leg_pool");
-	if (first_leg < 0 || (int) sim->sim_leg_array [leg_pool].size () <= first_leg) sim->Error ("Sim_Plan_Data::Next_Leg: first_leg");
+	if (first_leg < 0 || (int) sim->sim_leg_array [leg_pool].size () <= first_leg) sim->Error (String ("Sim_Plan_Data::Next_Leg: first_leg=%d") % first_leg);
 #endif
 	Sim_Leg_Ptr ptr = Get_Leg ();
 	if (ptr != 0) {

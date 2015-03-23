@@ -10,17 +10,14 @@
 
 void Router::Iteration_Loop (void)
 {
-<<<<<<< .working
-	int p, num, num_car, max_hhold, veh;
-=======
-	int p, num, num_car, max_hhold, veh, potential;
+	int num, num_car, max_hhold, veh;
 >>>>>>> .merge-right.r1529
 	int last_hhold, skip_hhold, skip_person;
 
 	Dtime second;
 	bool old_flag, duration_flag, last_skip, last_flag, link_last_flag, trip_last_flag, transit_last_flag;
 	bool last_new_plan_flag, last_problem_flag, last_skim_only, save_flag;
-	double gap, new_factor, total_percent;
+	double gap, new_factor;
 	
 	clock_t path_time, update_time, total_time;
 
@@ -62,51 +59,6 @@ void Router::Iteration_Loop (void)
 
 		Iteration_Setup ();
 
-		if (!first_iteration) {
-			Use_Link_Delays (true);
-		}
-		if (rider_flag || (System_File_Flag (RIDERSHIP) && param.cap_penalty_flag)) {
-			line_array.Clear_Ridership ();
-		}
-		potential = select_records;
-		total_percent = 1.0;
-
-<<<<<<< .working
-		if (max_iteration > 1) {
-			Print (1);
-			Write (1, "Iteration Number ") << iteration << ":  Weighting Factor = " << initial_factor;
-			if (!thread_flag) Show_Message (1);
-		}
-		if (trip_set_flag) Show_Message (1);
-=======
-		if (total_records > 0 && max_percent_flag) {
-			percent_selected = ((double) select_records / total_records);
-			total_percent = percent_selected;
->>>>>>> .merge-right.r1529
-
-<<<<<<< .working
-		Iteration_Setup ();
-
-		if (rider_flag || (System_File_Flag (RIDERSHIP) && param.cap_penalty_flag)) {
-			line_array.Clear_Ridership ();
-		}
-		if (total_records > 0 && max_percent_flag) {
-			percent_selected = ((double) num_selected / total_records);
-=======
->>>>>>> .merge-right.r1529
-			if (percent_selected > max_percent_select) {
-				percent_selected = max_percent_select / percent_selected;
-				if (select_weight > 0) {
-					percent_selected = percent_selected * select_records / select_weight;
-				}
-			} else {
-				percent_selected = 1.0;
-			}
-		} else {
-			percent_selected = 1.0;
-		}
-		total_records = select_records = select_weight = 0;
-
 		if (last_flag) {
 			new_plan_flag = last_new_plan_flag;
 			problem_flag = last_problem_flag;
@@ -114,12 +66,6 @@ void Router::Iteration_Loop (void)
 		} else {
 			new_plan_flag = problem_flag = false;
 			param.skim_only = true;
-		}
-
-		//---- preload transit vehicles ----
-
-		if (preload_flag) {
-			Preload_Transit ();
 		}
 
 		//---- process each partition ----
@@ -218,59 +164,7 @@ void Router::Iteration_Loop (void)
 		Show_Message (1);
 
 		if (!last_flag) {
-			if (save_flag) {
-				if (System_File_Flag (NEW_PERFORMANCE)) {
-					Performance_File *file = System_Performance_File (true);
-					if (file->Part_Flag ()) {
-						file->Open (iteration);
-					} else {
-						file->Create ();
-					}
-					Write_Performance (full_flag);
-
-					perf_period_array.Zero_Flows (reroute_time);
-					if (Turn_Flows ()) {
-						turn_period_array.Zero_Turns (reroute_time);
-					}
-				}
-				if (System_File_Flag (NEW_TURN_DELAY) && System_File_Flag (SIGNAL)) {
-					Turn_Delay_File *file = System_Turn_Delay_File (true);
-					if (file->Part_Flag ()) {
-						file->Open (iteration);
-					} else {
-						file->Create ();
-					}
-					Write_Turn_Delays (full_flag);
-				}
-				if (rider_flag) {
-					System_Ridership_File (true)->Create ();
-					Write_Ridership ();
-				}
-			}
-			if (trip_flag && !trip_memory_flag) {
-				if (trip_set_flag) {
-					for (p=0; p < num_file_sets; p++) {
-						trip_file_set [p]->Open (p);
-						trip_file_set [p]->Reset_Counters ();
-					}
-				} else {
-					trip_file->Open (0);
-					trip_file->Reset_Counters ();
-				}
-			}
-			if (plan_flag && !plan_memory_flag) {
-				if (new_set_flag) {
-					for (p=0; p < num_file_sets; p++) {
-						plan_file_set [p]->Open (p);
-						plan_file_set [p]->Reset_Counters ();
-					}
-				} else {
-					plan_file->Open (0);
-					plan_file->Reset_Counters ();
-				}
-			}
-			num_build = num_reroute = num_reskim = num_update = num_copied = 0;
-			Reset_Problems ();
+			Iteration_Output ();
 		}
 	}
 }

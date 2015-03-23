@@ -300,7 +300,7 @@ bool Data_Service::Get_Performance_Data (Performance_File &file, Performance_Dat
 //	Read_Performance
 //---------------------------------------------------------
 
-void Data_Service::Read_Performance (Performance_File &file, Volume_Array &data)
+void Data_Service::Read_Performance (Performance_File &file, Volume_Array &data, bool entry_flag)
 {
 	int i, num, start, end, count, index;
 	double factor, p1, p2, share;
@@ -376,6 +376,8 @@ void Data_Service::Read_Performance (Performance_File &file, Volume_Array &data)
 
 				if (!sum_flag && num == 0 && *volume > 0) {
 					*volume += perf_rec.Enter ();
+				} else if (entry_flag) {
+					*volume += (perf_rec.Enter () * share);
 				} else {
 					*volume += (perf_rec.Volume () * share);
 				}
