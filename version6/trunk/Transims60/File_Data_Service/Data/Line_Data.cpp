@@ -207,6 +207,8 @@ double Line_Array::Ridership_Gap (bool cap_flag, double factor)
 		for (stop_itr = line_itr->begin (); stop_itr != line_itr->end (); stop_itr++) {
 			for (r=0, run_itr = stop_itr->begin (); run_itr != stop_itr->end (); run_itr++, r++) {
 				penalty = run_itr->Penalty ();
+				if (penalty < 0) penalty = 0;
+
 				delay1 += penalty;
 
 				run_itr->Penalty (0);

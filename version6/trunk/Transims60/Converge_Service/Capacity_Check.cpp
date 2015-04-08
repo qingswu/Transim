@@ -8,7 +8,7 @@
 //	Capacity_Check
 //---------------------------------------------------------
 
-void Converge_Service::Capacity_Check (Plan_Data &plan)
+bool Converge_Service::Capacity_Check (Plan_Data &plan)
 {
 	int index;
 	bool constrain_flag;
@@ -35,7 +35,16 @@ END_LOCK
 
 	loc_cap_ptr = &loc_cap_array [plan.Destination ()];
 
-	if (loc_cap_ptr->capacity == 0) return;
+	if (loc_cap_ptr->capacity == 0) return (false);
+
+	if (choice_flag && choice_range.In_Range (plan.Type ())) {
+		if (plan.Method () != BUILD_PATH) {
+MAIN_LOCK
+			loc_cap_ptr->demand++;
+END_LOCK
+		}
+		return (true);
+	}
 
 	constrain_flag = false;
 MAIN_LOCK
@@ -47,7 +56,7 @@ MAIN_LOCK
 		Set_Problem (CONSTRAINT_PROBLEM);
 	}
 END_LOCK
-	if (!constrain_flag) return;
+	if (!constrain_flag) return (true);
 
 	index = (int) loc_cap_ptr->next_des.size ();
 
@@ -93,11 +102,12 @@ MAIN_LOCK
 			new_index.Start (plan.Arrive ());
 		}
 		if (!plan_time_map.insert (Time_Map_Data (new_index, plan.Index ())).second) {
-			Warning (String ("Time Index Problem Plan %d-%d-%d-%d") % plan.Household () %
+			Warning (String ("Capacity Time Index Problem Plan %d-%d-%d-%d") % plan.Household () %
 				plan.Person () % plan.Tour () % plan.Trip ());
 		}
 		time_itr = plan_time_map.find (index);
 END_LOCK
 	}
 	plan.Problem (CONSTRAINT_PROBLEM);
+	return (true);
 }

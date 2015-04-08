@@ -28,7 +28,9 @@ protected:
 		DATA_FILE = 1, DATA_FORMAT, NEW_DATA_FILE, NEW_DATA_FORMAT, 
 		DATA_SELECT_FIELD, COPY_EXISTING_FIELDS, 
 		NEW_FILE_HEADER, NEW_DATA_FIELD, SORT_BY_FIELDS,
-		DATA_FIELD_MAP, DATA_INDEX_FIELD, NEW_COMBINE_FIELDS_FILE, NEW_COMBINE_FIELDS_FORMAT, 
+		DATA_FIELD_MAP, DATA_INDEX_FIELD, 
+		NEW_MERGE_DATA_FILE, NEW_MERGE_DATA_FORMAT,
+		NEW_COMBINE_FIELDS_FILE, NEW_COMBINE_FIELDS_FORMAT, 
 		MATRIX_FILE, MATRIX_FORMAT, NEW_MATRIX_FILE, NEW_MATRIX_FORMAT,
 		SELECT_TABLES, CONVERSION_SCRIPT,
 	};
@@ -39,10 +41,10 @@ private:
 	enum FileFormat_Reports { PRINT_SCRIPT = 1, PRINT_STACK, STATS_REPORT };
 
 	String filename;
-	int num_records;
+	int num_records, group_num;
 
-	bool script_flag, data_flag, matrix_flag, stats_flag, combine_flag, index_flag;
-	Db_Header combine_file;
+	bool script_flag, data_flag, matrix_flag, stats_flag, combine_flag, index_flag, merge_flag;
+	Db_Header combine_file, merge_file;
 
 	//---- field statistics ----
 
@@ -55,6 +57,8 @@ private:
 
 	typedef vector <Field_Stats>    Stats_Array;
 	typedef Stats_Array::iterator   Stats_Itr;
+		
+	Stats_Array output;
 
 	//---- data groups ----
 
@@ -71,6 +75,7 @@ private:
 		Db_Header *new_file;
 		Db_Base *sort_string;
 		Db_Data_Array *dbase;
+		Db_Sort_Array *index;
 		Str_ID sort_id;
 		Stats_Array input;
 		Stats_Array output;
@@ -104,6 +109,7 @@ private:
 	
 	void Combine_Index (void);
 	void Combine_Fields (void);
+	void Merge_Data (void);
 	void Format_Data (void);
 	void Format_Matrix (void);
 	

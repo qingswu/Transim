@@ -29,6 +29,7 @@ typedef struct {
 	bool      ignore_veh_flag;              //---- ignore vehicle IDs and locations ----
 	bool      ignore_errors;                //---- ignore path building problems ----
 	bool      cap_penalty_flag;             //---- transit capacity penalty ----
+	bool      transit_penalty;              //---- apply penalty by traveler type ----
 
 	bool      limit_access;                 //---- limit parking access to access link connections ----
 	double    random_imped;                 //---- maximum percent random impedance variance ----

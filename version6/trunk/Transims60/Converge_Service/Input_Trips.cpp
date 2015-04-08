@@ -69,6 +69,8 @@ void Converge_Service::Input_Trips (void)
 				trip_rec.Priority (NO_PRIORITY);
 			}
 			if (!Selection (&trip_rec)) {
+				if (!plan_flag) continue;
+
 				trip_rec.Priority (SKIP);
 				priority = SKIP;
 			} else {
@@ -83,6 +85,7 @@ void Converge_Service::Input_Trips (void)
 
 		    if (map_itr == plan_trip_map.end ()) {
 			    plan_rec = trip_rec;
+
 			    plan_rec.Index ((int) plan_array.size ());
 				plan_rec.Priority (CRITICAL);
 
@@ -112,6 +115,7 @@ void Converge_Service::Input_Trips (void)
 				if (priority_flag || priority == SKIP) {
 					plan_ptr->Priority (priority);
 				}
+
 				if (plan_ptr->Start () != trip_rec.Start ()) {
 					shift = plan_ptr->Start () - trip_rec.Start ();
 

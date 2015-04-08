@@ -122,6 +122,7 @@ void Converge_Service::Iteration_Output (void)
 		for (itr = loc_fuel_array.begin (); itr != loc_fuel_array.end (); itr++) {
 			itr->consumed = 0;
 			itr->failed = 0;
+			itr->ran_out = 0;
 		}
 	}
 

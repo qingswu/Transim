@@ -79,7 +79,7 @@ void ArcPlan::Read_Plan (void)
 		if (select_end_times && !end_range.In_Range (plan.End ())) continue;
 		if (select_origins && !org_range.In_Range (plan.Origin ())) continue;
 		if (select_destinations && !des_range.In_Range (plan.Destination ())) continue;
-		
+
 		if (select_org_zones) {
 			int_itr = location_map.find (plan.Origin ());
 
@@ -104,7 +104,8 @@ void ArcPlan::Read_Plan (void)
 
 			if (problem_map.find (trip_index) == problem_map.end ()) continue;
 		}
-
+		if (select_routes && !Select_Plan_Routes (plan)) continue;
+		if (select_transit_modes && !Select_Plan_Route_Modes (plan)) continue;
 		if (select_links && !Select_Plan_Links (plan)) continue;
 		if (select_nodes && !Select_Plan_Nodes (plan)) continue;
 		if (select_subareas && !Select_Plan_Subareas (plan)) continue;

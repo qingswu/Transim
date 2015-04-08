@@ -117,6 +117,7 @@ private:
 	bool Plan_Flow (void);
 	bool Plan_Reskim (void);
 	bool Plan_Stop (void);
+	bool Stop_Access (void);
 	Dtime Load_Flow (void);
 
 	int  Build_Path (int lot = 0);

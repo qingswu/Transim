@@ -352,12 +352,20 @@ struct XYZ {
 	XYZ (int x, int y, int z) : x(x), y(y), z(z) {}
 };
 
+struct XY {
+	int  x;
+	int  y;
+
+	XY (void) : x(0), y(0) {}
+	XY (int x, int y) : x(x), y(y) {}
+};
+
 //---- array of XY points ----
 
 typedef Vector <XY_Point>            XY_Points;
-typedef XY_Points::iterator          XY_Itr;
-typedef XY_Points::reverse_iterator  XY_RItr;
-typedef XY_Points::pointer           XY_Ptr;
+typedef XY_Points::iterator          XY_Pt_Itr;
+typedef XY_Points::reverse_iterator  XY_Pt_RItr;
+typedef XY_Points::pointer           XY_Pt_Ptr;
 
 //---- array of XYZ points ----
 
@@ -373,13 +381,20 @@ typedef XYZ_Array::iterator          XYZ_Itr;
 typedef XYZ_Array::reverse_iterator  XYZ_RItr;
 typedef XYZ_Array::pointer           XYZ_Ptr;
 
+//---- array of XY points ----
+
+typedef Vector <XY>                  XY_Array;
+typedef XY_Array::iterator           XY_Itr;
+typedef XY_Array::reverse_iterator   XY_RItr;
+typedef XY_Array::pointer            XY_Ptr;
+
 //---- an integer sorted array of XY_Points ----
 
-typedef map <int, XY_Point>          XY_Map;
-typedef pair <int, XY_Point>         XY_Map_Data;
-typedef XY_Map::iterator             XY_Map_Itr;
-typedef XY_Map::reverse_iterator     XY_Map_RItr;
-typedef pair <XY_Map_Itr, bool>      XY_Map_Stat;
+typedef map <int, XY_Point>          XY_Pt_Map;
+typedef pair <int, XY_Point>         XY_Pt_Map_Data;
+typedef XY_Pt_Map::iterator          XY_Pt_Map_Itr;
+typedef XY_Pt_Map::reverse_iterator  XY_Pt_Map_RItr;
+typedef pair <XY_Pt_Map_Itr, bool>   XY_Pt_Map_Stat;
 
 //---- an integer sorted array of XYZ_Points ----
 
@@ -396,6 +411,14 @@ typedef pair <int, XYZ>              XYZ_Map_Data;
 typedef XYZ_Map::iterator            XYZ_Map_Itr;
 typedef XYZ_Map::reverse_iterator    XYZ_Map_RItr;
 typedef pair <XYZ_Map_Itr, bool>     XYZ_Map_Stat;
+
+//---- an integer sorted array of XY ----
+
+typedef map <int, XY>                XY_Map;
+typedef pair <int, XY>               XY_Map_Data;
+typedef XY_Map::iterator             XY_Map_Itr;
+typedef XY_Map::reverse_iterator     XY_Map_RItr;
+typedef pair <XY_Map_Itr, bool>      XY_Map_Stat;
 
 //---- an integer sorted array of Point arrays ----
 

@@ -26,7 +26,7 @@ public:
 protected:
 	enum RiderSum_Keys { 
 		NEW_LINE_RIDER_FILE = 1, NEW_LINE_GROUP_FILE, NEW_STOP_ROUTE_FILE, NEW_STOP_GROUP_FILE, 
-		NEW_STOP_PROFILE, NEW_STOP_LINES_FILE, NEW_STOP_DETAIL_FILE,
+		NEW_STOP_PROFILE, NEW_STOP_VEHTYPE_FILE, NEW_STOP_LINES_FILE, NEW_STOP_DETAIL_FILE,
 	};
 	virtual void Program_Control (void);
 	
@@ -39,9 +39,10 @@ private:
 	Ints_Array board_data, alight_data;
 	Integers load_data, stop_list, enter_runs, end_runs, start_runs, enter_cap, start_cap, end_cap;
 
-	Db_File line_rider_file, line_group_file, stop_route_file, stop_group_file, stop_profile, stop_lines, stop_detail_file;
+	Db_File line_rider_file, line_group_file, stop_route_file, stop_group_file;
+	Db_File stop_profile, stop_vehtype_file, stop_lines, stop_detail_file;
 	bool rider_flag, on_off_flag, line_rider_flag, line_group_flag, stop_route_flag, stop_group_flag;
-	bool stop_profile_flag, stop_lines_flag, stop_detail_flag;
+	bool stop_profile_flag, stop_vehtype_flag, stop_lines_flag, stop_detail_flag;
 	Integers run_flag, run_period, period_flag;
 
 	typedef struct {
@@ -71,6 +72,7 @@ private:
 	void Write_Line_Rider (void);
 	void Write_Group_Rider (void);
 	void Write_Stop_Profile (void);
+	void Write_Stop_VehTypes (void);
 	void Write_Stop_Lines (void);
 	void Write_Stop_Details (void);
 

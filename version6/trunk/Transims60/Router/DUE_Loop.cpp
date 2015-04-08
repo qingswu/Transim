@@ -97,7 +97,6 @@ void Router::DUE_Loop (void)
 		//---- update transit penalties ----
 
 		if (iteration != max_iteration && (rider_flag || (System_File_Flag (RIDERSHIP) && Cap_Penalty_Flag ()))) {
-
 			part_processor.Save_Riders ();
 
 			gap = line_array.Ridership_Gap (Cap_Penalty_Flag (), initial_factor);
@@ -127,7 +126,7 @@ void Router::DUE_Loop (void)
 
 		if (converge_flag) break;
 
-		if (save_trip_gap || save_link_gap) {
+		if (save_trip_gap || save_link_gap || rider_flag) {
 			Show_Message (1);
 		}
 

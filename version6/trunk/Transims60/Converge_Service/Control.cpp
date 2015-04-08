@@ -19,6 +19,18 @@ void Converge_Service::Program_Control (void)
 
 	Read_Select_Keys ();
 
+	if (System_File_Flag (TRIP)) {
+		trip_flag = true;
+		trip_file = System_Trip_File ();
+	}
+	if (System_File_Flag (PLAN)) {
+		plan_flag = true;
+		plan_file = System_Plan_File ();
+	}
+	if (!trip_flag && !plan_flag) {
+		Error ("An Input Trip or Plan File is Required");
+	}
+
 	//---- open traveler type script ----
 
 	if (System_File_Flag (HOUSEHOLD)) {
@@ -114,10 +126,7 @@ void Converge_Service::Program_Control (void)
 		}
 	}
 
-	if (System_File_Flag (TRIP)) {
-		trip_flag = true;
-		trip_file = System_Trip_File ();
-
+	if (trip_flag) {
 		if (trip_file->Version () < 60) {
 			Error (String ("Convert Version %.1lf Trip File to Version 6.0 using NewFormat") % (trip_file->Version () / 10.0));
 		}
@@ -128,16 +137,10 @@ void Converge_Service::Program_Control (void)
 
 		Required_File_Check (*trip_file, LOCATION);
 	}
-	if (System_File_Flag (PLAN)) {
-		plan_flag = true;
-		plan_file = System_Plan_File ();
-
+	if (plan_flag) {
 		if (plan_file->Time_Sort () && !plan_memory_flag) {
 			Error ("Plan Files should be Traveler Sorted");
 		}
-	}
-	if (!trip_flag && !plan_flag) {
-		Error ("An Input Trip or Plan File is Required");
 	}
 
 	if (System_File_Flag (NEW_PLAN)) {
@@ -546,9 +549,38 @@ void Converge_Service::Program_Control (void)
 			fuel_const_file.Create (Project_Filename (key));
 			fuel_const_flag = true;
 		}
+
+		//---- fuel information travelers ----
+
+		key = Get_Control_Text (FUEL_INFORMATION_TRAVELERS);
+
+		if (!key.empty () && !key.Equals ("NONE")) {
+			info_flag = true;
+			info_range.Add_Ranges (key);
+			Location_XY_Flag (true);
+		}
 	}
 
-	if (capacity_flag || fuel_flag) {
+	//---- scheduled access travelers ----
+
+	key = Get_Control_Text (SCHEDULED_ACCESS_TRAVELERS);
+
+	if (!key.empty () && !key.Equals ("NONE")) {
+		sched_acc_flag = true;
+		sched_acc_range.Add_Ranges (key);
+
+		bool cap_flag = Cap_Penalty_Flag ();
+
+		for (num=1; num <= 100; num++) {
+			if (sched_acc_range.In_Range (num)) {
+				cap_transit.push_back (false);
+			} else {
+				cap_transit.push_back (cap_flag);
+			}
+		}
+	}
+
+	if (capacity_flag || fuel_flag || sched_acc_flag) {
 		Time_Sort_Flag (true);
 		time_order_flag = true;
 	}

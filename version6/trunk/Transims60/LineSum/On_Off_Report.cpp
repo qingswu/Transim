@@ -18,7 +18,7 @@ void LineSum::On_Off_Report (On_Off_Report_Data &report)
 	On_Off_Map_Itr on_off_itr;
 	On_Off_Data *access_ptr, stop_data, mode_data, total_data;
 	Str_Map_Itr name_itr;
-	XY_Map_Itr xy_itr;
+	XY_Pt_Map_Itr xy_itr;
 	XYZ_Point point;
 
 	report_code = report.details;

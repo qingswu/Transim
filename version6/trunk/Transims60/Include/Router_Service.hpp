@@ -13,7 +13,6 @@
 #include "Path_Parameters.hpp"
 #include "Db_Header.hpp"
 #include "Route_Stop_Data.hpp"
-#include "Lot_XY_Data.hpp"
 #include "One_To_Many.hpp"
 
 #define MAX_PATHS	10
@@ -93,6 +92,7 @@ protected:
 	double Value_Time (int type)       { return (value_time.Best (type)); }
 
 	bool select_flag, update_flag, thread_flag;
+	Bool_List cap_transit;
 
 private:
 
@@ -118,7 +118,7 @@ private:
 	Integers link_parking, next_parking;
 	Integers link_stop, next_stop, stop_list;
 	Route_Stop_Array route_stop_array;
-	Lot_XY_Array park_ride, kiss_ride;
+	XY_Map park_ride, kiss_ride;
 	Integers park_penalty;
 
 	List_Array loc_access, park_access, stop_access, node_access, from_access, to_access;

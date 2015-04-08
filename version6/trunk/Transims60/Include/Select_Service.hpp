@@ -49,6 +49,7 @@ protected:
 	bool Select_Plan_Nodes (Plan_Data &plan);
 	bool Select_Plan_Stops (Plan_Data &plan);
 	bool Select_Plan_Routes (Plan_Data &plan);
+	bool Select_Plan_Route_Modes (Plan_Data &plan);
 	bool Select_Plan_Subareas (Plan_Data &plan);
 	bool Select_Plan_Polygon (Plan_Data &plan);
 	bool Select_Path_Difference (Plan_Data &plan1, Plan_Data &plan2);

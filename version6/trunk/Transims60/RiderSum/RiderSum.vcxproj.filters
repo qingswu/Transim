@@ -77,6 +77,9 @@
     <ClCompile Include="Write_Stop_Lines.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Write_Stop_VehTypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\RiderSum.hpp">

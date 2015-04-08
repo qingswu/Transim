@@ -39,7 +39,7 @@ bool Path_Builder::Origin_Parking (Trip_End_Array *org_ptr, Path_End_Array *from
 =======
 #ifdef CHECK
 		if (org_itr->Index () < 0 || org_itr->Index () >= (int) exe->location_array.size ()) {
-			exe->Error (String ("Path_Builder::Origin_Parking: location_array index=%d") % org_itr->Index ());
+			exe->Error (String ("Path_Builder::Origin_Parking: location_array index=%d, household=%d, org=%d, des=%d, method=%d, forward=%d") % org_itr->Index () % plan_ptr->Household () % plan_ptr->Origin () % plan_ptr->Destination () % plan_ptr->Method () % forward_flag);
 		}
 #endif
 >>>>>>> .merge-right.r1529

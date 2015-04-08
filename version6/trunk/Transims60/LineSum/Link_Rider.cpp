@@ -42,10 +42,10 @@ void LineSum::Link_Rider (Link_Rider_Data &data)
 
 	//---- node xy map data ----
 
-	XY_Map xy_map;
+	XY_Pt_Map xy_map;
 	XY_Point xy_rec;
-	XY_Map_Itr xy_itr;
-	XY_Map_Stat xy_stat;
+	XY_Pt_Map_Itr xy_itr;
+	XY_Pt_Map_Stat xy_stat;
 
 	Rider_Map link_map;
 	Rider_Data link_rec, *link_ptr;
@@ -133,7 +133,7 @@ void LineSum::Link_Rider (Link_Rider_Data &data)
 			xy_rec.x = data.xy_file->Get_Double (data.xcoord_fld);
 			xy_rec.y = data.xy_file->Get_Double (data.ycoord_fld);
 
-			xy_stat = xy_map.insert (XY_Map_Data (node, xy_rec));
+			xy_stat = xy_map.insert (XY_Pt_Map_Data (node, xy_rec));
 
 			if (!xy_stat.second) {
 				Warning ("Duplicate Node Number ") << node;

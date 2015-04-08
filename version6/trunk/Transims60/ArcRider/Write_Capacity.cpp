@@ -67,7 +67,7 @@ void ArcRider::Write_Capacity (void)
 
 		line_ptr = &line_array [map_itr->second];
 
-		if (select_modes && !select_mode [line_ptr->Mode ()]) continue;
+		if (select_transit_modes && !select_transit [line_ptr->Mode ()]) continue;
 		
 		veh_type_ptr = &veh_type_array [line_ptr->Type ()];
 		if (veh_type_ptr->Capacity () <= 0) continue;

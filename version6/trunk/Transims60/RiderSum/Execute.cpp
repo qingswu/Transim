@@ -52,6 +52,12 @@ void RiderSum::Execute (void)
 		Write_Stop_Profile ();
 	}
 
+	//---- write the stop vehtypes ----
+
+	if (stop_vehtype_flag) {
+		Write_Stop_VehTypes ();
+	}
+
 	//---- write the stop lines ----
 
 	if (stop_lines_flag) {

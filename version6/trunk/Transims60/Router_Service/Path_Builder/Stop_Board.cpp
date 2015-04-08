@@ -13,7 +13,7 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 	int route, stop, s, nstop, index, path, wait, run, imped, xfer, to, to_stop, from_offset;	
 	int from_cost, from_len, from_walk, to_cost, to_len, to_walk, wait_cost, wait_len, wait_walk, len;
 	unsigned from_imp, wait_imp, to_imp, hi_imp;
-	Dtime from_time, wait_time, to_time, min_time, ttime;
+	Dtime from_time, wait_time, to_time, min_time, ttime, penalty;
 	double factor;
 	bool to_flag, exit_flag;
 
@@ -113,7 +113,9 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 
 			for (run=0, run_itr = line_stop_ptr->begin (); run_itr != line_stop_ptr->end (); run_itr++, run++) {
 
-				if ((run_itr->Schedule () - run_itr->Penalty ()) < min_time) continue;
+				penalty = (path_param.transit_penalty) ? run_itr->Penalty () : 0;
+
+				if ((run_itr->Schedule () - penalty) < min_time) continue;
 
 				wait_time = run_itr->Schedule ();
 
@@ -333,7 +335,10 @@ bool Path_Builder::Stop_Board (Transit_Path_Index path_index, Path_End_Array *to
 			run = (int) line_stop_ptr->size () - 1;
 
 			for (run_ritr = line_stop_ptr->rbegin (); run_ritr != line_stop_ptr->rend (); run_ritr++, run--) {
-				if ((run_ritr->Schedule () + run_ritr->Penalty ()) > min_time) continue;
+
+				penalty = (path_param.transit_penalty) ? run_ritr->Penalty () : 0;
+
+				if ((run_ritr->Schedule () + penalty) > min_time) continue;
 
 				wait_time = run_ritr->Schedule ();
 

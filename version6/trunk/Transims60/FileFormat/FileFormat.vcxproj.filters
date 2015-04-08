@@ -35,6 +35,9 @@
     <ClCompile Include="Combine_Index.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Merge_Data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\FileFormat.hpp">

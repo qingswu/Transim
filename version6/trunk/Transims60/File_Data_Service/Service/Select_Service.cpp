@@ -819,6 +819,24 @@ bool Select_Service::Select_Plan_Routes (Plan_Data &plan)
 }
 
 //---------------------------------------------------------
+//	Select_Plan_Route_Modes
+//---------------------------------------------------------
+
+bool Select_Service::Select_Plan_Route_Modes (Plan_Data &plan)
+{
+	Plan_Leg_Itr leg_itr;
+	
+	for (leg_itr = plan.begin (); leg_itr != plan.end (); leg_itr++) {
+		if (leg_itr->Type () == ROUTE_ID) {
+			Line_Data *line_ptr = &dat->line_array [leg_itr->ID ()];
+
+			if (select_transit [line_ptr->Mode ()]) return (true);
+		}
+	}
+	return (false);
+}
+
+//---------------------------------------------------------
 //	Select_Plan_Subareas
 //---------------------------------------------------------
 

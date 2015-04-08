@@ -89,6 +89,20 @@ void RiderSum::Program_Control (void)
 		stop_profile.Create (Project_Filename (key));
 	}
 
+	//---- open stop vehtype file ----
+
+	key = Get_Control_String (NEW_STOP_VEHTYPE_FILE);
+
+	if (!key.empty ()) {
+		Print (1);
+		stop_vehtype_flag = true;
+
+		stop_vehtype_file.File_Type ("New Stop VehType File");
+		stop_vehtype_file.File_ID ("StopType");
+
+		stop_vehtype_file.Create (Project_Filename (key));
+	}
+
 	//---- open stop lines file ----
 
 	key = Get_Control_String (NEW_STOP_LINES_FILE);
@@ -140,7 +154,7 @@ void RiderSum::Program_Control (void)
 
 	if (Line_Equiv_Flag ()) {
 		line_equiv.Read (Report_Flag (LINE_EQUIV));
-	} else if (line_group_flag || Report_Flag (LINE_GROUP) || stop_profile_flag) {
+	} else if (line_group_flag || Report_Flag (LINE_GROUP) || stop_profile_flag || stop_vehtype_flag) {
 		Error ("A Line Equivalance File is Required for Link Group processing");
 	}
 }

@@ -78,10 +78,4 @@ void Converge_Service::Iteration_Setup (void)
 	if (preload_flag) {
 		Preload_Transit ();
 	}
-
-	//---- set current fuel levels ----
-
-	if (fuel_flag) {
-		current_fuel = initial_fuel;
-	}
 }

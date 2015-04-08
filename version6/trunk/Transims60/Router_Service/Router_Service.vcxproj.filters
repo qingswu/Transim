@@ -23,9 +23,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Include\Lot_XY_Data.hpp">
-      <Filter>Path_Builder\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Include\One_To_Many.hpp">
       <Filter>Path_Builder\Header Files</Filter>
     </ClInclude>
@@ -170,6 +167,9 @@
       <Filter>Path_Builder\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Path_Builder\Plan_Stop.cpp">
+      <Filter>Path_Builder\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Path_Builder\Stop_Access.cpp">
       <Filter>Path_Builder\Source Files</Filter>
     </ClCompile>
   </ItemGroup>

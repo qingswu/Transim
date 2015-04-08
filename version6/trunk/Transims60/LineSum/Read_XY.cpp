@@ -31,7 +31,7 @@ void LineSum::Read_XY (void)
 		xy.x = node_xy_file.Get_Double (x_field);
 		xy.y = node_xy_file.Get_Double (y_field);
 
-		xy_map.insert (XY_Map_Data (node, xy));
+		xy_map.insert (XY_Pt_Map_Data (node, xy));
 	}
 	End_Progress ();
 

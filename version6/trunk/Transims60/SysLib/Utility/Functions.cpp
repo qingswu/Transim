@@ -197,12 +197,12 @@ void Function_Array::Print_Function (int number)
 
 	fun_ptr = &(fun_itr->second);
 
-	exe->Print (1, String ("Function Parameters %d = %s, A = %0.2lf, B = %0.2lf") % number % Function_Code (fun_ptr->type) % fun_ptr->a % fun_ptr->b);
+	exe->Print (1, String ("Function Parameters %d = %s, A = %0.5lf, B = %0.5lf") % number % Function_Code (fun_ptr->type) % fun_ptr->a % fun_ptr->b);
 
 	if (fun_ptr->type != LINEAR) {
-		exe->Print (0, String (", C = %.2lf") % fun_ptr->c);
+		exe->Print (0, String (", C = %.5lf") % fun_ptr->c);
 	}
 	if ((fun_ptr->type == LOGIT || fun_ptr->type == POLYNOMIAL || fun_ptr->type == GAMMA || fun_ptr->type == MAX_LOGIT) && fun_ptr->d != 0.0) {
-		exe->Print (0, String (", D = %.2lf") % fun_ptr->d);
+		exe->Print (0, String (", D = %.5lf") % fun_ptr->d);
 	}
 }

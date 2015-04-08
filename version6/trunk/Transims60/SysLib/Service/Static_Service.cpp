@@ -223,10 +223,11 @@ Static_Service::Code_Text Static_Service::connect_codes [] = {
 Static_Service::Code_Text Static_Service::transit_codes [] = {
 	{ NO_TRANSIT, "NONE" }, { LOCAL_BUS, "LOCAL_BUS" }, { EXPRESS_BUS, "EXPRESS_BUS" }, { BRT, "BRT" }, 
 	{ STREETCAR, "STREETCAR" }, { LRT, "LIGHTRAIL" }, { RAPIDRAIL, "RAPIDRAIL" }, { REGIONRAIL, "REGIONRAIL" }, 
-	{ ANY_TRANSIT, "ANY_MODE" }, { NO_TRANSIT, "NO_MODE" }, { NO_TRANSIT, "N/A" }, { NO_TRANSIT, "" },
+	{ INTERCITY, "INTERCITY" }, { ANY_TRANSIT, "ANY_MODE" }, 
+	{ NO_TRANSIT, "NO_MODE" }, { NO_TRANSIT, "N/A" }, { NO_TRANSIT, "" },
 	{ LOCAL_BUS, "BUS" }, { LOCAL_BUS, "LOCAL" }, { EXPRESS_BUS, "EXPRESS" }, { BRT, "TROLLEY" }, 
-	{ LRT, "LRT" }, { RAPIDRAIL, "METRORAIL" }, { REGIONRAIL, "AMTRAK" },  { ANY_TRANSIT, "ANY" }, 
-	{ NO_TRANSIT, "" },	{ 0, 0 }
+	{ LRT, "LRT" }, { RAPIDRAIL, "METRORAIL" }, { REGIONRAIL, "COMMUTER" },  { REGIONRAIL, "REGIONAL" }, 
+	{ INTERCITY, "AMTRAK"}, { ANY_TRANSIT, "ANY" }, { NO_TRANSIT, "" },	{ 0, 0 }
 };
 
 //---- transit class codes ----

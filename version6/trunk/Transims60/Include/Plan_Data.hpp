@@ -98,6 +98,8 @@ public:
 	int      Length (void)                  { return (length); }
 	int      Cost (void)                    { return (cost); }
 	unsigned Impedance (void)               { return (impedance); }
+	Dtime    Reroute_Time (void)            { return (reroute); }
+	int      Stop_Location (void)           { return (stop); }
 
 	Dtime    Total_Time (void)              { return (Dtime ((int) walk + other) + drive + transit + wait); }
 
@@ -115,6 +117,8 @@ public:
 	void     Length (int value)             { length = value; }
 	void     Cost (int value)               { cost = (unsigned short) value; }
 	void     Impedance (unsigned value)     { impedance = value; }
+	void     Reroute_Time (Dtime time)      { reroute = time; }
+	void     Stop_Location (int value)      { stop = value; }
 
 	void     Length (double value)          { length = exe->Round (value); }
 	void     Cost (double value)            { cost = (unsigned short) exe->Round (value); }
@@ -136,7 +140,7 @@ public:
 
 	void     Clear_Plan (void)
 	{
-		method = problem = 0; depart = arrive = activity = 0; Zero_Totals (); clear ();
+		method = problem = 0; depart = arrive = activity = reroute = 0; stop = -1; Zero_Totals (); clear ();
 	}
 	void     Clear (void)
 	{
@@ -152,14 +156,6 @@ public:
 	bool Internal_IDs (void);
 	bool External_IDs (void);
 
-	//---- overrides ----
-
-	Dtime Reroute_Time (void)               { return (arrive); }
-	void  Reroute_Time (Dtime time)         { arrive = time; }
-
-	int   Stop_Location (void)              { return ((int) depart); }
-	void  Stop_Location (int value)         { depart = (Dtime) value; }
-
 private:
 	Dtime          depart;
 	Dtime          arrive;
@@ -174,6 +170,8 @@ private:
 	unsigned short cost;
 	int            length;
 	unsigned       impedance;
+	Dtime          reroute;
+	int            stop;
 };
 
 typedef Plan_Data *               Plan_Ptr;

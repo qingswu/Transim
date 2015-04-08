@@ -85,6 +85,8 @@ void Router_Service::Program_Control (void)
 	
 	path_param.cap_penalty_flag = Get_Control_Flag (TRANSIT_CAPACITY_PENALTY);
 
+	cap_transit.push_back (path_param.cap_penalty_flag);
+
 	//---- random impedance ----
 	
 	path_param.random_imped = Get_Control_Double (PERCENT_RANDOM_IMPEDANCE);

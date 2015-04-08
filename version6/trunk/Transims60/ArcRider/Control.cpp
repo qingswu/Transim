@@ -269,17 +269,20 @@ void ArcRider::Program_Control (void)
 	Read_Draw_Keys ();
 
 	if (bandwidth_flag) {
-		if (line_flag) {
-			width_field = arcview_line.Required_Field (bandwidth_field);
-		} else if (sum_flag) {
-			width_field = arcview_sum.Required_Field (bandwidth_field);
-		} else if (rider_flag) {
+		if (rider_flag) {
 			width_field = arcview_rider.Required_Field (bandwidth_field);
-		} else if (cap_flag) {
-			width_field = arcview_cap.Required_Field (bandwidth_field);
-		} else {
-			Error ("Bandwidths require an Arcview Link or Delay File");
 		}
+		//if (line_flag) {
+		//	width_field = arcview_line.Required_Field (bandwidth_field);
+		//} else if (sum_flag) {
+		//	width_field = arcview_sum.Required_Field (bandwidth_field);
+		//} else if (rider_flag) {
+		//	width_field = arcview_rider.Required_Field (bandwidth_field);
+		//} else if (cap_flag) {
+		//	width_field = arcview_cap.Required_Field (bandwidth_field);
+		//} else {
+		//	Error ("Bandwidths require an Arcview Output File");
+		//}
 	}
 
 	//---- read the stop equiv ----

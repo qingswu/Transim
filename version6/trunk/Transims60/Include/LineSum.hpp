@@ -303,7 +303,7 @@ private:
 	Projection_Service projection;
 
 	Db_Header node_xy_file;
-	XY_Map xy_map;
+	XY_Pt_Map xy_map;
 
 	//---- methods ----
 
