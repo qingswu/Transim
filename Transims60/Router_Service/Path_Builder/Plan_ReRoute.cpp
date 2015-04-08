@@ -10,7 +10,7 @@
 
 bool Path_Builder::Plan_ReRoute (void)
 {
-	int stat, len, cost, imp, link, mode;
+	int stat, len, cost, imp, link, mode, leg;
 	Dtime tod, time, reroute_time;
 	double factor;
 	bool start_flag;
@@ -19,6 +19,7 @@ bool Path_Builder::Plan_ReRoute (void)
 	Path_End path_end;
 	Path_Data path_data;
 	Link_Data *link_ptr;
+	Dir_Data *dir_ptr;
 	Plan_Leg_Itr leg_itr;
 
 	plan_flag = true;
@@ -43,7 +44,7 @@ bool Path_Builder::Plan_ReRoute (void)
 
 	//---- find the path mode at reroute time ---
 
-	for (leg_itr = plan_ptr->begin (); leg_itr != plan_ptr->end (); leg_itr++) {
+	for (leg=0, leg_itr = plan_ptr->begin (); leg_itr != plan_ptr->end (); leg_itr++, leg++) {
 		tod += leg_itr->Time ();
 		if (leg_itr->Mode () == DRIVE_MODE) start_flag = true;
 
@@ -109,27 +110,32 @@ bool Path_Builder::Plan_ReRoute (void)
 		//---- set the origin ----
 
 		if (tod >= reroute_time) {
-			if (!leg_itr->Link_Type ()) return (true);
-
 			path_end.Clear ();
 			path_end.Trip_End (0);
 			path_end.End_Type (FROM_ID);
 			path_end.Type (LINK_ID);
-
-			link = leg_itr->Link_ID ();
-
-			path_end.Index (link);
-			link_ptr = &exe->link_array [link];
-
 			path_end.Offset (len);
 
-			if (leg_itr->Link_Dir () == 0) {
-				path_data.From (link_ptr->AB_Dir ());
+			if (leg_itr->Link_Type ()) {
+				link = leg_itr->Link_ID ();
+
+				path_end.Index (link);
+				link_ptr = &exe->link_array [link];
+
+				if (leg_itr->Link_Dir () == 0) {
+					path_data.From (link_ptr->AB_Dir ());
+				} else {
+					path_data.From (link_ptr->BA_Dir ());
+				}
+			} else if (leg_itr->Dir_Type ()) {
+				path_data.From (leg_itr->ID ());
+
+				dir_ptr = &exe->dir_array [leg_itr->ID ()];
+				path_end.Index (dir_ptr->Link ());
 			} else {
-				path_data.From (link_ptr->BA_Dir ());
+				return (true);
 			}
 			path_data.Type (DIR_ID);
-
 			path_data.Time (reroute_time);
 			path_data.Imped (Round ((int) plan_ptr->Impedance ()));
 			path_data.Length (plan_ptr->Length ());

@@ -327,6 +327,7 @@
     <ClCompile Include="Write_Stop_Lines.cpp" />
     <ClCompile Include="Write_Stop_Profile.cpp" />
     <ClCompile Include="Write_Stop_Route.cpp" />
+    <ClCompile Include="Write_Stop_VehTypes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\RiderSum.hpp" />

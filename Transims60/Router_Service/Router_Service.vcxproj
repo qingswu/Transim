@@ -316,7 +316,6 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\Include\Lot_XY_Data.hpp" />
     <ClInclude Include="..\Include\One_To_Many.hpp" />
     <ClInclude Include="..\Include\Path_Builder.hpp" />
     <ClInclude Include="..\Include\Path_Data.hpp" />
@@ -353,6 +352,7 @@
     <ClCompile Include="Path_Builder\Plan_Update.cpp" />
     <ClCompile Include="Path_Builder\Save_Skims.cpp" />
     <ClCompile Include="Path_Builder\Skim_Build.cpp" />
+    <ClCompile Include="Path_Builder\Stop_Access.cpp" />
     <ClCompile Include="Path_Builder\Stop_Alight.cpp" />
     <ClCompile Include="Path_Builder\Stop_Board.cpp" />
     <ClCompile Include="Path_Builder\Trace_Path.cpp" />

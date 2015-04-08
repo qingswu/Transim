@@ -320,12 +320,10 @@ bool Path_Builder::Destination_Location (Trip_End_Array *des_ptr, Path_End_Array
 		if (to_itr->Type () == LINK_ID) {
 			link_to [to_itr->Index ()] = 1;
 			link_to_flag = true;
-		}
-		if (to_itr->Type () == NODE_ID) {
+		} else if (to_itr->Type () == NODE_ID) {
 			node_to [to_itr->Index ()] = 1;
 			node_to_flag = true;
-		}
-		if (stop_flag && to_itr->Type () == STOP_ID) {
+		} else if (stop_flag && to_itr->Type () == STOP_ID) {
 			stop_to [to_itr->Index ()] = 1;
 			stop_to_flag = true;
 		}

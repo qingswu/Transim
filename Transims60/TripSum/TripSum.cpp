@@ -11,7 +11,7 @@
 TripSum::TripSum (void) : Data_Service (), Select_Service ()
 {
 	Program ("TripSum");
-	Version (6);
+	Version (7);
 	Title ("Trip Summary Utility");
 
 	System_File_Type required_files [] = {

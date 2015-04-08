@@ -10,11 +10,12 @@
 
 bool Path_Builder::Plan_Stop (void)
 {
+	if (plan_ptr->Stop_Location () < 0) return (false);
+
 	int destination = plan_ptr->Destination ();
 	Dtime stop_duration = plan_ptr->Activity ();
 
 	plan_ptr->Destination (plan_ptr->Stop_Location ());
-	plan_ptr->Depart (plan_ptr->Start ());
 
 	if (!Plan_ReRoute ()) return (false);
 

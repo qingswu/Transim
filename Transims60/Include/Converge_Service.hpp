@@ -42,7 +42,8 @@ protected:
 		CAPACITY_CONSTRAINT_FIELD, NEXT_DESTINATION_FIELDS, DESTINATION_SHARE_FIELDS, 
 		CONSTRAINED_ACTIVITY_DURATION, NEW_CAPACITY_CONSTRAINT_FILE, DESTINATION_CHOICE_TRAVELERS, 
 		FUEL_SUPPLY_FIELD, FUEL_ACTIVITY_DURATION, MINIMUM_INITIAL_FUEL, SEEK_FUEL_LEVEL, 
-		NEW_FUEL_CONSTRAINT_FILE, CONSTRAINT_TIME_INCREMENT, 
+		NEW_FUEL_CONSTRAINT_FILE, FUEL_INFORMATION_TRAVELERS, SCHEDULED_ACCESS_TRAVELERS, 
+		CONSTRAINT_TIME_INCREMENT, 
 	};
 	enum Converge_Service_Reports { TRAVELER_SCRIPT = 1, TRAVELER_STACK, LINK_GAP, TRIP_GAP, ITERATION_PROBLEMS };
 
@@ -59,9 +60,9 @@ protected:
 
 	bool min_vht_flag, save_iter_flag, link_gap_flag, trip_gap_flag, trip_gap_map_flag, save_link_gap, save_trip_gap;
 	bool iteration_flag, first_iteration, link_report_flag, trip_report_flag, save_plan_flag, capacity_flag, priority_flag;
-	bool trip_flag, plan_flag, trip_set_flag, trip_memory_flag, plan_memory_flag, time_sort_flag, rider_flag;
+	bool trip_flag, plan_flag, trip_set_flag, trip_memory_flag, plan_memory_flag, time_sort_flag, rider_flag, sched_acc_flag;
 	bool new_plan_flag, problem_flag, new_set_flag, problem_set_flag, plan_set_flag, preload_flag, time_order_flag;
-	bool flow_flag, turn_flag, reroute_flag, cap_const_flag, fuel_const_flag, fuel_flag, choice_flag;
+	bool flow_flag, turn_flag, reroute_flag, cap_const_flag, fuel_const_flag, fuel_flag, choice_flag, info_flag;
 
 	Dtime cap_duration, fuel_duration;
 	int iteration, max_iteration, max_speed_updates, num_trip_sel, num_trip_rec, num_reroute, num_reskim;
@@ -71,13 +72,13 @@ protected:
 	double link_gap, trip_gap, transit_gap, min_speed_diff, percent_selected, total_percent;
 
 	int  loc_cap_field, initial_priority, loc_fuel_field;
-	Integers next_des_field, des_share_field, next_fuel_field, current_fuel, initial_fuel;
+	Integers next_des_field, des_share_field, initial_fuel;
 
 	Trip_File *trip_file;
 	Plan_File *plan_file, *new_plan_file;
 	Problem_File *problem_file;
 
-	Data_Range save_iter_range, save_hhold_range, choice_range;
+	Data_Range save_iter_range, save_hhold_range, choice_range, info_range, sched_acc_range;
 	Plan_File save_plan_file;
 	
 	User_Program type_script;
@@ -140,6 +141,7 @@ protected:
 		int consumed;
 		int supply;
 		int failed;
+		int ran_out;
 	} Loc_Fuel_Data;
 
 	typedef vector <Loc_Fuel_Data>    Loc_Fuel_Array;
@@ -224,7 +226,7 @@ protected:
 	void   Write_Constraint (int period = -1);
 	void   Write_Fuel_Demand (int period = -1);
 	void   Fuel_Check (Plan_Data &plan);
-	void   Capacity_Check (Plan_Data &plan);
+	bool   Capacity_Check (Plan_Data &plan);
 
 private:
 

@@ -26,14 +26,14 @@ void Converge_Service::Write_Fuel_Demand (int period)
 		file->First_Open (false);
 		file->Create (name);
 	}
-	file->File () << "LOCATION\tSUPPLY\tCONSUMED\tFAILED" << endl;
+	file->File () << "LOCATION\tSUPPLY\tCONSUMED\tFAILED\tRAN_OUT" << endl;
 
 	for (index=0, fuel_itr = loc_fuel_array.begin (); fuel_itr != loc_fuel_array.end (); fuel_itr++, index++) {
 		if (fuel_itr->supply == 0) continue;
 
 		loc_ptr = &location_array [index];
 
-		file->File () << loc_ptr->Location () << "\t" << UnRound (fuel_itr->supply) << "\t" << UnRound (fuel_itr->consumed) << "\t" << fuel_itr->failed << endl;
+		file->File () << loc_ptr->Location () << "\t" << UnRound (fuel_itr->supply) << "\t" << UnRound (fuel_itr->consumed) << "\t" << fuel_itr->failed << "\t" << fuel_itr->ran_out << endl;
 	}
 	file->Close ();
 }

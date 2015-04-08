@@ -328,7 +328,7 @@ void Router_Service::Execute (void)
 			Parking_Itr park_itr;
 			Link_Data *link_ptr;
 			Node_Data *node_ptr;
-			Lot_XY_Data lot_rec;
+			XY xy_rec;
 
 			int i, ax, ay, bx, by;
 			double factor;
@@ -352,11 +352,10 @@ void Router_Service::Execute (void)
 
 				factor = (double) park_itr->Offset () / (double) link_ptr->Length ();
 
-				lot_rec.Lot (i);
-				lot_rec.X (ax + (int) ((bx - ax) * factor + 0.5));
-				lot_rec.Y (ay + (int) ((by - ay) * factor + 0.5));
+				xy_rec.x = (ax + (int) ((bx - ax) * factor + 0.5));
+				xy_rec.y = (ay + (int) ((by - ay) * factor + 0.5));
 
-				park_ride.push_back (lot_rec);
+				park_ride.insert (XY_Map_Data (i, xy_rec));
 			}
 			Print (2, "Number of Park-&-Ride Lots = ") << park_ride.size ();
 		}
@@ -368,7 +367,7 @@ void Router_Service::Execute (void)
 			Link_Data *link_ptr;
 			Node_Data *node_ptr;
 			Stop_Itr stop_itr;
-			Lot_XY_Data kiss_rec;
+			XY xy_rec;
 
 			int i, ax, ay, bx, by, distance;
 			double factor;
@@ -391,9 +390,8 @@ void Router_Service::Execute (void)
 
 				factor = (double) park_itr->Offset () / (double) link_ptr->Length ();
 
-				kiss_rec.Lot (i);
-				kiss_rec.X (ax + (int) ((bx - ax) * factor + 0.5));
-				kiss_rec.Y (ay + (int) ((by - ay) * factor + 0.5));
+				xy_rec.x = (ax + (int) ((bx - ax) * factor + 0.5));
+				xy_rec.y = (ay + (int) ((by - ay) * factor + 0.5));
 				flag = false;
 
 				for (stop_itr = stop_array.begin (); stop_itr != stop_array.end (); stop_itr++) {
@@ -413,8 +411,8 @@ void Router_Service::Execute (void)
 
 					factor = (double) stop_itr->Offset () / (double) link_ptr->Length ();
 
-					ax += (int) ((bx - ax) * factor + 0.5) - kiss_rec.X ();
-					ay += (int) ((by - ay) * factor + 0.5) - kiss_rec.Y ();
+					ax += (int) ((bx - ax) * factor + 0.5) - xy_rec.x;
+					ay += (int) ((by - ay) * factor + 0.5) - xy_rec.y;
 
 					distance = abs (ax) + abs (ay);
 
@@ -423,7 +421,7 @@ void Router_Service::Execute (void)
 						break;
 					}
 				}
-				if (flag) kiss_ride.push_back (kiss_rec);
+				if (flag) kiss_ride.insert (XY_Map_Data (i, xy_rec));
 			}
 			Print (2, "Number of Kiss-&-Ride Lots = ") << kiss_ride.size ();
 		}

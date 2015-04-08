@@ -52,6 +52,7 @@ void Router_Service::Set_Parameters (Path_Parameters &p, int type, int veh_type)
 	p.max_parkride = max_parkride.Best (type);
 	p.max_kissride = max_kissride.Best (type);
 	p.kissride_fac = kissride_fac.Best (type);
+	p.transit_penalty = cap_transit.Best (type);
 
 	if (p.walk_pen == 0 || p.walk_fac == 0.0) p.walk_pen = p.max_walk;
 	if (p.bike_pen == 0 || p.bike_fac == 0.0) p.bike_pen = p.max_bike;

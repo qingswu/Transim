@@ -13,15 +13,29 @@ void Converge_Service::Set_Method (Plan_Data &plan)
 	double prob;
 	bool build_flag, extend_flag;
 	int copy;
-	
-	if (plan.Problem () == CONSTRAINT_PROBLEM) {
+
+	if (plan.Priority () == SKIP) {
+		plan.Problem (0);
+		plan.Method (COPY_PLAN);
+		return;
+	} else if (plan.Problem () == CONSTRAINT_PROBLEM) {
 		plan.Method (EXTEND_PLAN);
 		plan.Problem (0);
 		return;
 	} else if (plan.Problem () == FUEL_PROBLEM) {
-		plan.Method (STOP_PLAN);
 		plan.Problem (0);
-		return;
+		if (plan.Stop_Location () >= 0) {
+			plan.Method (STOP_PLAN);
+			return;
+		} else if (plan.Stop_Location () == -2) {
+			plan.Method (BUILD_PATH);
+			return;
+		}
+	} else if (sched_acc_flag && sched_acc_range.In_Range (plan.Type ())) {
+		if (plan.Mode () == TRANSIT_MODE) {
+			plan.Method (STOP_PLAN);
+			return;
+		}
 	}
 	extend_flag = false;
 
@@ -34,9 +48,7 @@ void Converge_Service::Set_Method (Plan_Data &plan)
 		copy = COPY_PLAN;
 	}
 
-	if (plan.Priority () == SKIP) {
-		plan.Method (copy);
-	} else if (method == DTA_FLOWS) {
+	if (method == DTA_FLOWS) {
 		plan.Method (BUILD_PATH);
 	} else if (iteration == 1 && plan.size () == 0) {
 		plan.Method (BUILD_PATH);

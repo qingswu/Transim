@@ -293,7 +293,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='BinThreads|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>..\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;TPPLIB;TCADLIB;THREADS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -320,6 +320,7 @@
     <ClCompile Include="FileFormat.cpp" />
     <ClCompile Include="Format_Data.cpp" />
     <ClCompile Include="Format_Matrix.cpp" />
+    <ClCompile Include="Merge_Data.cpp" />
     <ClCompile Include="Stats_Report.cpp" />
   </ItemGroup>
   <ItemGroup>

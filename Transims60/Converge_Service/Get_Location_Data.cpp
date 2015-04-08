@@ -71,6 +71,7 @@ bool Converge_Service::Get_Location_Data (Location_File &file, Location_Data &da
 			loc_fuel_data.supply = Round (file.Get_Integer (loc_fuel_field));
 			loc_fuel_data.consumed = 0;
 			loc_fuel_data.failed = 0;
+			loc_fuel_data.ran_out = 0;
 
 			loc_fuel_array.push_back (loc_fuel_data);
 		}

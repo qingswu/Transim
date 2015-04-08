@@ -11,7 +11,7 @@
 FileFormat::FileFormat (void) : Execution_Service ()
 {
 	Program ("FileFormat");
-	Version (6);
+	Version (9);
 	Title ("File Format Conversion");
 
 	Control_Key keys [] = { //--- code, key, level, status, type, default, range, help ----
@@ -26,6 +26,9 @@ FileFormat::FileFormat (void) : Execution_Service ()
 		{ SORT_BY_FIELDS, "SORT_BY_FIELDS", LEVEL1, OPT_KEY, TEXT_KEY, "", "", NO_HELP },
 		{ DATA_FIELD_MAP, "DATA_FIELD_MAP", LEVEL2, OPT_KEY, TEXT_KEY, "", "DATA_FIELD = COMBINE_FIELD", NO_HELP },	
 		{ DATA_INDEX_FIELD, "DATA_INDEX_FIELD", LEVEL1, OPT_KEY, TEXT_KEY, "", "", NO_HELP },
+
+		{ NEW_MERGE_DATA_FILE, "NEW_MERGE_DATA_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
+		{ NEW_MERGE_DATA_FORMAT, "NEW_MERGE_DATA_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, FORMAT_HELP },
 
 		{ NEW_COMBINE_FIELDS_FILE, "NEW_COMBINE_FIELDS_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
 		{ NEW_COMBINE_FIELDS_FORMAT, "NEW_COMBINE_FIELDS_FORMAT", LEVEL0, OPT_KEY, TEXT_KEY, "TAB_DELIMITED", FORMAT_RANGE, FORMAT_HELP },
@@ -48,8 +51,8 @@ FileFormat::FileFormat (void) : Execution_Service ()
 	Key_List (keys);
 	Report_List (reports);
 
-	script_flag = data_flag = matrix_flag = stats_flag = combine_flag = index_flag = false;
-	num_records = 0;
+	script_flag = data_flag = matrix_flag = stats_flag = combine_flag = index_flag = merge_flag = false;
+	num_records = group_num = 0;
 
 	int ignore_keys [] = {
 		MODEL_START_TIME, MODEL_END_TIME, MODEL_TIME_INCREMENT,  

@@ -20,7 +20,11 @@ void FileFormat::Execute (void)
 				Combine_Fields ();
 			}
 		} else {
-			Format_Data ();
+			if (merge_flag) {
+				Merge_Data ();
+			} else {
+				Format_Data ();
+			}
 		}
 	}
 

@@ -12,7 +12,7 @@ bool Converge_Service::Save_Plans (Plan_Ptr_Array *array_ptr, int part)
 {
 	if (array_ptr == 0) return (false);
 
-	bool keep_new, copy_flag;
+	bool keep_new, copy_flag, cap_flag;
 	Dtime time1, time2, time_diff;
 	int cost1, cost2, cost_diff, priority;
 	double prob, ran;
@@ -69,12 +69,12 @@ END_LOCK
 					
 			plan_ptr = &plan_array [new_ptr->Index ()];
 
-			keep_new = (plan_ptr->Household () <= 0 || plan_ptr->size () == 0 || plan_ptr->Problem () > 0);
+			keep_new = (plan_ptr->Household () <= 0 || plan_ptr->size () == 0 || plan_ptr->Path_Problem ());
 			time1 = 0;
 			priority = CRITICAL;
 
 			if (plan_ptr->Priority () == SKIP) {
-				if (plan_ptr->Problem () == 0 && new_ptr->Problem () > 0) {
+				if (!plan_ptr->Path_Problem () && new_ptr->Path_Problem ()) {
 					priority = HIGH;
 					goto select_plans;
 				} else {
@@ -197,31 +197,26 @@ END_LOCK
 				*plan_ptr = *new_ptr;
 			}
 select_plans:
-			if (iteration > 1 && plan_ptr->Priority () == CRITICAL && priority == CRITICAL) {
+			if (plan_ptr->Priority () != SKIP) {
+				if (iteration > 1 && plan_ptr->Priority () == CRITICAL && priority == CRITICAL) {
 
-				//---- avoid rerouting the same plan twice in a row ----
+					//---- avoid rerouting the same plan twice in a row ----
 
-				plan_ptr->Priority (MEDIUM);
-			} else {
-				plan_ptr->Priority (priority);
-			}
-
-			if (select_priorities && select_priority [plan_ptr->Priority ()]) {
+					plan_ptr->Priority (MEDIUM);
+				} else {
+					plan_ptr->Priority (priority);
+				}
+				if (select_priorities && select_priority [plan_ptr->Priority ()]) {
 MAIN_LOCK
-				select_records++;
-				select_weight += plan_ptr->Priority ();
+					select_records++;
+					select_weight += plan_ptr->Priority ();
 END_LOCK
+				}
 			}
 
 			//---- process completed plans ----
 
 			if (plan_ptr->Problem () == 0) {
-
-				//---- check the fuel supply ----
-
-				if (fuel_flag) {
-					Fuel_Check (*plan_ptr);
-				}
 
 				//---- calculate the trip gap ----
 
@@ -247,8 +242,17 @@ END_LOCK
 				//---- check for a capacity constraint ----
 
 				if (capacity_flag) {
-					Capacity_Check (*plan_ptr);
+					cap_flag = Capacity_Check (*plan_ptr);
+				} else {
+					cap_flag = false;
 				}
+
+				//---- check the fuel supply ----
+
+				if (fuel_flag && !cap_flag) {
+					Fuel_Check (*plan_ptr);
+				}
+
 			}
 
 		} else {	//---- file-based processing ----

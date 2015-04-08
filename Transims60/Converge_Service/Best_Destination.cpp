@@ -14,6 +14,7 @@ void Converge_Service::Best_Destination (Plan_Data &plan)
 	double x, y, dx, dy, diff, min_diff;
 
 	Loc_Cap_Itr cap_itr;
+	Loc_Cap_Data *cap_ptr;
 	Location_Data *loc_ptr;
 
 	origin = plan.Origin ();
@@ -41,5 +42,10 @@ void Converge_Service::Best_Destination (Plan_Data &plan)
 	}
 	if (best_loc >= 0) {
 		plan.Destination (best_loc);
+
+		cap_ptr = &loc_cap_array [best_loc];
+MAIN_LOCK
+		cap_ptr->demand++;
+END_LOCK
 	}
 }

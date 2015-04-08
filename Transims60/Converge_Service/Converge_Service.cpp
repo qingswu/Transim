@@ -24,7 +24,7 @@ Converge_Service::Converge_Service (void) : Router_Service (), Select_Service ()
 	first_iteration = true;
 	max_iteration = 1;
 	num_parts = 0;
-	max_speed_updates = 20;
+	max_speed_updates = 0;
 	min_speed_diff = 0.01;
 	num_trip_rec = num_trip_sel = 0;
 	loc_cap_field = loc_fuel_field = -1;
@@ -43,8 +43,8 @@ Converge_Service::Converge_Service (void) : Router_Service (), Select_Service ()
 
 	min_vht_flag = link_gap_flag = trip_gap_flag = trip_gap_map_flag = save_link_gap = save_trip_gap = memory_flag = false;
 	iteration_flag = save_iter_flag = link_report_flag = trip_report_flag = trip_gap_parts = save_plan_flag = false;
-	script_flag = hhfile_flag = capacity_flag = fuel_flag = priority_flag = reroute_flag = false;
-	new_set_flag = problem_set_flag = trip_memory_flag = plan_memory_flag = preload_flag = false;
+	script_flag = hhfile_flag = capacity_flag = fuel_flag = priority_flag = reroute_flag = sched_acc_flag = false;
+	new_set_flag = problem_set_flag = trip_memory_flag = plan_memory_flag = preload_flag = info_flag = false;
 	plan_set_flag = update_flag = select_flag = flow_flag = turn_flag = rider_flag = time_order_flag = false;
 	trip_flag = plan_flag = new_plan_flag = problem_flag = cap_const_flag = fuel_const_flag = choice_flag = false;
 
@@ -80,7 +80,7 @@ void Converge_Service::Converge_Service_Keys (int *keys)
 		{ ITERATION_WEIGHTING_INCREMENT, "ITERATION_WEIGHTING_INCREMENT", LEVEL0, OPT_KEY, FLOAT_KEY, "1.0", "0.0..5.0", NO_HELP },
 		{ MAXIMUM_WEIGHTING_FACTOR, "MAXIMUM_WEIGHTING_FACTOR", LEVEL0, OPT_KEY, FLOAT_KEY, "20.0", "0.0, >= 2.0", NO_HELP },
 		{ MINIMIZE_VEHICLE_HOURS, "MINIMIZE_VEHICLE_HOURS", LEVEL0, OPT_KEY, BOOL_KEY, "FALSE", BOOL_RANGE, NO_HELP },
-		{ MAXIMUM_RESKIM_ITERATIONS, "MAXIMUM_RESKIM_ITERATIONS", LEVEL0, OPT_KEY, INT_KEY, "10", "0..100", NO_HELP },
+		{ MAXIMUM_RESKIM_ITERATIONS, "MAXIMUM_RESKIM_ITERATIONS", LEVEL0, OPT_KEY, INT_KEY, "0", "0..100", NO_HELP },
 		{ RESKIM_CONVERGENCE_CRITERIA, "RESKIM_CONVERGENCE_CRITERIA", LEVEL0, OPT_KEY, FLOAT_KEY, "0.02", "0..10.0", NO_HELP },
 		{ NEW_LINK_CONVERGENCE_FILE, "NEW_LINK_CONVERGENCE_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
 		{ NEW_TRIP_CONVERGENCE_FILE, "NEW_TRIP_CONVERGENCE_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
@@ -99,6 +99,8 @@ void Converge_Service::Converge_Service_Keys (int *keys)
 		{ MINIMUM_INITIAL_FUEL, "MINIMUM_INITIAL_FUEL", LEVEL0, OPT_KEY, INT_KEY, "25 percent", "1..100 percent", NO_HELP },
 		{ SEEK_FUEL_LEVEL, "SEEK_FUEL_LEVEL", LEVEL0, OPT_KEY, INT_KEY, "25 percent", "1..100 percent", NO_HELP },
 		{ NEW_FUEL_CONSTRAINT_FILE, "NEW_FUEL_CONSTRAINT_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
+		{ FUEL_INFORMATION_TRAVELERS, "FUEL_INFORMATION_TRAVELERS", LEVEL0, OPT_KEY, LIST_KEY, "NONE", RANGE_RANGE, NO_HELP },
+		{ SCHEDULED_ACCESS_TRAVELERS, "SCHEDULED_ACCESS_TRAVELERS", LEVEL0, OPT_KEY, LIST_KEY, "NONE", RANGE_RANGE, NO_HELP },
 		{ CONSTRAINT_TIME_INCREMENT, "CONSTRAINT_TIME_INCREMENT", LEVEL0, OPT_KEY, TIME_KEY, "0 minutes", MINUTE_RANGE, NO_HELP },
 		END_CONTROL
 	};

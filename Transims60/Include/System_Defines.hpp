@@ -319,7 +319,7 @@ enum Use_Type {         //---- facility use restrictions ----
 };
 enum Transit_Type {     //---- transit route/mode types ----
 	NO_TRANSIT, LOCAL_BUS, EXPRESS_BUS, BRT, STREETCAR, LRT, 
-	RAPIDRAIL, REGIONRAIL, ANY_TRANSIT
+	RAPIDRAIL, REGIONRAIL, INTERCITY, ANY_TRANSIT
 };
 enum Class_Type {       //---- transit fare types ----
 	CASH, CARD, SPECIAL

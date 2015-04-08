@@ -90,6 +90,20 @@ void TripSum::Trip_Processing::Read_Trips (int part)
 		if (exe->select_origins && !exe->org_range.In_Range (trip_data.Origin ())) continue;
 		if (exe->select_destinations && !exe->des_range.In_Range (trip_data.Destination ())) continue;
 
+		if (exe->select_org_zones) {
+			map_itr = exe->location_map.find (trip_data.Origin ());
+			if (map_itr != exe->location_map.end ()) {
+				location_ptr = &exe->location_array [map_itr->second];
+				if (!exe->org_zone_range.In_Range (location_ptr->Zone ())) continue;
+			}
+		}
+		if (exe->select_des_zones) {
+			map_itr = exe->location_map.find (trip_data.Destination ());
+			if (map_itr != exe->location_map.end ()) {
+				location_ptr = &exe->location_array [map_itr->second];
+				if (!exe->des_zone_range.In_Range (location_ptr->Zone ())) continue;
+			}
+		}
 		if (exe->select_subareas || exe->select_polygon) {
 			map_itr = exe->location_map.find (trip_data.Origin ());
 			if (map_itr != exe->location_map.end ()) {

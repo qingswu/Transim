@@ -95,7 +95,11 @@ bool Path_Builder::Array_Processing (Plan_Ptr_Array *array_ptr)
 				if (!Plan_Extend ()) return (false);
 				break;
 			case STOP_PLAN:
-				if (!Plan_Stop ()) return (false);
+				if (plan_ptr->Mode () == TRANSIT_MODE) {
+					if (!Stop_Access ()) return (false);
+				} else {
+					if (!Plan_Stop ()) return (false);
+				}
 				break;
 			default:
 				break;

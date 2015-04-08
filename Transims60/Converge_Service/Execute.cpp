@@ -106,7 +106,7 @@ void Converge_Service::Execute (void)
 		}
 	}
 
-	//---- convert to internal location numbers ----
+	//---- convert to internal fuel units ----
 
 	if (fuel_flag) {
 		int i, fuel_cap;
@@ -125,6 +125,7 @@ void Converge_Service::Execute (void)
 			}
 		}
 	}
+
 	if (time_order_flag) {
 		initial_time_map = plan_time_map;
 	}

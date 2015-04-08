@@ -17,7 +17,7 @@ void LineSum::Access_Report (Access_Report_Data &report)
 	Access_Map_Itr access_itr;
 	On_Off_Data *access_ptr, stop_data, mode_data, total_data;
 	Str_Map_Itr name_itr;
-	XY_Map_Itr xy_itr;
+	XY_Pt_Map_Itr xy_itr;
 	XYZ_Point point;
 
 	report_code = report.details;

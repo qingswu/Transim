@@ -35,7 +35,7 @@ void ArcRider::Sum_Riders (void)
 
 		line_ptr = &line_array [map_itr->second];
 
-		if (select_modes && !select_mode [line_ptr->Mode ()]) continue;
+		if (select_transit_modes && !select_transit [line_ptr->Mode ()]) continue;
 
 		if (Line_Equiv_Flag ()) {
 			Int_Set *group;

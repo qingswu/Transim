@@ -605,6 +605,8 @@ void TransitNet::Build_Routes (void)
 						if (Notes_Name_Flag ()) {
 							if (!link_ptr->Name ().empty ()) {
 								stop_rec.Name (link_ptr->Name ());
+							} else {
+								stop_rec.Name ("");
 							}
 							note = compass.Point_Text (dir_ptr->Out_Bearing (), 8);
 							note += "B";

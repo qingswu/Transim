@@ -11,7 +11,7 @@
 RiderSum::RiderSum (void) : Data_Service (), Select_Service ()
 {
 	Program ("RiderSum");
-	Version (8);
+	Version (9);
 	Title ("Ridership File Summary Utility");
 
 	System_File_Type required_files [] = {
@@ -36,6 +36,7 @@ RiderSum::RiderSum (void) : Data_Service (), Select_Service ()
 		{ NEW_STOP_ROUTE_FILE, "NEW_STOP_ROUTE_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
 		{ NEW_STOP_GROUP_FILE, "NEW_STOP_GROUP_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
 		{ NEW_STOP_PROFILE , "NEW_STOP_PROFILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
+		{ NEW_STOP_VEHTYPE_FILE , "NEW_STOP_VEHTYPE_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
 		{ NEW_STOP_LINES_FILE , "NEW_STOP_LINES_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
 		{ NEW_STOP_DETAIL_FILE, "NEW_STOP_DETAIL_FILE", LEVEL0, OPT_KEY, OUT_KEY, "", FILE_RANGE, NO_HELP },
 		END_CONTROL
@@ -63,7 +64,8 @@ RiderSum::RiderSum (void) : Data_Service (), Select_Service ()
 	Key_List (ridersum_keys);
 	Report_List (reports);
 
-	rider_flag = on_off_flag = line_rider_flag = line_group_flag = stop_route_flag = stop_group_flag = stop_profile_flag = stop_lines_flag = false;
+	rider_flag = on_off_flag = line_rider_flag = line_group_flag = stop_route_flag = stop_group_flag = false;
+	stop_profile_flag = stop_vehtype_flag = stop_lines_flag = false;
 }
 #ifdef _CONSOLE
 //---------------------------------------------------------

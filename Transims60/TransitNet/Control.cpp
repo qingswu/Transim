@@ -21,7 +21,7 @@ void TransitNet::Program_Control (void)
 		parkride_flag = true;
 		System_File_True (PARKING);
 		System_File_True (NEW_PARKING);
-	} else {
+	} else if (!System_Control_Check (ACCESS_LINK)) {
 		System_Option_False (PARKING);
 		System_Option_False (NEW_PARKING);
 	}

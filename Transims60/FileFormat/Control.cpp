@@ -39,10 +39,16 @@ void FileFormat::Program_Control (void)
 
 	num = Highest_Control_Group (DATA_FILE, 0);
 	combine_flag = Check_Control_Key (NEW_COMBINE_FIELDS_FILE);
+	merge_flag = Check_Control_Key (NEW_MERGE_DATA_FILE);
+	stats_flag = Report_Flag (STATS_REPORT);
 
 	if (num > 0) {
 		data_flag = true;
 		warning = false;
+
+		if (combine_flag && merge_flag) {
+			Error ("Merge Data and Combine Fields are Incompatible Options");
+		}
 
 		//---- open each file ----
 
@@ -77,6 +83,9 @@ void FileFormat::Program_Control (void)
 				if (data_ptr->file->Num_Nest_Field () < 0) {
 					Error ("A Nest Count field is Required for Nested Files");
 				}
+			}
+			if (!merge_flag) {
+				file_array.push_back (data_ptr->file);
 			}
 
 			//---- get the data select field ----
@@ -115,14 +124,12 @@ void FileFormat::Program_Control (void)
 			Print (1);
 			key = Get_Control_String (NEW_DATA_FILE, i);
 
-			if (key.empty ()) {
-				if (!combine_flag) {
-					Error (String ("New Data File %d is Required") % i);
+			if (!key.empty ()) {
+				if (combine_flag) {
+					Error ("New Data File and Combine Fields File are Not Supported");
+				} else if (merge_flag) {
+					Error ("New Data File and Merge Data File are Not Supported");
 				}
-			} else if (combine_flag) {
-				Error ("New Data File and Combine Fields File are Not Supported");
-			}
-			if (!combine_flag) {
 				data_ptr->new_file = new Db_Header ();
 
 				data_ptr->new_file->File_Type (String ("New Data File #%d") % i);
@@ -204,13 +211,8 @@ void FileFormat::Program_Control (void)
 					}
 				}
 				data_ptr->new_file->Write_Header ();
-			}
-			
-			file_array.push_back (data_ptr->file);
 
-			//---- process the sort option ----
-
-			if (!combine_flag) {
+				//---- process the sort option ----
 
 				key = Get_Control_Text (SORT_BY_FIELDS, i);
 
@@ -237,47 +239,60 @@ void FileFormat::Program_Control (void)
 					data_ptr->sort_flag = false;
 					file_array.push_back (data_ptr->new_file);
 				}
-
 			} else {
+				if (!combine_flag && !merge_flag && !stats_flag) {
+					Error (String ("New Data File %d is Required") % i);
+				}
+				data_ptr->new_file = 0;
 
-				//---- get the data field map ----
+				if (combine_flag) {
 
-				num_fld = Highest_Control_Group (DATA_FIELD_MAP, i, 0);
+					//---- get the data field map ----
 
-				if (num_fld == 0) {
-					Error ("No Data Field Maps");
-				} else {
-					for (j=1; j <= num_fld; j++) {
-						key = Get_Control_Text (DATA_FIELD_MAP, i, j);
-						if (key.empty ()) continue;
+					num_fld = Highest_Control_Group (DATA_FIELD_MAP, i, 0);
 
-						key.Split (name, "=");
+					if (num_fld == 0) {
+						Error ("No Data Field Maps");
+					} else {
+						for (j=1; j <= num_fld; j++) {
+							key = Get_Control_Text (DATA_FIELD_MAP, i, j);
+							if (key.empty ()) continue;
 
-						field = data_ptr->file->Field_Number (name);
-						if (field < 0) {
-							Error (String ("Data Field %s was Not Found") % name);
-						}
-						data_ptr->in_fields.push_back (field);
-				
-						fld_ptr = data_ptr->file->Field (field);
-						data_ptr->field_types.push_back (fld_ptr->Type ());
+							key.Split (name, "=");
 
-						if (key.empty ()) {
-							key = name;
-						}
-						field = combine_file.Field_Number (key);
-						if (field >= 0) {
-							Warning (String ("Combine Data Field %s already exists as Field %d") % key % field);
-							warning = true;
-						} else {
-							size = fld_ptr->Size ();
-
-							if (fld_ptr->Type () == DB_DOUBLE || fld_ptr->Type () == DB_FLOAT || fld_ptr->Type () == DB_FIXED) {
-								size += fld_ptr->Decimal () / 10;
+							field = data_ptr->file->Field_Number (name);
+							if (field < 0) {
+								Error (String ("Data Field %s was Not Found") % name);
 							}
-							field = combine_file.Add_Field (key, fld_ptr->Type (), size, fld_ptr->Units ());
+							data_ptr->in_fields.push_back (field);
+				
+							fld_ptr = data_ptr->file->Field (field);
+							data_ptr->field_types.push_back (fld_ptr->Type ());
+
+							if (key.empty ()) {
+								key = name;
+							}
+							field = combine_file.Field_Number (key);
+							if (field >= 0) {
+								Warning (String ("Combine Data Field %s already exists as Field %d") % key % field);
+								warning = true;
+							} else {
+								size = fld_ptr->Size ();
+
+								if (fld_ptr->Type () == DB_DOUBLE || fld_ptr->Type () == DB_FLOAT || fld_ptr->Type () == DB_FIXED) {
+									size += fld_ptr->Decimal () / 10;
+								}
+								field = combine_file.Add_Field (key, fld_ptr->Type (), size, fld_ptr->Units ());
+							}
+							data_ptr->out_fields.push_back (field);
 						}
-						data_ptr->out_fields.push_back (field);
+					}
+				} else if (merge_flag) {
+
+					//---- copy existing fields ----
+
+					if (Get_Control_Flag (COPY_EXISTING_FIELDS, i)) {
+						merge_file.Replicate_Fields (data_ptr->file);
 					}
 				}
 			}
@@ -292,7 +307,89 @@ void FileFormat::Program_Control (void)
 				}
 				data_ptr->index_field = field;
 				index_flag = true;
+
+				if (merge_flag) {
+					data_ptr->index = new Db_Sort_Array ();
+					data_ptr->index->Dbase_Format (FIXED_COLUMN);
+
+					data_ptr->index->Replicate_Fields (data_ptr->file, true);
+					data_ptr->index->File_ID (data_ptr->file->File_ID ());
+
+					file_array.push_back (data_ptr->index);
+				}
+			} else if (merge_flag) {
+				Error ("A Data Index Field is required to Merge Data Files");
 			}
+		}
+
+		//---- open the merge data file ----
+
+		if (merge_flag) {
+			Print (1);
+			key = Get_Control_String (NEW_MERGE_DATA_FILE);
+
+			merge_file.File_Type ("New Merge Data File");
+			merge_file.File_ID ("NewData");
+
+			//---- get the file format ----
+
+			if (Check_Control_Key (NEW_MERGE_DATA_FORMAT)) {
+				merge_file.Dbase_Format (Get_Control_String (NEW_MERGE_DATA_FORMAT));
+			}
+			merge_file.Create (Project_Filename (key));
+
+			//---- get the new data fields ----
+
+			num_fld = Highest_Control_Group (NEW_DATA_FIELD, 1, 0);
+
+			if (num_fld == 0) {
+				if (merge_file.Num_Fields () == 0) {
+					Error ("No Merge Data Fields");
+				}
+			} else {
+				Print (1);
+
+				for (j=1; j <= num_fld; j++) {
+					key = Get_Control_Text (NEW_DATA_FIELD, 1, j);
+					if (key.empty ()) continue;
+
+					key.Split (name, ",");
+					if (name.empty ()) {
+						Error (String ("New Data Field %d-%d is Improperly Specified") % 1 % j);
+					}
+					field = merge_file.Field_Number (name);
+					if (field >= 0) {
+						Error (String ("New Data Field %s already exists as Field %d") % name % field);
+					}
+					key.Split (buf, ",");
+					units = NO_UNITS;
+					if (buf.empty () || buf.Starts_With ("I")) {
+						type = DB_INTEGER;
+					} else if (buf.Starts_With ("D") || buf.Starts_With ("R")) {
+						type = DB_DOUBLE;
+					} else if (buf.Starts_With ("S") || buf.Starts_With ("C")) {
+						type = DB_STRING;
+					} else if (buf.Starts_With ("T")) {
+						type = DB_TIME;
+						units = Time_Format ();
+					} else {
+						Error (String ("New Data Field %d-%d is Improperly Specified") % 1 % j);
+					}
+					key.Split (buf, ",");
+					if (buf.empty ()) {
+						if (type == DB_DOUBLE) {
+							size = 10.2;
+						} else {
+							size = 10.0;
+						}
+					} else {
+						size = buf.Double ();
+					}
+					merge_file.Add_Field (name, type, size, units);
+				}
+				merge_file.Write_Header ();
+			}
+			file_array.push_back (&merge_file);
 		}
 
 		//---- open the combine fields file ----
@@ -445,8 +542,6 @@ void FileFormat::Program_Control (void)
 	//---- read report types ----
 
 	List_Reports ();
-
-	stats_flag = Report_Flag (STATS_REPORT);
 
 	if (script_flag) {
 		Show_Message ("Compiling Conversion Script");

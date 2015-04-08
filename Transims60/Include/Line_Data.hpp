@@ -49,7 +49,7 @@ public:
 
 	void   Clear (void)
 	{
-		schedule = time = 0; board = alight = load = factor = 0; off_rider = -1;
+		schedule = time = 0; board = alight = load = factor = 0; penalty = 0; off_rider = -1;
 	}
 private:
 	Dtime  schedule;
@@ -58,10 +58,8 @@ private:
 	short  alight;
 	short  load;
 	short  factor;
-	union {
-		int off_rider;
-		int penalty;
-	};
+	int    off_rider;
+	int    penalty;
 };
 
 typedef vector <Line_Run>                 Line_Run_Array;

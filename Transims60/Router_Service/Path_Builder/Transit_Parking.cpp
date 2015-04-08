@@ -26,8 +26,8 @@ int Path_Builder::Transit_Parking (Trip_End_Array *org_ptr, Trip_End_Array *des_
 	Parking_Data *park_ptr;
 	Park_Nest_Itr park_itr;
 	Link_Data *link_ptr;
-	Lot_XY_Array *lot_array;
-	Lot_XY_Itr lot_itr;
+	XY_Map *lot_map;
+	XY_Map_Itr lot_itr;
 	List_Data *acc_ptr;
 	Access_Data *access_ptr;
 
@@ -36,13 +36,13 @@ int Path_Builder::Transit_Parking (Trip_End_Array *org_ptr, Trip_End_Array *des_
 	to_parking.clear ();
 
 	if (path_param.mode == PNR_OUT_MODE || path_param.mode == PNR_IN_MODE) {
-		lot_array = &exe->park_ride;
+		lot_map = &exe->park_ride;
 		max_ratio = path_param.max_parkride;
 		park_flag = true;
 		out_flag = (path_param.mode == PNR_OUT_MODE && forward_flag);
 		exit_flag = (path_param.mode == PNR_OUT_MODE);
 	} else if (path_param.mode == KNR_OUT_MODE || path_param.mode == KNR_IN_MODE) {
-		lot_array = &exe->kiss_ride;
+		lot_map = &exe->kiss_ride;
 		max_ratio = path_param.max_kissride;
 		park_flag = false;
 		out_flag = (path_param.mode == KNR_OUT_MODE && forward_flag);
@@ -50,7 +50,7 @@ int Path_Builder::Transit_Parking (Trip_End_Array *org_ptr, Trip_End_Array *des_
 	} else {
 		return (0);
 	}
-	if (lot_array->size () == 0) return (0);
+	if (lot_map->size () == 0) return (0);
 
 	org_itr = org_ptr->begin ();
 	des_itr = des_ptr->begin ();
@@ -74,18 +74,18 @@ int Path_Builder::Transit_Parking (Trip_End_Array *org_ptr, Trip_End_Array *des_
 
 	//---- process each park-&-ride lot ----
 
-	for (lot_itr = lot_array->begin (); lot_itr != lot_array->end (); lot_itr++) {
-		if (lot_num >= 0 && lot_itr->Lot () != lot_num) continue;
+	for (lot_itr = lot_map->begin (); lot_itr != lot_map->end (); lot_itr++) {
+		if (lot_num >= 0 && lot_itr->first != lot_num) continue;
 
 		//---- calculate the distance ----
 
-		dx = org_x - lot_itr->X ();
-		dy = org_y - lot_itr->Y ();
+		dx = org_x - lot_itr->second.x;
+		dy = org_y - lot_itr->second.y;
 
 		dist1 = (int) (sqrt (dx * dx + dy * dy) + 0.5);
 
-		dx = des_x - lot_itr->X ();
-		dy = des_y - lot_itr->Y ();
+		dx = des_x - lot_itr->second.x;
+		dy = des_y - lot_itr->second.y;
 
 		dist2 = (int) (sqrt (dx * dx + dy * dy) + 0.5);
 
@@ -100,7 +100,7 @@ int Path_Builder::Transit_Parking (Trip_End_Array *org_ptr, Trip_End_Array *des_
 		}
 		if (ratio > max_ratio) continue;
 
-		parking = lot_itr->Lot ();
+		parking = lot_itr->first;
 
 		trip_end.Type (PARKING_ID);
 		trip_end.Index (parking);
@@ -155,7 +155,7 @@ int Path_Builder::Transit_Parking (Trip_End_Array *org_ptr, Trip_End_Array *des_
 			//---- add the parking penalty ----
 
 			if (out_flag && path_param.park_pen_flag) {
-				imped += exe->park_penalty [lot_itr->Lot ()];
+				imped += exe->park_penalty [lot_itr->first];
 			}
 		}
 

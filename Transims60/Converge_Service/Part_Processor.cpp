@@ -183,7 +183,7 @@ void Converge_Service::Part_Processor::Read_Trips (void)
 #endif
 
 	if (exe->Memory_Flag ()) {
-		exe->Trip_Loop (false);
+		exe->Trip_Loop ((exe->max_iteration == 1));
 	} else {
 		if (exe->trip_set_flag) {
 			for (p=0; p < exe->num_file_sets; p++) {

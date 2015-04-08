@@ -11,7 +11,7 @@
 ArcRider::ArcRider (void) : Data_Service (), Select_Service (), Draw_Service ()
 {
 	Program ("ArcRider");
-	Version (10);
+	Version (12);
 	Title ("Ridership File Display Utility");
 
 	System_File_Type required_files [] = {
@@ -24,8 +24,8 @@ ArcRider::ArcRider (void) : Data_Service (), Select_Service (), Draw_Service ()
 		NOTES_AND_NAME_FIELDS, STOP_EQUIVALENCE_FILE, LINE_EQUIVALENCE_FILE, 0
 	};
 	int select_service_keys [] = {
-		SELECT_MODES, SELECT_TIME_OF_DAY, SELECT_START_TIMES, SELECT_END_TIMES, 
-		SELECT_LINKS, SELECT_ROUTES, SELECT_STOPS, 0
+		SELECT_TIME_OF_DAY, SELECT_START_TIMES, SELECT_END_TIMES, 
+		SELECT_LINKS, SELECT_ROUTES, SELECT_STOPS, SELECT_TRANSIT_MODES, 0
 	};
 	int draw_service_keys [] = {
 		TRANSIT_STOP_SIDE_OFFSET, TRANSIT_DIRECTION_OFFSET, TRANSIT_OVERLAP_FLAG, MAXIMUM_SHAPE_ANGLE, MINIMUM_SHAPE_LENGTH, 
